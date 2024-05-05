@@ -17,7 +17,11 @@ size_t ThingSet::ThingSetBinaryEncoder::getEncodedLength()
 
 bool ThingSet::ThingSetBinaryEncoder::encode(char *&value)
 {
+#ifdef zcbor_tstr_put_term
+    return zcbor_tstr_put_term(this->getEncoder(), value);
+#else
     return zcbor_tstr_put_term(this->getEncoder(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+#endif
 }
 
 bool ThingSet::ThingSetBinaryEncoder::encode(float &value)
