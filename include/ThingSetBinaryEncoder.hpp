@@ -8,6 +8,8 @@
 #include "zcbor_encode.h"
 #include <array>
 
+#define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
+
 /// @brief Binary protocol encoder for ThingSet.
 class ThingSetBinaryEncoder
 {

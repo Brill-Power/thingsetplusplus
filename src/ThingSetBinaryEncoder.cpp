@@ -17,7 +17,7 @@ size_t ThingSetBinaryEncoder::getEncodedLength()
 
 template <> bool ThingSetBinaryEncoder::encode(char *&value)
 {
-    return zcbor_tstr_put_term(getEncoder(), value);
+    return zcbor_tstr_put_term(getEncoder(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 }
 
 template <> bool ThingSetBinaryEncoder::encode(float &value)
