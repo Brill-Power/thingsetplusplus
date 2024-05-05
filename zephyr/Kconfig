@@ -1,0 +1,10 @@
+config THINGSET_PLUS_PLUS
+	bool "ThingSet C++"
+	select ZCBOR
+
+if THINGSET_PLUS_PLUS
+
+module = THINGSET_PLUS_PLUS
+module-str = thingset++
+
+endif
