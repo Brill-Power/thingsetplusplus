@@ -7,9 +7,9 @@ manifest:
 
   projects:
     - name: zephyr
-        remote: zephyrproject-rtos
-        revision: v3.3-branch
-        import:
-          name-allowlist:
-            - edtt
-            - zcbor
+      remote: zephyrproject-rtos
+      revision: v3.3-branch
+      import:
+        name-allowlist:
+          - edtt
+          - zcbor
