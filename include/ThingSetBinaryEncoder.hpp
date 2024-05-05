@@ -22,7 +22,8 @@ protected:
 public:
     template <typename T, size_t size> bool encode(std::array<T, size> &value);
     template <typename T, size_t size> bool encode(T value[size]);
-    bool encode(char *&value);
+    bool encode(const char *value);
+    bool encode(char *value);
     bool encode(float &value);
     bool encode(double &value);
     bool encode(bool &value);

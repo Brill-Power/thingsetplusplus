@@ -31,3 +31,20 @@ TEST(BinaryEncoder, EncodeArrayOfFloats)
                            0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1 };
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
+
+TEST(BinaryEncoder, EncodeString)
+{
+    SETUP(128)
+    const char *hello = "world";
+    encoder.encode(hello);
+    uint8_t expected[] = { 0x65, 0x77, 0x6F, 0x72, 0x6C, 0x64 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(BinaryEncoder, EncodeBag)
+{
+    SETUP(128)
+    encoder.encode(1.23f, 123, "123");
+    uint8_t expected[] = { 0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0x18, 0x7B, 0x63, 0x31, 0x32, 0x33 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
