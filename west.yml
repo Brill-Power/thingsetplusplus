@@ -6,10 +6,10 @@ manifest:
       url-base: https://github.com/NordicSemiconductor
 
   projects:
-  - name: zephyr
-      remote: zephyrproject-rtos
-      revision: v3.3-branch
-      import:
-        name-allowlist:
-          - edtt
-          - zcbor
+    - name: zephyr
+        remote: zephyrproject-rtos
+        revision: v3.3-branch
+        import:
+          name-allowlist:
+            - edtt
+            - zcbor
