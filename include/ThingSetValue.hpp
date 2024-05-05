@@ -7,6 +7,8 @@
 
 #include "ThingSetBinaryEncoder.hpp"
 
+namespace ThingSet {
+
 template <typename T> class ThingSetValue : public ThingSetBinaryEncodable
 {
 protected:
@@ -19,5 +21,7 @@ public:
 
     operator T();
 };
+
+}; // namespace ThingSet
 
 #include "ThingSetValue.tpp"

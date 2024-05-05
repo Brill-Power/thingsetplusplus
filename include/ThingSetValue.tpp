@@ -5,6 +5,8 @@
  */
 #include "ThingSetValue.hpp"
 
+using namespace ThingSet;
+
 template <typename T> ThingSetValue<T>::ThingSetValue(T &value) : _value(value)
 {}
 

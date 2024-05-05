@@ -5,72 +5,72 @@
  */
 #include "ThingSetBinaryEncoder.hpp"
 
-zcbor_state_t *ThingSetBinaryEncoder::getEncoder()
+zcbor_state_t *ThingSet::ThingSetBinaryEncoder::getEncoder()
 {
     return nullptr;
 }
 
-size_t ThingSetBinaryEncoder::getEncodedLength()
+size_t ThingSet::ThingSetBinaryEncoder::getEncodedLength()
 {
     return 0;
 }
 
-template <> bool ThingSetBinaryEncoder::encode(char *&value)
+bool ThingSet::ThingSetBinaryEncoder::encode(char *&value)
 {
-    return zcbor_tstr_put_term(getEncoder(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+    return zcbor_tstr_put_term(this->getEncoder(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(float &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(float &value)
 {
-    return zcbor_float32_put(getEncoder(), value);
+    return zcbor_float32_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(double &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(double &value)
 {
-    return zcbor_float64_put(getEncoder(), value);
+    return zcbor_float64_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(bool &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(bool &value)
 {
-    return zcbor_bool_put(getEncoder(), value);
+    return zcbor_bool_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(uint8_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(uint8_t &value)
 {
-    return zcbor_uint32_put(getEncoder(), value);
+    return zcbor_uint32_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(uint16_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(uint16_t &value)
 {
-    return zcbor_uint32_put(getEncoder(), value);
+    return zcbor_uint32_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(uint32_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(uint32_t &value)
 {
-    return zcbor_uint32_put(getEncoder(), value);
+    return zcbor_uint32_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(uint64_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(uint64_t &value)
 {
-    return zcbor_uint64_put(getEncoder(), value);
+    return zcbor_uint64_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(int8_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(int8_t &value)
 {
-    return zcbor_int32_put(getEncoder(), value);
+    return zcbor_int32_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(int16_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(int16_t &value)
 {
-    return zcbor_int32_put(getEncoder(), value);
+    return zcbor_int32_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(int32_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(int32_t &value)
 {
-    return zcbor_int32_put(getEncoder(), value);
+    return zcbor_int32_put(this->getEncoder(), value);
 }
 
-template <> bool ThingSetBinaryEncoder::encode(int64_t &value)
+bool ThingSet::ThingSetBinaryEncoder::encode(int64_t &value)
 {
-    return zcbor_int64_put(getEncoder(), value);
+    return zcbor_int64_put(this->getEncoder(), value);
 }

@@ -1,0 +1,20 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Tests (Debug)",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": ["-c", "\"cmake -DCMAKE_BUILD_TYPE=Debug -B build . && cd build && make\""],
+            "options": {
+                "cwd": "${workspaceRoot}/tests"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        }
+    ]
+}
