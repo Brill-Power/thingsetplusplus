@@ -15,11 +15,11 @@ protected:
     T _value;
 
 public:
-    ThingSetValue(T &value);
+    ThingSetValue(T value);
 
     bool encode(ThingSetBinaryEncoder &encoder) override;
 
-    operator T();
+    operator T() const;
 };
 
 }; // namespace ThingSet

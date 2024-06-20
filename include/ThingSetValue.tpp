@@ -7,7 +7,7 @@
 
 using namespace ThingSet;
 
-template <typename T> ThingSetValue<T>::ThingSetValue(T &value) : _value(value)
+template <typename T> ThingSetValue<T>::ThingSetValue(T value) : _value(value)
 {}
 
 template <typename T> bool ThingSetValue<T>::encode(ThingSetBinaryEncoder &encoder)
@@ -15,7 +15,7 @@ template <typename T> bool ThingSetValue<T>::encode(ThingSetBinaryEncoder &encod
     return encoder.encode(_value);
 }
 
-template <typename T> T ThingSetValue<T>::operator()
+template <typename T> ThingSetValue<T>::operator T() const
 {
     return _value;
 }
