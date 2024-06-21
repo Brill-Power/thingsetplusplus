@@ -8,7 +8,7 @@ TEST(Properties, SimpleProperty)
 {
     ThingSetProperty<0x100, float> f32("f32", 1.0f);
     ThingSetProperty<0x200, int32_t> i32("i32", 1);
-    ThingSetProperty<0x300, uint32_t> u32("u32", 1U);
+    ThingSetProperty<0x201, uint32_t> u32("u32", 1U);
 
     ThingSetNode *node;
     ASSERT_TRUE(ThingSetRegistry::findById(0x100, &node));

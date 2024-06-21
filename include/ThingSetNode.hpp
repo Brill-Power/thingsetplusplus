@@ -18,6 +18,11 @@ public:
     constexpr ThingSetNode(const std::string_view name) : _name(name)
     {}
 
+    constexpr const std::string_view getName() const
+    {
+        return _name;
+    }
+
     constexpr virtual const unsigned getId() const
     {
         return 0;

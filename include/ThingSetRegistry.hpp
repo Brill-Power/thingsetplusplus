@@ -26,9 +26,6 @@ private:
     ThingSetRegistry();
 
 public:
-    // FlatteningIterator<NodeMap::iterator> begin();
-    // FlatteningIterator<NodeMap::iterator> end();
-
     ThingSetRegistry(ThingSetRegistry const &) = delete;
     void operator=(ThingSetRegistry const &) = delete;
 
@@ -40,8 +37,6 @@ public:
 
     FlatteningIterator<NodeMap::iterator> begin();
     FlatteningIterator<NodeMap::iterator> end();
-
-    // static void iterateNodes(std::function<void(ThingSetNode *)> action);
 };
 
 } // namespace ThingSet
