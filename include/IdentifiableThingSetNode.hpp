@@ -10,6 +10,8 @@
 
 namespace ThingSet {
 
+/// @brief Represents a ThingSet node with an ID.
+/// @tparam id The unique integer ID of the ThingSet node.
 template <unsigned id> class IdentifiableThingSetNode : public ThingSetNode
 {
 public:

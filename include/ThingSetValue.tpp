@@ -15,7 +15,18 @@ template <typename T> bool ThingSetValue<T>::encode(ThingSetBinaryEncoder &encod
     return encoder.encode(_value);
 }
 
-template <typename T> ThingSetValue<T>::operator T() const
+template <typename T> T &ThingSetValue<T>::operator()()
 {
     return _value;
+}
+
+template <typename T> const T &ThingSetValue<T>::operator()() const
+{
+    return _value;
+}
+
+template <typename T> auto &ThingSetValue<T>::operator=(const T &value)
+{
+    _value = value;
+    return *this;
 }

@@ -9,6 +9,8 @@
 
 namespace ThingSet {
 
+/// @brief Represents a ThingSet value of a given type.
+/// @tparam T The type of the value.
 template <typename T> class ThingSetValue : public ThingSetBinaryEncodable
 {
 protected:
@@ -19,7 +21,10 @@ public:
 
     bool encode(ThingSetBinaryEncoder &encoder) override;
 
-    operator T() const;
+    T &operator()();
+    const T &operator()() const;
+
+    auto &operator=(const T &value);
 };
 
 }; // namespace ThingSet
