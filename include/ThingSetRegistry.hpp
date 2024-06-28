@@ -20,7 +20,21 @@ typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
 class ThingSetRegistry
 {
 private:
-    static constexpr ThingSetNode _rootNode = ThingSetNode("Root");
+    class RootNode : public ThingSetNode
+    {
+        RootNode()
+        {}
+        constexpr const std::string_view getName() const override
+        {
+            return "Root";
+        }
+
+        constexpr const unsigned getId() const override
+        {
+            return 0;
+        }
+    };
+    static constexpr RootNode _rootNode();
 
     NodeMap _nodeMap;
     ThingSetRegistry();

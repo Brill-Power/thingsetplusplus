@@ -6,16 +6,20 @@
 #pragma once
 
 #include "IdentifiableThingSetNode.hpp"
+#include "StringLiteral.hpp"
 #include "ThingSetValue.hpp"
+#include <array>
 
 namespace ThingSet {
 
-template <unsigned id, typename T> class ThingSetProperty : public ThingSetValue<T>, public IdentifiableThingSetNode<id>
+template <unsigned id, StringLiteral name, typename T>
+class ThingSetProperty : public ThingSetValue<T>, public IdentifiableThingSetNode<id, name>
 {
 public:
-    ThingSetProperty(std::string_view name, T value);
+    ThingSetProperty() : IdentifiableThingSetNode<id, name>(), ThingSetValue<T>()
+    {}
+    ThingSetProperty(T value) : IdentifiableThingSetNode<id, name>(), ThingSetValue<T>(value)
+    {}
 };
 
 } // namespace ThingSet
-
-#include "ThingSetProperty.tpp"

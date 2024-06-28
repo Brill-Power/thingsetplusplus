@@ -13,6 +13,7 @@ include_directories(../include ../zcbor/include)
 
 target_sources(testapp PRIVATE TestBinaryEncoder.cpp)
 target_sources(testapp PRIVATE TestProperties.cpp)
+target_sources(testapp PRIVATE TestRecords.cpp)
 
 target_link_libraries(testapp PRIVATE thingset++)
 target_link_libraries(testapp PRIVATE gtest_main)

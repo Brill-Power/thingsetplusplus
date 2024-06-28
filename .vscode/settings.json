@@ -64,6 +64,13 @@
         "stdexcept": "c",
         "variant": "c",
         "algorithm": "c",
-        "identifiablethingsetnode.hpp": "c"
+        "identifiablethingsetnode.hpp": "c",
+        "regex": "cpp",
+        "version": "cpp",
+        "iterator": "cpp",
+        "memory_resource": "cpp",
+        "source_location": "cpp",
+        "stack": "cpp",
+        "valarray": "cpp"
     }
 }

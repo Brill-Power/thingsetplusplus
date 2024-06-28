@@ -11,16 +11,13 @@ namespace ThingSet {
 
 class ThingSetNode
 {
-private:
-    const std::string_view _name;
-
 public:
-    constexpr ThingSetNode(const std::string_view name) : _name(name)
+    constexpr ThingSetNode()
     {}
 
-    constexpr const std::string_view getName() const
+    constexpr virtual const std::string_view getName() const
     {
-        return _name;
+        return nullptr;
     }
 
     constexpr virtual const unsigned getId() const

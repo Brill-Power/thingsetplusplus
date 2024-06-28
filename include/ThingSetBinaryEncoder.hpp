@@ -5,8 +5,10 @@
  */
 #pragma once
 
+#include "internal/bind_to_tuple.hpp"
 #include "zcbor_encode.h"
 #include <array>
+#include <tuple>
 
 #define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
 #define BINARY_ENCODER_DEFAULT_MAX_DEPTH                 6
@@ -20,27 +22,87 @@ protected:
     virtual zcbor_state_t *getEncoder();
 
 public:
-    template <typename T, size_t size> bool encode(std::array<T, size> &value);
-    template <typename T, size_t size> bool encode(T value[size]);
     bool encode(const char *value);
     bool encode(char *value);
+    bool encode(const float &value);
     bool encode(float &value);
+    bool encode(const double &value);
     bool encode(double &value);
+    bool encode(const bool &value);
     bool encode(bool &value);
+    bool encode(const uint8_t &value);
     bool encode(uint8_t &value);
+    bool encode(const uint16_t &value);
     bool encode(uint16_t &value);
+    bool encode(const uint32_t &value);
     bool encode(uint32_t &value);
+    bool encode(const uint64_t &value);
     bool encode(uint64_t &value);
+    bool encode(const int8_t &value);
     bool encode(int8_t &value);
+    bool encode(const int16_t &value);
     bool encode(int16_t &value);
+    bool encode(const int32_t &value);
     bool encode(int32_t &value);
+    bool encode(const int64_t &value);
     bool encode(int64_t &value);
-    template <typename... TArgs> bool encode(TArgs... args);
+
+    template <typename T> bool encode(T &value)
+    {
+        auto bound = bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
+        auto items = std::tuple_size_v<decltype(bound)>;
+        zcbor_map_start_encode(getEncoder(), items);
+        for_each_element(bound, [this](auto &prop) {
+            auto id = prop->getId();
+            encode(id);
+            prop->encode(*this);
+        });
+        return zcbor_map_end_encode(getEncoder(), items);
+    }
+
+    template <typename T, size_t size> bool encode(std::array<T, size> &value)
+    {
+        return this->encode(value.data(), value.size());
+    }
+
+    template <typename T, size_t size> bool encode(T value[size])
+    {
+        return this->encode(value, size);
+    }
+
+    template <typename... TArgs> bool encodeList(TArgs... args)
+    {
+        const size_t count = sizeof...(TArgs);
+        return zcbor_list_start_encode(getEncoder(), count) && encode_and_shift(this, args...)
+               && zcbor_list_end_encode(getEncoder(), count);
+    }
 
     virtual size_t getEncodedLength();
 
 private:
-    template <typename T> bool encode(T *value, size_t size);
+    template <typename T> bool encode(T *value, size_t size)
+    {
+        bool result = zcbor_list_start_encode(getEncoder(), size);
+        for (size_t i = 0; i < size; i++) {
+            result &= this->encode(value[i]);
+        }
+        return result && zcbor_list_end_encode(getEncoder(), size);
+    }
+
+    inline bool encode_and_shift(ThingSetBinaryEncoder *encoder)
+    {
+        return true;
+    }
+
+    template <typename T, typename... TArgs> bool encode_and_shift(ThingSetBinaryEncoder *encoder, T arg, TArgs... rest)
+    {
+        return encoder->encode(arg) && encode_and_shift(encoder, rest...);
+    }
+
+    template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)
+    {
+        std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
+    }
 };
 
 template <int size, int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
@@ -54,11 +116,21 @@ private:
     zcbor_state_t _encoder[depth];
 
 protected:
-    zcbor_state_t *getEncoder() override;
+    zcbor_state_t *getEncoder() override
+    {
+        return _encoder;
+    }
 
 public:
-    FixedSizeThingSetBinaryEncoder(uint8_t buffer[size]);
-    size_t getEncodedLength() override;
+    FixedSizeThingSetBinaryEncoder(uint8_t buffer[size]) : _buffer(buffer)
+    {
+        zcbor_new_encode_state(_encoder, depth, buffer, size, 2);
+    }
+
+    size_t getEncodedLength() override
+    {
+        return _encoder->payload - _buffer;
+    }
 };
 
 /// @brief Interface for values that can be encoded with a binary encoder.
@@ -68,5 +140,3 @@ class ThingSetBinaryEncodable
 };
 
 }; // namespace ThingSet
-
-#include "ThingSetBinaryEncoder.tpp"
