@@ -46,6 +46,9 @@ This is the purpose of get_nested_array_size().
 #pragma clang diagnostic ignored "-Wundefined-inline"
 #endif
 
+namespace ThingSet {
+namespace internal {
+
 template <class Derived> struct any_empty_base
 {
     any_empty_base(std::size_t);
@@ -76,7 +79,7 @@ template <typename T> struct CountFieldsHelper
     template <std::size_t n> static consteval bool constructible()
     {
         return []<std::size_t... is>(std::index_sequence<is...>) {
-            return requires { T{  any(is)...  }; };
+            return requires { T{ any(is)... }; };
         }(std::make_index_sequence<n>());
     }
 
@@ -84,7 +87,7 @@ template <typename T> struct CountFieldsHelper
     {
         return []<std::size_t... i, std::size_t... j, std::size_t... k>(
                    std::index_sequence<i...>, std::index_sequence<j...>, std::index_sequence<k...>) {
-            return requires { T{  any(i)..., {  any(j)...  }, any(k)...  }; };
+            return requires { T{ any(i)..., { any(j)... }, any(k)... }; };
         }(std::make_index_sequence<l>(), std::make_index_sequence<nested>(), std::make_index_sequence<r>());
     }
 
@@ -121,7 +124,7 @@ template <typename T> struct CountFieldsHelper
         static_assert(index < max_args);
         constexpr auto check = []<std::size_t... l, std::size_t... r>(std::index_sequence<l...>,
                                                                       std::index_sequence<r...>) {
-            return requires { T{  any_empty_base<T>(l)..., any_base<T>(0), any_empty_base<T>(r)...  }; };
+            return requires { T{ any_empty_base<T>(l)..., any_base<T>(0), any_empty_base<T>(r)... }; };
         };
 
         if constexpr (check(std::make_index_sequence<index>(), std::make_index_sequence<max_args - index - 1>())) {
@@ -149,7 +152,7 @@ template <typename T> struct CountFieldsHelper
     {
         constexpr auto right_len = max_arg_num >= n ? max_arg_num - n : 0;
         return []<std::size_t... l, std::size_t... r>(std::index_sequence<l...>, std::index_sequence<r...>) {
-            return requires { T{  any_base<T>(l)..., any(r)...  }; };
+            return requires { T{ any_base<T>(l)..., any(r)... }; };
         }(std::make_index_sequence<n>(), std::make_index_sequence<right_len>());
     }
 
@@ -200,6 +203,9 @@ template <typename T> struct CountFieldsHelper
 };
 
 template <class T> constexpr std::size_t num_fields = CountFieldsHelper<T>::count_fields();
+
+} // namespace internal
+} // namespace ThingSet
 
 #ifdef __clang__
 #pragma clang diagnostic pop

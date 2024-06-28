@@ -49,9 +49,11 @@ public:
 
     template <typename T> bool encode(T &value)
     {
-        auto bound = bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
+        auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
         auto items = std::tuple_size_v<decltype(bound)>;
-        zcbor_map_start_encode(getEncoder(), items);
+        if (!zcbor_map_start_encode(getEncoder(), items)) {
+            return false;
+        }
         for_each_element(bound, [this](auto &prop) {
             auto id = prop->getId();
             encode(id);
@@ -136,6 +138,7 @@ public:
 /// @brief Interface for values that can be encoded with a binary encoder.
 class ThingSetBinaryEncodable
 {
+public:
     virtual bool encode(ThingSetBinaryEncoder &encoder) = 0;
 };
 

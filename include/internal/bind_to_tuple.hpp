@@ -10,6 +10,9 @@
 #include "always_false.hpp"
 #include "num_fields.hpp"
 
+namespace ThingSet {
+namespace internal {
+
 template <std::size_t n> struct tuple_view_helper
 {
     template <class T> static constexpr auto tuple_view(T &)
@@ -466,5 +469,8 @@ template <class T, typename F> constexpr auto bind_to_tuple(T &_t, const F &_f)
         return std::make_tuple(_f(std::get<Is>(view))...);
     }(std::make_index_sequence<std::tuple_size_v<decltype(view)>>());
 }
+
+} // namespace internal
+} // namespace ThingSet
 
 #endif

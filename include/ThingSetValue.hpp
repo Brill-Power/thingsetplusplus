@@ -5,13 +5,14 @@
  */
 #pragma once
 
+#include "ThingSetBinaryDecoder.hpp"
 #include "ThingSetBinaryEncoder.hpp"
 
 namespace ThingSet {
 
 /// @brief Represents a ThingSet value of a given type.
 /// @tparam T The type of the value.
-template <typename T> class ThingSetValue : public ThingSetBinaryEncodable
+template <typename T> class ThingSetValue : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable
 {
 protected:
     T _value;
@@ -30,6 +31,11 @@ public:
     bool encode(ThingSetBinaryEncoder &encoder) override
     {
         return encoder.encode(_value);
+    }
+
+    bool decode(ThingSetBinaryDecoder &decoder) override
+    {
+        return decoder.decode(&_value);
     }
 
     T &getValue()

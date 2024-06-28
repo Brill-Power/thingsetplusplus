@@ -46,4 +46,12 @@ TEST(Records, SimpleRecord)
     encoder.encode(moduleRecords);
     ASSERT_EQ(0x82, buffer[0]); // array with 2 elements
     ASSERT_EQ(0xA4, buffer[1]); // map with 4 elements
+
+    std::array<ModuleRecord, 2> newModuleRecords;
+    FixedSizeThingSetBinaryDecoder<512> decoder(buffer);
+    decoder.decode(&newModuleRecords);
+    ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
+    ASSERT_EQ(moduleRecords[1].voltage.getValue(), newModuleRecords[1].voltage.getValue());
+    ASSERT_EQ(moduleRecords[0].current.getValue(), newModuleRecords[0].current.getValue());
+    ASSERT_EQ(moduleRecords[1].current.getValue(), newModuleRecords[1].current.getValue());
 }

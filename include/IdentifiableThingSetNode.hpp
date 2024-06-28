@@ -30,5 +30,7 @@ public:
     {
         return id;
     }
+
+    constexpr static const unsigned _id = id;
 };
 } // namespace ThingSet
