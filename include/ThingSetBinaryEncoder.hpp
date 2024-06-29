@@ -19,7 +19,7 @@ namespace ThingSet {
 class ThingSetBinaryEncoder
 {
 protected:
-    virtual zcbor_state_t *getEncoder();
+    virtual zcbor_state_t *getState();
 
 public:
     bool encode(const char *value);
@@ -51,7 +51,7 @@ public:
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
         auto items = std::tuple_size_v<decltype(bound)>;
-        if (!zcbor_map_start_encode(getEncoder(), items)) {
+        if (!zcbor_map_start_encode(getState(), items)) {
             return false;
         }
         for_each_element(bound, [this](auto &prop) {
@@ -59,7 +59,7 @@ public:
             encode(id);
             prop->encode(*this);
         });
-        return zcbor_map_end_encode(getEncoder(), items);
+        return zcbor_map_end_encode(getState(), items);
     }
 
     template <typename T, size_t size> bool encode(std::array<T, size> &value)
@@ -75,8 +75,8 @@ public:
     template <typename... TArgs> bool encodeList(TArgs... args)
     {
         const size_t count = sizeof...(TArgs);
-        return zcbor_list_start_encode(getEncoder(), count) && encode_and_shift(this, args...)
-               && zcbor_list_end_encode(getEncoder(), count);
+        return zcbor_list_start_encode(getState(), count) && encode_and_shift(this, args...)
+               && zcbor_list_end_encode(getState(), count);
     }
 
     virtual size_t getEncodedLength();
@@ -84,11 +84,11 @@ public:
 private:
     template <typename T> bool encode(T *value, size_t size)
     {
-        bool result = zcbor_list_start_encode(getEncoder(), size);
+        bool result = zcbor_list_start_encode(getState(), size);
         for (size_t i = 0; i < size; i++) {
             result &= this->encode(value[i]);
         }
-        return result && zcbor_list_end_encode(getEncoder(), size);
+        return result && zcbor_list_end_encode(getState(), size);
     }
 
     inline bool encode_and_shift(ThingSetBinaryEncoder *encoder)
@@ -115,23 +115,23 @@ class FixedSizeThingSetBinaryEncoder : public ThingSetBinaryEncoder
 private:
     // The start of the buffer
     const uint8_t *_buffer;
-    zcbor_state_t _encoder[depth];
+    zcbor_state_t _state[depth];
 
 protected:
-    zcbor_state_t *getEncoder() override
+    zcbor_state_t *getState() override
     {
-        return _encoder;
+        return _state;
     }
 
 public:
     FixedSizeThingSetBinaryEncoder(uint8_t buffer[size]) : _buffer(buffer)
     {
-        zcbor_new_encode_state(_encoder, depth, buffer, size, 2);
+        zcbor_new_encode_state(_state, depth, buffer, size, 2);
     }
 
     size_t getEncodedLength() override
     {
-        return _encoder->payload - _buffer;
+        return _state->payload - _buffer;
     }
 };
 

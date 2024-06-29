@@ -30,7 +30,7 @@ public:
 class ThingSetBinaryDecoder
 {
 protected:
-    virtual zcbor_state_t *getDecoder();
+    virtual zcbor_state_t *getState();
 
 public:
     bool decode(float *value);
@@ -47,11 +47,11 @@ public:
 
     template <typename T, size_t size> bool decode(std::array<T, size> *value)
     {
-        if (!zcbor_list_start_decode(getDecoder())) {
+        if (!zcbor_list_start_decode(getState())) {
             return false;
         }
 
-        if (size != getDecoder()->elem_count) {
+        if (size != getState()->elem_count) {
             return false;
         }
 
@@ -62,13 +62,13 @@ public:
             }
         }
 
-        return zcbor_list_end_decode(getDecoder());
+        return zcbor_list_end_decode(getState());
     }
 
     template <typename T> bool decode(T *value)
     {
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
-        if (!zcbor_map_start_decode(getDecoder())) {
+        if (!zcbor_map_start_decode(getState())) {
             return false;
         }
         uint32_t id;
@@ -78,7 +78,7 @@ public:
                 return false;
             }
         }
-        return zcbor_map_end_decode(getDecoder());
+        return zcbor_map_end_decode(getState());
     }
 
 private:
@@ -111,19 +111,19 @@ class FixedSizeThingSetBinaryDecoder : public ThingSetBinaryDecoder
 private:
     // The start of the buffer
     const uint8_t *_buffer;
-    zcbor_state_t _decoder[depth];
+    zcbor_state_t _state[depth];
 
 protected:
-    zcbor_state_t *getDecoder() override
+    zcbor_state_t *getState() override
     {
-        return _decoder;
+        return _state;
     }
 
 public:
     FixedSizeThingSetBinaryDecoder(uint8_t buffer[size]) : _buffer(buffer)
     {
-        zcbor_new_decode_state(_decoder, depth, buffer, size, 1, NULL, 0);
-        _decoder->constant_state->enforce_canonical = false;
+        zcbor_new_decode_state(_state, depth, buffer, size, 1, NULL, 0);
+        _state->constant_state->enforce_canonical = false;
     }
 };
 
