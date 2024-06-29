@@ -26,4 +26,4 @@ test:
   artifacts:
     when: always
     reports:
-      junit: test/build/report.xml
+      junit: tests/build/report.xml
