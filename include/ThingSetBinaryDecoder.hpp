@@ -82,6 +82,7 @@ public:
     }
 
 private:
+    // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
     template <class Fields, std::size_t... Is>
     static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id,
                                                                                  std::index_sequence<Is...>)
