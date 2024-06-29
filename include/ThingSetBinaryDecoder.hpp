@@ -8,6 +8,7 @@
 #include "internal/bind_to_tuple.hpp"
 #include "zcbor_decode.h"
 #include <array>
+#include <functional>
 #include <optional>
 #include <tuple>
 
@@ -72,11 +73,8 @@ public:
         }
         uint32_t id;
         while (decode(&id) && id < UINT16_MAX) {
-            std::optional<ThingSetBinaryDecodable *> decodable = compile_switch(id, bound);
-            if (!decodable.has_value()) {
-                return false;
-            }
-            if (!decodable.value()->decode(*this)) {
+            std::function<bool(ThingSetBinaryDecoder &, decltype(bound) &)> func = compile_switch(id, bound);
+            if (!func(*this, bound)) {
                 return false;
             }
         }
@@ -85,20 +83,22 @@ public:
 
 private:
     template <class Fields, std::size_t... Is>
-    static std::optional<ThingSetBinaryDecodable *> compile_switch(uint32_t id, Fields fields,
-                                                                   std::index_sequence<Is...>)
+    static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id,
+                                                                                 std::index_sequence<Is...>)
     {
-        std::optional<ThingSetBinaryDecodable *> ret;
-        std::initializer_list<std::optional<ThingSetBinaryDecodable *>>(
+        std::function<bool(ThingSetBinaryDecoder &, Fields &)> ret;
+        std::initializer_list<std::function<bool(ThingSetBinaryDecoder &, Fields &)>>(
             { ((id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::_id)
-               ? ret = std::make_optional((std::get<Is>(fields))),
-               std::nullopt : std::nullopt)... });
+               ? ret = [](ThingSetBinaryDecoder &dec, Fields &f) -> bool { return std::get<Is>(f)->decode(dec); },
+               [](ThingSetBinaryDecoder &x, Fields &y) { return false; }
+               : [](ThingSetBinaryDecoder &x, Fields &y) { return false; })... });
         return ret;
     }
 
-    template <class Fields> static std::optional<ThingSetBinaryDecodable *> compile_switch(uint32_t id, Fields fields)
+    template <class Fields>
+    static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id, Fields fields)
     {
-        return compile_switch(id, fields, std::make_index_sequence<std::tuple_size_v<Fields>>());
+        return compile_switch<Fields>(id, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
 };
 
@@ -110,18 +110,19 @@ class FixedSizeThingSetBinaryDecoder : public ThingSetBinaryDecoder
 private:
     // The start of the buffer
     const uint8_t *_buffer;
-    zcbor_state_t _encoder[depth];
+    zcbor_state_t _decoder[depth];
 
 protected:
     zcbor_state_t *getDecoder() override
     {
-        return _encoder;
+        return _decoder;
     }
 
 public:
     FixedSizeThingSetBinaryDecoder(uint8_t buffer[size]) : _buffer(buffer)
     {
-        zcbor_new_decode_state(_encoder, depth, buffer, size, 1, NULL, 0);
+        zcbor_new_decode_state(_decoder, depth, buffer, size, 1, NULL, 0);
+        _decoder->constant_state->enforce_canonical = false;
     }
 };
 

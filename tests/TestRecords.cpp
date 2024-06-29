@@ -4,12 +4,19 @@
 
 using namespace ThingSet;
 
+struct SupercellRecord
+{
+    ThingSetProperty<0x611, "soc", float> soc;
+    ThingSetProperty<0x612, "soh", float> soh;
+};
+
 struct ModuleRecord
 {
     ThingSetProperty<0x601, "voltage", float> voltage;
     ThingSetProperty<0x602, "current", float> current;
     ThingSetProperty<0x603, "error", uint64_t> error;
     ThingSetProperty<0x604, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetProperty<0x610, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
 template <typename TupleT, typename Fn> constexpr void for_each_tuple(TupleT &&tp, Fn &&fn)
@@ -23,7 +30,28 @@ TEST(Records, SimpleRecord)
                                                       .voltage = 24.0f,
                                                       .current = 10.0f,
                                                       .error = 0,
-                                                      .cellVoltages = { { 3.2f, 3.1f, 2.9f, 3.3f, 3.0f, 2.8f } },
+                                                      .cellVoltages = { { 3.2f, 3.1f, 2.9f, 3.3f, 0.0f, 2.8f } },
+                                                      .supercells = { { (SupercellRecord){
+                                                                            .soc = 0.1,
+                                                                            .soh = 1,
+                                                                        },
+                                                                        (SupercellRecord){ .soc = 0.25, .soh = 1 },
+                                                                        (SupercellRecord){
+                                                                            .soc = 0.5,
+                                                                            .soh = 1,
+                                                                        },
+                                                                        (SupercellRecord){
+                                                                            .soc = 0.75,
+                                                                            .soh = 1,
+                                                                        },
+                                                                        (SupercellRecord){
+                                                                            .soc = 0.8,
+                                                                            .soh = 1,
+                                                                        },
+                                                                        (SupercellRecord){
+                                                                            .soc = 1,
+                                                                            .soh = 1,
+                                                                        } } },
                                                   },
                                                   (ModuleRecord){
                                                       .voltage = 24.2f,
@@ -45,13 +73,15 @@ TEST(Records, SimpleRecord)
     FixedSizeThingSetBinaryEncoder<512> encoder(buffer);
     encoder.encode(moduleRecords);
     ASSERT_EQ(0x82, buffer[0]); // array with 2 elements
-    ASSERT_EQ(0xA4, buffer[1]); // map with 4 elements
+    ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
 
     std::array<ModuleRecord, 2> newModuleRecords;
     FixedSizeThingSetBinaryDecoder<512> decoder(buffer);
-    decoder.decode(&newModuleRecords);
+    ASSERT_TRUE(decoder.decode(&newModuleRecords));
     ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
     ASSERT_EQ(moduleRecords[1].voltage.getValue(), newModuleRecords[1].voltage.getValue());
     ASSERT_EQ(moduleRecords[0].current.getValue(), newModuleRecords[0].current.getValue());
     ASSERT_EQ(moduleRecords[1].current.getValue(), newModuleRecords[1].current.getValue());
+    ASSERT_EQ(moduleRecords[0].supercells.getValue()[0].soc.getValue(),
+              newModuleRecords[0].supercells.getValue()[0].soc.getValue());
 }
