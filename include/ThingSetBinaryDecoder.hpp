@@ -30,9 +30,13 @@ public:
 class ThingSetBinaryDecoder
 {
 protected:
-    virtual zcbor_state_t *getState();
+    virtual zcbor_state_t *getState() = 0;
 
 public:
+    virtual size_t getDecodedLength() = 0;
+
+    bool decode(std::string *value);
+    bool decode(char *value);
     bool decode(float *value);
     bool decode(double *value);
     bool decode(bool *value);
@@ -44,6 +48,28 @@ public:
     bool decode(int16_t *value);
     bool decode(int32_t *value);
     bool decode(int64_t *value);
+    bool decodeNull();
+
+    bool peekIsList();
+
+    template <typename T> bool decodeList(std::function<bool(T &)> callback)
+    {
+        if (!zcbor_list_start_decode(getState())) {
+            return false;
+        }
+
+        while (getState()->elem_count != 0) {
+            T element;
+            if (!decode(&element)) {
+                return false;
+            }
+            if (!callback(element)) {
+                return false;
+            }
+        }
+
+        return zcbor_list_end_decode(getState());
+    }
 
     template <typename T, size_t size> bool decode(std::array<T, size> *value)
     {
@@ -89,7 +115,7 @@ private:
     {
         std::function<bool(ThingSetBinaryDecoder &, Fields &)> ret;
         std::initializer_list<std::function<bool(ThingSetBinaryDecoder &, Fields &)>>(
-            { ((id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::_id)
+            { ((id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id)
                ? ret = [](ThingSetBinaryDecoder &dec, Fields &f) -> bool { return std::get<Is>(f)->decode(dec); },
                [](ThingSetBinaryDecoder &x, Fields &y) { return false; }
                : [](ThingSetBinaryDecoder &x, Fields &y) { return false; })... });
@@ -103,11 +129,9 @@ private:
     }
 };
 
-template <int size, int depth = BINARY_DECODER_DEFAULT_MAX_DEPTH>
+template <int depth = BINARY_DECODER_DEFAULT_MAX_DEPTH>
 class FixedSizeThingSetBinaryDecoder : public ThingSetBinaryDecoder
 {
-    friend class ThingSetBinaryDecoder;
-
 private:
     // The start of the buffer
     const uint8_t *_buffer;
@@ -120,10 +144,15 @@ protected:
     }
 
 public:
-    FixedSizeThingSetBinaryDecoder(uint8_t buffer[size]) : _buffer(buffer)
+    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size) : _buffer(buffer)
     {
         zcbor_new_decode_state(_state, depth, buffer, size, 1, NULL, 0);
         _state->constant_state->enforce_canonical = false;
+    }
+
+    size_t getDecodedLength() override
+    {
+        return _state->payload - _buffer;
     }
 };
 

@@ -1,0 +1,91 @@
+/*
+ * Copyright (c) 2024 Brill Power. All rights reserved.
+ *
+ * SPDX-License-Identifier: Proprietary
+ */
+#pragma once
+
+#include <string>
+
+namespace ThingSet {
+template <typename T> struct ThingSetType
+{
+    inline static const std::string name = "record";
+};
+
+template <typename T, size_t size> struct ThingSetType<std::array<T, size>>
+{
+    inline static const std::string name = std::string(ThingSetType<T>::name) + "[]";
+};
+
+template <> struct ThingSetType<const char *>
+{
+    inline static const std::string name = "string";
+};
+
+template <> struct ThingSetType<char *>
+{
+    inline static const std::string name = "string";
+};
+
+template <> struct ThingSetType<std::string>
+{
+    inline static const std::string name = "string";
+};
+
+template <> struct ThingSetType<bool>
+{
+    inline static const std::string name = "bool";
+};
+
+template <> struct ThingSetType<uint8_t>
+{
+    inline static const std::string name = "u8";
+};
+
+template <> struct ThingSetType<uint16_t>
+{
+    inline static const std::string name = "u16";
+};
+
+template <> struct ThingSetType<uint32_t>
+{
+    inline static const std::string name = "u32";
+};
+
+template <> struct ThingSetType<uint64_t>
+{
+    inline static const std::string name = "u64";
+};
+
+template <> struct ThingSetType<int8_t>
+{
+    inline static const std::string name = "i8";
+};
+
+template <> struct ThingSetType<int16_t>
+{
+    inline static const std::string name = "i16";
+};
+
+template <> struct ThingSetType<int32_t>
+{
+    inline static const std::string name = "i32";
+};
+
+template <> struct ThingSetType<int64_t>
+{
+    inline static const std::string name = "i64";
+};
+
+template <> struct ThingSetType<float>
+{
+    inline static const std::string name = "f32";
+};
+
+template <> struct ThingSetType<double>
+{
+    inline static const std::string name = "f64";
+};
+
+} // namespace ThingSet

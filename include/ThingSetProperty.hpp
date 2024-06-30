@@ -7,19 +7,37 @@
 
 #include "IdentifiableThingSetNode.hpp"
 #include "StringLiteral.hpp"
+#include "ThingSetType.hpp"
 #include "ThingSetValue.hpp"
 #include <array>
 
 namespace ThingSet {
 
-template <unsigned id, StringLiteral name, typename T>
-class ThingSetProperty : public ThingSetValue<T>, public IdentifiableThingSetNode<id, name>
+template <unsigned id, unsigned parentId, StringLiteral name, typename T>
+class ThingSetProperty : public ThingSetValue<T>, public IdentifiableThingSetNode<id, parentId, name>
 {
 public:
-    ThingSetProperty() : IdentifiableThingSetNode<id, name>(), ThingSetValue<T>()
+    ThingSetProperty() : IdentifiableThingSetNode<id, parentId, name>(), ThingSetValue<T>()
     {}
-    ThingSetProperty(T value) : IdentifiableThingSetNode<id, name>(), ThingSetValue<T>(value)
+    ThingSetProperty(const T &value) : IdentifiableThingSetNode<id, parentId, name>(), ThingSetValue<T>(value)
     {}
+
+    auto &operator=(const T &value)
+    {
+        this->_value = value;
+        return *this;
+    }
+
+    auto &operator=(T &&value)
+    {
+        this->_value = std::move(value);
+        return *this;
+    }
+
+    const std::string getType() const override
+    {
+        return ThingSetType<T>::name;
+    }
 };
 
 } // namespace ThingSet

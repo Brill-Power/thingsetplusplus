@@ -5,14 +5,24 @@
  */
 #include "ThingSetBinaryEncoder.hpp"
 
-zcbor_state_t *ThingSet::ThingSetBinaryEncoder::getState()
+bool ThingSet::ThingSetBinaryEncoder::encode(const std::string_view &value)
 {
-    return nullptr;
+    return encode(std::string(value));
 }
 
-size_t ThingSet::ThingSetBinaryEncoder::getEncodedLength()
+bool ThingSet::ThingSetBinaryEncoder::encode(std::string_view &value)
 {
-    return 0;
+    return encode(std::string(value));
+}
+
+bool ThingSet::ThingSetBinaryEncoder::encode(const std::string &value)
+{
+    return encode(value.c_str());
+}
+
+bool ThingSet::ThingSetBinaryEncoder::encode(std::string &value)
+{
+    return encode(value.c_str());
 }
 
 bool ThingSet::ThingSetBinaryEncoder::encode(const char *value)
@@ -141,4 +151,29 @@ bool ThingSet::ThingSetBinaryEncoder::encode(const int64_t &value)
 bool ThingSet::ThingSetBinaryEncoder::encode(int64_t &value)
 {
     return zcbor_int64_put(this->getState(), value);
+}
+
+bool ThingSet::ThingSetBinaryEncoder::encodeNull()
+{
+    return zcbor_nil_put(this->getState(), NULL);
+}
+
+bool ThingSet::ThingSetBinaryEncoder::encodeListStart()
+{
+    return zcbor_list_start_encode(this->getState(), UINT8_MAX);
+}
+
+bool ThingSet::ThingSetBinaryEncoder::encodeListEnd()
+{
+    return zcbor_list_end_encode(this->getState(), UINT8_MAX);
+}
+
+bool ThingSet::ThingSetBinaryEncoder::encodeMapStart()
+{
+    return zcbor_map_start_encode(this->getState(), UINT8_MAX);
+}
+
+bool ThingSet::ThingSetBinaryEncoder::encodeMapEnd()
+{
+    return zcbor_map_end_encode(this->getState(), UINT8_MAX);
 }

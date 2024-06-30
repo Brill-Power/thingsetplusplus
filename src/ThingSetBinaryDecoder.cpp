@@ -5,9 +5,25 @@
  */
 #include "ThingSetBinaryDecoder.hpp"
 
-zcbor_state_t *ThingSet::ThingSetBinaryDecoder::getState()
+bool ThingSet::ThingSetBinaryDecoder::decode(std::string *value)
 {
-    return nullptr;
+    zcbor_string zstring;
+    if (zcbor_tstr_decode(this->getState(), &zstring)) {
+        *value = std::string((char *)zstring.value, zstring.len);
+        return true;
+    }
+    return false;
+}
+
+bool ThingSet::ThingSetBinaryDecoder::decode(char *value)
+{
+    zcbor_string zstring;
+    if (zcbor_tstr_decode(this->getState(), &zstring)) {
+        strncpy(value, (char *)zstring.value, zstring.len);
+        value[zstring.len] = '\0';
+        return true;
+    }
+    return false;
 }
 
 bool ThingSet::ThingSetBinaryDecoder::decode(float *value)
@@ -87,4 +103,15 @@ bool ThingSet::ThingSetBinaryDecoder::decode(int32_t *value)
 bool ThingSet::ThingSetBinaryDecoder::decode(int64_t *value)
 {
     return zcbor_int64_decode(this->getState(), value);
+}
+
+bool ThingSet::ThingSetBinaryDecoder::decodeNull()
+{
+    return zcbor_nil_expect(this->getState(), NULL);
+}
+
+bool ThingSet::ThingSetBinaryDecoder::peekIsList()
+{
+    zcbor_major_type_t type = ZCBOR_MAJOR_TYPE(this->getState()->payload[0]);
+    return type == ZCBOR_MAJOR_TYPE_LIST;
 }

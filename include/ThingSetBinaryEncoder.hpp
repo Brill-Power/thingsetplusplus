@@ -8,6 +8,8 @@
 #include "internal/bind_to_tuple.hpp"
 #include "zcbor_encode.h"
 #include <array>
+#include <list>
+#include <map>
 #include <tuple>
 
 #define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
@@ -19,9 +21,15 @@ namespace ThingSet {
 class ThingSetBinaryEncoder
 {
 protected:
-    virtual zcbor_state_t *getState();
+    virtual zcbor_state_t *getState() = 0;
 
 public:
+    virtual size_t getEncodedLength() = 0;
+
+    bool encode(const std::string_view &value);
+    bool encode(std::string_view &value);
+    bool encode(const std::string &value);
+    bool encode(std::string &value);
     bool encode(const char *value);
     bool encode(char *value);
     bool encode(const float &value);
@@ -46,6 +54,42 @@ public:
     bool encode(int32_t &value);
     bool encode(const int64_t &value);
     bool encode(int64_t &value);
+    bool encodeNull();
+    bool encodeListStart();
+    bool encodeListEnd();
+    bool encodeMapStart();
+    bool encodeMapEnd();
+
+    template <typename K, typename V> bool encode(std::pair<K, V> &pair)
+    {
+        return encode(pair.first) && encode(pair.second);
+    }
+
+    template <typename T> bool encode(std::list<T> &value)
+    {
+        if (!zcbor_list_start_encode(getState(), value.size())) {
+            return false;
+        }
+        for (T &item : value) {
+            if (!encode(item)) {
+                return false;
+            }
+        }
+        return zcbor_list_end_encode(getState(), value.size());
+    }
+
+    template <typename K, typename V> bool encode(std::map<K, V> &map)
+    {
+        if (!zcbor_map_start_encode(getState(), map.size())) {
+            return false;
+        }
+        for (auto const &[key, value] : map) {
+            if (!encode(key) || !encode(value)) {
+                return false;
+            }
+        }
+        return zcbor_map_end_encode(getState(), map.size());
+    }
 
     template <typename T> bool encode(T &value)
     {
@@ -79,8 +123,6 @@ public:
                && zcbor_list_end_encode(getState(), count);
     }
 
-    virtual size_t getEncodedLength();
-
 private:
     template <typename T> bool encode(T *value, size_t size)
     {
@@ -107,11 +149,9 @@ private:
     }
 };
 
-template <int size, int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
+template <int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
 class FixedSizeThingSetBinaryEncoder : public ThingSetBinaryEncoder
 {
-    friend class ThingSetBinaryEncoder;
-
 private:
     // The start of the buffer
     const uint8_t *_buffer;
@@ -124,7 +164,7 @@ protected:
     }
 
 public:
-    FixedSizeThingSetBinaryEncoder(uint8_t buffer[size]) : _buffer(buffer)
+    FixedSizeThingSetBinaryEncoder(uint8_t *buffer, size_t size) : _buffer(buffer)
     {
         zcbor_new_encode_state(_state, depth, buffer, size, 2);
     }

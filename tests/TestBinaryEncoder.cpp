@@ -5,7 +5,7 @@ using namespace ThingSet;
 
 #define SETUP(size)                                                                                                    \
     uint8_t buffer[size];                                                                                              \
-    FixedSizeThingSetBinaryEncoder<size> encoder(buffer);
+    FixedSizeThingSetBinaryEncoder encoder(buffer, size);
 
 #define ASSERT_BUFFER_EQ(expected, actual, actual_len)                                                                 \
     ASSERT_EQ(sizeof(expected), actual_len);                                                                           \

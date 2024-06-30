@@ -1,4 +1,7 @@
 target_sources(thingset++ PRIVATE ThingSetBinaryDecoder.cpp)
 target_sources(thingset++ PRIVATE ThingSetBinaryEncoder.cpp)
-target_sources(thingset++ PRIVATE ThingSetNode.cpp)
+target_sources(thingset++ PRIVATE ThingSetParentNode.cpp)
 target_sources(thingset++ PRIVATE ThingSetRegistry.cpp)
+target_sources(thingset++ PRIVATE ThingSetAsyncSocketServerTransport.cpp)
+target_sources(thingset++ PRIVATE ThingSetSocketServerTransport.cpp)
+target_sources(thingset++ PRIVATE ThingSetServer.cpp)

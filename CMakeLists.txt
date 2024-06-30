@@ -11,7 +11,7 @@ target_sources(zcbor PRIVATE zcbor/src/zcbor_common.c)
 target_sources(zcbor PRIVATE zcbor/src/zcbor_decode.c)
 target_sources(zcbor PRIVATE zcbor/src/zcbor_encode.c)
 target_sources(zcbor PRIVATE zcbor/src/zcbor_print.c)
-include_directories(zcbor/include)
+include_directories(zcbor/include asio/asio/include)
 target_link_libraries(thingset++ zcbor)
 
 include_directories(include)

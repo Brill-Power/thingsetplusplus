@@ -1,28 +1,25 @@
-#include "ThingSetProperty.hpp"
-#include "ThingSetRegistry.hpp"
 #include "gtest/gtest.h"
+#include <ThingSet.hpp>
 
 using namespace ThingSet;
 
+ThingSetGroup<0x600, 0, "Modules"> modules;
+ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
+
 struct SupercellRecord
 {
-    ThingSetProperty<0x611, "soc", float> soc;
-    ThingSetProperty<0x612, "soh", float> soh;
+    ThingSetProperty<0x611, 0x610, "soc", float> soc;
+    ThingSetProperty<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
-    ThingSetProperty<0x601, "voltage", float> voltage;
-    ThingSetProperty<0x602, "current", float> current;
-    ThingSetProperty<0x603, "error", uint64_t> error;
-    ThingSetProperty<0x604, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetProperty<0x610, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetProperty<0x601, 0x600, "voltage", float> voltage;
+    ThingSetProperty<0x602, 0x600, "current", float> current;
+    ThingSetProperty<0x603, 0x600, "error", uint64_t> error;
+    ThingSetProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
-
-template <typename TupleT, typename Fn> constexpr void for_each_tuple(TupleT &&tp, Fn &&fn)
-{
-    std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
-}
 
 TEST(Records, SimpleRecord)
 {
@@ -70,13 +67,13 @@ TEST(Records, SimpleRecord)
     moduleRecords[0].voltage = 25.0f;
 
     uint8_t buffer[512];
-    FixedSizeThingSetBinaryEncoder<512> encoder(buffer);
+    FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     encoder.encode(moduleRecords);
     ASSERT_EQ(0x82, buffer[0]); // array with 2 elements
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
 
+    FixedSizeThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
     std::array<ModuleRecord, 2> newModuleRecords;
-    FixedSizeThingSetBinaryDecoder<512> decoder(buffer);
     ASSERT_TRUE(decoder.decode(&newModuleRecords));
     ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
     ASSERT_EQ(moduleRecords[1].voltage.getValue(), newModuleRecords[1].voltage.getValue());

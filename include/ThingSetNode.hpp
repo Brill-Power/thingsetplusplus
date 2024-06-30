@@ -15,15 +15,13 @@ public:
     constexpr ThingSetNode()
     {}
 
-    constexpr virtual const std::string_view getName() const
-    {
-        return nullptr;
-    }
+    constexpr virtual const std::string_view getName() const = 0;
 
-    constexpr virtual const unsigned getId() const
-    {
-        return 0;
-    }
+    constexpr virtual const unsigned getId() const = 0;
+
+    constexpr virtual const unsigned getParentId() const = 0;
+
+    virtual const std::string getType() const = 0;
 };
 
 } // namespace ThingSet

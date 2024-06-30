@@ -71,6 +71,13 @@
         "memory_resource": "cpp",
         "source_location": "cpp",
         "stack": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "*.ipp": "cpp",
+        "coroutine": "cpp",
+        "cinttypes": "cpp",
+        "codecvt": "cpp",
+        "future": "cpp",
+        "queue": "cpp",
+        "strstream": "cpp"
     }
 }
