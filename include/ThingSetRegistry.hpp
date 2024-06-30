@@ -9,6 +9,7 @@
 #include "StringLiteral.hpp"
 #include "ThingSetParentNode.hpp"
 #include <array>
+#include <functional>
 #include <list>
 
 #define NODE_MAP_LOOKUP_BUCKETS 8
