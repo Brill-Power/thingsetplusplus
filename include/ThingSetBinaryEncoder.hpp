@@ -166,7 +166,7 @@ protected:
 public:
     FixedSizeThingSetBinaryEncoder(uint8_t *buffer, size_t size) : _buffer(buffer)
     {
-        zcbor_new_encode_state(_state, depth, buffer, size, 2);
+        zcbor_new_encode_state(_state, depth, buffer, size, 1);
     }
 
     size_t getEncodedLength() override

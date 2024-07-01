@@ -8,6 +8,7 @@
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
 #include <asio/ip/tcp.hpp>
+#include <asio/ip/udp.hpp>
 #include <asio/signal_set.hpp>
 #include <asio/write.hpp>
 
@@ -18,9 +19,16 @@ using asio::co_spawn;
 using asio::detached;
 using asio::use_awaitable;
 using asio::ip::tcp;
+using asio::ip::udp;
 
-ThingSet::ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport() : _ioContext(1)
+ThingSet::ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport()
+    : _ioContext(1), _publishSocket(_ioContext)
 {}
+
+asio::io_context &ThingSet::ThingSetAsyncSocketServerTransport::getContext()
+{
+    return _ioContext;
+}
 
 asio::awaitable<void> ThingSet::ThingSetAsyncSocketServerTransport::handle(
     asio::ip::tcp::socket socket, std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
@@ -38,6 +46,13 @@ awaitable<void> ThingSet::ThingSetAsyncSocketServerTransport::listener(
 {
     auto executor = co_await asio::this_coro::executor;
     tcp::acceptor acceptor(executor, { tcp::v4(), 9001 });
+    asio::error_code error;
+    _publishSocket.open(udp::v4(), error);
+    if (error) {
+        throw std::system_error(error);
+    }
+    _publishSocket.set_option(udp::socket::reuse_address(true));
+    _publishSocket.set_option(asio::socket_base::broadcast(true));
     for (;;) {
         tcp::socket socket = co_await acceptor.async_accept(use_awaitable);
         co_spawn(executor, handle(std::move(socket), callback), detached);
@@ -54,4 +69,14 @@ bool ThingSet::ThingSetAsyncSocketServerTransport::listen(
 
     _ioContext.run();
     return true;
+}
+
+bool ThingSet::ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size_t len)
+{
+    if (_publishSocket.is_open()) {
+        udp::endpoint endpoint(asio::ip::address_v4::broadcast(), 9002);
+        size_t sent = _publishSocket.send_to(asio::buffer(buffer, len), endpoint);
+        return sent == len;
+    }
+    return false;
 }

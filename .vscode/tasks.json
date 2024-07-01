@@ -7,9 +7,28 @@
             "label": "Build Tests (Debug)",
             "type": "shell",
             "command": "/bin/bash",
-            "args": ["-c", "\"cmake -DCMAKE_BUILD_TYPE=Debug -B build . && cd build && make\""],
+            "args": [
+                "-c",
+                "\"cmake -DCMAKE_BUILD_TYPE=Debug -B build . && cd build && make\""
+            ],
             "options": {
                 "cwd": "${workspaceRoot}/tests"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+        {
+            "label": "Build Example Server (Debug)",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "\"cmake -DCMAKE_BUILD_TYPE=Debug -B build . && cd build && make\""
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/examples/server"
             },
             "group": {
                 "kind": "build",

@@ -1,6 +1,8 @@
 #include <ThingSet.hpp>
 #include <ThingSetAsyncSocketServerTransport.hpp>
 #include <ThingSetServer.hpp>
+#include <asio.hpp>
+#include <functional>
 
 using namespace ThingSet;
 
@@ -25,6 +27,14 @@ struct ModuleRecord
 ThingSetProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
 std::array<ModuleRecord, 2> moduleRecords;
+
+void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer *server)
+{
+    server->publish(0x600, moduleRecords);
+
+    t->expires_at(t->expiry() + asio::chrono::seconds(1));
+    t->async_wait(std::bind(publishCallback, asio::placeholders::error, t, server));
+}
 
 int main()
 {
@@ -64,6 +74,10 @@ int main()
 
     ThingSetAsyncSocketServerTransport transport;
     ThingSetServer server(transport);
+
+    asio::steady_timer t(transport.getContext(), asio::chrono::seconds(1));
+    t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));
+
     server.listen();
     return 0;
 }

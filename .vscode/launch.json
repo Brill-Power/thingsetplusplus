@@ -13,6 +13,16 @@
             "stopAtEntry": false,
             "MIMode": "lldb",
             "preLaunchTask": "Build Tests (Debug)"
+        },
+        {
+            "name": "Debug Sample Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/examples/server/build/server",
+            "stopAtEntry": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Build Example Server (Debug)"
         }
     ]
 }

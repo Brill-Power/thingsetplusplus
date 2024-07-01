@@ -7,7 +7,6 @@
 #include "ThingSetServer.hpp"
 #include "ThingSet.hpp"
 #include <ThingSetBinaryDecoder.hpp>
-#include <ThingSetBinaryEncoder.hpp>
 #include <ThingSetRegistry.hpp>
 #include <list>
 
