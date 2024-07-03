@@ -30,7 +30,7 @@ bool ThingSetBinaryEncoder::encode(std::string &value)
 bool ThingSetBinaryEncoder::encode(const char *value)
 {
 #ifdef zcbor_tstr_put_term
-    return zcbor_tstr_put_term(this->getEncoder(), value);
+    return zcbor_tstr_put_term(this->getState(), value);
 #else
     return zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif
@@ -39,7 +39,7 @@ bool ThingSetBinaryEncoder::encode(const char *value)
 bool ThingSetBinaryEncoder::encode(char *value)
 {
 #ifdef zcbor_tstr_put_term
-    return zcbor_tstr_put_term(this->getEncoder(), value);
+    return zcbor_tstr_put_term(this->getState(), value);
 #else
     return zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif

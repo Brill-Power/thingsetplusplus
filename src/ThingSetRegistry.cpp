@@ -64,8 +64,8 @@ void ThingSetRegistry::unregisterNode(ThingSetNode *node)
 bool ThingSetRegistry::findContainerById(unsigned id, ThingSetParentNode **parent)
 {
     ThingSetNode *node;
-    if (findById(id, &node) && (*parent = dynamic_cast<ThingSetParentNode *>(node))) {
-        return true;
+    if (findById(id, &node) && node->getNodeType() == ThingSetNodeType::Group) {
+        *parent = (ThingSetParentNode *)node;
     }
 
     return false;
@@ -83,10 +83,10 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
         if ((*node)->getName() == token) {
             break;
         }
-        auto *parent = dynamic_cast<ThingSetParentNode *>(*node);
-        if (!parent) {
+        if ((*node)->getNodeType() != ThingSetNodeType::Group) {
             break;
         }
+        auto *parent = (ThingSetParentNode *)*node;
         for (ThingSetNode *child : *parent) {
             if (child->getName() == token) {
                 pos += index;
@@ -105,7 +105,6 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
 bool ThingSetRegistry::findById(unsigned id, ThingSetNode **node)
 {
     NodeList list = getInstance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
-    size_t count = 0;
     for (ThingSetNode *n : list) {
         if (n && (n->getId() == id)) {
             *node = n;

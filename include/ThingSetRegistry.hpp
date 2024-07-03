@@ -44,6 +44,11 @@ private:
         {
             return "group";
         }
+
+        constexpr const ThingSetNodeType getNodeType() const override
+        {
+            return ThingSetNodeType::Group;
+        }
     };
 
     class RootNode : public ThingSetNode, public ThingSetParentNode
@@ -77,6 +82,11 @@ private:
         const std::string getType() const override
         {
             return "group";
+        }
+
+        constexpr const ThingSetNodeType getNodeType() const override
+        {
+            return ThingSetNodeType::Group;
         }
     };
 

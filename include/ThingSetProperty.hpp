@@ -38,6 +38,11 @@ public:
     {
         return ThingSetType<T>::name;
     }
+
+    constexpr const ThingSetNodeType getNodeType() const override
+    {
+        return ThingSetNodeType::Value;
+    }
 };
 
 } // namespace ThingSet

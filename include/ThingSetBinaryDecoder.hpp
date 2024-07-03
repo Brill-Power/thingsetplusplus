@@ -172,8 +172,12 @@ protected:
 public:
     FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size) : _buffer(buffer)
     {
+#ifdef zcbor_tstr_put_term
+        zcbor_new_decode_state(_state, depth, buffer, size, 1);
+#else
         zcbor_new_decode_state(_state, depth, buffer, size, 1, NULL, 0);
         _state->constant_state->enforce_canonical = false;
+#endif
     }
 
     size_t getDecodedLength() override

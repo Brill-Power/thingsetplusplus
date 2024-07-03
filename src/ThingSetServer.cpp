@@ -52,9 +52,11 @@ std::pair<uint8_t *, size_t> ThingSetServer::requestCallback(uint8_t *buffer, si
         case THINGSET_BIN_GET: {
             response[0] = THINGSET_STATUS_CONTENT;
             encoder.encodeNull();
-            ThingSetBinaryEncodable *encodable = dynamic_cast<ThingSetBinaryEncodable *>(node);
-            if (encodable && encodable->encode(encoder)) {
-                return std::make_pair(response, encoder.getEncodedLength() + 1);
+            if (node->getNodeType() == ThingSetNodeType::Value) {
+                ThingSetBinaryEncodable *encodable = (ThingSetBinaryEncodable *)node;
+                if (encodable->encode(encoder)) {
+                    return std::make_pair(response, encoder.getEncodedLength() + 1);
+                }
             }
             error[0] = THINGSET_ERR_UNSUPPORTED_FORMAT;
             return std::make_pair(error, 1);
@@ -64,8 +66,8 @@ std::pair<uint8_t *, size_t> ThingSetServer::requestCallback(uint8_t *buffer, si
             encoder.encodeNull();
             if (decoder.decodeNull()) {
                 // expect that this is a group
-                ThingSetParentNode *parent = dynamic_cast<ThingSetParentNode *>(node);
-                if (parent) {
+                if (node->getNodeType() == ThingSetNodeType::Group) {
+                    ThingSetParentNode *parent = (ThingSetParentNode *)node;
                     if (useIds) {
                         std::list<unsigned> ids;
                         for (ThingSetNode *child : *parent) {

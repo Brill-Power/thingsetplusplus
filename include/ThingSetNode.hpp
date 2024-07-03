@@ -9,6 +9,12 @@
 
 namespace ThingSet {
 
+enum ThingSetNodeType
+{
+    Value,
+    Group,
+};
+
 class ThingSetNode
 {
 public:
@@ -22,6 +28,8 @@ public:
     constexpr virtual const unsigned getParentId() const = 0;
 
     virtual const std::string getType() const = 0;
+
+    constexpr virtual const ThingSetNodeType getNodeType() const = 0;
 };
 
 } // namespace ThingSet

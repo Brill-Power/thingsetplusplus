@@ -20,6 +20,11 @@ public:
     {
         return "group";
     }
+
+    constexpr const ThingSetNodeType getNodeType() const override
+    {
+        return ThingSetNodeType::Group;
+    }
 };
 
 } // namespace ThingSet
