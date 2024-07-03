@@ -8,3 +8,8 @@
 
 ThingSet::ThingSetClient::ThingSetClient(ThingSetClientTransport &transport) : _transport(transport)
 {}
+
+void ThingSet::ThingSetClient::connect()
+{
+    _transport.connect();
+}

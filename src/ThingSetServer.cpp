@@ -21,7 +21,7 @@ std::pair<uint8_t *, size_t> ThingSetServer::requestCallback(uint8_t *buffer, si
 {
     uint8_t error[1];
     uint8_t response[1024];
-    FixedSizeThingSetBinaryEncoder encoder(response + 1, sizeof(response) - 1);
+    FixedSizeThingSetBinaryEncoder encoder(response + 1, 1024 - 1);
     FixedSizeThingSetBinaryDecoder decoder(buffer + 1, len - 1);
     std::string path;
     uint16_t id;
@@ -87,7 +87,7 @@ std::pair<uint8_t *, size_t> ThingSetServer::requestCallback(uint8_t *buffer, si
                     return std::make_pair(error, 1);
                 }
             }
-            else if (decoder.peekIsList() && encoder.encodeListStart()) {
+            else if (decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && encoder.encodeListStart()) {
                 if (decoder.decodeList<unsigned>([node, &encoder](unsigned &i) {
                         ThingSetNode *n;
                         return ThingSetRegistry::findById(i, &n) && node == ThingSetRegistry::getMetadataNode()

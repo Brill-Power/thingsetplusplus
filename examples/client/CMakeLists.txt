@@ -5,13 +5,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_FLAGS -O3)
 set(ENABLE_ASIO ON)
 
-project(server LANGUAGES C CXX VERSION 1.0.0)
+project(client LANGUAGES C CXX VERSION 1.0.0)
 
 add_subdirectory(../../ thingset++)
 
-add_executable(server)
+add_executable(client)
 include_directories(../../include ../../zcbor/include ../../asio/asio/include)
 
-target_sources(server PRIVATE main.cpp)
+target_sources(client PRIVATE main.cpp)
 
-target_link_libraries(server PRIVATE thingset++)
+target_link_libraries(client PRIVATE thingset++)

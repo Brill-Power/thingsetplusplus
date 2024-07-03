@@ -6,24 +6,28 @@
 
 #include "ThingSetParentNode.hpp"
 
-ThingSet::ThingSetParentNode::ChildIterator ThingSet::ThingSetParentNode::begin()
+namespace ThingSet {
+
+ThingSetParentNode::ChildIterator ThingSetParentNode::begin()
 {
     return _children.begin();
 }
 
-ThingSet::ThingSetParentNode::ChildIterator ThingSet::ThingSetParentNode::end()
+ThingSetParentNode::ChildIterator ThingSetParentNode::end()
 {
     return _children.end();
 }
 
-bool ThingSet::ThingSetParentNode::addChild(ThingSetNode *child)
+bool ThingSetParentNode::addChild(ThingSetNode *child)
 {
     _children.push_back(child);
     return true;
 }
 
-bool ThingSet::ThingSetParentNode::removeChild(ThingSetNode *child)
+bool ThingSetParentNode::removeChild(ThingSetNode *child)
 {
     _children.remove(child);
     return true;
 }
+
+} // namespace ThingSet

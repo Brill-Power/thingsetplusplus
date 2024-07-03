@@ -1,7 +1,7 @@
 #include <ThingSet.hpp>
-#include <ThingSetAsyncSocketServerTransport.hpp>
 #include <ThingSetServer.hpp>
 #include <asio.hpp>
+#include <asio/ThingSetAsyncSocketServerTransport.hpp>
 #include <functional>
 
 using namespace ThingSet;
@@ -30,6 +30,7 @@ std::array<ModuleRecord, 2> moduleRecords;
 
 void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer *server)
 {
+    std::cout << "Publishing report" << std::endl;
     server->publish(0x600, moduleRecords);
 
     t->expires_at(t->expiry() + asio::chrono::seconds(1));

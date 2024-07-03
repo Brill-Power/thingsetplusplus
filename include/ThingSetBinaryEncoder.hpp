@@ -13,7 +13,7 @@
 #include <tuple>
 
 #define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
-#define BINARY_ENCODER_DEFAULT_MAX_DEPTH                 6
+#define BINARY_ENCODER_DEFAULT_MAX_DEPTH                 8
 
 namespace ThingSet {
 

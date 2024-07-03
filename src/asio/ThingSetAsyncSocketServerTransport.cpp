@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "ThingSetAsyncSocketServerTransport.hpp"
+#include <asio/ThingSetAsyncSocketServerTransport.hpp>
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
 #include <asio/ip/tcp.hpp>
@@ -21,17 +21,19 @@ using asio::use_awaitable;
 using asio::ip::tcp;
 using asio::ip::udp;
 
-ThingSet::ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport()
-    : _ioContext(1), _publishSocket(_ioContext)
+namespace ThingSet {
+
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport() : _ioContext(1), _publishSocket(_ioContext)
 {}
 
-asio::io_context &ThingSet::ThingSetAsyncSocketServerTransport::getContext()
+asio::io_context &ThingSetAsyncSocketServerTransport::getContext()
 {
     return _ioContext;
 }
 
-asio::awaitable<void> ThingSet::ThingSetAsyncSocketServerTransport::handle(
-    asio::ip::tcp::socket socket, std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
+awaitable<void>
+ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket socket,
+                                           std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
 {
     char data[1024];
     for (;;) {
@@ -41,8 +43,8 @@ asio::awaitable<void> ThingSet::ThingSetAsyncSocketServerTransport::handle(
     }
 }
 
-awaitable<void> ThingSet::ThingSetAsyncSocketServerTransport::listener(
-    std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
+awaitable<void>
+ThingSetAsyncSocketServerTransport::listener(std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
 {
     auto executor = co_await asio::this_coro::executor;
     tcp::acceptor acceptor(executor, { tcp::v4(), 9001 });
@@ -59,8 +61,7 @@ awaitable<void> ThingSet::ThingSetAsyncSocketServerTransport::listener(
     }
 }
 
-bool ThingSet::ThingSetAsyncSocketServerTransport::listen(
-    std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
+bool ThingSetAsyncSocketServerTransport::listen(std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
 {
     asio::signal_set signals(_ioContext, SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto) { _ioContext.stop(); });
@@ -71,7 +72,7 @@ bool ThingSet::ThingSetAsyncSocketServerTransport::listen(
     return true;
 }
 
-bool ThingSet::ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size_t len)
+bool ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size_t len)
 {
     if (_publishSocket.is_open()) {
         udp::endpoint endpoint(asio::ip::address_v4::broadcast(), 9002);
@@ -80,3 +81,5 @@ bool ThingSet::ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size
     }
     return false;
 }
+
+} // namespace ThingSet

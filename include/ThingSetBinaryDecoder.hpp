@@ -9,11 +9,12 @@
 #include "zcbor_decode.h"
 #include <array>
 #include <functional>
+#include <map>
 #include <optional>
 #include <tuple>
 
 #define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
-#define BINARY_DECODER_DEFAULT_MAX_DEPTH                 6
+#define BINARY_DECODER_DEFAULT_MAX_DEPTH                 8
 
 namespace ThingSet {
 
@@ -50,7 +51,32 @@ public:
     bool decode(int64_t *value);
     bool decodeNull();
 
-    bool peekIsList();
+    zcbor_major_type_t peekType();
+    bool skipUntil(zcbor_major_type_t sought);
+
+    /// @brief Decodes a map by iterating over its keys and invoking a callback for each key.
+    /// @tparam K The type of the keys in the map.
+    /// @param callback The callback to be invoked each time a key is decoded. This callback should decode the value and
+    /// return true, or fail and return false.
+    /// @return True if decoding succeeded, otherwise false.
+    template <typename K> bool decodeMap(std::function<bool(K &)> callback)
+    {
+        if (!zcbor_map_start_decode(getState())) {
+            return false;
+        }
+
+        while (getState()->elem_count != 0) {
+            K key;
+            if (!decode(&key)) {
+                return false;
+            }
+            if (!callback(key)) {
+                return false;
+            }
+        }
+
+        return zcbor_map_end_decode(getState());
+    }
 
     template <typename T> bool decodeList(std::function<bool(T &)> callback)
     {
