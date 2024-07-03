@@ -58,6 +58,7 @@ public:
     bool encode(int64_t &value);
     bool encodeNull();
     bool encodeListStart();
+    bool encodeListStart(uint32_t count);
     bool encodeListEnd();
     bool encodeMapStart();
     bool encodeMapEnd();

@@ -160,9 +160,14 @@ bool ThingSetBinaryEncoder::encodeNull()
     return zcbor_nil_put(this->getState(), NULL);
 }
 
+bool ThingSetBinaryEncoder::encodeListStart(uint32_t count)
+{
+    return zcbor_list_start_encode(this->getState(), count);
+}
+
 bool ThingSetBinaryEncoder::encodeListStart()
 {
-    return zcbor_list_start_encode(this->getState(), UINT8_MAX);
+    return encodeListStart(UINT8_MAX);
 }
 
 bool ThingSetBinaryEncoder::encodeListEnd()
