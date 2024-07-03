@@ -122,11 +122,16 @@ zcbor_major_type_t ThingSetBinaryDecoder::peekType()
     return type;
 }
 
+bool ThingSetBinaryDecoder::skip()
+{
+    zcbor_any_skip(this->getState(), NULL);
+}
+
 bool ThingSetBinaryDecoder::skipUntil(zcbor_major_type_t sought)
 {
     zcbor_major_type_t type;
     while ((type = this->peekType()) != sought) {
-        zcbor_any_skip(this->getState(), NULL);
+        this->skip();
     };
     return sought == type;
 }

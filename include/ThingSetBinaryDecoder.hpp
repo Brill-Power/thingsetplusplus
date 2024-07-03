@@ -53,6 +53,7 @@ public:
     bool decodeNull();
 
     zcbor_major_type_t peekType();
+    bool skip();
     bool skipUntil(zcbor_major_type_t sought);
 
     /// @brief Decodes a map by iterating over its keys and invoking a callback for each key.
@@ -173,7 +174,7 @@ protected:
 public:
     FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size) : _buffer(buffer)
     {
-#ifdef zcbor_tstr_put_term
+#ifdef zcbor_tstr_expect_term
         zcbor_new_decode_state(_state, depth, buffer, size, 1);
 #else
         zcbor_new_decode_state(_state, depth, buffer, size, 1, NULL, 0);
