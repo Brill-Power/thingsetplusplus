@@ -124,7 +124,7 @@ zcbor_major_type_t ThingSetBinaryDecoder::peekType()
 
 bool ThingSetBinaryDecoder::skip()
 {
-    zcbor_any_skip(this->getState(), NULL);
+    return zcbor_any_skip(this->getState(), NULL);
 }
 
 bool ThingSetBinaryDecoder::skipUntil(zcbor_major_type_t sought)

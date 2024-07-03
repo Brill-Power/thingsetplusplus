@@ -4,6 +4,10 @@ config THINGSET_PLUS_PLUS
 
 if THINGSET_PLUS_PLUS
 
+config THINGSET_PLUS_PLUS_SERVER
+	bool "Enable server"
+	default false
+
 module = THINGSET_PLUS_PLUS
 module-str = thingset++
 
