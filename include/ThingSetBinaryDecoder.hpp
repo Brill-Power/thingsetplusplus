@@ -101,6 +101,11 @@ public:
 
     template <typename T, size_t size> bool decode(std::array<T, size> *value)
     {
+        return decode(value.data(), value.size());
+    }
+
+    template <typename T> bool decode(T *value, size_t size)
+    {
         if (!zcbor_list_start_decode(getState())) {
             return false;
         }
@@ -110,7 +115,7 @@ public:
         }
 
         for (size_t i = 0; i < size; i++) {
-            T *element = &(*value)[i];
+            T *element = &value[i];
             if (!decode(element)) {
                 return false;
             }
