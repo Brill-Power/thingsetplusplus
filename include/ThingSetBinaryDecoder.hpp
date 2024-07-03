@@ -11,6 +11,7 @@
 #include <functional>
 #include <map>
 #include <optional>
+#include <string>
 #include <tuple>
 
 #define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
