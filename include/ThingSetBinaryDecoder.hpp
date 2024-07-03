@@ -101,7 +101,7 @@ public:
 
     template <typename T, size_t size> bool decode(std::array<T, size> *value)
     {
-        return decode(value.data(), value.size());
+        return decode(value->data(), value->size());
     }
 
     template <typename T> bool decode(T *value, size_t size)
