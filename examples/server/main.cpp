@@ -3,6 +3,7 @@
 #include <asio.hpp>
 #include <asio/ThingSetAsyncSocketServerTransport.hpp>
 #include <functional>
+#include <iostream>
 
 using namespace ThingSet;
 

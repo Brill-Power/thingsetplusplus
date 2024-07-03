@@ -2,7 +2,6 @@
 #define RFL_INTERNAL_BIND_TO_TUPLE_HPP_
 
 #include <cstddef>
-#include <iostream>
 #include <tuple>
 #include <type_traits>
 #include <utility>
