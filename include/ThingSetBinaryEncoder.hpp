@@ -10,6 +10,8 @@
 #include <array>
 #include <list>
 #include <map>
+#include <string>
+#include <string_view>
 #include <tuple>
 
 #define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
