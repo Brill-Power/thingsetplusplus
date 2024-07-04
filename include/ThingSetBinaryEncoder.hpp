@@ -128,7 +128,6 @@ public:
         return encodeListStart(count) && encode_and_shift(this, args...) && encodeListEnd(count);
     }
 
-private:
     template <typename T> bool encode(T *value, size_t size)
     {
         bool result = encodeListStart(size);
@@ -138,6 +137,7 @@ private:
         return result && encodeListEnd(size);
     }
 
+private:
     inline bool encode_and_shift(ThingSetBinaryEncoder *encoder)
     {
         return true;
