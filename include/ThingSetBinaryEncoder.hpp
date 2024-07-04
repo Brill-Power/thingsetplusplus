@@ -23,48 +23,48 @@ namespace ThingSet {
 class ThingSetBinaryEncoder
 {
 protected:
-    virtual zcbor_state_t *getState() = 0;
+    virtual zcbor_state_t *getState(const size_t expectedSize) = 0;
 
 public:
     virtual size_t getEncodedLength() = 0;
 
-    virtual bool encode(const std::string_view &value);
-    virtual bool encode(std::string_view &value);
-    virtual bool encode(const std::string &value);
-    virtual bool encode(std::string &value);
-    virtual bool encode(const char *value);
-    virtual bool encode(char *value);
-    virtual bool encode(const float &value);
-    virtual bool encode(float &value);
-    virtual bool encode(const double &value);
-    virtual bool encode(double &value);
-    virtual bool encode(const bool &value);
-    virtual bool encode(bool &value);
-    virtual bool encode(const uint8_t &value);
-    virtual bool encode(uint8_t &value);
-    virtual bool encode(const uint16_t &value);
-    virtual bool encode(uint16_t &value);
-    virtual bool encode(const uint32_t &value);
-    virtual bool encode(uint32_t &value);
-    virtual bool encode(const uint64_t &value);
-    virtual bool encode(uint64_t &value);
-    virtual bool encode(const int8_t &value);
-    virtual bool encode(int8_t &value);
-    virtual bool encode(const int16_t &value);
-    virtual bool encode(int16_t &value);
-    virtual bool encode(const int32_t &value);
-    virtual bool encode(int32_t &value);
-    virtual bool encode(const int64_t &value);
-    virtual bool encode(int64_t &value);
-    virtual bool encodeNull();
-    virtual bool encodeListStart();
-    virtual bool encodeListStart(uint32_t count);
-    virtual bool encodeListEnd();
-    virtual bool encodeListEnd(uint32_t count);
-    virtual bool encodeMapStart();
-    virtual bool encodeMapStart(uint32_t count);
-    virtual bool encodeMapEnd();
-    virtual bool encodeMapEnd(uint32_t count);
+    bool encode(const std::string_view &value);
+    bool encode(std::string_view &value);
+    bool encode(const std::string &value);
+    bool encode(std::string &value);
+    bool encode(const char *value);
+    bool encode(char *value);
+    bool encode(const float &value);
+    bool encode(float &value);
+    bool encode(const double &value);
+    bool encode(double &value);
+    bool encode(const bool &value);
+    bool encode(bool &value);
+    bool encode(const uint8_t &value);
+    bool encode(uint8_t &value);
+    bool encode(const uint16_t &value);
+    bool encode(uint16_t &value);
+    bool encode(const uint32_t &value);
+    bool encode(uint32_t &value);
+    bool encode(const uint64_t &value);
+    bool encode(uint64_t &value);
+    bool encode(const int8_t &value);
+    bool encode(int8_t &value);
+    bool encode(const int16_t &value);
+    bool encode(int16_t &value);
+    bool encode(const int32_t &value);
+    bool encode(int32_t &value);
+    bool encode(const int64_t &value);
+    bool encode(int64_t &value);
+    bool encodeNull();
+    bool encodeListStart();
+    bool encodeListStart(uint32_t count);
+    bool encodeListEnd();
+    bool encodeListEnd(uint32_t count);
+    bool encodeMapStart();
+    bool encodeMapStart(uint32_t count);
+    bool encodeMapEnd();
+    bool encodeMapEnd(uint32_t count);
 
     template <typename K, typename V> bool encode(std::pair<K, V> &pair)
     {
@@ -163,7 +163,7 @@ private:
     zcbor_state_t _state[depth];
 
 protected:
-    zcbor_state_t *getState() override
+    zcbor_state_t *getState(const size_t expectedSize) override
     {
         return _state;
     }
