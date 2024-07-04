@@ -54,22 +54,32 @@ bool ThingSetBinaryEncoder::encode(char *value)
 
 bool ThingSetBinaryEncoder::encode(const float &value)
 {
-    return zcbor_float32_put(this->getState(), value);
+    return zcbor_float32_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(float &value)
 {
-    return zcbor_float32_put(this->getState(), value);
+    return encode(&value);
+}
+
+bool ThingSetBinaryEncoder::encode(float *value)
+{
+    return zcbor_float32_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const double &value)
 {
-    return zcbor_float64_put(this->getState(), value);
+    return zcbor_float64_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(double &value)
 {
-    return zcbor_float64_put(this->getState(), value);
+    return encode(&value);
+}
+
+bool ThingSetBinaryEncoder::encode(double *value)
+{
+    return zcbor_float64_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const bool &value)
@@ -104,22 +114,32 @@ bool ThingSetBinaryEncoder::encode(uint16_t &value)
 
 bool ThingSetBinaryEncoder::encode(const uint32_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return zcbor_uint32_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint32_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return encode(&value);
+}
+
+bool ThingSetBinaryEncoder::encode(uint32_t *value)
+{
+    return zcbor_uint32_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const uint64_t &value)
 {
-    return zcbor_uint64_put(this->getState(), value);
+    return zcbor_uint64_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint64_t &value)
 {
-    return zcbor_uint64_put(this->getState(), value);
+    return encode(&value);
+}
+
+bool ThingSetBinaryEncoder::encode(uint64_t *value)
+{
+    return zcbor_uint64_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const int8_t &value)
@@ -144,22 +164,32 @@ bool ThingSetBinaryEncoder::encode(int16_t &value)
 
 bool ThingSetBinaryEncoder::encode(const int32_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return zcbor_int32_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(int32_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return encode(&value);
+}
+
+bool ThingSetBinaryEncoder::encode(int32_t *value)
+{
+    return zcbor_int32_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const int64_t &value)
 {
-    return zcbor_int64_put(this->getState(), value);
+    return zcbor_int64_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(int64_t &value)
 {
-    return zcbor_int64_put(this->getState(), value);
+    return encode(&value);
+}
+
+bool ThingSetBinaryEncoder::encode(int64_t *value)
+{
+    return zcbor_int64_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encodeNull()
