@@ -224,14 +224,15 @@ static bool encodeListMapEnd(zcbor_state_t *state)
 {
     // zcbor_list_map_end_force_encode is broken; it resets the pointer
     // back to where the list started, rendering it pointless, so we reimplement
-    // it here, passing in the necessary TRANSFER_PAYLOAD flag to make it behave
+    // it here, passing in the necessary TRANSFER/KEEP_PAYLOAD flag to make it behave
     // properly
-    if (!zcbor_process_backup(state, ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME | ZCBOR_FLAG_TRANSFER_PAYLOAD,
-                              ZCBOR_MAX_ELEM_COUNT))
-    {
-        ZCBOR_FAIL();
-    }
-    return true;
+    auto flags = ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME;
+#ifdef ZCBOR_FLAG_TRANSFER_PAYLOAD
+    flags |= ZCBOR_FLAG_TRANSFER_PAYLOAD;
+#else
+    flags |= ZCBOR_FLAG_KEEP_PAYLOAD;
+#endif
+    return zcbor_process_backup(state, flags, ZCBOR_MAX_ELEM_COUNT);
 }
 
 } // namespace ThingSet

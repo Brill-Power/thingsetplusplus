@@ -17,9 +17,9 @@ template <unsigned id, unsigned parentId, StringLiteral name, typename T>
 class ThingSetProperty : public ThingSetValue<T>, public IdentifiableThingSetNode<id, parentId, name>
 {
 public:
-    ThingSetProperty() : IdentifiableThingSetNode<id, parentId, name>(), ThingSetValue<T>()
+    ThingSetProperty() : ThingSetValue<T>(), IdentifiableThingSetNode<id, parentId, name>()
     {}
-    ThingSetProperty(const T &value) : IdentifiableThingSetNode<id, parentId, name>(), ThingSetValue<T>(value)
+    ThingSetProperty(const T &value) : ThingSetValue<T>(value), IdentifiableThingSetNode<id, parentId, name>()
     {}
 
     auto &operator=(const T &value)
