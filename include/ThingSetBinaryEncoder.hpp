@@ -23,7 +23,7 @@ namespace ThingSet {
 class ThingSetBinaryEncoder
 {
 protected:
-    virtual zcbor_state_t *getState(const size_t expectedSize) = 0;
+    virtual zcbor_state_t *getState() = 0;
 
 public:
     virtual size_t getEncodedLength() = 0;
@@ -163,7 +163,7 @@ private:
     zcbor_state_t _state[depth];
 
 protected:
-    zcbor_state_t *getState(const size_t expectedSize) override
+    zcbor_state_t *getState() override
     {
         return _state;
     }
