@@ -169,6 +169,7 @@ bool ThingSetBinaryEncoder::encodeListStart()
 
 bool ThingSetBinaryEncoder::encodeListStart(uint32_t count)
 {
+    // TODO: this would be a massive overestimate if this is called with e.g. UINT8_MAX
     return zcbor_list_start_encode(this->getState((count + 1) * 5), count);
 }
 
