@@ -28,40 +28,43 @@ protected:
 public:
     virtual size_t getEncodedLength() = 0;
 
-    bool encode(const std::string_view &value);
-    bool encode(std::string_view &value);
-    bool encode(const std::string &value);
-    bool encode(std::string &value);
-    bool encode(const char *value);
-    bool encode(char *value);
-    bool encode(const float &value);
-    bool encode(float &value);
-    bool encode(const double &value);
-    bool encode(double &value);
-    bool encode(const bool &value);
-    bool encode(bool &value);
-    bool encode(const uint8_t &value);
-    bool encode(uint8_t &value);
-    bool encode(const uint16_t &value);
-    bool encode(uint16_t &value);
-    bool encode(const uint32_t &value);
-    bool encode(uint32_t &value);
-    bool encode(const uint64_t &value);
-    bool encode(uint64_t &value);
-    bool encode(const int8_t &value);
-    bool encode(int8_t &value);
-    bool encode(const int16_t &value);
-    bool encode(int16_t &value);
-    bool encode(const int32_t &value);
-    bool encode(int32_t &value);
-    bool encode(const int64_t &value);
-    bool encode(int64_t &value);
-    bool encodeNull();
-    bool encodeListStart();
-    bool encodeListStart(uint32_t count);
-    bool encodeListEnd();
-    bool encodeMapStart();
-    bool encodeMapEnd();
+    virtual bool encode(const std::string_view &value);
+    virtual bool encode(std::string_view &value);
+    virtual bool encode(const std::string &value);
+    virtual bool encode(std::string &value);
+    virtual bool encode(const char *value);
+    virtual bool encode(char *value);
+    virtual bool encode(const float &value);
+    virtual bool encode(float &value);
+    virtual bool encode(const double &value);
+    virtual bool encode(double &value);
+    virtual bool encode(const bool &value);
+    virtual bool encode(bool &value);
+    virtual bool encode(const uint8_t &value);
+    virtual bool encode(uint8_t &value);
+    virtual bool encode(const uint16_t &value);
+    virtual bool encode(uint16_t &value);
+    virtual bool encode(const uint32_t &value);
+    virtual bool encode(uint32_t &value);
+    virtual bool encode(const uint64_t &value);
+    virtual bool encode(uint64_t &value);
+    virtual bool encode(const int8_t &value);
+    virtual bool encode(int8_t &value);
+    virtual bool encode(const int16_t &value);
+    virtual bool encode(int16_t &value);
+    virtual bool encode(const int32_t &value);
+    virtual bool encode(int32_t &value);
+    virtual bool encode(const int64_t &value);
+    virtual bool encode(int64_t &value);
+    virtual bool encodeNull();
+    virtual bool encodeListStart();
+    virtual bool encodeListStart(uint32_t count);
+    virtual bool encodeListEnd();
+    virtual bool encodeListEnd(uint32_t count);
+    virtual bool encodeMapStart();
+    virtual bool encodeMapStart(uint32_t count);
+    virtual bool encodeMapEnd();
+    virtual bool encodeMapEnd(uint32_t count);
 
     template <typename K, typename V> bool encode(std::pair<K, V> &pair)
     {
@@ -70,7 +73,7 @@ public:
 
     template <typename T> bool encode(std::list<T> &value)
     {
-        if (!zcbor_list_start_encode(getState(), value.size())) {
+        if (!encodeListStart(value.size())) {
             return false;
         }
         for (T &item : value) {
@@ -78,12 +81,12 @@ public:
                 return false;
             }
         }
-        return zcbor_list_end_encode(getState(), value.size());
+        return encodeListStart(value.size());
     }
 
     template <typename K, typename V> bool encode(std::map<K, V> &map)
     {
-        if (!zcbor_map_start_encode(getState(), map.size())) {
+        if (!encodeMapStart(map.size())) {
             return false;
         }
         for (auto const &[key, value] : map) {
@@ -91,14 +94,14 @@ public:
                 return false;
             }
         }
-        return zcbor_map_end_encode(getState(), map.size());
+        return encodeMapEnd(map.size());
     }
 
     template <typename T> bool encode(T &value)
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
-        auto items = std::tuple_size_v<decltype(bound)>;
-        if (!zcbor_map_start_encode(getState(), items)) {
+        auto count = std::tuple_size_v<decltype(bound)>;
+        if (!encodeMapStart(count)) {
             return false;
         }
         for_each_element(bound, [this](auto &prop) {
@@ -106,7 +109,7 @@ public:
             encode(id);
             prop->encode(*this);
         });
-        return zcbor_map_end_encode(getState(), items);
+        return encodeMapEnd(count);
     }
 
     template <typename T, size_t size> bool encode(std::array<T, size> &value)
@@ -122,18 +125,17 @@ public:
     template <typename... TArgs> bool encodeList(TArgs... args)
     {
         const size_t count = sizeof...(TArgs);
-        return zcbor_list_start_encode(getState(), count) && encode_and_shift(this, args...)
-               && zcbor_list_end_encode(getState(), count);
+        return encodeListStart(count) && encode_and_shift(this, args...) && encodeListEnd(count);
     }
 
 private:
     template <typename T> bool encode(T *value, size_t size)
     {
-        bool result = zcbor_list_start_encode(getState(), size);
+        bool result = encodeListStart(size);
         for (size_t i = 0; i < size; i++) {
             result &= this->encode(value[i]);
         }
-        return result && zcbor_list_end_encode(getState(), size);
+        return result && encodeListEnd(size);
     }
 
     inline bool encode_and_shift(ThingSetBinaryEncoder *encoder)

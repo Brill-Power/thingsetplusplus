@@ -160,29 +160,44 @@ bool ThingSetBinaryEncoder::encodeNull()
     return zcbor_nil_put(this->getState(), NULL);
 }
 
-bool ThingSetBinaryEncoder::encodeListStart(uint32_t count)
-{
-    return zcbor_list_start_encode(this->getState(), count);
-}
-
 bool ThingSetBinaryEncoder::encodeListStart()
 {
     return encodeListStart(UINT8_MAX);
 }
 
+bool ThingSetBinaryEncoder::encodeListStart(uint32_t count)
+{
+    return zcbor_list_start_encode(this->getState(), count);
+}
+
 bool ThingSetBinaryEncoder::encodeListEnd()
 {
-    return zcbor_list_end_encode(this->getState(), UINT8_MAX);
+    return encodeListEnd(UINT8_MAX);
+}
+
+bool ThingSetBinaryEncoder::encodeListEnd(uint32_t count)
+{
+    return zcbor_list_end_encode(this->getState(), count);
 }
 
 bool ThingSetBinaryEncoder::encodeMapStart()
 {
-    return zcbor_map_start_encode(this->getState(), UINT8_MAX);
+    return encodeMapStart(UINT8_MAX);
+}
+
+bool ThingSetBinaryEncoder::encodeMapStart(uint32_t count)
+{
+    return zcbor_map_start_encode(this->getState(), count);
 }
 
 bool ThingSetBinaryEncoder::encodeMapEnd()
 {
-    return zcbor_map_end_encode(this->getState(), UINT8_MAX);
+    return encodeMapEnd(UINT8_MAX);
+}
+
+bool ThingSetBinaryEncoder::encodeMapEnd(uint32_t count)
+{
+    return zcbor_map_end_encode(this->getState(), count);
 }
 
 } // namespace ThingSet
