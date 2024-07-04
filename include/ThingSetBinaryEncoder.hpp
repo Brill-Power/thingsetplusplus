@@ -24,6 +24,7 @@ class ThingSetBinaryEncoder
 {
 protected:
     virtual zcbor_state_t *getState() = 0;
+    const virtual bool getIsForwardOnly() const;
 
 public:
     virtual size_t getEncodedLength() = 0;
@@ -81,7 +82,7 @@ public:
                 return false;
             }
         }
-        return encodeListStart(value.size());
+        return encodeListEnd(value.size());
     }
 
     template <typename K, typename V> bool encode(std::map<K, V> &map)
