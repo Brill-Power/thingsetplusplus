@@ -7,6 +7,8 @@
 
 namespace ThingSet {
 
+static bool encodeListMapEnd(zcbor_state_t *state);
+
 const bool ThingSetBinaryEncoder::getIsForwardOnly() const
 {
     return false;
@@ -183,7 +185,7 @@ bool ThingSetBinaryEncoder::encodeListEnd()
 bool ThingSetBinaryEncoder::encodeListEnd(uint32_t count)
 {
     if (this->getIsForwardOnly()) {
-        return zcbor_list_map_end_force_encode(this->getState());
+        return encodeListMapEnd(this->getState());
     }
     else {
         return zcbor_list_end_encode(this->getState(), count);
@@ -192,32 +194,44 @@ bool ThingSetBinaryEncoder::encodeListEnd(uint32_t count)
 
 bool ThingSetBinaryEncoder::encodeMapStart()
 {
-    return zcbor_map_start_encode(this->getState(), UINT8_MAX);
+    return encodeMapStart(UINT8_MAX);
 }
 
 bool ThingSetBinaryEncoder::encodeMapStart(uint32_t count)
 {
-    return zcbor_map_start_encode(this->getState(), count * 2);
+    return zcbor_map_start_encode(this->getState(), count);
 }
 
 bool ThingSetBinaryEncoder::encodeMapEnd()
 {
-    if (this->getIsForwardOnly()) {
-        return zcbor_list_map_end_force_encode(this->getState());
-    }
-    else {
-        return zcbor_map_end_encode(this->getState(), UINT8_MAX);
-    }
+    return encodeMapEnd(UINT8_MAX);
 }
 
 bool ThingSetBinaryEncoder::encodeMapEnd(uint32_t count)
 {
     if (this->getIsForwardOnly()) {
-        return zcbor_list_map_end_force_encode(this->getState());
+        return encodeListMapEnd(this->getState());
     }
     else {
-        return zcbor_map_end_encode(this->getState(), count * 2);
+        return zcbor_map_end_encode(this->getState(), count);
     }
+}
+
+/// @brief End a list or map without going back and rewriting the header. Useful in forward-only encoding scenarios.
+/// @param state The encoder state array.
+/// @return True.
+static bool encodeListMapEnd(zcbor_state_t *state)
+{
+    // zcbor_list_map_end_force_encode is broken; it resets the pointer
+    // back to where the list started, rendering it pointless, so we reimplement
+    // it here, passing in the necessary TRANSFER_PAYLOAD flag to make it behave
+    // properly
+    if (!zcbor_process_backup(state, ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME | ZCBOR_FLAG_TRANSFER_PAYLOAD,
+                              ZCBOR_MAX_ELEM_COUNT))
+    {
+        ZCBOR_FAIL();
+    }
+    return true;
 }
 
 } // namespace ThingSet
