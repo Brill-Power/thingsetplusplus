@@ -116,6 +116,22 @@ bool ThingSetBinaryDecoder::decodeNull()
     return zcbor_nil_expect(this->getState(), NULL);
 }
 
+bool ThingSetBinaryDecoder::decodeList(std::function<bool(size_t)> callback)
+{
+    if (!zcbor_list_start_decode(getState())) {
+        return false;
+    }
+
+    size_t index = 0;
+    while (getState()->elem_count != 0) {
+        if (!callback(index++)) {
+            return false;
+        }
+    }
+
+    return zcbor_list_end_decode(getState());
+}
+
 zcbor_major_type_t ThingSetBinaryDecoder::peekType()
 {
     zcbor_major_type_t type = ZCBOR_MAJOR_TYPE(this->getState()->payload[0]);

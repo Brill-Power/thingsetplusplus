@@ -51,6 +51,13 @@ public:
     bool decode(int32_t *value);
     bool decode(int64_t *value);
     bool decodeNull();
+    /// @brief Decodes a list by iterating over its elements and invoking a callback
+    /// with the index of each element. The callback should decode the element.
+    /// @param callback The callback to be invoked for each element. The parameter is the
+    /// index of the current element. The callback should decode the value and return true
+    /// if successful, otherwise false.
+    /// @return True if decoding succeeded, otherwise false.
+    bool decodeList(std::function<bool(size_t)> callback);
 
     zcbor_major_type_t peekType();
     bool skip();
@@ -78,25 +85,6 @@ public:
         }
 
         return zcbor_map_end_decode(getState());
-    }
-
-    template <typename T> bool decodeList(std::function<bool(T &)> callback)
-    {
-        if (!zcbor_list_start_decode(getState())) {
-            return false;
-        }
-
-        while (getState()->elem_count != 0) {
-            T element;
-            if (!decode(&element)) {
-                return false;
-            }
-            if (!callback(element)) {
-                return false;
-            }
-        }
-
-        return zcbor_list_end_decode(getState());
     }
 
     template <typename T, size_t size> bool decode(std::array<T, size> *value)

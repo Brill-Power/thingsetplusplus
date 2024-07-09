@@ -90,9 +90,13 @@ std::pair<uint8_t *, size_t> ThingSetServer::requestCallback(uint8_t *buffer, si
                 }
             }
             else if (decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && encoder.encodeListStart()) {
-                if (decoder.decodeList<unsigned>([node, &encoder](unsigned &i) {
+                if (decoder.decodeList([node, &decoder, &encoder](size_t index) {
+                        unsigned id;
+                        if (!decoder.decode(&id)) {
+                            return false;
+                        }
                         ThingSetNode *n;
-                        return ThingSetRegistry::findById(i, &n) && node == ThingSetRegistry::getMetadataNode()
+                        return ThingSetRegistry::findById(id, &n) && node == ThingSetRegistry::getMetadataNode()
                                && encoder.encodeMapStart() && encoder.encode("name") && encoder.encode(n->getName())
                                && encoder.encode("type") && encoder.encode(n->getType()) && encoder.encodeMapEnd();
                     })
