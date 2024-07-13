@@ -87,11 +87,21 @@ public:
         return zcbor_map_end_decode(getState());
     }
 
+    /// @brief Decode a list into an array.
+    /// @tparam T The type of items in the array.
+    /// @tparam size The length of the array.
+    /// @param value A pointer to the array into which list elements should be decoded.
+    /// @return True if decoding succeeded, otherwise false.
     template <typename T, size_t size> bool decode(std::array<T, size> *value)
     {
         return decode(value->data(), value->size());
     }
 
+    /// @brief Decode a list into an array of the specified length.
+    /// @tparam T The type of items in the array.
+    /// @param value A pointer to the start of the array into which list elements should be decoded.
+    /// @param size The length of the array.
+    /// @return True if decoding succeeded, otherwise false.
     template <typename T> bool decode(T *value, size_t size)
     {
         if (!zcbor_list_start_decode(getState())) {
@@ -112,6 +122,10 @@ public:
         return zcbor_list_end_decode(getState());
     }
 
+    /// @brief Decode a map into a pointer to a class or structure.
+    /// @tparam T The type of the class or structure to be decoded.
+    /// @param value A pointer to the class or structure.
+    /// @return True if decoding succeeded, otherwise false.
     template <typename T> bool decode(T *value)
     {
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
@@ -134,6 +148,7 @@ private:
     static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id,
                                                                                  std::index_sequence<Is...>)
     {
+        // TODO: does not handle missing case properly
         std::function<bool(ThingSetBinaryDecoder &, Fields &)> ret;
         std::initializer_list<std::function<bool(ThingSetBinaryDecoder &, Fields &)>>(
             { ((id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id)

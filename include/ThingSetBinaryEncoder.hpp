@@ -64,20 +64,49 @@ public:
     bool encode(int64_t &value);
     bool encode(int64_t *value);
     bool encodeNull();
+    /// @brief Encode the start of a list. In forward-only encoding scenarios, you should
+    /// use the overload which allows the number of elements in the list to be specified in
+    /// advance.
+    /// @return True if encoding succeeded, otherwise false.
     bool encodeListStart();
+    /// @brief Encode the start of a list, specifying the number of elements the list
+    /// will contain.
+    /// @param count The number of elements in the list.
+    /// @return True if encoding succeeded, otherwise false.
     bool encodeListStart(uint32_t count);
     bool encodeListEnd();
+    /// @brief Encode the end of a list, specifying the number of elements the list
+    /// contained. It should match the number passed to @ref encodeListStart.
+    /// @param count The number of elements in the list.
+    /// @return True if encoding succeeded, otherwise false.
     bool encodeListEnd(uint32_t count);
     bool encodeMapStart();
+    /// @brief Encode the start of a map, specifying the number of key-value pairs the map
+    /// will contain.
+    /// @param count The number of pairs in the map.
+    /// @return True if encoding succeeded, otherwise false.
     bool encodeMapStart(uint32_t count);
     bool encodeMapEnd();
+    /// @brief Encode the end of a map, specifying the number of key-value pairs the map
+    /// contained. It should match the number passed to @ref encodeMapStart.
+    /// @param count The number of pairs in the map.
+    /// @return True if encoding succeeded, otherwise false.
     bool encodeMapEnd(uint32_t count);
 
+    /// @brief Encode a pair. This is probably most useful inside a map.
+    /// @tparam K The type of the first value in the pair.
+    /// @tparam V The type of the second value in the pair.
+    /// @param pair A reference to the pair to be encoded.
+    /// @return True if encoding succeeded, otherwise false.
     template <typename K, typename V> bool encode(std::pair<K, V> &pair)
     {
         return encode(pair.first) && encode(pair.second);
     }
 
+    /// @brief Encode a linked list.
+    /// @tparam T The type of items in the list.
+    /// @param value A reference to the list to be encoded.
+    /// @return True if encoding succeeded, otherwise false.
     template <typename T> bool encode(std::list<T> &value)
     {
         if (!encodeListStart(value.size())) {
@@ -91,6 +120,11 @@ public:
         return encodeListEnd(value.size());
     }
 
+    /// @brief Encode a map.
+    /// @tparam K The type of the keys in the map.
+    /// @tparam V The type of the values in the map.
+    /// @param map A reference to the map to be encoded.
+    /// @return True if encoding succeeded, otherwise false.
     template <typename K, typename V> bool encode(std::map<K, V> &map)
     {
         if (!encodeMapStart(map.size())) {
@@ -104,6 +138,10 @@ public:
         return encodeMapEnd(map.size());
     }
 
+    /// @brief Encode an object (structure or class) as a map.
+    /// @tparam T The type to encode.
+    /// @param value A reference to the value to be encoded.
+    /// @return True if encoding succeeded, otherwise false.
     template <typename T> bool encode(T &value)
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
@@ -119,6 +157,11 @@ public:
         return encodeMapEnd(count);
     }
 
+    /// @brief Encode an array as a list.
+    /// @tparam T The type of elements in the array.
+    /// @tparam size The size of the array.
+    /// @param value A reference to the array to be encoded.
+    /// @return True if encoding succeeded, otherwise false.
     template <typename T, size_t size> bool encode(std::array<T, size> &value)
     {
         return this->encode(value.data(), value.size());
@@ -132,7 +175,7 @@ public:
     template <typename... TArgs> bool encodeList(TArgs... args)
     {
         const size_t count = sizeof...(TArgs);
-        return encodeListStart(count) && encode_and_shift(this, args...) && encodeListEnd(count);
+        return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
     }
 
     template <typename T> bool encode(T *value, size_t size)
@@ -145,14 +188,14 @@ public:
     }
 
 private:
-    inline bool encode_and_shift(ThingSetBinaryEncoder *encoder)
+    inline bool encodeAndShift()
     {
         return true;
     }
 
-    template <typename T, typename... TArgs> bool encode_and_shift(ThingSetBinaryEncoder *encoder, T arg, TArgs... rest)
+    template <typename T, typename... TArgs> bool encodeAndShift(T arg, TArgs... rest)
     {
-        return encoder->encode(arg) && encode_and_shift(encoder, rest...);
+        return encode(arg) && encodeAndShift(rest...);
     }
 
     template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)
