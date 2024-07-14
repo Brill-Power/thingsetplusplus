@@ -180,12 +180,15 @@ protected:
     }
 
 public:
-    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size) : _buffer(buffer)
+    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size) : FixedSizeThingSetBinaryDecoder(buffer, size, 1)
+    {}
+
+    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount) : _buffer(buffer)
     {
 #ifdef zcbor_tstr_expect_term
-        zcbor_new_decode_state(_state, depth, buffer, size, 1);
+        zcbor_new_decode_state(_state, depth, buffer, size, elementCount);
 #else
-        zcbor_new_decode_state(_state, depth, buffer, size, 1, NULL, 0);
+        zcbor_new_decode_state(_state, depth, buffer, size, elementCount, NULL, 0);
         _state->constant_state->enforce_canonical = false;
 #endif
     }
