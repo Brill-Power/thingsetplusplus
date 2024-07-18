@@ -41,6 +41,20 @@ TEST(BinaryEncoder, EncodeString)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
+TEST(BinaryEncoder, EncodeMap)
+{
+    SETUP(128)
+    ASSERT_TRUE(encoder.encodeMapStart(2));
+    ASSERT_TRUE(encoder.encode(0x01));
+    ASSERT_TRUE(encoder.encode("hello"));
+    ASSERT_TRUE(encoder.encode(0x02));
+    std::array<uint32_t, 3> i32 = { { 1, 2, 3 } };
+    ASSERT_TRUE(encoder.encode(i32));
+    ASSERT_TRUE(encoder.encodeMapEnd(2));
+    uint8_t expected[] = { 0xA2, 0x01, 0x65, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x02, 0x83, 0x01, 0x02, 0x03 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
 TEST(BinaryEncoder, EncodeBag)
 {
     SETUP(128)

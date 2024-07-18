@@ -21,8 +21,8 @@ std::pair<uint8_t *, size_t> ThingSetServer::requestCallback(uint8_t *buffer, si
 {
     uint8_t error[1];
     uint8_t response[1024];
-    FixedSizeThingSetBinaryEncoder encoder(response + 1, 1024 - 1);
-    FixedSizeThingSetBinaryDecoder decoder(buffer + 1, len - 1);
+    FixedSizeThingSetBinaryEncoder encoder(response + 1, sizeof(buffer) - 1);
+    FixedSizeThingSetBinaryDecoder decoder(buffer + 1, len - 1, 2);
     std::string path;
     uint16_t id;
     bool useIds = false;
@@ -45,9 +45,6 @@ std::pair<uint8_t *, size_t> ThingSetServer::requestCallback(uint8_t *buffer, si
         error[0] = THINGSET_ERR_BAD_REQUEST;
         return std::make_pair(error, 1);
     }
-    // reinitialise; this is rather ugly, but mimics the C original for now
-    decoder =
-        FixedSizeThingSetBinaryDecoder(buffer + 1 + decoder.getDecodedLength(), len - 1 - decoder.getDecodedLength());
     switch (buffer[0]) {
         case THINGSET_BIN_GET: {
             response[0] = THINGSET_STATUS_CONTENT;
