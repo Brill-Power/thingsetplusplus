@@ -20,12 +20,12 @@ template <unsigned id_, unsigned parentId_, StringLiteral name> class Identifiab
 public:
     constexpr IdentifiableThingSetNode() : ThingSetNode()
     {
-        ThingSetRegistry::getInstance().registerNode(this);
+        ThingSetRegistry::registerNode(this);
     }
 
     ~IdentifiableThingSetNode()
     {
-        ThingSetRegistry::getInstance().unregisterNode(this);
+        ThingSetRegistry::unregisterNode(this);
     }
 
     constexpr const std::string_view getName() const override

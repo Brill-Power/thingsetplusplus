@@ -19,6 +19,7 @@ namespace ThingSet {
 typedef std::list<ThingSetNode *> NodeList;
 typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
 
+/// @brief Repository of all current ThingSet nodes.
 class ThingSetRegistry
 {
 private:
@@ -101,12 +102,18 @@ public:
 
     static ThingSetNode *getMetadataNode();
 
-    static ThingSetRegistry &getInstance();
-
     static void registerNode(ThingSetNode *node);
     static void unregisterNode(ThingSetNode *node);
 
+    /// @brief Find a node by its fully-qualified name.
+    /// @param name The full string path of the node that is sought.
+    /// @param node When the method returns, contains a pointer to the node if it was found.
+    /// @return True if the node was found, otherwise false.
     static bool findByName(const std::string &name, ThingSetNode **node);
+    /// @brief Find a node by its integer ID.
+    /// @param id The integer ID of the node that is sought.
+    /// @param node When the method returns, contains a pointer to the node if it was found.
+    /// @return True if the node was found, otherwise false.
     static bool findById(unsigned id, ThingSetNode **node);
     static bool findContainerById(unsigned id, ThingSetParentNode **parent);
 
@@ -114,6 +121,8 @@ public:
     FlatteningIterator<NodeMap::iterator> end();
 
 private:
+    static ThingSetRegistry &getInstance();
+
     static void registerOrUnregisterNode(ThingSetNode *node,
                                          std::function<void(NodeList &, ThingSetNode *)> nodeListAction,
                                          std::function<bool(ThingSetParentNode *, ThingSetNode *)> parentNodeAction);
