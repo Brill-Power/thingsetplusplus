@@ -23,14 +23,14 @@ public:
 
     asio::io_context &getContext();
 
-    bool listen(std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback) override;
+    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 
     bool publish(uint8_t *buffer, size_t len) override;
 
 private:
     asio::awaitable<void> handle(asio::ip::tcp::socket socket,
-                                 std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback);
-    asio::awaitable<void> listener(std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback);
+                                 std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback);
+    asio::awaitable<void> listener(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback);
 };
 
 } // namespace ThingSet

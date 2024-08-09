@@ -16,7 +16,7 @@ class ThingSetServer
 private:
     ThingSetServerTransport &_transport;
 
-    std::pair<uint8_t *, size_t> requestCallback(uint8_t *buffer, size_t len);
+    int requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
 
 public:
     ThingSetServer(ThingSetServerTransport &transport);

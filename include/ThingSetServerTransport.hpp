@@ -14,7 +14,7 @@ namespace ThingSet {
 class ThingSetServerTransport
 {
 public:
-    virtual bool listen(std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback) = 0;
+    virtual bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
 
     virtual bool publish(uint8_t *buffer, size_t len) = 0;
 };

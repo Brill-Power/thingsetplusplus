@@ -33,18 +33,19 @@ asio::io_context &ThingSetAsyncSocketServerTransport::getContext()
 
 awaitable<void>
 ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket socket,
-                                           std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
+                                           std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
-    char data[1024];
+    char request[1024];
+    char response[1024];
     for (;;) {
-        std::size_t n = co_await socket.async_read_some(asio::buffer(data), use_awaitable);
-        auto [response, responseLength] = callback((uint8_t *)data, n);
+        std::size_t n = co_await socket.async_read_some(asio::buffer(request), use_awaitable);
+        auto responseLength = callback((uint8_t *)request, n, (uint8_t *)response, sizeof(response));
         co_await async_write(socket, asio::buffer(response, responseLength), use_awaitable);
     }
 }
 
 awaitable<void>
-ThingSetAsyncSocketServerTransport::listener(std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
+ThingSetAsyncSocketServerTransport::listener(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     auto executor = co_await asio::this_coro::executor;
     tcp::acceptor acceptor(executor, { tcp::v4(), 9001 });
@@ -61,7 +62,7 @@ ThingSetAsyncSocketServerTransport::listener(std::function<std::pair<uint8_t *, 
     }
 }
 
-bool ThingSetAsyncSocketServerTransport::listen(std::function<std::pair<uint8_t *, size_t>(uint8_t *, size_t)> callback)
+bool ThingSetAsyncSocketServerTransport::listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     asio::signal_set signals(_ioContext, SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto) { _ioContext.stop(); });
