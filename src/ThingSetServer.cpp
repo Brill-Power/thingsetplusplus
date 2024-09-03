@@ -48,7 +48,7 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             response[0] = THINGSET_STATUS_CONTENT;
             encoder.encodeNull();
             if (node->getNodeType() == ThingSetNodeType::Value) {
-                ThingSetBinaryEncodable *encodable = (ThingSetBinaryEncodable *)node;
+                ThingSetBinaryEncodable *encodable = dynamic_cast<ThingSetBinaryEncodable *>(node);
                 if (encodable->encode(encoder)) {
                     return encoder.getEncodedLength() + 1;
                 }
@@ -62,7 +62,7 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             if (decoder.decodeNull()) {
                 // expect that this is a group
                 if (node->getNodeType() == ThingSetNodeType::Group) {
-                    ThingSetParentNode *parent = (ThingSetParentNode *)node;
+                    ThingSetParentNode *parent = dynamic_cast<ThingSetParentNode *>(node);
                     if (useIds) {
                         std::list<unsigned> ids;
                         for (ThingSetNode *child : *parent) {

@@ -21,7 +21,7 @@ using asio::use_awaitable;
 using asio::ip::tcp;
 using asio::ip::udp;
 
-namespace ThingSet {
+namespace ThingSet::Async {
 
 ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport() : _ioContext(1), _publishSocket(_ioContext)
 {}
@@ -83,4 +83,4 @@ bool ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size_t len)
     return false;
 }
 
-} // namespace ThingSet
+} // namespace ThingSet::Async

@@ -10,7 +10,7 @@
 #include <asio/ip/tcp.hpp>
 #include <asio/ip/udp.hpp>
 
-namespace ThingSet {
+namespace ThingSet::Async {
 
 class ThingSetAsyncSocketServerTransport : public ThingSetServerTransport
 {
@@ -33,4 +33,4 @@ private:
     asio::awaitable<void> listener(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback);
 };
 
-} // namespace ThingSet
+} // namespace ThingSet::Async

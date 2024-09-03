@@ -14,7 +14,7 @@ using asio::co_spawn;
 using asio::detached;
 using asio::use_awaitable;
 
-namespace ThingSet {
+namespace ThingSet::Async {
 
 ThingSetAsyncSocketClientTransport::ThingSetAsyncSocketClientTransport(asio::ip::tcp::endpoint &endpoint)
     : _ioContext(1), _requestResponseSocket(_ioContext), _subscribeSocket(_ioContext), _endpoint(endpoint)
@@ -83,4 +83,4 @@ void ThingSetAsyncSocketClientTransport::subscribe(std::function<void(uint8_t *,
     }
     co_spawn(_ioContext, listener(callback), detached);
 }
-} // namespace ThingSet
+} // namespace ThingSet::Async
