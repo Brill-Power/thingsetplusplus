@@ -18,4 +18,5 @@ include_directories(include)
 
 set(ENABLE_CLIENT ON)
 set(ENABLE_SERVER ON)
+set(ENABLE_SOCKETCAN ON)
 add_subdirectory(src)

@@ -36,6 +36,22 @@
             },
         },
         {
+            "label": "Build Example CAN Server (Debug)",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "\"cmake -DCMAKE_BUILD_TYPE=Debug -B build . && cd build && make\""
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/examples/canserver"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+        {
             "label": "Build Example Client (Debug)",
             "type": "shell",
             "command": "/bin/bash",

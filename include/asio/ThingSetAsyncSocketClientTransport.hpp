@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace ThingSet {
+namespace ThingSet::Async {
 
 class ThingSetAsyncSocketClientTransport : public ThingSetClientTransport
 {
@@ -37,4 +37,4 @@ private:
     asio::awaitable<void> listener(std::function<void(uint8_t *, size_t)> callback);
 };
 
-} // namespace ThingSet
+} // namespace ThingSet::Async

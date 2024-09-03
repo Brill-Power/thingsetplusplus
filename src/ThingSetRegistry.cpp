@@ -5,10 +5,8 @@
  */
 
 #include "ThingSetRegistry.hpp"
+#include "internal/logging.hpp"
 #include <ThingSetParentNode.hpp>
-#ifdef DEBUG_LOGGING
-#include <iostream>
-#endif
 
 namespace ThingSet {
 
@@ -45,18 +43,14 @@ void ThingSetRegistry::registerOrUnregisterNode(
 
 void ThingSetRegistry::registerNode(ThingSetNode *node)
 {
-#ifdef DEBUG_LOGGING
-    std::cout << "Registering node " << node->getName() << " (" << node->getId() << ")" << std::endl;
-#endif
+    LOG_DBG("Registering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::registerOrUnregisterNode(
         node, [](auto &l, auto *n) { l.push_back(n); }, [](auto *p, auto *n) { return p->addChild(n); });
 }
 
 void ThingSetRegistry::unregisterNode(ThingSetNode *node)
 {
-#ifdef DEBUG_LOGGING
-    std::cout << "Unregistering node " << node->getName() << " (" << node->getId() << ")" << std::endl;
-#endif
+    LOG_DBG("Unregistering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::registerOrUnregisterNode(
         node, [](auto &l, auto *n) { l.remove(n); }, [](auto *p, auto *n) { return p->removeChild(n); });
 }
@@ -65,7 +59,8 @@ bool ThingSetRegistry::findContainerById(unsigned id, ThingSetParentNode **paren
 {
     ThingSetNode *node;
     if (findById(id, &node) && node->getNodeType() == ThingSetNodeType::Group) {
-        *parent = (ThingSetParentNode *)node;
+        *parent = dynamic_cast<ThingSetParentNode *>(node);
+        return true;
     }
 
     return false;
@@ -86,7 +81,7 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
         if ((*node)->getNodeType() != ThingSetNodeType::Group) {
             break;
         }
-        auto *parent = (ThingSetParentNode *)*node;
+        auto *parent = dynamic_cast<ThingSetParentNode *>(*node);
         for (ThingSetNode *child : *parent) {
             if (child->getName() == token) {
                 pos += index;

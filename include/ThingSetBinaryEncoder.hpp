@@ -27,7 +27,7 @@ protected:
     const virtual bool getIsForwardOnly() const;
 
 public:
-    virtual size_t getEncodedLength() = 0;
+    virtual size_t getEncodedLength() const = 0;
 
     bool encode(const std::string_view &value);
     bool encode(std::string_view &value);
@@ -224,7 +224,7 @@ public:
         zcbor_new_encode_state(_state, depth, buffer, size, 1);
     }
 
-    size_t getEncodedLength() override
+    size_t getEncodedLength() const override
     {
         return _state->payload - _buffer;
     }

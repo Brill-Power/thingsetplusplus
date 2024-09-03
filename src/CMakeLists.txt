@@ -1,10 +1,11 @@
-target_sources(thingset++ PRIVATE ThingSetBinaryDecoder.cpp)
-target_sources(thingset++ PRIVATE ThingSetBinaryEncoder.cpp)
+target_sources(thingset++ PRIVATE Eui.cpp
+    ThingSetBinaryDecoder.cpp
+    ThingSetBinaryEncoder.cpp)
 
 if(ENABLE_SERVER)
-    target_sources(thingset++ PRIVATE ThingSetParentNode.cpp)
-    target_sources(thingset++ PRIVATE ThingSetRegistry.cpp)
-    target_sources(thingset++ PRIVATE ThingSetServer.cpp)
+    target_sources(thingset++ PRIVATE ThingSetParentNode.cpp
+        ThingSetRegistry.cpp
+        ThingSetServer.cpp)
 endif()
 
 if(ENABLE_CLIENT)
@@ -12,6 +13,11 @@ if(ENABLE_CLIENT)
 endif()
 
 if(ENABLE_ASIO)
-    target_sources(thingset++ PRIVATE asio/ThingSetAsyncSocketServerTransport.cpp)
-    target_sources(thingset++ PRIVATE asio/ThingSetAsyncSocketClientTransport.cpp)
+    target_sources(thingset++ PRIVATE asio/ThingSetAsyncSocketServerTransport.cpp
+        asio/ThingSetAsyncSocketClientTransport.cpp)
+endif()
+
+if(ENABLE_SOCKETCAN)
+    add_subdirectory(can)
+    add_subdirectory(socketcan)
 endif()

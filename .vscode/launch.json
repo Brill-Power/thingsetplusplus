@@ -25,6 +25,16 @@
             "preLaunchTask": "Build Example Server (Debug)"
         },
         {
+            "name": "Debug Sample CAN Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/examples/canserver/build/canserver",
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            //"preLaunchTask": "Build Example CAN Server (Debug)"
+        },
+        {
             "name": "Debug Sample Client",
             "type": "cppdbg",
             "request": "launch",
