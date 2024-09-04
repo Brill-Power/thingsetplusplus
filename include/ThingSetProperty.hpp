@@ -9,7 +9,6 @@
 #include "StringLiteral.hpp"
 #include "ThingSetType.hpp"
 #include "ThingSetValue.hpp"
-#include <array>
 
 namespace ThingSet {
 

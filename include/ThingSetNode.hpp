@@ -13,6 +13,7 @@ enum ThingSetNodeType
 {
     Value,
     Group,
+    Record,
 };
 
 class ThingSetNode

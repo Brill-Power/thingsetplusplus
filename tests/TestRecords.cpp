@@ -1,5 +1,6 @@
+#include "ThingSet.hpp"
+#include "ThingSetRecordCollection.hpp"
 #include "gtest/gtest.h"
-#include <ThingSet.hpp>
 
 using namespace ThingSet;
 
@@ -81,4 +82,15 @@ TEST(Records, SimpleRecord)
     ASSERT_EQ(moduleRecords[1].current.getValue(), newModuleRecords[1].current.getValue());
     ASSERT_EQ(moduleRecords[0].supercells.getValue()[0].soc.getValue(),
               newModuleRecords[0].supercells.getValue()[0].soc.getValue());
+
+    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 1> records = { (ModuleRecord){
+        .voltage = 24.0f,
+        .current = 10.0f,
+        .error = 0,
+    } };
+
+    ASSERT_EQ(24.0f, records[0].voltage.getValue());
+    uint8_t boffer[512];
+    FixedSizeThingSetBinaryEncoder encodah(boffer, sizeof(boffer));
+    records.encode(encodah);
 }
