@@ -19,5 +19,4 @@ endif()
 
 if(ENABLE_SOCKETCAN)
     add_subdirectory(can)
-    add_subdirectory(socketcan)
 endif()
