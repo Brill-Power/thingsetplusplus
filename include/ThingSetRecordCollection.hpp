@@ -16,6 +16,12 @@ template <unsigned id, unsigned parentId, StringLiteral name, typename Element, 
 class ThingSetRecordCollection : public ThingSetValue<Collection>, public IdentifiableThingSetNode<id, parentId, name>
 {
 public:
+    ThingSetRecordCollection()
+    {}
+
+    ThingSetRecordCollection(Collection &source) : ThingSetValue<Collection>(source)
+    {}
+
     const std::string getType() const override
     {
         return ThingSetType<Element>::name;
@@ -34,7 +40,8 @@ public:
     ThingSetRecordArray()
     {}
 
-    ThingSetRecordArray(std::array<Element, size> &source) : ThingSetValue<std::array<Element, size>>(source)
+    ThingSetRecordArray(std::array<Element, size> &source)
+        : ThingSetRecordCollection<id, parentId, name, Element, std::array<Element, size>>(source)
     {}
 
     template <typename... Elements> ThingSetRecordArray(Elements... args)
