@@ -22,6 +22,9 @@ public:
     ThingSetRecordCollection(Collection &source) : ThingSetValue<Collection>(source)
     {}
 
+    ThingSetRecordCollection(const Collection &source) : ThingSetValue<Collection>(source)
+    {}
+
     const std::string getType() const override
     {
         return ThingSetType<Element>::name;
@@ -44,24 +47,15 @@ public:
         : ThingSetRecordCollection<id, parentId, name, Element, std::array<Element, size>>(source)
     {}
 
-    template <typename... Elements> ThingSetRecordArray(Elements... args)
-    {
-        initialiseArray(args...);
-    }
+    template <typename... Elements>
+    ThingSetRecordArray(Elements... args)
+        : ThingSetRecordCollection<id, parentId, name, Element, std::array<Element, size>>(
+            std::array<Element, size>{ args... })
+    {}
 
     Element &operator[](int index)
     {
         return this->_value[index];
-    }
-
-private:
-    void initialiseArray()
-    {}
-    template <typename... Elements> void initialiseArray(Element arg, Elements... remainder)
-    {
-        const size_t index = size - (sizeof...(Elements) + 1);
-        this->_value[index] = arg;
-        initialiseArray(remainder...);
     }
 };
 
