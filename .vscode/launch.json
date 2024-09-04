@@ -11,7 +11,12 @@
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/tests/build/testapp",
             "stopAtEntry": false,
-            "MIMode": "lldb",
+            "linux": {
+                "MIMode": "gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
             "preLaunchTask": "Build Tests (Debug)"
         },
         {
@@ -21,7 +26,12 @@
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/examples/server/build/server",
             "stopAtEntry": false,
-            "MIMode": "lldb",
+            "linux": {
+                "MIMode": "gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
             "preLaunchTask": "Build Example Server (Debug)"
         },
         {
@@ -41,7 +51,12 @@
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/examples/client/build/client",
             "stopAtEntry": false,
-            "MIMode": "lldb",
+            "linux": {
+                "MIMode": "gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
             "preLaunchTask": "Build Example Client (Debug)"
         }
     ]
