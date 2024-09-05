@@ -113,26 +113,6 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
                     return encoder.getEncodedLength();
                 }
             }
-            //  && decoder.decodeListStart()) {
-            //     ThingSetParentNode *parent = dynamic_cast<ThingSetParentNode *>(node);
-            //     for (ThingSetNode *parameter : *parent) {
-            //         if (parameter->getNodeType() == ThingSetNodeType::parameter) {
-            //             ThingSetBinaryDecodable *decodable = dynamic_cast<ThingSetBinaryDecodable *>(parameter);
-            //             if (!decodable->decode(decoder)) {
-            //                 response[0] = THINGSET_ERR_BAD_REQUEST;
-            //                 return 1;
-            //             }
-            //         }
-            //         else {
-            //             // the child node of a function should be a parameter; if it is not
-            //             // something has gone quite wrong
-            //             response[0] = THINGSET_ERR_INTERNAL_SERVER_ERR;
-            //             return 1;
-            //         }
-            //     }
-            //     if (decoder.decodeListEnd()) {
-            //     }
-            // }
             response[0] = THINGSET_ERR_BAD_REQUEST;
             return 1;
         }
