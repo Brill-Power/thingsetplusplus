@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Proprietary
  */
 
+#ifdef __linux__
+
 #include "Eui.hpp"
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
@@ -53,3 +55,5 @@ std::array<uint8_t, 8> Eui::getValue()
     return getInstance().value;
 }
 } // namespace ThingSet
+
+#endif

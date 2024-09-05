@@ -13,7 +13,9 @@
 namespace ThingSet {
 
 template <unsigned id, unsigned parentId, StringLiteral name, typename Element, typename Collection>
-class ThingSetRecordCollection : public ThingSetValue<Collection>, public IdentifiableThingSetNode<id, parentId, name>
+class ThingSetRecordCollection : public ThingSetValue<Collection>,
+                                 public IdentifiableThingSetNode<id, parentId, name>,
+                                 public ThingSetParentNode
 {
 public:
     ThingSetRecordCollection()
@@ -32,7 +34,7 @@ public:
 
     constexpr const ThingSetNodeType getNodeType() const override
     {
-        return ThingSetNodeType::Record;
+        return ThingSetNodeType::record;
     }
 };
 

@@ -23,7 +23,7 @@ public:
 
     constexpr const ThingSetNodeType getNodeType() const override
     {
-        return ThingSetNodeType::Group;
+        return ThingSetNodeType::group;
     }
 };
 

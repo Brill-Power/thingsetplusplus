@@ -116,9 +116,19 @@ bool ThingSetBinaryDecoder::decodeNull()
     return zcbor_nil_expect(this->getState(), NULL);
 }
 
+bool ThingSetBinaryDecoder::decodeListStart()
+{
+    return zcbor_list_start_decode(getState());
+}
+
+bool ThingSetBinaryDecoder::decodeListEnd()
+{
+    return zcbor_list_end_decode(getState());
+}
+
 bool ThingSetBinaryDecoder::decodeList(std::function<bool(size_t)> callback)
 {
-    if (!zcbor_list_start_decode(getState())) {
+    if (!decodeListStart()) {
         return false;
     }
 
@@ -129,7 +139,7 @@ bool ThingSetBinaryDecoder::decodeList(std::function<bool(size_t)> callback)
         }
     }
 
-    return zcbor_list_end_decode(getState());
+    return decodeListEnd();
 }
 
 zcbor_major_type_t ThingSetBinaryDecoder::peekType()

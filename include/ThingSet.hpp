@@ -4,5 +4,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
+#include "ThingSetFunction.hpp"
 #include "ThingSetGroup.hpp"
+#include "ThingSetParameter.hpp"
 #include "ThingSetProperty.hpp"

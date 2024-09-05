@@ -47,7 +47,7 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
         case THINGSET_BIN_GET: {
             response[0] = THINGSET_STATUS_CONTENT;
             encoder.encodeNull();
-            if (node->getNodeType() == ThingSetNodeType::Value) {
+            if (node->getNodeType() == ThingSetNodeType::value) {
                 ThingSetBinaryEncodable *encodable = dynamic_cast<ThingSetBinaryEncodable *>(node);
                 if (encodable->encode(encoder)) {
                     return encoder.getEncodedLength() + 1;
@@ -61,7 +61,7 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             encoder.encodeNull();
             if (decoder.decodeNull()) {
                 // expect that this is a group
-                if (node->getNodeType() == ThingSetNodeType::Group) {
+                if ((node->getNodeType() & ThingSetNodeType::hasChildren) == ThingSetNodeType::hasChildren) {
                     ThingSetParentNode *parent = dynamic_cast<ThingSetParentNode *>(node);
                     if (useIds) {
                         std::list<unsigned> ids;
@@ -104,6 +104,37 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
                     return 1;
                 }
             }
+        }
+        case THINGSET_BIN_EXEC: {
+            response[0] = THINGSET_STATUS_CHANGED;
+            if (node->getNodeType() == ThingSetNodeType::function) {
+                ThingSetInvocable *invocable = dynamic_cast<ThingSetInvocable *>(node);
+                if (invocable->invoke(decoder, encoder)) {
+                    return encoder.getEncodedLength();
+                }
+            }
+            //  && decoder.decodeListStart()) {
+            //     ThingSetParentNode *parent = dynamic_cast<ThingSetParentNode *>(node);
+            //     for (ThingSetNode *parameter : *parent) {
+            //         if (parameter->getNodeType() == ThingSetNodeType::parameter) {
+            //             ThingSetBinaryDecodable *decodable = dynamic_cast<ThingSetBinaryDecodable *>(parameter);
+            //             if (!decodable->decode(decoder)) {
+            //                 response[0] = THINGSET_ERR_BAD_REQUEST;
+            //                 return 1;
+            //             }
+            //         }
+            //         else {
+            //             // the child node of a function should be a parameter; if it is not
+            //             // something has gone quite wrong
+            //             response[0] = THINGSET_ERR_INTERNAL_SERVER_ERR;
+            //             return 1;
+            //         }
+            //     }
+            //     if (decoder.decodeListEnd()) {
+            //     }
+            // }
+            response[0] = THINGSET_ERR_BAD_REQUEST;
+            return 1;
         }
         default:
             break;

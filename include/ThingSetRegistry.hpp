@@ -48,7 +48,7 @@ private:
 
         constexpr const ThingSetNodeType getNodeType() const override
         {
-            return ThingSetNodeType::Group;
+            return ThingSetNodeType::group;
         }
     };
 
@@ -87,7 +87,7 @@ private:
 
         constexpr const ThingSetNodeType getNodeType() const override
         {
-            return ThingSetNodeType::Group;
+            return ThingSetNodeType::group;
         }
     };
 

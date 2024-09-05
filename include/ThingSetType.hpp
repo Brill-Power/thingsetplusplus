@@ -9,6 +9,7 @@
 #include <string>
 
 namespace ThingSet {
+
 template <typename T> struct ThingSetType
 {
     inline static const std::string name = "record";
@@ -17,6 +18,40 @@ template <typename T> struct ThingSetType
 template <typename T, size_t size> struct ThingSetType<std::array<T, size>>
 {
     inline static const std::string name = std::string(ThingSetType<T>::name) + "[]";
+};
+
+static std::string concatAndShift(std::string &str)
+{
+    return str;
+}
+
+template <typename Arg, typename... Remainder> static std::string concatAndShift(std::string &str)
+{
+    str += (str.length() > 0 ? "," : "") + ThingSetType<Arg>::name;
+    if constexpr (sizeof...(Remainder) > 0) {
+        return concatAndShift<Remainder...>(str);
+    }
+    else {
+        return concatAndShift(str);
+    }
+}
+
+template <typename... Args> static std::string concat()
+{
+    std::string result;
+    concatAndShift<Args...>(result);
+    return result;
+}
+
+template <typename Result, typename... Args> struct ThingSetType<std::function<Result(Args...)>>
+{
+    inline static const std::string name =
+        "(" + std::string(ThingSetType<Result>::name) + ")->(" + concat<Args...>() + ")";
+};
+
+template <> struct ThingSetType<void>
+{
+    inline static const std::string name = "";
 };
 
 template <> struct ThingSetType<const char *>

@@ -28,6 +28,15 @@ struct ModuleRecord
 
 ThingSetProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
+static void test(int argi, float argf)
+{
+    printf("int is %d, float is %f\n", argi, argf);
+}
+
+ThingSetFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
+// ThingSetParameter<0x401, 0x400, "xTestInt", int> intArg;
+// ThingSetParameter<0x402, 0x400, "xTestFloat", float> floatArg;
+
 std::array<ModuleRecord, 2> moduleRecords;
 
 int main()

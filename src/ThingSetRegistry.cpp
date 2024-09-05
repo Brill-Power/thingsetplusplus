@@ -58,7 +58,7 @@ void ThingSetRegistry::unregisterNode(ThingSetNode *node)
 bool ThingSetRegistry::findContainerById(unsigned id, ThingSetParentNode **parent)
 {
     ThingSetNode *node;
-    if (findById(id, &node) && node->getNodeType() == ThingSetNodeType::Group) {
+    if (findById(id, &node) && (node->getNodeType() & ThingSetNodeType::hasChildren) == ThingSetNodeType::hasChildren) {
         *parent = dynamic_cast<ThingSetParentNode *>(node);
         return true;
     }
@@ -78,7 +78,7 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
         if ((*node)->getName() == token) {
             break;
         }
-        if ((*node)->getNodeType() != ThingSetNodeType::Group) {
+        if (((*node)->getNodeType() & ThingSetNodeType::hasChildren) != ThingSetNodeType::hasChildren) {
             break;
         }
         auto *parent = dynamic_cast<ThingSetParentNode *>(*node);

@@ -35,12 +35,12 @@ public:
 
     const std::string getType() const override
     {
-        return ThingSetType<T>::name;
+        return ThingSetType<std::remove_pointer<T>>::name;
     }
 
     constexpr const ThingSetNodeType getNodeType() const override
     {
-        return ThingSetNodeType::Value;
+        return ThingSetNodeType::value;
     }
 };
 

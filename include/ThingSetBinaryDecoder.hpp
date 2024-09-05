@@ -58,10 +58,25 @@ public:
     /// if successful, otherwise false.
     /// @return True if decoding succeeded, otherwise false.
     bool decodeList(std::function<bool(size_t)> callback);
+    bool decodeListStart();
+    bool decodeListEnd();
 
     zcbor_major_type_t peekType();
     bool skip();
     bool skipUntil(zcbor_major_type_t sought);
+
+    /// @brief Decode a list into a tuple.
+    /// @tparam ...Args The types of the elements in the list.
+    /// @param tuple The tuple into which the list elements should be decoded.
+    /// @return True if decoding succeeded, otherwise false.
+    template <typename... Args> bool decodeList(std::tuple<Args...> &tuple)
+    {
+        bool result = decodeListStart();
+        if (result) {
+            std::apply([&](auto &&...args) { ((result &= decode(&args)), ...); }, tuple);
+        }
+        return result & decodeListEnd();
+    }
 
     /// @brief Decodes a map by iterating over its keys and invoking a callback for each key.
     /// @tparam K The type of the keys in the map.

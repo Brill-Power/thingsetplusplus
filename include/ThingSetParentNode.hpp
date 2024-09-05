@@ -11,6 +11,7 @@
 
 namespace ThingSet {
 
+/// @brief Storage and behaviour for nodes that have children.
 class ThingSetParentNode
 {
 private:
