@@ -110,7 +110,7 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             if (node->getNodeType() == ThingSetNodeType::function) {
                 ThingSetInvocable *invocable = dynamic_cast<ThingSetInvocable *>(node);
                 if (invocable->invoke(decoder, encoder)) {
-                    return encoder.getEncodedLength();
+                    return encoder.getEncodedLength() + 1;
                 }
             }
             response[0] = THINGSET_ERR_BAD_REQUEST;
