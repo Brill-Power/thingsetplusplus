@@ -24,7 +24,7 @@ CanFrame::CanFrame(CanID &id, std::array<uint8_t, CAN_MAX_DLEN> buffer) : CanFra
     setLength(buffer.size());
 }
 
-CanID &CanFrame::getId() const
+CanID CanFrame::getId() const
 {
     return CanID::create(_frame.id);
 }
@@ -50,11 +50,6 @@ CanFrame &CanFrame::setLength(uint8_t length)
 {
     _frame.dlc = can_bytes_to_dlc(length);
     return *this;
-}
-
-can_frame *CanFrame::getFrame()
-{
-    return &_frame;
 }
 
 } // namespace ThingSet::Can::Zephyr

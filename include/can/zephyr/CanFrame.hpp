@@ -18,7 +18,7 @@ public:
     CanFrame(CanID &id);
     CanFrame(CanID &id, std::array<uint8_t, CAN_MAX_DLEN> buffer);
 
-    CanID &getId() const override;
+    CanID getId() const override;
     CanFrame &setId(CanID &id) override;
     uint8_t getLength() const override;
     CanFrame &setLength(uint8_t length) override;
