@@ -20,6 +20,9 @@ protected:
 
 public:
     ThingSetZephyrCanServerTransport(const device *const canDevice);
+
+    // this is a stop-gap until address negotiation is implemented and migrated to
+    bool bind(uint8_t nodeAddress);
 };
 
 } // namespace ThingSet::Can::Zephyr

@@ -15,4 +15,9 @@ ThingSetCanInterface &ThingSetZephyrCanServerTransport::getInterface() {
     return _canInterface;
 }
 
+bool ThingSetZephyrCanServerTransport::bind(uint8_t nodeAddress)
+{
+    return _canInterface.bind(nodeAddress);
+}
+
 } // namespace ThingSet::Can::SocketCan
