@@ -12,9 +12,11 @@ add_subdirectory(../ thingset++)
 add_executable(testapp)
 include_directories(../include ../zcbor/include)
 
-target_sources(testapp PRIVATE TestBinaryEncoder.cpp)
-target_sources(testapp PRIVATE TestProperties.cpp)
-target_sources(testapp PRIVATE TestRecords.cpp)
+target_sources(testapp PRIVATE TestBinaryEncoder.cpp
+    TestProperties.cpp)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_sources(testapp PRIVATE TestRecords.cpp)
+endif()
 
 target_link_libraries(testapp PRIVATE thingset++)
 target_link_libraries(testapp PRIVATE gtest_main)
