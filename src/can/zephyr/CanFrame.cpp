@@ -13,24 +13,23 @@ using namespace ThingSet::Can;
 CanFrame::CanFrame()
 {}
 
-CanFrame::CanFrame(CanID id)
+CanFrame::CanFrame(CanID &id)
 {
     setId(id);
 }
 
-CanFrame::CanFrame(CanID id, std::array<uint8_t, CAN_MAX_DLEN> buffer)
-    : CanFrame(id)
+CanFrame::CanFrame(CanID &id, std::array<uint8_t, CAN_MAX_DLEN> buffer) : CanFrame(id)
 {
     memcpy(_frame.data, buffer.data(), buffer.size());
     setLength(buffer.size());
 }
 
-CanID CanFrame::getId() const
+CanID &CanFrame::getId() const
 {
     return CanID::create(_frame.id);
 }
 
-CanFrame & CanFrame::setId(CanID id)
+CanFrame &CanFrame::setId(CanID &id)
 {
     _frame.id = id;
     if (_frame.id >= 0x800) {

@@ -22,8 +22,13 @@ public:
         return sizeof(T);
     }
 
+    T *getFrame()
+    {
+        return &_frame;
+    }
+
     virtual CanID getId() const = 0;
-    virtual Self &setId(CanID id) = 0;
+    virtual Self &setId(CanID &id) = 0;
 
     uint8_t *getData()
     {

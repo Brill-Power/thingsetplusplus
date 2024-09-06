@@ -15,15 +15,13 @@ class CanFrame : public AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>
 {
 public:
     CanFrame();
-    CanFrame(CanID id);
-    CanFrame(CanID id, std::array<uint8_t, CAN_MAX_DLEN> buffer);
+    CanFrame(CanID &id);
+    CanFrame(CanID &id, std::array<uint8_t, CAN_MAX_DLEN> buffer);
 
-    CanID getId() const override;
-    CanFrame &setId(CanID id) override;
+    CanID &getId() const override;
+    CanFrame &setId(CanID &id) override;
     uint8_t getLength() const override;
     CanFrame &setLength(uint8_t length) override;
-
-    can_frame *getFrame();
 };
 
 } // namespace ThingSet::Can::Zephyr

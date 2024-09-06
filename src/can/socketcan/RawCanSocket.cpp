@@ -34,7 +34,7 @@ RawCanSocket &RawCanSocket::setIsFd(bool value)
     return *this;
 }
 
-bool RawCanSocket::setFilter(Can::CanID canId)
+bool RawCanSocket::setFilter(const Can::CanID &canId)
 {
     can_filter filter[1] = { {
         .can_id = canId,

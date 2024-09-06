@@ -29,19 +29,19 @@ public:
     bool getIsFd();
     RawCanSocket &setIsFd(bool value);
 
-    bool setFilter(CanID canId);
+    bool setFilter(const CanID &canId);
 
     bool bind(const std::string &deviceName);
 
     template <typename Frame> int read(Frame &frame)
     {
-        int size = ::read(_canSocket, &frame, Frame::size());
+        int size = ::read(_canSocket, frame.getFrame(), Frame::size());
         return size;
     }
 
     template <typename Frame> int write(Frame &frame)
     {
-        int size = ::write(_canSocket, &frame, Frame::size());
+        int size = ::write(_canSocket, frame.getFrame(), Frame::size());
         return size;
     }
 
