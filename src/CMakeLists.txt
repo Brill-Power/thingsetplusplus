@@ -21,3 +21,7 @@ endif()
 if(ENABLE_SOCKETCAN)
     add_subdirectory(can)
 endif()
+
+if(ENABLE_ZEPHYR)
+    add_subdirectory(can)
+endif()

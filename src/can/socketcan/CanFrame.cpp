@@ -10,24 +10,24 @@ namespace ThingSet::Can::SocketCan {
 
 using namespace ThingSet::Can;
 
-CanFrame::CanFrame() : AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::AbstractCanFrame()
+CanFrame::CanFrame() : SocketCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::SocketCanFrame()
 {}
 
-CanFrame::CanFrame(CanID id) : AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::AbstractCanFrame(id)
+CanFrame::CanFrame(CanID id) : SocketCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::SocketCanFrame(id)
 {}
 
 CanFrame::CanFrame(CanID id, std::array<uint8_t, CAN_MAX_DLEN> buffer)
-    : AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::AbstractCanFrame(id, buffer)
+    : SocketCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::SocketCanFrame(id, buffer)
 {}
 
-CanFdFrame::CanFdFrame() : AbstractCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::AbstractCanFrame()
+CanFdFrame::CanFdFrame() : SocketCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::SocketCanFrame()
 {}
 
-CanFdFrame::CanFdFrame(CanID id) : AbstractCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::AbstractCanFrame(id)
+CanFdFrame::CanFdFrame(CanID id) : SocketCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::SocketCanFrame(id)
 {}
 
 CanFdFrame::CanFdFrame(CanID id, std::array<uint8_t, CANFD_MAX_DLEN> buffer)
-    : AbstractCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::AbstractCanFrame(id, buffer)
+    : SocketCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::SocketCanFrame(id, buffer)
 {}
 
 } // namespace ThingSet::Can::SocketCan
