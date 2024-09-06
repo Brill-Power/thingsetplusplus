@@ -12,11 +12,13 @@ namespace ThingSet {
 enum ThingSetNodeType
 {
     hasChildren = 1,
-    value = 2,
-    parameter = 4,
-    function = 5,
-    group = 7,
-    record = 9,
+    encodable = 2,
+    decodable = 4,
+    value = 8 | encodable | decodable,
+    parameter = 16 | encodable | decodable,
+    function = 32 | hasChildren,
+    group = 64 | hasChildren,
+    record = 128 | hasChildren,
 };
 
 class ThingSetNode

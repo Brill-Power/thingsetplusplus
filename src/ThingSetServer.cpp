@@ -48,7 +48,7 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             response[0] = THINGSET_STATUS_CONTENT;
             encoder.encodeNull();
             void *target;
-            if (node->tryCastTo(ThingSetNodeType::value, &target)) {
+            if (node->tryCastTo(ThingSetNodeType::encodable, &target)) {
                 ThingSetBinaryEncodable *encodable = reinterpret_cast<ThingSetBinaryEncodable *>(target);
                 if (encodable->encode(encoder)) {
                     return encoder.getEncodedLength() + 1;
@@ -106,6 +106,35 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
                     return 1;
                 }
             }
+        }
+        case THINGSET_BIN_UPDATE: {
+            response[0] = THINGSET_STATUS_CHANGED;
+            if (decoder.decodeMap<std::string>([&](auto &key) {
+                    // concoct full path to node
+                    std::string fullPath = std::string(path) + (path.length() > 1 ? "/" : "") + key;
+                    ThingSetNode *child;
+                    void *target;
+                    if (!ThingSetRegistry::findByName(fullPath, &child)) {
+                        response[0] = THINGSET_ERR_NOT_FOUND;
+                        return false;
+                    }
+                    if (!child->tryCastTo(ThingSetNodeType::decodable, &target)) {
+                        response[0] = THINGSET_ERR_BAD_REQUEST;
+                        return false;
+                    }
+                    ThingSetBinaryDecodable *decodable = reinterpret_cast<ThingSetBinaryDecodable *>(target);
+                    if (!decodable->decode(decoder)) {
+                        response[0] = THINGSET_ERR_BAD_REQUEST;
+                        return false;
+                    }
+                    return true;
+                }))
+            {
+                encoder.encodeNull();
+                return encoder.getEncodedLength() + 1;
+            }
+            // just the error code
+            return 1;
         }
         case THINGSET_BIN_EXEC: {
             response[0] = THINGSET_STATUS_CHANGED;

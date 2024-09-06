@@ -46,8 +46,11 @@ public:
     bool tryCastTo(ThingSetNodeType type, void **target) override
     {
         switch (type) {
-            case ThingSetNodeType::value:
+            case ThingSetNodeType::encodable:
                 *target = static_cast<ThingSetBinaryEncodable *>(this);
+                return true;
+            case ThingSetNodeType::decodable:
+                *target = static_cast<ThingSetBinaryDecodable *>(this);
                 return true;
             default:
                 return false;
