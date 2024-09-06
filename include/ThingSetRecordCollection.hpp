@@ -37,7 +37,8 @@ public:
         return ThingSetNodeType::record;
     }
 
-    void* cast(ThingSetNodeType type) override {
+    void *castTo(ThingSetNodeType type) override
+    {
         switch (type) {
             case ThingSetNodeType::hasChildren:
                 return static_cast<ThingSetParentNode *>(this);
