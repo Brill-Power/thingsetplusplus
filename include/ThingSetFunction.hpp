@@ -74,6 +74,18 @@ public:
     {
         return decoder.decodeList(_arguments) && ThingSet::invoke(_function, _arguments, encoder);
     }
+
+    void *castTo(ThingSetNodeType type) override
+    {
+        switch (type) {
+            case ThingSetNodeType::function:
+                return static_cast<ThingSetInvocable *>(this);
+            case ThingSetNodeType::hasChildren:
+                return static_cast<ThingSetParentNode *>(this);
+            default:
+                return 0;
+        }
+    }
 };
 
 } // namespace ThingSet

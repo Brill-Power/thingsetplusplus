@@ -5,15 +5,15 @@
  */
 
 #include "ThingSetRegistry.hpp"
+#include "ThingSetParentNode.hpp"
 #include "internal/logging.hpp"
-#include <ThingSetParentNode.hpp>
 
 namespace ThingSet {
 
 ThingSetRegistry::ThingSetRegistry()
 {
     // manually register the root node
-    _nodeMap[RootNode::getInstance().getId() % NODE_MAP_LOOKUP_BUCKETS].push_back(&RootNode::getInstance());
+    _nodeMap[_rootNode.getId() % NODE_MAP_LOOKUP_BUCKETS].push_back(&_rootNode);
     _nodeMap[_metadataNode.getId() % NODE_MAP_LOOKUP_BUCKETS].push_back(&_metadataNode);
 }
 
@@ -59,7 +59,7 @@ bool ThingSetRegistry::findContainerById(unsigned id, ThingSetParentNode **paren
 {
     ThingSetNode *node;
     if (findById(id, &node) && (node->getNodeType() & ThingSetNodeType::hasChildren) == ThingSetNodeType::hasChildren) {
-        *parent = dynamic_cast<ThingSetParentNode *>(node);
+        *parent = reinterpret_cast<ThingSetParentNode *>(node->castTo(ThingSetNodeType::hasChildren));
         return true;
     }
 
@@ -71,7 +71,7 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
     size_t pos = 0;
     size_t index;
     std::string token = name;
-    *node = &RootNode::getInstance();
+    *node = &getInstance()._rootNode;
     do {
         index = name.find('/', pos);
         token = name.substr(pos, index);
@@ -81,7 +81,7 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
         if (((*node)->getNodeType() & ThingSetNodeType::hasChildren) != ThingSetNodeType::hasChildren) {
             break;
         }
-        auto *parent = dynamic_cast<ThingSetParentNode *>(*node);
+        auto *parent = reinterpret_cast<ThingSetParentNode *>((*node)->castTo(ThingSetNodeType::hasChildren));
         for (ThingSetNode *child : *parent) {
             if (child->getName() == token) {
                 pos += index;

@@ -25,6 +25,15 @@ public:
     {
         return ThingSetNodeType::group;
     }
+
+    void* castTo(ThingSetNodeType type) override {
+        switch (type) {
+            case ThingSetNodeType::hasChildren:
+                return static_cast<ThingSetParentNode *>(this);
+            default:
+                return 0;
+        }
+    }
 };
 
 } // namespace ThingSet

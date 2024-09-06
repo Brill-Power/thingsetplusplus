@@ -34,6 +34,8 @@ public:
     virtual const std::string getType() const = 0;
 
     constexpr virtual const ThingSetNodeType getNodeType() const = 0;
+
+    virtual void* castTo(ThingSetNodeType type);
 };
 
 } // namespace ThingSet

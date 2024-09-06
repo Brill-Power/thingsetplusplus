@@ -3,7 +3,8 @@ target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryEncoder.cpp)
 
 if(ENABLE_SERVER)
-    target_sources(thingset++ PRIVATE ThingSetParentNode.cpp
+    target_sources(thingset++ PRIVATE ThingSetNode.cpp
+        ThingSetParentNode.cpp
         ThingSetRegistry.cpp
         ThingSetServer.cpp)
 endif()

@@ -23,7 +23,8 @@ typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
 class ThingSetRegistry
 {
 private:
-    template <unsigned id, unsigned parentId, StringLiteral name> class OverlayNode : public ThingSetNode
+    template <unsigned id, unsigned parentId, StringLiteral name>
+    class OverlayNode : public ThingSetParentNode, public ThingSetNode
     {
     public:
         constexpr virtual const std::string_view getName() const override
@@ -50,48 +51,20 @@ private:
         {
             return ThingSetNodeType::group;
         }
-    };
 
-    class RootNode : public ThingSetNode, public ThingSetParentNode
-    {
-    private:
-        RootNode()
-        {}
-
-    public:
-        static RootNode &getInstance()
+        void *castTo(ThingSetNodeType type) override
         {
-            static RootNode instance;
-            return instance;
-        }
-
-        constexpr const std::string_view getName() const override
-        {
-            return "";
-        }
-
-        constexpr const unsigned getId() const override
-        {
-            return 0;
-        }
-
-        constexpr const unsigned getParentId() const override
-        {
-            return 0;
-        }
-
-        const std::string getType() const override
-        {
-            return "group";
-        }
-
-        constexpr const ThingSetNodeType getNodeType() const override
-        {
-            return ThingSetNodeType::group;
+            switch (type) {
+                case ThingSetNodeType::hasChildren:
+                    return static_cast<ThingSetParentNode *>(this);
+                default:
+                    return 0;
+            }
         }
     };
 
     NodeMap _nodeMap;
+    OverlayNode<0, 0, ""> _rootNode;
     OverlayNode<25, 0, "_Metadata"> _metadataNode;
 
     ThingSetRegistry();

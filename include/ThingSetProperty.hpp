@@ -42,6 +42,15 @@ public:
     {
         return ThingSetNodeType::value;
     }
+
+    void* castTo(ThingSetNodeType type) override {
+        switch (type) {
+            case ThingSetNodeType::value:
+                return static_cast<ThingSetBinaryEncodable *>(this);
+            default:
+                return 0;
+        }
+    }
 };
 
 } // namespace ThingSet

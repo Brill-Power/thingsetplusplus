@@ -36,6 +36,15 @@ public:
     {
         return ThingSetNodeType::record;
     }
+
+    void* cast(ThingSetNodeType type) override {
+        switch (type) {
+            case ThingSetNodeType::hasChildren:
+                return static_cast<ThingSetParentNode *>(this);
+            default:
+                return 0;
+        }
+    }
 };
 
 template <unsigned id, unsigned parentId, StringLiteral name, typename Element, unsigned size>
