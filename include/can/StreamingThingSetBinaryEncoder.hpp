@@ -11,14 +11,13 @@
 #include <array>
 #include <zcbor_encode.h>
 
-#ifdef __linux__
+#if defined(__ZEPHYR__)
+#include "zephyr/drivers/can.h"
+#define THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE CAN_MAX_DLEN
+#elif defined(__linux__)
 #include "linux/can.h"
 // for now, on Linux, assume CAN FD
 #define THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE CANFD_MAX_DLEN
-#endif
-#ifdef __ZEPHYR__
-#include "zephyr/drivers/can.h"
-#define THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE CAN_MAX_DLEN
 #endif
 
 namespace ThingSet::Can {
