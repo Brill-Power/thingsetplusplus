@@ -47,7 +47,7 @@ uint8_t CanID::getSource() const
 
 CanID &CanID::setSource(uint8_t value)
 {
-    _id = _id & ~sourceMask | ((value << THINGSET_CAN_ID_POSITION_SOURCE) & sourceMask);
+    _id = (_id & ~sourceMask) | ((value << THINGSET_CAN_ID_POSITION_SOURCE) & sourceMask);
     _mask |= sourceMask;
     return *this;
 }
@@ -59,7 +59,7 @@ uint8_t CanID::getTarget() const
 
 CanID &CanID::setTarget(uint8_t value)
 {
-    _id = _id & ~targetMask | ((value << THINGSET_CAN_ID_POSITION_TARGET) & targetMask);
+    _id = (_id & ~targetMask) | ((value << THINGSET_CAN_ID_POSITION_TARGET) & targetMask);
     _mask |= targetMask;
     return *this;
 }
@@ -71,7 +71,7 @@ uint8_t CanID::getSequenceNumber() const
 
 CanID &CanID::setSequenceNumber(uint8_t value)
 {
-    _id = _id & ~sequenceNumberMask | ((value << THINGSET_CAN_ID_POSITION_SEQ_NO) & sequenceNumberMask);
+    _id = (_id & ~sequenceNumberMask) | ((value << THINGSET_CAN_ID_POSITION_SEQ_NO) & sequenceNumberMask);
     _mask |= sequenceNumberMask;
     return *this;
 }
@@ -83,7 +83,7 @@ uint8_t CanID::getMessageNumber() const
 
 CanID &CanID::setMessageNumber(uint8_t value)
 {
-    _id = _id & ~messageNumberMask | ((value << THINGSET_CAN_ID_POSITION_MSG_NO) & messageNumberMask);
+    _id = (_id & ~messageNumberMask) | ((value << THINGSET_CAN_ID_POSITION_MSG_NO) & messageNumberMask);
     _mask |= messageNumberMask;
     return *this;
 }
@@ -95,7 +95,7 @@ uint8_t CanID::getBridge() const
 
 CanID &CanID::setBridge(uint8_t value)
 {
-    _id = _id & ~bridgeMask | ((value << THINGSET_CAN_ID_POSITION_BRIDGE) & bridgeMask);
+    _id = (_id & ~bridgeMask) | ((value << THINGSET_CAN_ID_POSITION_BRIDGE) & bridgeMask);
     _mask |= bridgeMask;
     return *this;
 }
@@ -117,7 +117,7 @@ MessageType CanID::getMessageType() const
 
 CanID &CanID::setMessageType(const MessageType value)
 {
-    _id = _id & ~messageTypeMask | value;
+    _id = (_id & ~messageTypeMask) | value;
     _mask |= messageTypeMask;
     return *this;
 }
@@ -129,7 +129,7 @@ MultiFrameMessageType CanID::getMultiFrameMessageType() const
 
 CanID &CanID::setMultiFrameMessageType(const MultiFrameMessageType value)
 {
-    _id = _id & ~multiFrameTypeMask | value;
+    _id = (_id & ~multiFrameTypeMask) | value;
     _mask |= multiFrameTypeMask;
     return *this;
 }
@@ -141,7 +141,7 @@ MessagePriority CanID::getMessagePriority() const
 
 CanID &CanID::setMessagePriority(const MessagePriority value)
 {
-    _id = _id & ~messagePriorityMask | value;
+    _id = (_id & ~messagePriorityMask) | value;
     _mask |= messagePriorityMask;
     return *this;
 }

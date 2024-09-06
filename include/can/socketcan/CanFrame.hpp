@@ -15,10 +15,10 @@ namespace ThingSet::Can::SocketCan {
 template <typename Self, typename T, unsigned Size> class SocketCanFrame : public AbstractCanFrame<Self, T, Size>
 {
 protected:
-    SocketCanFrame()
+    SocketCanFrame() : AbstractCanFrame<Self, T, Size>::AbstractCanFrame()
     {}
 
-    SocketCanFrame(CanID &id)
+    SocketCanFrame(CanID &id) : SocketCanFrame()
     {
         setId(id);
     }

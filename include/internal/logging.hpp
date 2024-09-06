@@ -3,7 +3,12 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#ifdef DEBUG_LOGGING
+#if defined(__ZEPHYR__)
+
+#include <zephyr/logging/log.h>
+LOG_MODULE_DECLARE(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
+
+#elif defined(DEBUG_LOGGING)
 
 #define LOCAL_DEBUG_LEVEL 3
 

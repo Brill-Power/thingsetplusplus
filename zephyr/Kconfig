@@ -9,6 +9,7 @@ config THINGSET_PLUS_PLUS_SERVER
 	default false
 
 module = THINGSET_PLUS_PLUS
-module-str = thingset++
+module-str = thingsetplusplus
+source "../zephyr/subsys/logging/Kconfig.template.log_config"
 
 endif

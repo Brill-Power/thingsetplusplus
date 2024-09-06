@@ -35,6 +35,7 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
 {
     // no-op for now; negotiation happens elsewhere
     _nodeAddress = nodeAddress;
+    LOG_INF("CAN device %s bound to address 0x%x", _canDevice->name, _nodeAddress);
     return true;
 }
 

@@ -16,6 +16,9 @@ template <typename Self, typename T, unsigned Size> class AbstractCanFrame
 protected:
     T _frame;
 
+    AbstractCanFrame() : _frame {}
+    {}
+
 public:
     static constexpr size_t size()
     {

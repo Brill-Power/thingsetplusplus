@@ -10,10 +10,10 @@ namespace ThingSet::Can::Zephyr {
 
 using namespace ThingSet::Can;
 
-CanFrame::CanFrame()
+CanFrame::CanFrame() : AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::AbstractCanFrame()
 {}
 
-CanFrame::CanFrame(CanID &id)
+CanFrame::CanFrame(CanID &id) : CanFrame()
 {
     setId(id);
 }
