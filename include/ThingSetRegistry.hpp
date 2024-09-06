@@ -88,8 +88,8 @@ public:
     /// @param id The integer ID of the node that is sought.
     /// @param node When the method returns, contains a pointer to the node if it was found.
     /// @return True if the node was found, otherwise false.
-    static bool findById(unsigned id, ThingSetNode **node);
-    static bool findContainerById(unsigned id, ThingSetParentNode **parent);
+    static bool findById(const unsigned id, ThingSetNode **node);
+    static bool findContainerById(const unsigned id, ThingSetParentNode **parent);
 
     FlatteningIterator<NodeMap::iterator> begin();
     FlatteningIterator<NodeMap::iterator> end();

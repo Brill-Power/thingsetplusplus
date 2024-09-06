@@ -60,7 +60,7 @@ void ThingSetRegistry::unregisterNode(ThingSetNode *node)
         node, [](auto &l, auto *n) { l.remove(n); }, [](auto *p, auto *n) { return p->removeChild(n); });
 }
 
-bool ThingSetRegistry::findContainerById(unsigned id, ThingSetParentNode **parent)
+bool ThingSetRegistry::findContainerById(const unsigned id, ThingSetParentNode **parent)
 {
     ThingSetNode *node;
     void *target;
@@ -104,7 +104,7 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
     return false;
 }
 
-bool ThingSetRegistry::findById(unsigned id, ThingSetNode **node)
+bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)
 {
     NodeList list = getInstance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
     for (ThingSetNode *n : list) {

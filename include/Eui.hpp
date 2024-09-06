@@ -19,7 +19,7 @@ private:
     static Eui &getInstance();
 
 public:
-    static std::array<uint8_t, 8> getValue();
+    static const std::array<uint8_t, 8> getValue();
 };
 
 } // namespace ThingSet

@@ -50,7 +50,7 @@ Eui &Eui::getInstance()
     return instance;
 }
 
-std::array<uint8_t, 8> Eui::getValue()
+const std::array<uint8_t, 8> Eui::getValue()
 {
     return getInstance().value;
 }
