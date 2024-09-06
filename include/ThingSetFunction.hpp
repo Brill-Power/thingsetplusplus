@@ -75,15 +75,17 @@ public:
         return decoder.decodeList(_arguments) && ThingSet::invoke(_function, _arguments, encoder);
     }
 
-    void *castTo(ThingSetNodeType type) override
+    bool tryCastTo(ThingSetNodeType type, void **target) override
     {
         switch (type) {
             case ThingSetNodeType::function:
-                return static_cast<ThingSetInvocable *>(this);
+                *target = static_cast<ThingSetInvocable *>(this);
+                return true;
             case ThingSetNodeType::hasChildren:
-                return static_cast<ThingSetParentNode *>(this);
+                *target = static_cast<ThingSetParentNode *>(this);
+                return true;
             default:
-                return 0;
+                return false;
         }
     }
 };

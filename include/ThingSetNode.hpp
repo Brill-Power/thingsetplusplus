@@ -35,7 +35,7 @@ public:
 
     constexpr virtual const ThingSetNodeType getNodeType() const = 0;
 
-    virtual void* castTo(ThingSetNodeType type);
+    virtual bool tryCastTo(ThingSetNodeType type, void **target);
 };
 
 } // namespace ThingSet

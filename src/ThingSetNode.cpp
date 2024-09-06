@@ -8,8 +8,9 @@
 
 namespace ThingSet {
 
-void* ThingSetNode::castTo(ThingSetNodeType type) {
-    return 0;
+bool ThingSetNode::tryCastTo(ThingSetNodeType type, void **target)
+{
+    return false;
 }
 
 } // namespace ThingSet

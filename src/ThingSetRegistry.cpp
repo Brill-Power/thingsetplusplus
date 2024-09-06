@@ -63,8 +63,9 @@ void ThingSetRegistry::unregisterNode(ThingSetNode *node)
 bool ThingSetRegistry::findContainerById(unsigned id, ThingSetParentNode **parent)
 {
     ThingSetNode *node;
-    if (findById(id, &node) && (node->getNodeType() & ThingSetNodeType::hasChildren) == ThingSetNodeType::hasChildren) {
-        *parent = reinterpret_cast<ThingSetParentNode *>(node->castTo(ThingSetNodeType::hasChildren));
+    void *target;
+    if (findById(id, &node) && node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
+        *parent = reinterpret_cast<ThingSetParentNode *>(target);
         return true;
     }
 
@@ -83,10 +84,11 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
         if ((*node)->getName() == token) {
             break;
         }
-        if (((*node)->getNodeType() & ThingSetNodeType::hasChildren) != ThingSetNodeType::hasChildren) {
+        void *target;
+        if (!(*node)->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
             break;
         }
-        auto *parent = reinterpret_cast<ThingSetParentNode *>((*node)->castTo(ThingSetNodeType::hasChildren));
+        auto *parent = reinterpret_cast<ThingSetParentNode *>(target);
         for (ThingSetNode *child : *parent) {
             if (child->getName() == token) {
                 pos += index;

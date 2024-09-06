@@ -47,8 +47,9 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
         case THINGSET_BIN_GET: {
             response[0] = THINGSET_STATUS_CONTENT;
             encoder.encodeNull();
-            if (node->getNodeType() == ThingSetNodeType::value) {
-                ThingSetBinaryEncodable *encodable = reinterpret_cast<ThingSetBinaryEncodable *>(node->castTo(ThingSetNodeType::value));
+            void *target;
+            if (node->tryCastTo(ThingSetNodeType::value, &target)) {
+                ThingSetBinaryEncodable *encodable = reinterpret_cast<ThingSetBinaryEncodable *>(target);
                 if (encodable->encode(encoder)) {
                     return encoder.getEncodedLength() + 1;
                 }
@@ -61,8 +62,9 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             encoder.encodeNull();
             if (decoder.decodeNull()) {
                 // expect that this is a group
-                if ((node->getNodeType() & ThingSetNodeType::hasChildren) == ThingSetNodeType::hasChildren) {
-                    ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(node->castTo(ThingSetNodeType::hasChildren));
+                void *target;
+                if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
+                    ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
                     if (useIds) {
                         std::list<unsigned> ids;
                         for (ThingSetNode *child : *parent) {
@@ -107,8 +109,9 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
         }
         case THINGSET_BIN_EXEC: {
             response[0] = THINGSET_STATUS_CHANGED;
-            if (node->getNodeType() == ThingSetNodeType::function) {
-                ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(node->castTo(ThingSetNodeType::function));
+            void *target;
+            if (node->tryCastTo(ThingSetNodeType::function, &target)) {
+                ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
                 if (invocable->invoke(decoder, encoder)) {
                     return encoder.getEncodedLength() + 1;
                 }

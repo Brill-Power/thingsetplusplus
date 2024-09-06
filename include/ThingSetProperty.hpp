@@ -43,12 +43,14 @@ public:
         return ThingSetNodeType::value;
     }
 
-    void* castTo(ThingSetNodeType type) override {
+    bool tryCastTo(ThingSetNodeType type, void **target) override
+    {
         switch (type) {
             case ThingSetNodeType::value:
-                return static_cast<ThingSetBinaryEncodable *>(this);
+                *target = static_cast<ThingSetBinaryEncodable *>(this);
+                return true;
             default:
-                return 0;
+                return false;
         }
     }
 };

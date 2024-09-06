@@ -26,12 +26,14 @@ public:
         return ThingSetNodeType::group;
     }
 
-    void* castTo(ThingSetNodeType type) override {
+    bool tryCastTo(ThingSetNodeType type, void **target) override
+    {
         switch (type) {
             case ThingSetNodeType::hasChildren:
-                return static_cast<ThingSetParentNode *>(this);
+                *target = static_cast<ThingSetParentNode *>(this);
+                return true;
             default:
-                return 0;
+                return false;
         }
     }
 };
