@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ThingSetServerTransport.hpp"
+#include "ThingSetCanInterface.hpp"
 #include "can/CanID.hpp"
 
 namespace ThingSet::Can {
@@ -17,9 +18,13 @@ protected:
 
     ThingSetCanServerTransport();
 
+    virtual ThingSetCanInterface &getInterface() = 0;
+
 public:
     bool publish(uint8_t *buffer, size_t len) override;
-    virtual bool publish(Can::CanID &id, uint8_t *buffer, size_t length) = 0;
+    bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
+
+    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 };
 
 } // namespace ThingSet::Can

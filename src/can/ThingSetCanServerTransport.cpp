@@ -10,6 +10,22 @@ namespace ThingSet::Can {
 ThingSetCanServerTransport::ThingSetCanServerTransport() : _messageNumber(0)
 {}
 
+bool ThingSetCanServerTransport::listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
+{
+    return getInterface().bind() && getInterface().listen(callback);
+}
+
+bool ThingSetCanServerTransport::publish(CanID &id, uint8_t *buffer, size_t length)
+{
+    id.setSource(getInterface().getNodeAddress()).setMessageNumber(_messageNumber);
+    bool result = getInterface().publish(id, buffer, length);
+    auto type = id.getMultiFrameMessageType();
+    if (type == MultiFrameMessageType::last || type == MultiFrameMessageType::single) {
+        _messageNumber++;
+    }
+    return result;
+}
+
 bool ThingSetCanServerTransport::publish(uint8_t *buffer, size_t length)
 {
     // not a lot we can do with this code path: we would need the object ID

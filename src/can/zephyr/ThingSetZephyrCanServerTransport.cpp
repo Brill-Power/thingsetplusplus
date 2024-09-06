@@ -11,20 +11,8 @@ ThingSetZephyrCanServerTransport::ThingSetZephyrCanServerTransport(const device 
     : ThingSetCanServerTransport(), _canInterface(canDevice)
 {}
 
-bool ThingSetZephyrCanServerTransport::listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
-{
-    return _canInterface.bind() && _canInterface.listen(callback);
-}
-
-bool ThingSetZephyrCanServerTransport::publish(CanID &id, uint8_t *buffer, size_t length)
-{
-    id.setSource(_canInterface.getNodeAddress()).setMessageNumber(_messageNumber);
-    bool result = _canInterface.publish(id, buffer, length);
-    auto type = id.getMultiFrameMessageType();
-    if (type == MultiFrameMessageType::last || type == MultiFrameMessageType::single) {
-        _messageNumber++;
-    }
-    return result;
+ThingSetCanInterface &ThingSetZephyrCanServerTransport::getInterface() {
+    return _canInterface;
 }
 
 } // namespace ThingSet::Can::SocketCan
