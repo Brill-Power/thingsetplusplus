@@ -106,6 +106,10 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
                     return 1;
                 }
             }
+            else {
+                response[0] = THINGSET_ERR_BAD_REQUEST;
+                return 1;
+            }
         }
         case THINGSET_BIN_UPDATE: {
             response[0] = THINGSET_STATUS_CHANGED;

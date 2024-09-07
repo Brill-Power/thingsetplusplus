@@ -12,9 +12,7 @@ namespace ThingSet {
 
 /// @brief Represents a ThingSet value of a given type.
 /// @tparam T The type of the value.
-template <typename T, bool isPointer = std::is_pointer_v<T> == true> class ThingSetValue;
-
-template <typename T> class ThingSetValue<T, false> : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable
+template <typename T> class ThingSetValue : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable
 {
 protected:
     T _value;
@@ -85,13 +83,53 @@ public:
     }
 };
 
-template <typename T> class ThingSetValue<T, true> : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable
+template <typename Element, std::size_t Size>
+class ThingSetValue<std::array<Element, Size>> : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable
 {
 protected:
-    T _value;
+    std::array<Element, Size> _value;
 
 public:
-    ThingSetValue(T value) : _value(value)
+    ThingSetValue() : _value(std::array<Element, Size>())
+    {}
+    ThingSetValue(const std::array<Element, Size> &value) : _value(value)
+    {}
+    ThingSetValue(std::array<Element, Size> &&value) : _value(std::move(value))
+    {}
+
+    bool encode(ThingSetBinaryEncoder &encoder) override
+    {
+        return encoder.encode(_value);
+    }
+
+    bool decode(ThingSetBinaryDecoder &decoder) override
+    {
+        return decoder.decode(&_value);
+    }
+
+    std::array<Element, Size> &getValue()
+    {
+        return _value;
+    }
+
+    Element &operator[](int index)
+    {
+        return _value[index];
+    }
+
+    std::size_t size() const
+    {
+        return _value.size();
+    }
+};
+
+template <typename T> class ThingSetValue<T *> : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable
+{
+protected:
+    T *_value;
+
+public:
+    ThingSetValue(T *value) : _value(value)
     {}
 
     bool encode(ThingSetBinaryEncoder &encoder) override
@@ -104,12 +142,7 @@ public:
         return decoder.decode(_value);
     }
 
-    T getValue()
-    {
-        return _value;
-    }
-
-    operator T()
+    T *getValue()
     {
         return _value;
     }

@@ -4,9 +4,6 @@
 
 using namespace ThingSet;
 
-ThingSetGroup<0x600, 0, "Modules"> modules;
-ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
-
 struct SupercellRecord
 {
     ThingSetProperty<0x611, 0x610, "soc", float> soc;
@@ -22,39 +19,41 @@ struct ModuleRecord
     ThingSetProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-std::array<ModuleRecord, 2> moduleRecords = { (ModuleRecord){
-                                                  .voltage = 24.0f,
-                                                  .current = 10.0f,
-                                                  .error = 0,
-                                                  .cellVoltages = { { 3.2f, 3.1f, 2.9f, 3.3f, 0.0f, 2.8f } },
-                                                  .supercells = { { (SupercellRecord){
-                                                                        .soc = 0.1,
-                                                                        .soh = 1,
-                                                                    },
-                                                                    (SupercellRecord){ .soc = 0.25, .soh = 1 },
-                                                                    (SupercellRecord){
-                                                                        .soc = 0.5,
-                                                                        .soh = 1,
-                                                                    },
-                                                                    (SupercellRecord){
-                                                                        .soc = 0.75,
-                                                                        .soh = 1,
-                                                                    },
-                                                                    (SupercellRecord){
-                                                                        .soc = 0.8,
-                                                                        .soh = 1,
-                                                                    },
-                                                                    (SupercellRecord){
-                                                                        .soc = 1,
-                                                                        .soh = 1,
-                                                                    } } },
-                                              },
-                                              (ModuleRecord){
-                                                  .voltage = 24.2f,
-                                                  .current = 5.0f,
-                                                  .error = 0,
-                                                  .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
-                                              } };
+ThingSetProperty<0x610, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords = {
+    { (ModuleRecord){
+          .voltage = 24.0f,
+          .current = 10.0f,
+          .error = 0,
+          .cellVoltages = { { 3.2f, 3.1f, 2.9f, 3.3f, 0.0f, 2.8f } },
+          .supercells = { { (SupercellRecord){
+                                .soc = 0.1,
+                                .soh = 1,
+                            },
+                            (SupercellRecord){ .soc = 0.25, .soh = 1 },
+                            (SupercellRecord){
+                                .soc = 0.5,
+                                .soh = 1,
+                            },
+                            (SupercellRecord){
+                                .soc = 0.75,
+                                .soh = 1,
+                            },
+                            (SupercellRecord){
+                                .soc = 0.8,
+                                .soh = 1,
+                            },
+                            (SupercellRecord){
+                                .soc = 1,
+                                .soh = 1,
+                            } } },
+      },
+      (ModuleRecord){
+          .voltage = 24.2f,
+          .current = 5.0f,
+          .error = 0,
+          .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
+      } }
+};
 
 TEST(Records, SimpleRecord)
 {
@@ -69,7 +68,7 @@ TEST(Records, SimpleRecord)
 
     uint8_t buffer[512];
     FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
-    encoder.encode(moduleRecords);
+    encoder.encode(moduleRecords.getValue());
     ASSERT_EQ(0x82, buffer[0]); // array with 2 elements
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
 
@@ -86,7 +85,7 @@ TEST(Records, SimpleRecord)
 
 TEST(Records, InitialiseRecordArrayCopy)
 {
-    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 2> records(moduleRecords);
+    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 2> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     uint8_t buffer[512];
     FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
@@ -97,7 +96,7 @@ TEST(Records, InitialiseRecordArrayCopy)
 
 TEST(Records, RecordArrayIndexing)
 {
-    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 2> records(moduleRecords);
+    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 2> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     ModuleRecord *mod = &records[1];
     ASSERT_EQ(24.2f, mod->voltage.getValue());
