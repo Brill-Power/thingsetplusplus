@@ -8,9 +8,6 @@
 using namespace ThingSet;
 using namespace ThingSet::Can::SocketCan;
 
-ThingSetGroup<0x600, 0, "Modules"> modules;
-ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
-
 struct SupercellRecord
 {
     ThingSetProperty<0x611, 0x610, "soc", float> soc;
@@ -37,7 +34,7 @@ ThingSetFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
 // ThingSetParameter<0x401, 0x400, "xTestInt", int> intArg;
 // ThingSetParameter<0x402, 0x400, "xTestFloat", float> floatArg;
 
-std::array<ModuleRecord, 2> moduleRecords;
+ThingSetProperty<0x600, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
 
 int main()
 {
@@ -84,7 +81,7 @@ int main()
             Can::StreamingThingSetBinaryEncoder encoder(transport);
             encoder.encode(0x0);
             encoder.encodeMapStart(1);
-            encoder.encodePair(0x650, moduleRecords);
+            encoder.encodePair(0x650, moduleRecords.getValue());
             encoder.encodeMapEnd();
             encoder.flush();
         }

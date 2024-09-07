@@ -1,5 +1,4 @@
 #include "ThingSet.hpp"
-#include "ThingSetRecordCollection.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;
@@ -85,7 +84,7 @@ TEST(Records, SimpleRecord)
 
 TEST(Records, InitialiseRecordArrayCopy)
 {
-    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 2> records(moduleRecords.getValue());
+    ThingSetProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     uint8_t buffer[512];
     FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
@@ -96,7 +95,7 @@ TEST(Records, InitialiseRecordArrayCopy)
 
 TEST(Records, RecordArrayIndexing)
 {
-    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 2> records(moduleRecords.getValue());
+    ThingSetProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     ModuleRecord *mod = &records[1];
     ASSERT_EQ(24.2f, mod->voltage.getValue());
@@ -104,11 +103,11 @@ TEST(Records, RecordArrayIndexing)
 
 TEST(Records, InitialiseRecordArrayInline)
 {
-    ThingSetRecordArray<0x800, 0x0, "Modules", ModuleRecord, 1> records = { (ModuleRecord){
+    ThingSetProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 1>> records = { { (ModuleRecord){
         .voltage = 24.0f,
         .current = 10.0f,
         .error = 0,
-    } };
+    } } };
 
     ASSERT_EQ(24.0f, records[0].voltage.getValue());
     uint8_t buffer[512];
