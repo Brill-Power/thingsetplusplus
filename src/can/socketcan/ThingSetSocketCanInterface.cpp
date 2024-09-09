@@ -24,7 +24,7 @@ static bool tryClaimAddress(uint8_t nodeAddress, RawCanSocket &socket)
                        .setTarget(CanID::broadcastAddress)
                        .setMessageType(MessageType::network)
                        .setMessagePriority(MessagePriority::networkManagement),
-                   Eui::getValue());
+                   Eui::getArray());
     int result = socket.write(frame);
     return result > 0;
 }

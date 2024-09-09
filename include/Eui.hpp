@@ -13,13 +13,15 @@ namespace ThingSet {
 class Eui
 {
 private:
-    std::array<uint8_t, 8> value;
+    std::array<uint8_t, 8> _array;
+    uint64_t _value;
 
     Eui();
     static Eui &getInstance();
 
 public:
-    static const std::array<uint8_t, 8> getValue();
+    static const uint64_t &getValue();
+    static const std::array<uint8_t, 8> &getArray();
 };
 
 } // namespace ThingSet
