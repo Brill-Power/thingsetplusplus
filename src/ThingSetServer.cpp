@@ -12,9 +12,8 @@
 
 namespace ThingSet {
 
-static inline ThingSetProperty<0x1d, 0, "NodeID", std::string> nodeId = std::string("000ba77e71e50000");
-
-ThingSetServer::ThingSetServer(ThingSetServerTransport &transport) : _transport(transport)
+ThingSetServer::ThingSetServer(ThingSetServerTransport &transport)
+    : _transport(transport), _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
 {}
 
 int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
@@ -122,6 +121,10 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
                         response[0] = THINGSET_ERR_NOT_FOUND;
                         return false;
                     }
+                    if (!child->checkAccess(_access)) {
+                        response[0] = THINGSET_ERR_FORBIDDEN;
+                        return false;
+                    }
                     if (!child->tryCastTo(ThingSetNodeType::decodable, &target)) {
                         response[0] = THINGSET_ERR_BAD_REQUEST;
                         return false;
@@ -141,11 +144,15 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             return 1;
         }
         case THINGSET_BIN_EXEC: {
-            response[0] = THINGSET_STATUS_CHANGED;
+            if (!node->checkAccess(_access)) {
+                response[0] = THINGSET_ERR_FORBIDDEN;
+                return 1;
+            }
             void *target;
             if (node->tryCastTo(ThingSetNodeType::function, &target)) {
                 ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
                 if (invocable->invoke(decoder, encoder)) {
+                    response[0] = THINGSET_STATUS_CHANGED;
                     return encoder.getEncodedLength() + 1;
                 }
             }

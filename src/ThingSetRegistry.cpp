@@ -44,6 +44,15 @@ void ThingSetRegistry::registerOrUnregisterNode(
     if (node->getParentId() != id && findContainerById(node->getParentId(), &parent)) {
         parentNodeAction(parent, node);
     }
+    void *target;
+    if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
+        parent = reinterpret_cast<ThingSetParentNode *>(target);
+        for (auto n : getInstance()) {
+            if (n->getParentId() == node->getId()) {
+                parent->addChild(n);
+            }
+        }
+    }
 }
 
 void ThingSetRegistry::registerNode(ThingSetNode *node)

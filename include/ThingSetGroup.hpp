@@ -12,8 +12,8 @@
 
 namespace ThingSet {
 
-template <unsigned id, unsigned parentId, StringLiteral name>
-class ThingSetGroup : public IdentifiableThingSetNode<id, parentId, name>, public ThingSetParentNode
+template <unsigned Id, unsigned ParentId, StringLiteral Name>
+class ThingSetGroup : public IdentifiableThingSetNode<Id, ParentId, Name>, public ThingSetParentNode
 {
 public:
     const std::string getType() const override
@@ -35,6 +35,12 @@ public:
             default:
                 return false;
         }
+    }
+
+    bool checkAccess(ThingSetAccess access) override
+    {
+        // no access control on groups at the moment
+        return true;
     }
 };
 

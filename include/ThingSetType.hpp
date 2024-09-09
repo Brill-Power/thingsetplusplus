@@ -46,7 +46,7 @@ template <typename... Args> static std::string concat()
 template <typename Result, typename... Args> struct ThingSetType<std::function<Result(Args...)>>
 {
     inline static const std::string name =
-        "(" + std::string(ThingSetType<Result>::name) + ")->(" + concat<Args...>() + ")";
+        "(" + concat<Args...>() + ")->(" + std::string(ThingSetType<Result>::name) + ")";
 };
 
 template <> struct ThingSetType<void>

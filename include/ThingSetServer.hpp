@@ -5,9 +5,10 @@
  */
 #pragma once
 
+#include "ThingSetAccess.hpp"
+#include "ThingSetBinaryEncoder.hpp"
 #include "ThingSetServerTransport.hpp"
 #include "internal/thingset.h"
-#include <ThingSetBinaryEncoder.hpp>
 
 namespace ThingSet {
 
@@ -15,6 +16,7 @@ class ThingSetServer
 {
 private:
     ThingSetServerTransport &_transport;
+    ThingSetAccess _access;
 
     int requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
 

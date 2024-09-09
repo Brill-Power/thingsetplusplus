@@ -23,23 +23,23 @@ typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
 class ThingSetRegistry
 {
 private:
-    template <unsigned id, unsigned parentId, StringLiteral name>
+    template <unsigned Id, unsigned ParentId, StringLiteral Name>
     class OverlayNode : public ThingSetParentNode, public ThingSetNode
     {
     public:
         constexpr virtual const std::string_view getName() const override
         {
-            return name.string_view();
+            return Name.string_view();
         }
 
         constexpr virtual const unsigned getId() const override
         {
-            return id;
+            return Id;
         }
 
         constexpr virtual const unsigned getParentId() const override
         {
-            return parentId;
+            return ParentId;
         }
 
         const std::string getType() const override
@@ -61,6 +61,11 @@ private:
                 default:
                     return false;
             }
+        }
+
+        bool checkAccess(ThingSetAccess access) const override
+        {
+            return true;
         }
     };
 

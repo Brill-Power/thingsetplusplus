@@ -10,31 +10,33 @@ using namespace ThingSet::Can::SocketCan;
 
 struct SupercellRecord
 {
-    ThingSetProperty<0x611, 0x610, "soc", float> soc;
-    ThingSetProperty<0x612, 0x610, "soh", float> soh;
+    ThingSetReadOnlyProperty<0x611, 0x610, "soc", float> soc;
+    ThingSetReadOnlyProperty<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
-    ThingSetProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetProperty<0x602, 0x600, "current", float> current;
-    ThingSetProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
+    ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadOnlyProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-ThingSetProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
+static inline ThingSetReadOnlyProperty<0x1d, 0, "NodeID", std::string> nodeId = std::string("000ba77e71e50000");
+
+ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
 static void test(int argi, float argf)
 {
     printf("int is %d, float is %f\n", argi, argf);
 }
 
-ThingSetFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
+ThingSetUserFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
 // ThingSetParameter<0x401, 0x400, "xTestInt", int> intArg;
 // ThingSetParameter<0x402, 0x400, "xTestFloat", float> floatArg;
 
-ThingSetProperty<0x600, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
+ThingSetReadOnlyProperty<0x600, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
 
 int main()
 {

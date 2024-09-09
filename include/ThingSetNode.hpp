@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "ThingSetAccess.hpp"
 #include <string_view>
 
 namespace ThingSet {
@@ -21,6 +22,7 @@ enum ThingSetNodeType
     record = 128 | hasChildren,
 };
 
+/// @brief Base class for all nodes.
 class ThingSetNode
 {
 public:
@@ -38,6 +40,8 @@ public:
     constexpr virtual const ThingSetNodeType getNodeType() const = 0;
 
     virtual bool tryCastTo(ThingSetNodeType type, void **target);
+
+    virtual bool checkAccess(ThingSetAccess access) const = 0;
 };
 
 } // namespace ThingSet

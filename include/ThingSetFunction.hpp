@@ -40,13 +40,14 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &
 }
 
 /// @brief Represents an executable function.
-/// @tparam id The unique integer ID of the ThingSet node.
-/// @tparam parentId The integer ID of the parent node.
-/// @tparam name The name of the node.
+/// @tparam Id The unique integer ID of the ThingSet node.
+/// @tparam ParentId The integer ID of the parent node.
+/// @tparam Name The name of the node.
+/// @tparam Access Access control flags.
 /// @tparam Result The return type of the function.
 /// @tparam ...Args The argument types of the function, if any.
-template <unsigned id, unsigned parentId, StringLiteral name, typename Result, typename... Args>
-class ThingSetFunction : public IdentifiableThingSetNode<id, parentId, name>,
+template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Result, typename... Args>
+class ThingSetFunction : public IdentifiableThingSetNode<Id, ParentId, Name>,
                          public ThingSetParentNode,
                          public ThingSetInvocable
 {
@@ -88,6 +89,21 @@ public:
                 return false;
         }
     }
+
+    bool checkAccess(ThingSetAccess access) const override
+    {
+        return (access & Access) == Access;
+    }
 };
+
+template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::userWrite, Result, Args...>;
+
+template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::advancedWrite, Result, Args...>;
+
+template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+using ThingSetManufacturerFunction =
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Result, Args...>;
 
 } // namespace ThingSet
