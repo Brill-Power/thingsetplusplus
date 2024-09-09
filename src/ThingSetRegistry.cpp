@@ -100,13 +100,13 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
         auto *parent = reinterpret_cast<ThingSetParentNode *>(target);
         for (ThingSetNode *child : *parent) {
             if (child->getName() == token) {
-                pos += index;
+                pos += index + 1;
                 *node = child;
                 break;
             }
         }
     } while (index != std::string::npos);
-    if ((*node)->getName() == name) {
+    if ((*node)->getName() == token) {
         return true;
     }
 

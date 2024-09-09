@@ -12,10 +12,21 @@
 
 namespace ThingSet {
 
+static bool defaultCallback(ThingSetNode *node, ThingSetCallbackReason reason)
+{
+    return true;
+}
+
 template <unsigned Id, unsigned ParentId, StringLiteral Name>
 class ThingSetGroup : public IdentifiableThingSetNode<Id, ParentId, Name>, public ThingSetParentNode
 {
+private:
+    std::function<bool(ThingSetNode *, ThingSetCallbackReason)> _callback;
+
 public:
+    ThingSetGroup() : ThingSetGroup(defaultCallback){};
+    ThingSetGroup(std::function<bool(ThingSetNode *, ThingSetCallbackReason)> callback) : _callback(callback){};
+
     const std::string getType() const override
     {
         return "group";
@@ -37,10 +48,15 @@ public:
         }
     }
 
-    bool checkAccess(ThingSetAccess access) override
+    bool checkAccess(ThingSetAccess access) const override
     {
         // no access control on groups at the moment
         return true;
+    }
+
+    bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const override
+    {
+        return _callback(node, reason);
     }
 };
 

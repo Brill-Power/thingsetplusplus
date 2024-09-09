@@ -11,6 +11,14 @@
 
 namespace ThingSet {
 
+enum ThingSetCallbackReason
+{
+    willRead,
+    didRead,
+    willWrite,
+    didWrite
+};
+
 /// @brief Storage and behaviour for nodes that have children.
 class ThingSetParentNode
 {
@@ -25,6 +33,8 @@ public:
 
     bool addChild(ThingSetNode *child);
     bool removeChild(ThingSetNode *child);
+
+    virtual bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const = 0;
 };
 
 } // namespace ThingSet

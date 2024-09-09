@@ -10,6 +10,17 @@
 using namespace ThingSet;
 using namespace ThingSet::Can::SocketCan;
 
+static bool onConfigChange(ThingSetNode *node, ThingSetCallbackReason reason)
+{
+    auto s = std::format("Node {} {}", node->getName(), reason);
+    printf("%s\n", s.c_str());
+    return true;
+}
+
+ThingSetGroup<0x100, 0x0, "Config"> configGroup(onConfigChange);
+ThingSetReadWriteProperty<0x101, 0x100, "sMinVoltage", float> minVoltage;
+ThingSetReadWriteProperty<0x102, 0x100, "sMaxVoltage", float> maxVoltage;
+
 struct SupercellRecord
 {
     ThingSetReadOnlyProperty<0x611, 0x610, "soc", float> soc;

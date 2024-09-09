@@ -67,6 +67,11 @@ private:
         {
             return true;
         }
+
+        bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const override
+        {
+            return true;
+        }
     };
 
     NodeMap _nodeMap;

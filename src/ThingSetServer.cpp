@@ -111,12 +111,17 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
             }
         }
         case THINGSET_BIN_UPDATE: {
+            void *target;
+            if (!node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
+                response[0] = THINGSET_ERR_BAD_REQUEST;
+                return 1;
+            }
+            ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
             response[0] = THINGSET_STATUS_CHANGED;
             if (decoder.decodeMap<std::string>([&](auto &key) {
                     // concoct full path to node
                     std::string fullPath = std::string(path) + (path.length() > 1 ? "/" : "") + key;
                     ThingSetNode *child;
-                    void *target;
                     if (!ThingSetRegistry::findByName(fullPath, &child)) {
                         response[0] = THINGSET_ERR_NOT_FOUND;
                         return false;
@@ -129,11 +134,17 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
                         response[0] = THINGSET_ERR_BAD_REQUEST;
                         return false;
                     }
+                    if (!parent->invokeCallback(child, ThingSetCallbackReason::willWrite)) {
+                        response[0] = THINGSET_ERR_FORBIDDEN;
+                        return false;
+                    }
                     ThingSetBinaryDecodable *decodable = reinterpret_cast<ThingSetBinaryDecodable *>(target);
                     if (!decodable->decode(decoder)) {
                         response[0] = THINGSET_ERR_BAD_REQUEST;
                         return false;
                     }
+                    // for now we ignore the return value here; what would returning false here mean?
+                    parent->invokeCallback(child, ThingSetCallbackReason::didWrite);
                     return true;
                 }))
             {

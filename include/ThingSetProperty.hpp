@@ -52,6 +52,12 @@ protected:
     }
 };
 
+/// @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
+/// @tparam T The type of the value stored by this property.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
+/// @tparam Access The access permissions for this property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
 class ThingSetProperty : public _ThingSetProperty<Id, ParentId, Name, Access, T>
 {
@@ -110,19 +116,44 @@ public:
 
         return false;
     }
+
+    bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const override
+    {
+        return true;
+    }
 };
 
+/// @brief A ThingSet property that can be read by anyone.
+/// @tparam T The type of the value stored by this property.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
 using ThingSetReadOnlyProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead, T>;
 
+/// @brief A ThingSet property that can be read and written by anyone.
+/// @tparam T The type of the value stored by this property.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
 using ThingSetReadWriteProperty =
     ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead | ThingSetAccess::userWrite, T>;
 
+/// @brief A ThingSet property that can be read by anyone but only written by advanced users.
+/// @tparam T The type of the value stored by this property.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
 using ThingSetReadAdvancedWriteProperty =
     ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead | ThingSetAccess::advancedWrite, T>;
 
+/// @brief A ThingSet property that can be read by anyone but only written by the manufacturer.
+/// @tparam T The type of the value stored by this property.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
 using ThingSetReadManufacturerWriteProperty =
     ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead | ThingSetAccess::manufacturerWrite, T>;
