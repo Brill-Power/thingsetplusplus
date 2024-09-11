@@ -45,8 +45,10 @@ public:
     bool encode(bool &value);
     bool encode(const uint8_t &value);
     bool encode(uint8_t &value);
+    bool encode(uint8_t *value);
     bool encode(const uint16_t &value);
     bool encode(uint16_t &value);
+    bool encode(uint16_t *value);
     bool encode(const uint32_t &value);
     bool encode(uint32_t &value);
     bool encode(uint32_t *value);

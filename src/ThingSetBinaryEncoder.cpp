@@ -102,6 +102,11 @@ bool ThingSetBinaryEncoder::encode(uint8_t &value)
     return zcbor_uint32_put(this->getState(), value);
 }
 
+bool ThingSetBinaryEncoder::encode(uint8_t *value)
+{
+    return encode(*value);
+}
+
 bool ThingSetBinaryEncoder::encode(const uint16_t &value)
 {
     return zcbor_uint32_put(this->getState(), value);
@@ -110,6 +115,11 @@ bool ThingSetBinaryEncoder::encode(const uint16_t &value)
 bool ThingSetBinaryEncoder::encode(uint16_t &value)
 {
     return zcbor_uint32_put(this->getState(), value);
+}
+
+bool ThingSetBinaryEncoder::encode(uint16_t *value)
+{
+    return encode(*value);
 }
 
 bool ThingSetBinaryEncoder::encode(const uint32_t &value)
