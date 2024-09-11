@@ -142,6 +142,18 @@ public:
         return decoder.decode(_value);
     }
 
+    auto &operator=(const T &value)
+    {
+        *_value = value;
+        return *this;
+    }
+
+    auto &operator=(T &&value)
+    {
+        *_value = std::move(value);
+        return *this;
+    }
+
     T *getValue()
     {
         return _value;

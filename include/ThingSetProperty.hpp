@@ -90,6 +90,29 @@ public:
     }
 };
 
+template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
+class ThingSetProperty<Id, ParentId, Name, Access, T *>
+    : public _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access,
+                               T *>
+{
+public:
+    ThingSetProperty(T *value)
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access,
+                            T *>(value)
+    {}
+
+    auto &operator=(T &value)
+    {
+        *this->_value = value;
+    }
+
+    auto &operator=(T &&value)
+    {
+        *this->_value = std::move(value);
+        return *this;
+    }
+};
+
 /// @brief Partial specialisation of ThingSetProperty for record arrays.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size>
 class ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>
