@@ -5,12 +5,12 @@ using namespace ThingSet;
 
 TEST(Properties, SimpleProperty)
 {
-    ThingSetProperty<0x100, 0, "f32", float> f32;
-    ThingSetProperty<0x200, 0, "i32", int32_t> i32;
-    ThingSetProperty<0x201, 0, "u32", uint32_t> u32;
+    ThingSetReadOnlyProperty<0x100, 0, "f32", float> f32;
+    ThingSetReadOnlyProperty<0x200, 0, "i32", int32_t> i32;
+    ThingSetReadOnlyProperty<0x201, 0, "u32", uint32_t> u32;
 
     float rf32 = 1.0;
-    ThingSetProperty<0x101, 0, "rf32", float *> prf32(&rf32);
+    ThingSetReadOnlyProperty<0x101, 0, "rf32", float *> prf32(&rf32);
 
     ThingSetNode *node;
     ASSERT_TRUE(ThingSetRegistry::findById(0x100, &node));

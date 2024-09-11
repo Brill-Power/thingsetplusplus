@@ -5,20 +5,20 @@ using namespace ThingSet;
 
 struct SupercellRecord
 {
-    ThingSetProperty<0x611, 0x610, "soc", float> soc;
-    ThingSetProperty<0x612, 0x610, "soh", float> soh;
+    ThingSetReadOnlyProperty<0x611, 0x610, "soc", float> soc;
+    ThingSetReadOnlyProperty<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
-    ThingSetProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetProperty<0x602, 0x600, "current", float> current;
-    ThingSetProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
+    ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadOnlyProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-ThingSetProperty<0x610, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords = {
+ThingSetReadOnlyProperty<0x610, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords = {
     { (ModuleRecord){
           .voltage = 24.0f,
           .current = 10.0f,
@@ -84,7 +84,7 @@ TEST(Records, SimpleRecord)
 
 TEST(Records, InitialiseRecordArrayCopy)
 {
-    ThingSetProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
+    ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     uint8_t buffer[512];
     FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
@@ -95,7 +95,7 @@ TEST(Records, InitialiseRecordArrayCopy)
 
 TEST(Records, RecordArrayIndexing)
 {
-    ThingSetProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
+    ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     ModuleRecord *mod = &records[1];
     ASSERT_EQ(24.2f, mod->voltage.getValue());
@@ -103,7 +103,7 @@ TEST(Records, RecordArrayIndexing)
 
 TEST(Records, InitialiseRecordArrayInline)
 {
-    ThingSetProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 1>> records = { { (ModuleRecord){
+    ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 1>> records = { { (ModuleRecord){
         .voltage = 24.0f,
         .current = 10.0f,
         .error = 0,
