@@ -90,6 +90,7 @@ public:
     }
 };
 
+/// @brief Partial specialisation of ThingSetProperty for pointers to values.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
 class ThingSetProperty<Id, ParentId, Name, Access, T *>
     : public _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access,
