@@ -34,12 +34,12 @@ static bool getEthernetMacAddress(uint64_t &target, std::array<uint8_t, 8> &arra
                     memcpy(&target, s->sll_addr, s->sll_halen);
                 }
                 else {
-                    target = (uint64_t)s->sll_addr[0] << 56 | (uint64_t)s->sll_addr[1] << 48
-                             | (uint64_t)s->sll_addr[2] << 40 | (uint64_t)s->sll_addr[3] << 32
-                             | (uint64_t)s->sll_addr[4] << 24 | (uint64_t)s->sll_addr[5] << 16
-                             | (uint64_t)s->sll_addr[6] << 8 | (uint64_t)s->sll_addr[7];
+                    target = 0;
+                    for (size_t i = 0; i < s->sll_halen; i++) {
+                        target |= (uint64_t)s->sll_addr[i] << (8 * (s->sll_halen - (i + 1)));
+                    }
                 }
-                memcpy(array.data(), s->sll_addr, s->sll_halen);
+                memcpy(&array.data()[array.size() - s->sll_halen], s->sll_addr, s->sll_halen);
                 return true;
             }
         }
