@@ -96,7 +96,7 @@ template <> struct convertAccess<THINGSET_ANY_R | THINGSET_MFR_W>
 #define THINGSET_ADD_ITEM_FLOAT(parentId, id, name, pointer, ignored, access, subsets)                                 \
     THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, float)
 
-#define THINGSET_ADD_ITEM_STRING(parentId, id, name, pointer, access, subsets)                                         \
+#define THINGSET_ADD_ITEM_STRING(parentId, id, name, pointer, length, access, subsets)                                 \
     THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, char *)
 
 } // namespace ThingSet
