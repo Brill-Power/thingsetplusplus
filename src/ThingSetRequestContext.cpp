@@ -9,7 +9,7 @@
 namespace ThingSet {
 
 ThingSetRequestContext::ThingSetRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen)
-    : index(SIZE_MAX), requestType((ThingSetRequestType)request[0]), useIds(false), response(resp),
+    : index(SIZE_MAX), requestType((ThingSetRequestType)request[0]), response(resp), useIds(false),
       encoder(resp + 1, responseLen - 1), decoder(request + 1, requestLen - 1, 2)
 {}
 

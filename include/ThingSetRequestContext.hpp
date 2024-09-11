@@ -20,11 +20,11 @@ struct ThingSetRequestContext
     ThingSetNode *node;
     size_t index;
     ThingSetRequestType requestType;
-    DefaultFixedSizeThingSetBinaryDecoder decoder;
-    DefaultFixedSizeThingSetBinaryEncoder encoder;
     uint8_t *response;
     bool useIds;
     std::string path;
+    DefaultFixedSizeThingSetBinaryEncoder encoder;
+    DefaultFixedSizeThingSetBinaryDecoder decoder;
 };
 
 } // namespace ThingSet
