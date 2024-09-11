@@ -5,6 +5,7 @@
  */
 
 #include "ThingSetParentNode.hpp"
+#include <cstdint>
 #include <string>
 
 namespace ThingSet {
