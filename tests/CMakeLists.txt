@@ -13,7 +13,8 @@ add_executable(testapp)
 include_directories(../include ../zcbor/include)
 
 target_sources(testapp PRIVATE TestBinaryEncoder.cpp
-    TestProperties.cpp)
+    TestProperties.cpp
+    TestFunctions.cpp)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_sources(testapp PRIVATE TestRecords.cpp)
 endif()

@@ -39,7 +39,9 @@ template <typename Arg, typename... Remainder> static std::string concatAndShift
 template <typename... Args> static std::string concat()
 {
     std::string result;
-    concatAndShift<Args...>(result);
+    if constexpr (sizeof...(Args) > 0) {
+        concatAndShift<Args...>(result);
+    }
     return result;
 }
 

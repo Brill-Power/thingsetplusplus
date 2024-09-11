@@ -1,18 +1,26 @@
+#include "ThingSet.hpp"
 #include "gtest/gtest.h"
-#include <ThingSet.hpp>
 
 using namespace ThingSet;
 
 static bool called = false;
+static bool calledVoid = false;
 
 static void test(int argi, float argf)
 {
     called = true;
 }
 
-ThingSetFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
-ThingSetParameter<0x401, 0x400, "xTestInt", int> intArg;
-ThingSetParameter<0x402, 0x400, "xTestFloat", float> floatArg;
+static void voidvoid()
+{
+    calledVoid = true;
+}
 
-TEST(Functions, SimpleFunction)
-{}
+ThingSetUserFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
+ThingSetUserFunction<0x403, 0x0, "xVoid", void> xVoidVoidFunc(voidvoid);
+
+TEST(Functions, FunctionTypes)
+{
+    ASSERT_EQ("(i32,f32)->()", xTestFunc.getType());
+    ASSERT_EQ("()->()", xVoidVoidFunc.getType());
+}
