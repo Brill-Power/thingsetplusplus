@@ -6,8 +6,8 @@
 
 #include "ThingSetServer.hpp"
 #include "ThingSet.hpp"
-#include <ThingSetBinaryDecoder.hpp>
-#include <ThingSetRegistry.hpp>
+#include "ThingSetCustomRequestHandler.hpp"
+#include "ThingSetRegistry.hpp"
 #include <list>
 
 namespace ThingSet {
@@ -18,162 +18,185 @@ ThingSetServer::ThingSetServer(ThingSetServerTransport &transport)
 
 int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
 {
-    FixedSizeThingSetBinaryEncoder encoder(response + 1, responseLen - 1);
-    FixedSizeThingSetBinaryDecoder decoder(request + 1, requestLen - 1, 2);
-    std::string path;
+    ThingSetRequestContext context(request, requestLen, response, responseLen);
+
     uint16_t id;
-    bool useIds = false;
-    ThingSetNode *node;
-    if (decoder.decode(&path)) {
-        if (!ThingSetRegistry::findByName(path, &node)) {
-            response[0] = THINGSET_ERR_NOT_FOUND;
+    if (context.decoder.decode(&context.path)) {
+        if (!ThingSetRegistry::findByName(context.path, &context.node, &context.index)) {
+            response[0] = ThingSetStatusCode::notFound;
             return 1;
         }
     }
-    else if (decoder.decode(&id)) {
-        if (!ThingSetRegistry::findById(id, &node)) {
-            response[0] = THINGSET_ERR_NOT_FOUND;
+    else if (context.decoder.decode(&id)) {
+        if (!ThingSetRegistry::findById(id, &context.node)) {
+            response[0] = ThingSetStatusCode::notFound;
             return 1;
         }
-        useIds = true;
+        context.useIds = true;
     }
     else {
         // fail
-        response[0] = THINGSET_ERR_BAD_REQUEST;
+        response[0] = ThingSetStatusCode::badRequest;
         return 1;
     }
+    void *target;
+    if (context.node->tryCastTo(ThingSetNodeType::requestHandler, &target)) {
+        ThingSetCustomRequestHandler *handler = reinterpret_cast<ThingSetCustomRequestHandler *>(target);
+        int result = handler->handleRequest(context);
+        if (result != 0) {
+            return result;
+        }
+    }
     switch (request[0]) {
-        case THINGSET_BIN_GET: {
-            response[0] = THINGSET_STATUS_CONTENT;
-            encoder.encodeNull();
-            void *target;
-            if (node->tryCastTo(ThingSetNodeType::encodable, &target)) {
-                ThingSetBinaryEncodable *encodable = reinterpret_cast<ThingSetBinaryEncodable *>(target);
-                if (encodable->encode(encoder)) {
-                    return encoder.getEncodedLength() + 1;
-                }
-            }
-            response[0] = THINGSET_ERR_UNSUPPORTED_FORMAT;
-            return 1;
-        }
-        case THINGSET_BIN_FETCH: {
-            response[0] = THINGSET_STATUS_CONTENT;
-            encoder.encodeNull();
-            if (decoder.decodeNull()) {
-                // expect that this is a group
-                void *target;
-                if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
-                    ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
-                    if (useIds) {
-                        std::list<unsigned> ids;
-                        for (ThingSetNode *child : *parent) {
-                            ids.push_back(child->getId());
-                        }
-                        encoder.encode(ids);
-                    }
-                    else {
-                        std::list<std::string_view> names;
-                        for (ThingSetNode *child : *parent) {
-                            names.push_back(child->getName());
-                        }
-                        encoder.encode(names);
-                    }
-                    return encoder.getEncodedLength() + 1;
-                }
-                else {
-                    response[0] = THINGSET_ERR_BAD_REQUEST;
-                    return 1;
-                }
-            }
-            else if (decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && encoder.encodeListStart()) {
-                if (decoder.decodeList([node, &decoder, &encoder](size_t index) {
-                        unsigned id;
-                        if (!decoder.decode(&id)) {
-                            return false;
-                        }
-                        ThingSetNode *n;
-                        return ThingSetRegistry::findById(id, &n) && node == ThingSetRegistry::getMetadataNode()
-                               && encoder.encodeMapStart() && encoder.encode("name") && encoder.encode(n->getName())
-                               && encoder.encode("type") && encoder.encode(n->getType()) && encoder.encodeMapEnd();
-                    })
-                    && encoder.encodeListEnd())
-                {
-                    return encoder.getEncodedLength() + 1;
-                }
-                else {
-                    response[0] = THINGSET_ERR_NOT_FOUND;
-                    return 1;
-                }
-            }
-            else {
-                response[0] = THINGSET_ERR_BAD_REQUEST;
-                return 1;
-            }
-        }
-        case THINGSET_BIN_UPDATE: {
-            void *target;
-            if (!node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
-                response[0] = THINGSET_ERR_BAD_REQUEST;
-                return 1;
-            }
-            ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
-            response[0] = THINGSET_STATUS_CHANGED;
-            if (decoder.decodeMap<std::string>([&](auto &key) {
-                    // concoct full path to node
-                    std::string fullPath = std::string(path) + (path.length() > 1 ? "/" : "") + key;
-                    ThingSetNode *child;
-                    if (!ThingSetRegistry::findByName(fullPath, &child)) {
-                        response[0] = THINGSET_ERR_NOT_FOUND;
-                        return false;
-                    }
-                    if (!child->checkAccess(_access)) {
-                        response[0] = THINGSET_ERR_FORBIDDEN;
-                        return false;
-                    }
-                    if (!child->tryCastTo(ThingSetNodeType::decodable, &target)) {
-                        response[0] = THINGSET_ERR_BAD_REQUEST;
-                        return false;
-                    }
-                    if (!parent->invokeCallback(child, ThingSetCallbackReason::willWrite)) {
-                        response[0] = THINGSET_ERR_FORBIDDEN;
-                        return false;
-                    }
-                    ThingSetBinaryDecodable *decodable = reinterpret_cast<ThingSetBinaryDecodable *>(target);
-                    if (!decodable->decode(decoder)) {
-                        response[0] = THINGSET_ERR_BAD_REQUEST;
-                        return false;
-                    }
-                    // for now we ignore the return value here; what would returning false here mean?
-                    parent->invokeCallback(child, ThingSetCallbackReason::didWrite);
-                    return true;
-                }))
-            {
-                encoder.encodeNull();
-                return encoder.getEncodedLength() + 1;
-            }
-            // just the error code
-            return 1;
-        }
-        case THINGSET_BIN_EXEC: {
-            if (!node->checkAccess(_access)) {
-                response[0] = THINGSET_ERR_FORBIDDEN;
-                return 1;
-            }
-            void *target;
-            if (node->tryCastTo(ThingSetNodeType::function, &target)) {
-                ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
-                if (invocable->invoke(decoder, encoder)) {
-                    response[0] = THINGSET_STATUS_CHANGED;
-                    return encoder.getEncodedLength() + 1;
-                }
-            }
-            response[0] = THINGSET_ERR_BAD_REQUEST;
-            return 1;
-        }
+        case ThingSetRequestType::get:
+            return handleGet(context);
+        case ThingSetRequestType::fetch:
+            return handleFetch(context);
+        case ThingSetRequestType::update:
+            return handleUpdate(context);
+        case ThingSetRequestType::exec:
+            return handleExec(context);
         default:
             break;
     }
-    response[0] = THINGSET_ERR_NOT_IMPLEMENTED;
+    response[0] = ThingSetStatusCode::notImplemented;
+    return 1;
+}
+
+int ThingSetServer::handleGet(ThingSetRequestContext &context)
+{
+    context.response[0] = ThingSetStatusCode::content;
+    context.encoder.encodeNull();
+    void *target;
+    if (context.node->tryCastTo(ThingSetNodeType::encodable, &target)) {
+        ThingSetBinaryEncodable *encodable = reinterpret_cast<ThingSetBinaryEncodable *>(target);
+        if (encodable->encode(context.encoder)) {
+            return context.encoder.getEncodedLength() + 1;
+        }
+    }
+    context.response[0] = ThingSetStatusCode::unsupportedFormat;
+    return 1;
+}
+
+int ThingSetServer::handleFetch(ThingSetRequestContext &context)
+{
+    context.response[0] = ThingSetStatusCode::content;
+    context.encoder.encodeNull();
+    if (context.decoder.decodeNull()) {
+        // expect that this is a group
+        void *target;
+        if (context.node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
+            ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
+            if (context.useIds) {
+                std::list<unsigned> ids;
+                for (ThingSetNode *child : *parent) {
+                    ids.push_back(child->getId());
+                }
+                context.encoder.encode(ids);
+            }
+            else {
+                std::list<std::string_view> names;
+                for (ThingSetNode *child : *parent) {
+                    names.push_back(child->getName());
+                }
+                context.encoder.encode(names);
+            }
+            return context.encoder.getEncodedLength() + 1;
+        }
+        else {
+            context.response[0] = ThingSetStatusCode::badRequest;
+            return 1;
+        }
+    }
+    else if (context.decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && context.encoder.encodeListStart()) {
+        if (context.node == ThingSetRegistry::getMetadataNode() && context.decoder.decodeList([&context](size_t index) {
+                unsigned id;
+                if (!context.decoder.decode(&id)) {
+                    return false;
+                }
+                ThingSetNode *n;
+                return ThingSetRegistry::findById(id, &n) && context.encoder.encodeMapStart()
+                       && context.encoder.encode("name") && context.encoder.encode(n->getName())
+                       && context.encoder.encode("type") && context.encoder.encode(n->getType())
+                       && context.encoder.encodeMapEnd();
+            })
+            && context.encoder.encodeListEnd())
+        {
+            return context.encoder.getEncodedLength() + 1;
+        }
+        else {
+            context.response[0] = ThingSetStatusCode::notFound;
+            return 1;
+        }
+    }
+    else {
+        context.response[0] = ThingSetStatusCode::badRequest;
+        return 1;
+    }
+}
+
+int ThingSetServer::handleUpdate(ThingSetRequestContext &context)
+{
+    void *target;
+    if (!context.node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
+        context.response[0] = ThingSetStatusCode::badRequest;
+        return 1;
+    }
+    ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
+    context.response[0] = ThingSetStatusCode::changed;
+    if (context.decoder.decodeMap<std::string>([&](auto &key) {
+            // concoct full path to node
+            std::string fullPath = std::string(context.path) + (context.path.length() > 1 ? "/" : "") + key;
+            ThingSetNode *child;
+            size_t index;
+            if (!ThingSetRegistry::findByName(fullPath, &child, &index)) {
+                context.response[0] = ThingSetStatusCode::notFound;
+                return false;
+            }
+            if (!child->checkAccess(_access)) {
+                context.response[0] = ThingSetStatusCode::forbidden;
+                return false;
+            }
+            if (!child->tryCastTo(ThingSetNodeType::decodable, &target)) {
+                context.response[0] = ThingSetStatusCode::badRequest;
+                return false;
+            }
+            if (!parent->invokeCallback(child, ThingSetCallbackReason::willWrite)) {
+                context.response[0] = ThingSetStatusCode::forbidden;
+                return false;
+            }
+            ThingSetBinaryDecodable *decodable = reinterpret_cast<ThingSetBinaryDecodable *>(target);
+            if (!decodable->decode(context.decoder)) {
+                context.response[0] = ThingSetStatusCode::badRequest;
+                return false;
+            }
+            // for now we ignore the return value here; what would returning false here mean?
+            parent->invokeCallback(child, ThingSetCallbackReason::didWrite);
+            return true;
+        }))
+    {
+        context.encoder.encodeNull();
+        return context.encoder.getEncodedLength() + 1;
+    }
+    // just the error code
+    return 1;
+}
+
+int ThingSetServer::handleExec(ThingSetRequestContext &context)
+{
+    if (!context.node->checkAccess(_access)) {
+        context.response[0] = ThingSetStatusCode::forbidden;
+        return 1;
+    }
+    void *target;
+    if (context.node->tryCastTo(ThingSetNodeType::function, &target)) {
+        ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
+        if (invocable->invoke(context.decoder, context.encoder)) {
+            context.response[0] = ThingSetStatusCode::changed;
+            return context.encoder.getEncodedLength() + 1;
+        }
+    }
+    context.response[0] = ThingSetStatusCode::badRequest;
     return 1;
 }
 

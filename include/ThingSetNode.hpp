@@ -15,11 +15,12 @@ enum ThingSetNodeType
     hasChildren = 1,
     encodable = 2,
     decodable = 4,
-    value = 8 | encodable | decodable,
-    parameter = 16 | encodable | decodable,
-    function = 32 | hasChildren,
-    group = 64 | hasChildren,
-    record = 128 | hasChildren,
+    requestHandler = 8,
+    value = 16 | encodable | decodable,
+    parameter = 32 | encodable | decodable,
+    function = 64 | hasChildren,
+    group = 128 | hasChildren,
+    record = 256 | hasChildren | requestHandler,
 };
 
 /// @brief Base class for all nodes.

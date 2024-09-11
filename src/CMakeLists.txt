@@ -6,6 +6,7 @@ if(ENABLE_SERVER)
     target_sources(thingset++ PRIVATE ThingSetNode.cpp
         ThingSetParentNode.cpp
         ThingSetRegistry.cpp
+        ThingSetRequestContext.cpp
         ThingSetServer.cpp)
 endif()
 

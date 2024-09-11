@@ -6,9 +6,12 @@
 #pragma once
 
 #include "ThingSetAccess.hpp"
+#include "ThingSetBinaryDecoder.hpp"
 #include "ThingSetBinaryEncoder.hpp"
+#include "ThingSetNode.hpp"
+#include "ThingSetRequestContext.hpp"
 #include "ThingSetServerTransport.hpp"
-#include "internal/thingset.h"
+#include "ThingSetStatus.hpp"
 
 namespace ThingSet {
 
@@ -28,7 +31,7 @@ public:
     template <typename T> bool publish(uint16_t id, T &value)
     {
         uint8_t buffer[1024];
-        buffer[0] = THINGSET_BIN_REPORT;
+        buffer[0] = ThingSetRequestType::report;
         FixedSizeThingSetBinaryEncoder encoder(buffer + 3, 1024 - 3);
         encoder.encode(0); // fake subset ID
         size_t len = 3 + encoder.getEncodedLength();
@@ -40,6 +43,12 @@ public:
         buffer[2] = (uint8_t)(len >> 8);
         return _transport.publish(buffer, 3 + len);
     }
+
+private:
+    int handleGet(ThingSetRequestContext &context);
+    int handleFetch(ThingSetRequestContext &context);
+    int handleUpdate(ThingSetRequestContext &context);
+    int handleExec(ThingSetRequestContext &context);
 };
 
 } // namespace ThingSet

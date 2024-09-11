@@ -41,7 +41,7 @@ void ThingSetRegistry::registerOrUnregisterNode(
     NodeList &list = getInstance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
     nodeListAction(list, node);
     ThingSetParentNode *parent;
-    if (node->getParentId() != id && findContainerById(node->getParentId(), &parent)) {
+    if (node->getParentId() != id && findParentById(node->getParentId(), &parent)) {
         parentNodeAction(parent, node);
     }
     void *target;
@@ -69,7 +69,7 @@ void ThingSetRegistry::unregisterNode(ThingSetNode *node)
         node, [](auto &l, auto *n) { l.remove(n); }, [](auto *p, auto *n) { return p->removeChild(n); });
 }
 
-bool ThingSetRegistry::findContainerById(const unsigned id, ThingSetParentNode **parent)
+bool ThingSetRegistry::findParentById(const unsigned id, ThingSetParentNode **parent)
 {
     ThingSetNode *node;
     void *target;
@@ -81,36 +81,9 @@ bool ThingSetRegistry::findContainerById(const unsigned id, ThingSetParentNode *
     return false;
 }
 
-bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
+bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node, size_t *index)
 {
-    size_t pos = 0;
-    size_t index;
-    std::string token = name;
-    *node = &getInstance()._rootNode;
-    do {
-        index = name.find('/', pos);
-        token = name.substr(pos, index);
-        if ((*node)->getName() == token) {
-            break;
-        }
-        void *target;
-        if (!(*node)->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
-            break;
-        }
-        auto *parent = reinterpret_cast<ThingSetParentNode *>(target);
-        for (ThingSetNode *child : *parent) {
-            if (child->getName() == token) {
-                pos += index + 1;
-                *node = child;
-                break;
-            }
-        }
-    } while (index != std::string::npos);
-    if ((*node)->getName() == token) {
-        return true;
-    }
-
-    return false;
+    return getInstance()._rootNode.findByName(name, node, index);
 }
 
 bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)

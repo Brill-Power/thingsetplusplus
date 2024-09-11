@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 #include "can/StreamingThingSetBinaryEncoder.hpp"
-#include "internal/thingset.h"
+#include "ThingSetStatus.hpp"
 #include <list>
 
 namespace ThingSet::Can {
@@ -12,7 +12,7 @@ namespace ThingSet::Can {
 StreamingThingSetBinaryEncoder::StreamingThingSetBinaryEncoder(Can::ThingSetCanServerTransport &transport)
     : _transport(transport), _sequenceNumber(0), _exportedLength(0)
 {
-    _buffer[0] = THINGSET_BIN_REPORT;
+    _buffer[0] = ThingSetRequestType::report;
     zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[1],
                            (THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE * 2) - 1, 1);
 }

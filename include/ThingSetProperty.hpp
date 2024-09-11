@@ -8,20 +8,26 @@
 #include "IdentifiableThingSetNode.hpp"
 #include "StringLiteral.hpp"
 #include "ThingSetAccess.hpp"
+#include "ThingSetCustomRequestHandler.hpp"
 #include "ThingSetType.hpp"
 #include "ThingSetValue.hpp"
 
 namespace ThingSet {
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
-class _ThingSetProperty : public ThingSetValue<T>, public IdentifiableThingSetNode<Id, ParentId, Name>
+template <typename T, typename Base, unsigned Id, unsigned ParentId, StringLiteral Name>
+concept IdentifiableBase = std::is_base_of_v<_IdentifiableThingSetNode<Base, Id, ParentId, Name>, T>;
+
+template <unsigned Id, unsigned ParentId, StringLiteral Name, NodeBase NodeBase,
+          IdentifiableBase<NodeBase, Id, ParentId, Name> Base, ThingSetAccess Access, typename T>
+class _ThingSetProperty : public ThingSetValue<T>, public Base
 {
 protected:
-    _ThingSetProperty() : ThingSetValue<T>(), IdentifiableThingSetNode<Id, ParentId, Name>()
+    _ThingSetProperty() : ThingSetValue<T>(), Base()
     {}
-    _ThingSetProperty(const T &value) : ThingSetValue<T>(value), IdentifiableThingSetNode<Id, ParentId, Name>()
+    _ThingSetProperty(const T &value) : ThingSetValue<T>(value), Base()
     {}
 
+public:
     const std::string getType() const override
     {
         return ThingSetType<std::remove_pointer_t<T>>::name;
@@ -42,7 +48,7 @@ protected:
                 *target = static_cast<ThingSetBinaryDecodable *>(this);
                 return true;
             default:
-                return false;
+                return Base::tryCastTo(type, target);
         }
     }
 
@@ -59,12 +65,16 @@ protected:
 /// @tparam Name The human-readable name of the property.
 /// @tparam Access The access permissions for this property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
-class ThingSetProperty : public _ThingSetProperty<Id, ParentId, Name, Access, T>
+class ThingSetProperty : public _ThingSetProperty<Id, ParentId, Name, ThingSetNode,
+                                                  IdentifiableThingSetNode<Id, ParentId, Name>, Access, T>
 {
 public:
-    ThingSetProperty() : _ThingSetProperty<Id, ParentId, Name, Access, T>::_ThingSetProperty()
+    ThingSetProperty()
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T>()
     {}
-    ThingSetProperty(const T &value) : _ThingSetProperty<Id, ParentId, Name, Access, T>::_ThingSetProperty(value)
+    ThingSetProperty(const T &value)
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T>(
+            value)
     {}
 
     auto &operator=(const T &value)
@@ -80,15 +90,21 @@ public:
     }
 };
 
+/// @brief Partial specialisation of ThingSetProperty for record arrays.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size>
 class ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>
-    : public _ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>, ThingSetParentNode
+    : public _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode,
+                               IdentifiableThingSetParentNode<Id, ParentId, Name>, Access, std::array<Element, Size>>,
+      public ThingSetCustomRequestHandler
 {
 public:
-    ThingSetProperty() : _ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>::_ThingSetProperty()
+    ThingSetProperty()
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode, IdentifiableThingSetParentNode<Id, ParentId, Name>,
+                            Access, std::array<Element, Size>>()
     {}
     ThingSetProperty(const std::array<Element, Size> &value)
-        : _ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>::_ThingSetProperty(value)
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode, IdentifiableThingSetParentNode<Id, ParentId, Name>,
+                            Access, std::array<Element, Size>>(value)
     {}
 
     auto &operator=(const std::array<Element, Size> &value)
@@ -103,23 +119,60 @@ public:
         return *this;
     }
 
+    ThingSetParentNode::ChildIterator begin() override
+    {
+        // don't expose child nodes
+        return this->end();
+    }
+
     bool tryCastTo(ThingSetNodeType type, void **target) override
     {
-        if (_ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>::tryCastTo(type, target)) {
-            return true;
+        if (!_ThingSetProperty<Id, ParentId, Name, ThingSetParentNode,
+                               IdentifiableThingSetParentNode<Id, ParentId, Name>, Access,
+                               std::array<Element, Size>>::tryCastTo(type, target))
+        {
+            if (type == ThingSetNodeType::requestHandler) {
+                *target = static_cast<ThingSetCustomRequestHandler *>(this);
+                return true;
+            }
+
+            return false;
+        }
+        return true;
+    }
+
+    bool findByName(const std::string &name, ThingSetNode **node, size_t *index) override
+    {
+        if (!ThingSetParentNode::findByName(name, node, index)) {
+            if (name.c_str()[0] >= '0' && name.c_str()[0] <= '9') {
+                *index = std::atoi(name.c_str());
+                return true;
+            }
+            return false;
         }
 
-        if (type == ThingSetNodeType::hasChildren) {
-            *target = static_cast<ThingSetParentNode *>(this);
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const override
     {
         return true;
+    }
+
+    int handleRequest(ThingSetRequestContext &context) override
+    {
+        if (context.requestType == ThingSetRequestType::get) {
+            context.response[0] = ThingSetStatusCode::content;
+            context.encoder.encodeNull();
+            if (context.index == SIZE_MAX) {
+                context.encoder.encode(this->_value.size());
+            }
+            else {
+                context.encoder.encode(this->_value[context.index]);
+            }
+            return 1 + context.encoder.getEncodedLength();
+        }
+        return 0;
     }
 };
 

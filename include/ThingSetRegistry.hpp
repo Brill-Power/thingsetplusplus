@@ -23,8 +23,7 @@ typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
 class ThingSetRegistry
 {
 private:
-    template <unsigned Id, unsigned ParentId, StringLiteral Name>
-    class OverlayNode : public ThingSetParentNode, public ThingSetNode
+    template <unsigned Id, unsigned ParentId, StringLiteral Name> class OverlayNode : public ThingSetParentNode
     {
     public:
         constexpr virtual const std::string_view getName() const override
@@ -92,14 +91,15 @@ public:
     /// @brief Find a node by its fully-qualified name.
     /// @param name The full string path of the node that is sought.
     /// @param node When the method returns, contains a pointer to the node if it was found.
+    /// @param index When the method returns, contains the array index if relevant.
     /// @return True if the node was found, otherwise false.
-    static bool findByName(const std::string &name, ThingSetNode **node);
+    static bool findByName(const std::string &name, ThingSetNode **node, size_t *index);
     /// @brief Find a node by its integer ID.
     /// @param id The integer ID of the node that is sought.
     /// @param node When the method returns, contains a pointer to the node if it was found.
     /// @return True if the node was found, otherwise false.
     static bool findById(const unsigned id, ThingSetNode **node);
-    static bool findContainerById(const unsigned id, ThingSetParentNode **parent);
+    static bool findParentById(const unsigned id, ThingSetParentNode **parent);
 
     FlatteningIterator<NodeMap::iterator> begin();
     FlatteningIterator<NodeMap::iterator> end();

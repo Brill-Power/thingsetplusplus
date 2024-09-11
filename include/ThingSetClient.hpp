@@ -8,7 +8,7 @@
 #include "ThingSetBinaryDecoder.hpp"
 #include "ThingSetBinaryEncoder.hpp"
 #include "ThingSetClientTransport.hpp"
-#include "internal/thingset.h"
+#include "ThingSetStatus.hpp"
 
 namespace ThingSet {
 
@@ -25,7 +25,7 @@ public:
     template <typename T> bool get(uint16_t id, T &result)
     {
         uint8_t buffer[1024];
-        buffer[0] = THINGSET_BIN_GET;
+        buffer[0] = ThingSetRequestType::get;
         FixedSizeThingSetBinaryEncoder encoder(buffer + 1, sizeof(buffer) - 1);
         if (!encoder.encode(id)) {
             return false;

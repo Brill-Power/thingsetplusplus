@@ -230,6 +230,8 @@ public:
     }
 };
 
+using DefaultFixedSizeThingSetBinaryEncoder = FixedSizeThingSetBinaryEncoder<BINARY_ENCODER_DEFAULT_MAX_DEPTH>;
+
 /// @brief Interface for values that can be encoded with a binary encoder.
 class ThingSetBinaryEncodable
 {

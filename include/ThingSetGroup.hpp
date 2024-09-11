@@ -18,14 +18,15 @@ static bool defaultCallback(ThingSetNode *node, ThingSetCallbackReason reason)
 }
 
 template <unsigned Id, unsigned ParentId, StringLiteral Name>
-class ThingSetGroup : public IdentifiableThingSetNode<Id, ParentId, Name>, public ThingSetParentNode
+class ThingSetGroup : public IdentifiableThingSetParentNode<Id, ParentId, Name>
 {
 private:
     std::function<bool(ThingSetNode *, ThingSetCallbackReason)> _callback;
 
 public:
     ThingSetGroup() : ThingSetGroup(defaultCallback){};
-    ThingSetGroup(std::function<bool(ThingSetNode *, ThingSetCallbackReason)> callback) : _callback(callback){};
+    ThingSetGroup(std::function<bool(ThingSetNode *, ThingSetCallbackReason)> callback)
+        : IdentifiableThingSetParentNode<Id, ParentId, Name>(), _callback(callback){};
 
     const std::string getType() const override
     {
@@ -35,17 +36,6 @@ public:
     constexpr const ThingSetNodeType getNodeType() const override
     {
         return ThingSetNodeType::group;
-    }
-
-    bool tryCastTo(ThingSetNodeType type, void **target) override
-    {
-        switch (type) {
-            case ThingSetNodeType::hasChildren:
-                *target = static_cast<ThingSetParentNode *>(this);
-                return true;
-            default:
-                return false;
-        }
     }
 
     bool checkAccess(ThingSetAccess access) const override

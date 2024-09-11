@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: Proprietary
  */
 #include "asio/ThingSetAsyncSocketClientTransport.hpp"
-
+#include "ThingSetStatus.hpp"
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
-#include <internal/thingset.h>
 
 using asio::awaitable;
 using asio::co_spawn;
@@ -66,7 +65,7 @@ awaitable<void> ThingSetAsyncSocketClientTransport::listener(std::function<void(
         auto buffer = asio::buffer(_buffer, 1024);
         size_t length = co_await _subscribeSocket.async_receive(buffer, use_awaitable);
         if (length > 1) {
-            if (_buffer[0] == THINGSET_BIN_REPORT) {
+            if (_buffer[0] == ThingSetRequestType::report) {
                 callback(&_buffer[3], length);
             }
         }

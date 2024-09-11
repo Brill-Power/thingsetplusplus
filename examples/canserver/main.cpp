@@ -33,7 +33,7 @@ struct ModuleRecord
     ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
     ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
     ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadOnlyProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadOnlyProperty<0x610, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
 static inline ThingSetReadOnlyProperty<0x1d, 0, "NodeID", std::string> nodeId = std::format("{:x}", Eui::getValue());

@@ -214,4 +214,6 @@ public:
     }
 };
 
+using DefaultFixedSizeThingSetBinaryDecoder = FixedSizeThingSetBinaryDecoder<BINARY_DECODER_DEFAULT_MAX_DEPTH>;
+
 } // namespace ThingSet
