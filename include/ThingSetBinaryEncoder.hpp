@@ -144,7 +144,9 @@ public:
     /// @tparam T The type to encode.
     /// @param value A reference to the value to be encoded.
     /// @return True if encoding succeeded, otherwise false.
-    template <typename T> bool encode(T &value)
+    template <typename T>
+        requires std::is_class_v<T>
+    bool encode(T &value)
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
         auto count = std::tuple_size_v<decltype(bound)>;
