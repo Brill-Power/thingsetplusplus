@@ -110,7 +110,7 @@ int ThingSetServer::handleFetch(ThingSetRequestContext &context)
     }
     else if (context.decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && context.encoder.encodeListStart()) {
         if (context.node == ThingSetRegistry::getMetadataNode()
-            && context.decoder.decodeList([&context](__attribute_maybe_unused__ size_t index) {
+            && context.decoder.decodeList([&context]([[__unused]] size_t index) {
                    unsigned id;
                    if (!context.decoder.decode(&id)) {
                        return false;

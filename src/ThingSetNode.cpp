@@ -8,7 +8,7 @@
 
 namespace ThingSet {
 
-bool ThingSetNode::tryCastTo(__attribute_maybe_unused__ ThingSetNodeType type, __attribute_maybe_unused__ void **target)
+bool ThingSetNode::tryCastTo([[__unused]] ThingSetNodeType type, [[__unused]] void **target)
 {
     return false;
 }

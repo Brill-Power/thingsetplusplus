@@ -12,8 +12,8 @@
 
 namespace ThingSet {
 
-static bool defaultCallback(__attribute_maybe_unused__ ThingSetNode *node,
-                            __attribute_maybe_unused__ ThingSetCallbackReason reason)
+static bool defaultCallback([[__unused]] ThingSetNode *node,
+                            [[__unused]] ThingSetCallbackReason reason)
 {
     return true;
 }

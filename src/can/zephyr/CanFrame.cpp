@@ -42,6 +42,7 @@ CanFrame &CanFrame::setFd(bool value)
             _frame.flags &= ~CAN_FRAME_FDF;
         }
     }
+    return *this;
 }
 
 CanFrame &CanFrame::setId(CanID &id)
