@@ -4,14 +4,42 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#ifdef __linux__
-
 #include "Eui.hpp"
 #include <bit>
+#include <string.h>
+
+#ifdef __linux__
+
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
 #include <net/if_arp.h>
-#include <string.h>
+
+#elif defined(__ZEPHYR__)
+
+#include <zephyr/drivers/hwinfo.h>
+#include <zephyr/sys/crc.h>
+
+#endif
+
+namespace ThingSet {
+
+Eui &Eui::getInstance()
+{
+    static Eui instance;
+    return instance;
+}
+
+const uint64_t &Eui::getValue()
+{
+    return getInstance()._value;
+}
+
+const std::array<uint8_t, 8> &Eui::getArray()
+{
+    return getInstance()._array;
+}
+
+#ifdef __linux__
 
 /// @brief Gets the MAC address from the first Ethernet address found on the system.
 /// @param t A reference to an array that will contain the MAC address.
@@ -48,27 +76,38 @@ static bool getEthernetMacAddress(uint64_t &target, std::array<uint8_t, 8> &arra
     return false;
 }
 
-namespace ThingSet {
 Eui::Eui()
 {
     getEthernetMacAddress(_value, _array);
 }
 
-Eui &Eui::getInstance()
+#elif defined(__ZEPHYR__)
+
+static bool getHardwareIdentifier(std::array<uint8_t, 8> &array)
 {
-    static Eui instance;
-    return instance;
+    uint8_t buf[12] = { 0 };
+    uint32_t crc;
+    hwinfo_get_device_id(buf, sizeof(buf));
+
+    crc = crc32_ieee(buf, 8);
+    memcpy(array.data(), &crc, 4);
+    crc = crc32_ieee(buf + 4, 8);
+    memcpy(array.data() + 4, &crc, 4);
+
+    /* set U/L bit to 0 for locally administered (not globally unique) EUIs */
+    array[0] &= ~(1U << 1);
+    return true;
 }
 
-const uint64_t &Eui::getValue()
+Eui::Eui()
 {
-    return getInstance()._value;
+    getHardwareIdentifier(_array);
+    _value = 0;
+    for (size_t i = 0; i < _array.size(); i++) {
+        _value |= (uint64_t)_array[i] << (8 * (_array.size() - (i + 1)));
+    }
 }
-
-const std::array<uint8_t, 8> &Eui::getArray()
-{
-    return getInstance()._array;
-}
-} // namespace ThingSet
 
 #endif
+
+} // namespace ThingSet

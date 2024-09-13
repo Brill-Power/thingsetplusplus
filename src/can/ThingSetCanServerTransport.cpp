@@ -10,6 +10,10 @@ namespace ThingSet::Can {
 ThingSetCanServerTransport::ThingSetCanServerTransport() : _messageNumber(0)
 {}
 
+uint8_t ThingSetCanServerTransport::getNodeAddress() {
+    return getInterface().getNodeAddress();
+}
+
 bool ThingSetCanServerTransport::listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     return getInterface().bind() && getInterface().listen(callback);

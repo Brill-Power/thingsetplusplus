@@ -29,14 +29,26 @@ CanID CanFrame::getId() const
     return CanID::create(_frame.id);
 }
 
+bool CanFrame::getFd() const {
+    return (_frame.flags & CAN_FRAME_FDF);
+}
+
+CanFrame &CanFrame::setFd(bool value)
+{
+    if (IS_ENABLED(CONFIG_CAN_FD_MODE)) {
+        if (value) {
+            _frame.flags |= CAN_FRAME_FDF;
+        } else {
+            _frame.flags &= ~CAN_FRAME_FDF;
+        }
+    }
+}
+
 CanFrame &CanFrame::setId(CanID &id)
 {
     _frame.id = id;
     if (_frame.id >= 0x800) {
         _frame.flags |= CAN_FRAME_IDE;
-    }
-    if (IS_ENABLED(CONFIG_CAN_FD_MODE)) {
-        _frame.flags |= CAN_FRAME_FDF;
     }
     return *this;
 }

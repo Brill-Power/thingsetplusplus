@@ -22,6 +22,8 @@ public:
     CanFrame &setId(CanID &id) override;
     uint8_t getLength() const override;
     CanFrame &setLength(uint8_t length) override;
+    bool getFd() const;
+    CanFrame &setFd(bool value);
 };
 
 } // namespace ThingSet::Can::Zephyr

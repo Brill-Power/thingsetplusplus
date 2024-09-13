@@ -21,6 +21,8 @@ protected:
     virtual ThingSetCanInterface &getInterface() = 0;
 
 public:
+    uint8_t getNodeAddress();
+
     bool publish(uint8_t *buffer, size_t len) override;
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
 
