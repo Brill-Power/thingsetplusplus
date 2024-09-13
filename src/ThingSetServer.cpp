@@ -109,17 +109,18 @@ int ThingSetServer::handleFetch(ThingSetRequestContext &context)
         }
     }
     else if (context.decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && context.encoder.encodeListStart()) {
-        if (context.node == ThingSetRegistry::getMetadataNode() && context.decoder.decodeList([&context](size_t index) {
-                unsigned id;
-                if (!context.decoder.decode(&id)) {
-                    return false;
-                }
-                ThingSetNode *n;
-                return ThingSetRegistry::findById(id, &n) && context.encoder.encodeMapStart()
-                       && context.encoder.encode("name") && context.encoder.encode(n->getName())
-                       && context.encoder.encode("type") && context.encoder.encode(n->getType())
-                       && context.encoder.encodeMapEnd();
-            })
+        if (context.node == ThingSetRegistry::getMetadataNode()
+            && context.decoder.decodeList([&context](__attribute_maybe_unused__ size_t index) {
+                   unsigned id;
+                   if (!context.decoder.decode(&id)) {
+                       return false;
+                   }
+                   ThingSetNode *n;
+                   return ThingSetRegistry::findById(id, &n) && context.encoder.encodeMapStart()
+                          && context.encoder.encode("name") && context.encoder.encode(n->getName())
+                          && context.encoder.encode("type") && context.encoder.encode(n->getType())
+                          && context.encoder.encodeMapEnd();
+               })
             && context.encoder.encodeListEnd())
         {
             return context.encoder.getEncodedLength() + 1;

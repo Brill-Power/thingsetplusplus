@@ -12,7 +12,8 @@
 
 namespace ThingSet {
 
-static bool defaultCallback(ThingSetNode *node, ThingSetCallbackReason reason)
+static bool defaultCallback(__attribute_maybe_unused__ ThingSetNode *node,
+                            __attribute_maybe_unused__ ThingSetCallbackReason reason)
 {
     return true;
 }
@@ -33,7 +34,7 @@ public:
         return "group";
     }
 
-    constexpr const ThingSetNodeType getNodeType() const override
+    constexpr ThingSetNodeType getNodeType() const override
     {
         return ThingSetNodeType::group;
     }

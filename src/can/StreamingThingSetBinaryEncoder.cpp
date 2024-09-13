@@ -17,7 +17,7 @@ StreamingThingSetBinaryEncoder::StreamingThingSetBinaryEncoder(Can::ThingSetCanS
                            (THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE * 2) - 1, 1);
 }
 
-const bool StreamingThingSetBinaryEncoder::getIsForwardOnly() const
+bool StreamingThingSetBinaryEncoder::getIsForwardOnly() const
 {
     return true;
 }

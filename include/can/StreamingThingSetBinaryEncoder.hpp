@@ -37,7 +37,7 @@ public:
 
     size_t getEncodedLength() const override;
 
-    const bool getIsForwardOnly() const override;
+    bool getIsForwardOnly() const override;
 
     template <typename T> bool encodePair(uint32_t id, T &value)
     {

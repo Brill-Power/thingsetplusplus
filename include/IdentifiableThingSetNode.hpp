@@ -27,12 +27,12 @@ public:
         return Name.string_view();
     }
 
-    constexpr const unsigned getId() const override
+    constexpr unsigned getId() const override
     {
         return Id;
     }
 
-    constexpr const unsigned getParentId() const override
+    constexpr unsigned getParentId() const override
     {
         return ParentId;
     }

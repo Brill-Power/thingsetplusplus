@@ -33,7 +33,7 @@ public:
         return ThingSetType<std::remove_pointer_t<T>>::name;
     }
 
-    constexpr const ThingSetNodeType getNodeType() const override
+    constexpr ThingSetNodeType getNodeType() const override
     {
         return ThingSetNodeType::value;
     }

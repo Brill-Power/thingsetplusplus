@@ -32,13 +32,13 @@ public:
 
     constexpr virtual const std::string_view getName() const = 0;
 
-    constexpr virtual const unsigned getId() const = 0;
+    constexpr virtual unsigned getId() const = 0;
 
-    constexpr virtual const unsigned getParentId() const = 0;
+    constexpr virtual unsigned getParentId() const = 0;
 
     virtual const std::string getType() const = 0;
 
-    constexpr virtual const ThingSetNodeType getNodeType() const = 0;
+    constexpr virtual ThingSetNodeType getNodeType() const = 0;
 
     virtual bool tryCastTo(ThingSetNodeType type, void **target);
 

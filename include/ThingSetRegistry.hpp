@@ -31,12 +31,12 @@ private:
             return Name.string_view();
         }
 
-        constexpr virtual const unsigned getId() const override
+        constexpr virtual unsigned getId() const override
         {
             return Id;
         }
 
-        constexpr virtual const unsigned getParentId() const override
+        constexpr virtual unsigned getParentId() const override
         {
             return ParentId;
         }
@@ -46,7 +46,7 @@ private:
             return "group";
         }
 
-        constexpr const ThingSetNodeType getNodeType() const override
+        constexpr ThingSetNodeType getNodeType() const override
         {
             return ThingSetNodeType::group;
         }

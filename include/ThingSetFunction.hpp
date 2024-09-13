@@ -65,7 +65,7 @@ public:
         return ThingSetType<std::function<Result(Args...)>>::name;
     }
 
-    constexpr const ThingSetNodeType getNodeType() const override
+    constexpr ThingSetNodeType getNodeType() const override
     {
         return ThingSetNodeType::function;
     }

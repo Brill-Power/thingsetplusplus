@@ -9,7 +9,7 @@ namespace ThingSet {
 
 static bool encodeListMapEnd(zcbor_state_t *state);
 
-const bool ThingSetBinaryEncoder::getIsForwardOnly() const
+bool ThingSetBinaryEncoder::getIsForwardOnly() const
 {
     return false;
 }
