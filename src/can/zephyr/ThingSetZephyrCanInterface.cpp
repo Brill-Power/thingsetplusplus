@@ -20,7 +20,7 @@ static const isotp_fast_opts flowControlOptions = {
 #ifdef CONFIG_CAN_FD_MODE
     .flags = ISOTP_MSG_FDF,
 #endif
-    .addressing_mode = ISOTP_FAST_ADDRESSING_MODE_CUSTOM,
+    .addressing_mode = ISOTP_FAST_ADDRESSING_MODE_FIXED,
 };
 
 ThingSetZephyrCanInterface::ThingSetZephyrCanInterface(const device *const canDevice)

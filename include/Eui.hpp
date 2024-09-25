@@ -7,6 +7,7 @@
 
 #include <array>
 #include <cstdint>
+#include <string>
 
 namespace ThingSet {
 
@@ -22,6 +23,7 @@ private:
 public:
     static const uint64_t &getValue();
     static const std::array<uint8_t, 8> &getArray();
+    static const std::string getString();
 };
 
 } // namespace ThingSet

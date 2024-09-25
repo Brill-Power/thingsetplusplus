@@ -9,8 +9,11 @@
 #include "ThingSetCustomRequestHandler.hpp"
 #include "ThingSetRegistry.hpp"
 #include <list>
+#include "Eui.hpp"
 
 namespace ThingSet {
+
+static inline ThingSetProperty<std::string> nodeId(0x1d, 0, "NodeID", ThingSetAccess::userRead, Eui::getString());
 
 ThingSetServer::ThingSetServer(ThingSetServerTransport &transport)
     : _transport(transport), _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)

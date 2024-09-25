@@ -39,6 +39,15 @@ const std::array<uint8_t, 8> &Eui::getArray()
     return getInstance()._array;
 }
 
+const std::string Eui::getString()
+{
+    auto &arr = getInstance()._array;
+    char str[17];
+    snprintf(str, sizeof(str), "%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X", arr[0], arr[1],
+             arr[2], arr[3], arr[4], arr[5], arr[6], arr[7]);
+    return std::string(str);
+}
+
 #ifdef __linux__
 
 /// @brief Gets the MAC address from the first Ethernet address found on the system.
