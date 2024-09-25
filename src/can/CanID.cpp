@@ -64,6 +64,18 @@ CanID &CanID::setTarget(uint8_t value)
     return *this;
 }
 
+uint16_t CanID::getDataID() const
+{
+    return (_id & dataIdMask) >> THINGSET_CAN_ID_POSITION_DATA_ID;
+}
+
+CanID &CanID::setDataID(uint16_t value)
+{
+    _id = (_id & ~dataIdMask) | ((value << THINGSET_CAN_ID_POSITION_DATA_ID) & dataIdMask);
+    _mask |= dataIdMask;
+    return *this;
+}
+
 uint8_t CanID::getSequenceNumber() const
 {
     return (_id & sequenceNumberMask) >> THINGSET_CAN_ID_POSITION_SEQ_NO;

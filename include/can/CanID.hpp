@@ -88,6 +88,9 @@ public:
     uint8_t getTarget() const;
     CanID &setTarget(uint8_t value);
 
+    uint16_t getDataID() const;
+    CanID &setDataID(uint16_t value);
+
     uint8_t getSequenceNumber() const;
     CanID &setSequenceNumber(uint8_t value);
     uint8_t getMessageNumber() const;
