@@ -11,12 +11,16 @@
 
 namespace ThingSet::Can {
 
+/// @brief Abstraction of a CAN frame across different platforms.
+/// @tparam Self The derived type.
+/// @tparam T The native type of the CAN frame on the platform.
+/// @tparam Size The maximum data length.
 template <typename Self, typename T, unsigned Size> class AbstractCanFrame
 {
 protected:
     T _frame;
 
-    AbstractCanFrame() : _frame {}
+    AbstractCanFrame() : _frame{}
     {}
 
 public:

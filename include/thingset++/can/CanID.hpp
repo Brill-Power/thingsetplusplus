@@ -19,22 +19,33 @@
 
 namespace ThingSet::Can {
 
+/// @brief Specifies the type of a message.
 enum MessageType
 {
+    /// @brief Request-response. Uses ISO-TP.
     requestResponse = 0x0 << THINGSET_CAN_ID_POSITION_TYPE,
+    /// @brief Report spread over multiple frames.
     multiFrameReport = 0x1 << THINGSET_CAN_ID_POSITION_TYPE,
+    /// @brief Single frame report, also known as a control message.
     singleFrameReport = 0x2 << THINGSET_CAN_ID_POSITION_TYPE,
+    /// @brief Network management messages (address claims, etc.).
     network = 0x3 << THINGSET_CAN_ID_POSITION_TYPE,
 };
 
+/// @brief Specifies the sub-type of a multi-frame report.
 enum MultiFrameMessageType
 {
+    /// @brief The first frame in a multi-frame report.
     first = 0x0 << THINGSET_CAN_ID_POSITION_MF_TYPE,
+    /// @brief A frame that is neither the first nor the last in a multi-frame report.
     consecutive = 0x1 << THINGSET_CAN_ID_POSITION_MF_TYPE,
+    /// @brief The last frame in a multi-frame report.
     last = 0x2 << THINGSET_CAN_ID_POSITION_MF_TYPE,
+    /// @brief A multi-frame report-type message that fits inside a single frame.
     single = 0x3 << THINGSET_CAN_ID_POSITION_MF_TYPE,
 };
 
+/// @brief Specifies the priority of a message.
 enum MessagePriority
 {
     controlEmergency = 0x0 << THINGSET_CAN_ID_POSITION_PRIORITY,
@@ -54,10 +65,15 @@ private:
     uint32_t _mask;
 
 public:
+    /// @brief The minimum valid address for a node.
     static const uint8_t minAddress = 0x01;
+    /// @brief The maximum valid address for a node.
     static const uint8_t maxAddress = 0xfd;
+    /// @brief The anonymous node address.
     static const uint8_t anonymousAddress = 0xfe;
+    /// @brief The broadcast node address.
     static const uint8_t broadcastAddress = 0xff;
+    /// @brief The default (local) bridge address.
     static const uint8_t defaultBridge = 0x00;
 
 private:
@@ -78,14 +94,23 @@ public:
 
     operator uint32_t() const;
 
+    /// @brief Gets the CAN ID as a value.
     uint32_t getId() const;
+    /// @brief Gets a mask that indicates the set bits of this CAN ID.
     uint32_t getMask() const;
 
+    /// @brief Gets the reply address equivalent of this CAN ID.
     CanID getReplyId() const;
 
+    /// @brief Gets the source component of this CAN ID.
     uint8_t getSource() const;
+    /// @brief Sets the source component of this CAN ID.
+    /// @return The modified CAN ID.
     CanID &setSource(uint8_t value);
+    /// @brief Gets the target component of this CAN ID.
     uint8_t getTarget() const;
+    /// @brief Sets the target component of this CAN ID.
+    /// @return The modified CAN ID.
     CanID &setTarget(uint8_t value);
 
     uint16_t getDataID() const;
