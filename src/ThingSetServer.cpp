@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "ThingSetServer.hpp"
-#include "ThingSet.hpp"
-#include "ThingSetCustomRequestHandler.hpp"
-#include "ThingSetRegistry.hpp"
+#include "thingset++/ThingSetServer.hpp"
+#include "thingset++/Eui.hpp"
+#include "thingset++/ThingSet.hpp"
+#include "thingset++/ThingSetCustomRequestHandler.hpp"
+#include "thingset++/ThingSetRegistry.hpp"
 #include <list>
-#include "Eui.hpp"
 
 namespace ThingSet {
 
-static inline ThingSetProperty<std::string> nodeId(0x1d, 0, "NodeID", ThingSetAccess::userRead, Eui::getString());
+static inline ThingSetProperty<0x1d, 0, "NodeID", ThingSetAccess::userRead, std::string> nodeId(Eui::getString());
 
 ThingSetServer::ThingSetServer(ThingSetServerTransport &transport)
     : _transport(transport), _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
@@ -112,18 +112,17 @@ int ThingSetServer::handleFetch(ThingSetRequestContext &context)
         }
     }
     else if (context.decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && context.encoder.encodeListStart()) {
-        if (context.node == ThingSetRegistry::getMetadataNode()
-            && context.decoder.decodeList([&context]([[__unused]] size_t index) {
-                   unsigned id;
-                   if (!context.decoder.decode(&id)) {
-                       return false;
-                   }
-                   ThingSetNode *n;
-                   return ThingSetRegistry::findById(id, &n) && context.encoder.encodeMapStart()
-                          && context.encoder.encode("name") && context.encoder.encode(n->getName())
-                          && context.encoder.encode("type") && context.encoder.encode(n->getType())
-                          && context.encoder.encodeMapEnd();
-               })
+        if (context.node == ThingSetRegistry::getMetadataNode() && context.decoder.decodeList([&context](size_t) {
+                unsigned id;
+                if (!context.decoder.decode(&id)) {
+                    return false;
+                }
+                ThingSetNode *n;
+                return ThingSetRegistry::findById(id, &n) && context.encoder.encodeMapStart()
+                       && context.encoder.encode("name") && context.encoder.encode(n->getName())
+                       && context.encoder.encode("type") && context.encoder.encode(n->getType())
+                       && context.encoder.encodeMapEnd();
+            })
             && context.encoder.encodeListEnd())
         {
             return context.encoder.getEncodedLength() + 1;

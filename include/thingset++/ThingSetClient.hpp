@@ -52,8 +52,7 @@ public:
             size_t pos = decoder.getDecodedLength();
             decoder = FixedSizeThingSetBinaryDecoder(buffer + pos, len - pos);
             if (decoder.skipUntil(ZCBOR_MAJOR_TYPE_MAP)) {
-                decoder.template decodeMap<uint16_t>(
-                    [&decoder, items](uint16_t &key) { return decoder.decode(items); });
+                decoder.template decodeMap<uint16_t>([&decoder, items](uint16_t &) { return decoder.decode(items); });
             }
         });
     }

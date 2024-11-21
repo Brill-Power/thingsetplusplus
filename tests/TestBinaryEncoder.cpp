@@ -1,4 +1,4 @@
-#include "ThingSetBinaryEncoder.hpp"
+#include "thingset++/ThingSetBinaryEncoder.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;

@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "can/ThingSetCanServerTransport.hpp"
+#include "thingset++/can/ThingSetCanServerTransport.hpp"
 
 namespace ThingSet::Can {
 

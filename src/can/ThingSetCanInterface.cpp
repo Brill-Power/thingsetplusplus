@@ -3,9 +3,9 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "can/ThingSetCanInterface.hpp"
-#include "Eui.hpp"
-#include "can/CanID.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
+#include "thingset++/Eui.hpp"
+#include "thingset++/can/CanID.hpp"
 #include <chrono>
 #include <random>
 #include <string.h>

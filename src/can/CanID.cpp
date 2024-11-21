@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "can/CanID.hpp"
+#include "thingset++/can/CanID.hpp"
 
 namespace ThingSet::Can {
 

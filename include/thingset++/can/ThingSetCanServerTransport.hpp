@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include "ThingSetServerTransport.hpp"
-#include "ThingSetCanInterface.hpp"
-#include "can/CanID.hpp"
+#include "thingset++/ThingSetServerTransport.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
+#include "thingset++/can/CanID.hpp"
 
 namespace ThingSet::Can {
 

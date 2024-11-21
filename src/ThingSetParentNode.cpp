@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "ThingSetParentNode.hpp"
+#include "thingset++/ThingSetParentNode.hpp"
 #include <cstdint>
 #include <string>
 

@@ -3,11 +3,16 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "ThingSetBinaryEncoder.hpp"
+#include "thingset++/ThingSetBinaryEncoder.hpp"
 
 namespace ThingSet {
 
 static bool encodeListMapEnd(zcbor_state_t *state);
+
+bool ThingSetBinaryEncoder::ensureState()
+{
+    return true;
+}
 
 bool ThingSetBinaryEncoder::getIsForwardOnly() const
 {
@@ -37,24 +42,24 @@ bool ThingSetBinaryEncoder::encode(std::string &value)
 bool ThingSetBinaryEncoder::encode(const char *value)
 {
 #ifdef zcbor_tstr_put_term
-    return zcbor_tstr_put_term(this->getState(), value);
+    return this->ensureState() && zcbor_tstr_put_term(this->getState(), value);
 #else
-    return zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+    return this->ensureState() && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif
 }
 
 bool ThingSetBinaryEncoder::encode(char *value)
 {
 #ifdef zcbor_tstr_put_term
-    return zcbor_tstr_put_term(this->getState(), value);
+    return this->ensureState() && zcbor_tstr_put_term(this->getState(), value);
 #else
-    return zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+    return this->ensureState() && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif
 }
 
 bool ThingSetBinaryEncoder::encode(const float &value)
 {
-    return zcbor_float32_encode(this->getState(), &value);
+    return this->ensureState() && zcbor_float32_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(float &value)
@@ -64,12 +69,12 @@ bool ThingSetBinaryEncoder::encode(float &value)
 
 bool ThingSetBinaryEncoder::encode(float *value)
 {
-    return zcbor_float32_encode(this->getState(), value);
+    return this->ensureState() && zcbor_float32_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const double &value)
 {
-    return zcbor_float64_encode(this->getState(), &value);
+    return this->ensureState() && zcbor_float64_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(double &value)
@@ -79,27 +84,27 @@ bool ThingSetBinaryEncoder::encode(double &value)
 
 bool ThingSetBinaryEncoder::encode(double *value)
 {
-    return zcbor_float64_encode(this->getState(), value);
+    return this->ensureState() && zcbor_float64_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const bool &value)
 {
-    return zcbor_bool_put(this->getState(), value);
+    return this->ensureState() && zcbor_bool_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(bool &value)
 {
-    return zcbor_bool_put(this->getState(), value);
+    return this->ensureState() && zcbor_bool_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const uint8_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return this->ensureState() && zcbor_uint32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint8_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return this->ensureState() && zcbor_uint32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint8_t *value)
@@ -109,12 +114,12 @@ bool ThingSetBinaryEncoder::encode(uint8_t *value)
 
 bool ThingSetBinaryEncoder::encode(const uint16_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return this->ensureState() && zcbor_uint32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint16_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return this->ensureState() && zcbor_uint32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint16_t *value)
@@ -124,7 +129,7 @@ bool ThingSetBinaryEncoder::encode(uint16_t *value)
 
 bool ThingSetBinaryEncoder::encode(const uint32_t &value)
 {
-    return zcbor_uint32_encode(this->getState(), &value);
+    return this->ensureState() && zcbor_uint32_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint32_t &value)
@@ -134,12 +139,12 @@ bool ThingSetBinaryEncoder::encode(uint32_t &value)
 
 bool ThingSetBinaryEncoder::encode(uint32_t *value)
 {
-    return zcbor_uint32_encode(this->getState(), value);
+    return this->ensureState() && zcbor_uint32_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const uint64_t &value)
 {
-    return zcbor_uint64_encode(this->getState(), &value);
+    return this->ensureState() && zcbor_uint64_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(uint64_t &value)
@@ -149,32 +154,32 @@ bool ThingSetBinaryEncoder::encode(uint64_t &value)
 
 bool ThingSetBinaryEncoder::encode(uint64_t *value)
 {
-    return zcbor_uint64_encode(this->getState(), value);
+    return this->ensureState() && zcbor_uint64_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const int8_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return this->ensureState() && zcbor_int32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(int8_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return this->ensureState() && zcbor_int32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const int16_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return this->ensureState() && zcbor_int32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(int16_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return this->ensureState() && zcbor_int32_put(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const int32_t &value)
 {
-    return zcbor_int32_encode(this->getState(), &value);
+    return this->ensureState() && zcbor_int32_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(int32_t &value)
@@ -184,12 +189,12 @@ bool ThingSetBinaryEncoder::encode(int32_t &value)
 
 bool ThingSetBinaryEncoder::encode(int32_t *value)
 {
-    return zcbor_int32_encode(this->getState(), value);
+    return this->ensureState() && zcbor_int32_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encode(const int64_t &value)
 {
-    return zcbor_int64_encode(this->getState(), &value);
+    return this->ensureState() && zcbor_int64_encode(this->getState(), &value);
 }
 
 bool ThingSetBinaryEncoder::encode(int64_t &value)
@@ -199,12 +204,12 @@ bool ThingSetBinaryEncoder::encode(int64_t &value)
 
 bool ThingSetBinaryEncoder::encode(int64_t *value)
 {
-    return zcbor_int64_encode(this->getState(), value);
+    return this->ensureState() && zcbor_int64_encode(this->getState(), value);
 }
 
 bool ThingSetBinaryEncoder::encodeNull()
 {
-    return zcbor_nil_put(this->getState(), NULL);
+    return this->ensureState() && zcbor_nil_put(this->getState(), NULL);
 }
 
 bool ThingSetBinaryEncoder::encodeListStart()
@@ -214,7 +219,7 @@ bool ThingSetBinaryEncoder::encodeListStart()
 
 bool ThingSetBinaryEncoder::encodeListStart(uint32_t count)
 {
-    return zcbor_list_start_encode(this->getState(), count);
+    return this->ensureState() && zcbor_list_start_encode(this->getState(), count);
 }
 
 bool ThingSetBinaryEncoder::encodeListEnd()
@@ -225,10 +230,10 @@ bool ThingSetBinaryEncoder::encodeListEnd()
 bool ThingSetBinaryEncoder::encodeListEnd(uint32_t count)
 {
     if (this->getIsForwardOnly()) {
-        return encodeListMapEnd(this->getState());
+        return this->ensureState() && encodeListMapEnd(this->getState());
     }
     else {
-        return zcbor_list_end_encode(this->getState(), count);
+        return this->ensureState() && zcbor_list_end_encode(this->getState(), count);
     }
 }
 
@@ -239,7 +244,7 @@ bool ThingSetBinaryEncoder::encodeMapStart()
 
 bool ThingSetBinaryEncoder::encodeMapStart(uint32_t count)
 {
-    return zcbor_map_start_encode(this->getState(), count);
+    return this->ensureState() && zcbor_map_start_encode(this->getState(), count);
 }
 
 bool ThingSetBinaryEncoder::encodeMapEnd()
@@ -250,10 +255,10 @@ bool ThingSetBinaryEncoder::encodeMapEnd()
 bool ThingSetBinaryEncoder::encodeMapEnd(uint32_t count)
 {
     if (this->getIsForwardOnly()) {
-        return encodeListMapEnd(this->getState());
+        return this->ensureState() && encodeListMapEnd(this->getState());
     }
     else {
-        return zcbor_map_end_encode(this->getState(), count);
+        return this->ensureState() && zcbor_map_end_encode(this->getState(), count);
     }
 }
 

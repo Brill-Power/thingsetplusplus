@@ -5,23 +5,22 @@
  */
 #pragma once
 
-#include "can/ThingSetCanServerTransport.hpp"
-#include "can/zephyr/ThingSetZephyrCanInterface.hpp"
+#include "thingset++/can/ThingSetCanServerTransport.hpp"
+#include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
 class ThingSetZephyrCanServerTransport : public Can::ThingSetCanServerTransport
 {
 private:
-    ThingSetZephyrCanInterface _canInterface;
+    _ThingSetZephyrCanInterface &_canInterface;
 
 protected:
     ThingSetCanInterface &getInterface() override;
 
 public:
-    ThingSetZephyrCanServerTransport(const device *const canDevice);
+    ThingSetZephyrCanServerTransport(_ThingSetZephyrCanInterface &canInterface);
 
-    // this is a stop-gap until address negotiation is implemented and migrated to
     bool bind(uint8_t nodeAddress);
 };
 

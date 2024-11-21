@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "asio/ThingSetAsyncSocketClientTransport.hpp"
-#include "ThingSetStatus.hpp"
+#include "thingset++/asio/ThingSetAsyncSocketClientTransport.hpp"
+#include "thingset++/ThingSetStatus.hpp"
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
 

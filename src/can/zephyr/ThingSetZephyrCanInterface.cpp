@@ -3,11 +3,11 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "can/zephyr/ThingSetZephyrCanInterface.hpp"
-#include "can/zephyr/CanFrame.hpp"
-#include "Eui.hpp"
-#include "can/CanID.hpp"
-#include "internal/logging.hpp"
+#include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
+#include "thingset++/can/zephyr/CanFrame.hpp"
+#include "thingset++/Eui.hpp"
+#include "thingset++/can/CanID.hpp"
+#include "thingset++/internal/logging.hpp"
 #include <chrono>
 #include <string.h>
 #include <zephyr/random/random.h>
@@ -23,10 +23,41 @@ static const isotp_fast_opts flowControlOptions = {
     .addressing_mode = ISOTP_FAST_ADDRESSING_MODE_FIXED,
 };
 
-ThingSetZephyrCanInterface::ThingSetZephyrCanInterface(const device *const canDevice)
+_ThingSetZephyrCanInterface::_ThingSetZephyrCanInterface(const device *const canDevice)
     : _canDevice(canDevice)
 {
     _nodeAddress = CanID::broadcastAddress;
+}
+
+bool _ThingSetZephyrCanInterface::publish(CanID &id, uint8_t *buffer, size_t length)
+{
+    CanFrame frame(id);
+    memcpy(frame.getData(), buffer, length);
+    frame.setLength(length);
+    frame.setFd(true);
+    int result = can_send(_canDevice, frame.getFrame(), K_MSEC(CONFIG_THINGSET_CAN_REPORT_SEND_TIMEOUT), nullptr, nullptr);
+    return result == 0;
+}
+
+ThingSetZephyrCanStubInterface::ThingSetZephyrCanStubInterface(const device *const canDevice)
+    : _ThingSetZephyrCanInterface::_ThingSetZephyrCanInterface(canDevice)
+{
+}
+
+bool ThingSetZephyrCanStubInterface::bind(uint8_t nodeAddress)
+{
+    _nodeAddress = nodeAddress;
+    return true;
+}
+
+bool ThingSetZephyrCanStubInterface::listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
+{
+    return true;
+}
+
+ThingSetZephyrCanInterface::ThingSetZephyrCanInterface(const device *const canDevice)
+    : _ThingSetZephyrCanInterface::_ThingSetZephyrCanInterface(canDevice)
+{
 }
 
 ThingSetZephyrCanInterface::~ThingSetZephyrCanInterface()
@@ -44,7 +75,10 @@ void ThingSetZephyrCanInterface::onRequestResponseReceived(net_buf *buffer, int 
     uint8_t txBuffer[1024];
     len = listener->callback(rxBuffer, len, txBuffer, sizeof(txBuffer));
     if (len > 0) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnarrowing"
         int result = isotp_fast_send(&listener->requestResponseContext, txBuffer, len, isotp_fast_addr { .ext_id = CanID::create(address.ext_id).getReplyId() }, nullptr);
+#pragma GCC diagnostic pop
         if (result != 0) {
             LOG_ERR("Error %d sending reply to message from 0x%d", result, address.ext_id);
         }
@@ -70,11 +104,11 @@ void ThingSetZephyrCanInterface::AddressDiscoverer::onAddressDiscoverSent(const 
     }
 }
 
-static void onRequestResponseError(int8_t error, struct isotp_fast_addr addr, void *arg)
+static void onRequestResponseError(int8_t error, isotp_fast_addr addr, void *arg)
 {
 }
 
-static void onRequestResponseSent(int result, void *arg)
+static void onRequestResponseSent(int result, isotp_fast_addr addr, void *arg)
 {
 }
 
@@ -166,23 +200,16 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
     return true;
 }
 
-bool ThingSetZephyrCanInterface::publish(CanID &id, uint8_t *buffer, size_t length)
-{
-    CanFrame frame(id);
-    memcpy(frame.getData(), buffer, length);
-    frame.setLength(length);
-    frame.setFd(true);
-    int result = can_send(_canDevice, frame.getFrame(), K_MSEC(CONFIG_THINGSET_CAN_REPORT_SEND_TIMEOUT), nullptr, nullptr);
-    return result == 0;
-}
-
 bool ThingSetZephyrCanInterface::listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnarrowing"
     isotp_fast_addr rxAddress = {
         .ext_id = CanID().setMessageType(MessageType::requestResponse)
             .setMessagePriority(MessagePriority::channel)
             .setTarget(_nodeAddress),
     };
+#pragma GCC diagnostic pop
     _listener.callback = callback;
     return isotp_fast_bind(&_listener.requestResponseContext, _canDevice, rxAddress,
         &flowControlOptions, onRequestResponseReceived, &_listener, onRequestResponseError,
