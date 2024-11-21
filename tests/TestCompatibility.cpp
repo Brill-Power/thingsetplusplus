@@ -1,5 +1,5 @@
-#include "ThingSet.hpp"
-#include "ThingSetCompatibility.hpp"
+#include "thingset++/ThingSet.hpp"
+#include "thingset++/ThingSetCompatibility.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;

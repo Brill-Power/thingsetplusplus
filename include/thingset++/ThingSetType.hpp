@@ -20,7 +20,7 @@ template <typename T, size_t size> struct ThingSetType<std::array<T, size>>
     inline static const std::string name = std::string(ThingSetType<T>::name) + "[]";
 };
 
-static std::string concatAndShift(std::string &str)
+static inline std::string concatAndShift(std::string &str)
 {
     return str;
 }

@@ -1,7 +1,7 @@
-#include <ThingSet.hpp>
-#include <ThingSetClient.hpp>
-#include <asio.hpp>
-#include <asio/ThingSetAsyncSocketClientTransport.hpp>
+#include <thingset++/ThingSet.hpp>
+#include <thingset++/ThingSetClient.hpp>
+#include <thingset++/asio.hpp>
+#include <thingset++/asio/ThingSetAsyncSocketClientTransport.hpp>
 #include <functional>
 
 using namespace ThingSet;

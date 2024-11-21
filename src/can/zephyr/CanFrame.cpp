@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "can/zephyr/CanFrame.hpp"
+#include "thingset++/can/zephyr/CanFrame.hpp"
 #include <string.h>
 
 namespace ThingSet::Can::Zephyr {

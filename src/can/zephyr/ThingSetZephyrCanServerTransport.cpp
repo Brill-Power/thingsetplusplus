@@ -3,12 +3,12 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "can/zephyr/ThingSetZephyrCanServerTransport.hpp"
+#include "thingset++/can/zephyr/ThingSetZephyrCanServerTransport.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
-ThingSetZephyrCanServerTransport::ThingSetZephyrCanServerTransport(const device *const canDevice)
-    : ThingSetCanServerTransport(), _canInterface(canDevice)
+ThingSetZephyrCanServerTransport::ThingSetZephyrCanServerTransport(_ThingSetZephyrCanInterface &canInterface)
+    : ThingSetCanServerTransport(), _canInterface(canInterface)
 {}
 
 ThingSetCanInterface &ThingSetZephyrCanServerTransport::getInterface() {

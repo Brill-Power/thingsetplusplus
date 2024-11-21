@@ -1,4 +1,4 @@
-#include "ThingSet.hpp"
+#include "thingset++/ThingSet.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;

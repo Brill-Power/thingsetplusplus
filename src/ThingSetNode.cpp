@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "ThingSetNode.hpp"
+#include "thingset++/ThingSetNode.hpp"
 
 namespace ThingSet {
 
-bool ThingSetNode::tryCastTo([[__unused]] ThingSetNodeType type, [[__unused]] void **target)
+bool ThingSetNode::tryCastTo(ThingSetNodeType, void **)
 {
     return false;
 }

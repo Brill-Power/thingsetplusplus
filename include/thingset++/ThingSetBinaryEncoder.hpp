@@ -23,6 +23,7 @@ namespace ThingSet {
 class ThingSetBinaryEncoder
 {
 protected:
+    virtual bool ensureState();
     virtual zcbor_state_t *getState() = 0;
     virtual bool getIsForwardOnly() const;
 

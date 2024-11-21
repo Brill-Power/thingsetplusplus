@@ -3,13 +3,24 @@
  *
  * SPDX-License-Identifier: Proprietary
  */
-#include "ThingSetBinaryDecoder.hpp"
+#include "thingset++/ThingSetBinaryDecoder.hpp"
 
 #ifndef ZCBOR_MAJOR_TYPE
 #define ZCBOR_MAJOR_TYPE(header_byte) ((zcbor_major_type_t)(((header_byte) >> 5) & 0x7))
 #endif
 
 namespace ThingSet {
+
+ThingSetBinaryDecoder::ThingSetBinaryDecoder() : ThingSetBinaryDecoder(ThingSetBinaryDecoderOptions{})
+{}
+
+ThingSetBinaryDecoder::ThingSetBinaryDecoder(ThingSetBinaryDecoderOptions options) : _options(options)
+{}
+
+bool ThingSetBinaryDecoder::getIsForwardOnly() const
+{
+    return false;
+}
 
 bool ThingSetBinaryDecoder::decode(std::string *value)
 {

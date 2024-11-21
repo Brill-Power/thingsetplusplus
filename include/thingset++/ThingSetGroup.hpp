@@ -12,8 +12,7 @@
 
 namespace ThingSet {
 
-static bool defaultCallback([[__unused]] ThingSetNode *node,
-                            [[__unused]] ThingSetCallbackReason reason)
+static inline bool defaultCallback(ThingSetNode *, ThingSetCallbackReason)
 {
     return true;
 }
@@ -39,7 +38,7 @@ public:
         return ThingSetNodeType::group;
     }
 
-    bool checkAccess(ThingSetAccess access) const override
+    bool checkAccess(ThingSetAccess) const override
     {
         // no access control on groups at the moment
         return true;

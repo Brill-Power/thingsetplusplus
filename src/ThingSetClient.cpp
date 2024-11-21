@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "ThingSetClient.hpp"
+#include "thingset++/ThingSetClient.hpp"
 
 ThingSet::ThingSetClient::ThingSetClient(ThingSetClientTransport &transport) : _transport(transport)
 {}

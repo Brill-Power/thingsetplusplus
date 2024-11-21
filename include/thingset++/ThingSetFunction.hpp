@@ -94,7 +94,7 @@ public:
         return (access & Access) == Access;
     }
 
-    bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const override
+    bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override
     {
         return true;
     }

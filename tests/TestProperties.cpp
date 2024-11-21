@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include <ThingSet.hpp>
+#include <thingset++/ThingSet.hpp>
 
 using namespace ThingSet;
 

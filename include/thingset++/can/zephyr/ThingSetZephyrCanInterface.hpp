@@ -5,15 +5,39 @@
  */
 #pragma once
 
-#include "can/ThingSetCanInterface.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
 #include <functional>
 #include <zephyr/device.h>
-#include "isotp_fast.hpp"
+extern "C" {
+    #include <canbus/isotp_fast.h>
+}
 
 namespace ThingSet::Can::Zephyr {
 
+class _ThingSetZephyrCanInterface : public ThingSetCanInterface
+{
+protected:
+    const device *const _canDevice;
+
+    _ThingSetZephyrCanInterface(const device *const canDevice);
+
+public:
+    bool publish(CanID &id, uint8_t *buffer, size_t length) override;
+};
+
+class ThingSetZephyrCanStubInterface : public _ThingSetZephyrCanInterface
+{
+public:
+    ThingSetZephyrCanStubInterface(const device *const canDevice);
+
+    using ThingSetCanInterface::bind;
+    bool bind(uint8_t nodeAddress) override;
+
+    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+};
+
 /// @brief Encapsulates a ThingSet CAN interface.
-class ThingSetZephyrCanInterface : public ThingSetCanInterface
+class ThingSetZephyrCanInterface : public _ThingSetZephyrCanInterface
 {
 private:
     struct Listener {
@@ -34,7 +58,6 @@ private:
         discoverMessageSent = 0x02,
     };
 
-    const device *const _canDevice;
     Listener _listener;
 
 public:
@@ -45,8 +68,6 @@ public:
     bool bind(uint8_t nodeAddress) override;
 
     bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
-
-    bool publish(CanID &id, uint8_t *buffer, size_t length) override;
 
 private:
     static void onRequestResponseReceived(net_buf *buffer, int remainingLength, isotp_fast_addr address, void *arg);

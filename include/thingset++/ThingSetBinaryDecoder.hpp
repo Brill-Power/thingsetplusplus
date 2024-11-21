@@ -21,6 +21,14 @@ namespace ThingSet {
 
 class ThingSetBinaryDecoder;
 
+/// @brief Options to control the behaviour of the decoder.
+enum ThingSetBinaryDecoderOptions
+{
+    /// @brief If set, permits the decoding of arrays which are smaller than the declared
+    /// size of the destination array.
+    allowUndersizedArrays = 1 << 0,
+};
+
 /// @brief Interface for values that can be decoded with a binary encoder.
 class ThingSetBinaryDecodable
 {
@@ -31,8 +39,19 @@ public:
 /// @brief Binary protocol decoder for ThingSet.
 class ThingSetBinaryDecoder
 {
+private:
+    ThingSetBinaryDecoderOptions _options;
+
 protected:
+    ThingSetBinaryDecoder();
+    ThingSetBinaryDecoder(ThingSetBinaryDecoderOptions options);
+
     virtual zcbor_state_t *getState() = 0;
+
+    /// @brief Gets whether the stream that this decoder is decoding
+    /// is forward-only.
+    /// @return True if forward-only, otherwise false.
+    virtual bool getIsForwardOnly() const;
 
 public:
     virtual size_t getDecodedLength() = 0;
@@ -119,22 +138,8 @@ public:
     /// @return True if decoding succeeded, otherwise false.
     template <typename T> bool decode(T *value, size_t size)
     {
-        if (!zcbor_list_start_decode(getState())) {
-            return false;
-        }
-
-        if (size != getState()->elem_count) {
-            return false;
-        }
-
-        for (size_t i = 0; i < size; i++) {
-            T *element = &value[i];
-            if (!decode(element)) {
-                return false;
-            }
-        }
-
-        return zcbor_list_end_decode(getState());
+        size_t elementCount;
+        return decode(value, size, elementCount);
     }
 
     /// @brief Decode a map into a pointer to a class or structure.
@@ -157,6 +162,40 @@ public:
         return zcbor_map_end_decode(getState());
     }
 
+protected:
+    template <typename T> bool decode(T *value, size_t size, size_t &elementCount)
+    {
+        if (!zcbor_list_start_decode(getState())) {
+            return false;
+        }
+
+        // check if number of elements in stream matches array size
+        elementCount = getState()->elem_count;
+        if (size > elementCount && (_options & ThingSetBinaryDecoderOptions::allowUndersizedArrays) == 0) {
+            if (!getIsForwardOnly()) {
+                // wind the state back to before we started parsing the list, so that a
+                // call to `skip()` will skip the whole array
+                zcbor_process_backup(getState(), ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME, ZCBOR_MAX_ELEM_COUNT);
+                // because the backup is taken *after* it has consumed the byte(s) containing the number
+                // of elements in the array, this restore doesn't really work
+                // so we overwrite the payload pointer with the backup it takes
+                getState()->payload = getState()->payload_bak;
+                // we also need to increment this, because, yes, it has consumed this as well
+                getState()->elem_count++;
+            }
+            return false;
+        }
+
+        for (size_t i = 0; i < elementCount; i++) {
+            T *element = &value[i];
+            if (!decode(element)) {
+                return false;
+            }
+        }
+
+        return zcbor_list_end_decode(getState());
+    }
+
 private:
     // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
     template <class Fields, std::size_t... Is>
@@ -168,13 +207,13 @@ private:
         std::initializer_list<std::function<bool(ThingSetBinaryDecoder &, Fields &)>>(
             { ((id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id)
                ? ret = [](ThingSetBinaryDecoder &dec, Fields &f) -> bool { return std::get<Is>(f)->decode(dec); },
-               [](ThingSetBinaryDecoder &x, Fields &y) { return false; }
-               : [](ThingSetBinaryDecoder &x, Fields &y) { return false; })... });
+               [](ThingSetBinaryDecoder &, Fields &) { return false; }
+               : [](ThingSetBinaryDecoder &, Fields &) { return false; })... });
         return ret;
     }
 
     template <class Fields>
-    static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id, Fields fields)
+    static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id, Fields)
     {
         return compile_switch<Fields>(id, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
@@ -195,10 +234,20 @@ protected:
     }
 
 public:
-    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size) : FixedSizeThingSetBinaryDecoder(buffer, size, 1)
+    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, ThingSetBinaryDecoderOptions options)
+        : FixedSizeThingSetBinaryDecoder(buffer, size, 1, options)
     {}
 
-    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount) : _buffer(buffer)
+    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size)
+        : FixedSizeThingSetBinaryDecoder(buffer, size, ThingSetBinaryDecoderOptions{})
+    {}
+
+    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount)
+        : FixedSizeThingSetBinaryDecoder(buffer, size, elementCount, ThingSetBinaryDecoderOptions{})
+    {}
+
+    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount, ThingSetBinaryDecoderOptions options)
+        : ThingSetBinaryDecoder(options), _buffer(buffer)
     {
 #ifdef zcbor_tstr_expect_term
         zcbor_new_decode_state(_state, depth, buffer, size, elementCount);

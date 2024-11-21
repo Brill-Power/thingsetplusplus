@@ -62,12 +62,12 @@ private:
             }
         }
 
-        bool checkAccess(ThingSetAccess access) const override
+        bool checkAccess(ThingSetAccess) const override
         {
             return true;
         }
 
-        bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const override
+        bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override
         {
             return true;
         }

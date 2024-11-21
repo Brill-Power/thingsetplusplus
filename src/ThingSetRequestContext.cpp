@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "ThingSetRequestContext.hpp"
+#include "thingset++/ThingSetRequestContext.hpp"
 
 namespace ThingSet {
 

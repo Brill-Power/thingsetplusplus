@@ -1,7 +1,7 @@
-#include <ThingSet.hpp>
-#include <ThingSetServer.hpp>
-#include <asio.hpp>
-#include <asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/ThingSet.hpp>
+#include <thingset++/ThingSetServer.hpp>
+#include <thingset++/asio.hpp>
+#include <thingset++/asio/ThingSetAsyncSocketServerTransport.hpp>
 #include <functional>
 #include <iostream>
 

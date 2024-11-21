@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "can/AbstractCanFrame.hpp"
+#include "thingset++/can/AbstractCanFrame.hpp"
 #include "zephyr/drivers/can.h"
 #include <array>
 
