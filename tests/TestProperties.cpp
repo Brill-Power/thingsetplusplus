@@ -20,7 +20,7 @@ TEST(Properties, SimpleProperty)
     float &f = f32.getValue();
 
     uint8_t buffer[128];
-    FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     f32.encode(encoder);
 
     ASSERT_EQ(5, encoder.getEncodedLength());
@@ -40,7 +40,7 @@ TEST(Properties, PointerProperty)
     ASSERT_EQ(0x101, node->getId());
 
     uint8_t buffer[128];
-    FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     prf32.encode(encoder);
 
     ASSERT_EQ(5, encoder.getEncodedLength());

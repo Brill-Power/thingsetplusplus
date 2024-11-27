@@ -31,8 +31,8 @@ TEST(Functions, InvokeLambda)
 {
     uint8_t request[] = { 0x82, 0xF9, 0x40, 0x00, 0xF9, 0x42, 0x00 };
     uint8_t response[64];
-    FixedSizeThingSetBinaryDecoder decoder(request, sizeof(request));
-    FixedSizeThingSetBinaryEncoder encoder(response, sizeof(response));
+    FixedDepthThingSetBinaryDecoder decoder(request, sizeof(request));
+    FixedDepthThingSetBinaryEncoder encoder(response, sizeof(response));
     ASSERT_TRUE(xFloatLambda.invoke(decoder, encoder));
     uint8_t expected[] = { 0xFA, 0x40, 0xC0, 0x00, 0x00 }; // 6.0
     ASSERT_EQ(0, memcmp(response, expected, sizeof(expected)));

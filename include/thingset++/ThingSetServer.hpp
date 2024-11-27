@@ -32,11 +32,11 @@ public:
     {
         uint8_t buffer[1024];
         buffer[0] = ThingSetRequestType::report;
-        FixedSizeThingSetBinaryEncoder encoder(buffer + 3, 1024 - 3);
+        FixedDepthThingSetBinaryEncoder encoder(buffer + 3, 1024 - 3);
         encoder.encode(0); // fake subset ID
         size_t len = 3 + encoder.getEncodedLength();
         // reset encoder
-        encoder = FixedSizeThingSetBinaryEncoder(buffer + len, 1024 - len);
+        encoder = FixedDepthThingSetBinaryEncoder(buffer + len, 1024 - len);
         encoder.encodeMapStart() && encoder.encode(id) && encoder.encode(value) && encoder.encodeMapEnd();
         len = encoder.getEncodedLength() + 1; // TODO; this +1 should not be necessary
         buffer[1] = (uint8_t)len;

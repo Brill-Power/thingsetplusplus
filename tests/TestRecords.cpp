@@ -66,12 +66,12 @@ TEST(Records, SimpleRecord)
     moduleRecords[0].voltage = 25.0f;
 
     uint8_t buffer[512];
-    FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     encoder.encode(moduleRecords.getValue());
     ASSERT_EQ(0x82, buffer[0]); // array with 2 elements
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
 
-    FixedSizeThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
     std::array<ModuleRecord, 2> newModuleRecords;
     ASSERT_TRUE(decoder.decode(&newModuleRecords));
     ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
@@ -87,7 +87,7 @@ TEST(Records, InitialiseRecordArrayCopy)
     ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     uint8_t buffer[512];
-    FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     ASSERT_TRUE(records.encode(encoder));
     ASSERT_EQ(0x82, buffer[0]); // array with 2 elements
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
@@ -111,7 +111,7 @@ TEST(Records, InitialiseRecordArrayInline)
 
     ASSERT_EQ(24.0f, records[0].voltage.getValue());
     uint8_t buffer[512];
-    FixedSizeThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     ASSERT_TRUE(records.encode(encoder));
     ASSERT_EQ(0x81, buffer[0]); // array with 2 elements
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements

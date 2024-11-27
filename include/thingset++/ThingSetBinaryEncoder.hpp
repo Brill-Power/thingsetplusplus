@@ -210,7 +210,7 @@ private:
 };
 
 template <int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
-class FixedSizeThingSetBinaryEncoder : public ThingSetBinaryEncoder
+class FixedDepthThingSetBinaryEncoder : public ThingSetBinaryEncoder
 {
 private:
     // The start of the buffer
@@ -224,7 +224,7 @@ protected:
     }
 
 public:
-    FixedSizeThingSetBinaryEncoder(uint8_t *buffer, size_t size) : _buffer(buffer)
+    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size) : _buffer(buffer)
     {
         zcbor_new_encode_state(_state, depth, buffer, size, 1);
     }
@@ -235,7 +235,7 @@ public:
     }
 };
 
-using DefaultFixedSizeThingSetBinaryEncoder = FixedSizeThingSetBinaryEncoder<BINARY_ENCODER_DEFAULT_MAX_DEPTH>;
+using DefaultFixedDepthThingSetBinaryEncoder = FixedDepthThingSetBinaryEncoder<BINARY_ENCODER_DEFAULT_MAX_DEPTH>;
 
 /// @brief Interface for values that can be encoded with a binary encoder.
 class ThingSetBinaryEncodable

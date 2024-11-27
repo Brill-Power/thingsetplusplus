@@ -220,7 +220,7 @@ private:
 };
 
 template <int depth = BINARY_DECODER_DEFAULT_MAX_DEPTH>
-class FixedSizeThingSetBinaryDecoder : public ThingSetBinaryDecoder
+class FixedDepthThingSetBinaryDecoder : public ThingSetBinaryDecoder
 {
 private:
     // The start of the buffer
@@ -234,19 +234,20 @@ protected:
     }
 
 public:
-    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, ThingSetBinaryDecoderOptions options)
-        : FixedSizeThingSetBinaryDecoder(buffer, size, 1, options)
+    FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size, ThingSetBinaryDecoderOptions options)
+        : FixedDepthThingSetBinaryDecoder(buffer, size, 1, options)
     {}
 
-    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size)
-        : FixedSizeThingSetBinaryDecoder(buffer, size, ThingSetBinaryDecoderOptions{})
+    FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size)
+        : FixedDepthThingSetBinaryDecoder(buffer, size, ThingSetBinaryDecoderOptions{})
     {}
 
-    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount)
-        : FixedSizeThingSetBinaryDecoder(buffer, size, elementCount, ThingSetBinaryDecoderOptions{})
+    FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount)
+        : FixedDepthThingSetBinaryDecoder(buffer, size, elementCount, ThingSetBinaryDecoderOptions{})
     {}
 
-    FixedSizeThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount, ThingSetBinaryDecoderOptions options)
+    FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount,
+                                    ThingSetBinaryDecoderOptions options)
         : ThingSetBinaryDecoder(options), _buffer(buffer)
     {
 #ifdef zcbor_tstr_expect_term
@@ -263,6 +264,6 @@ public:
     }
 };
 
-using DefaultFixedSizeThingSetBinaryDecoder = FixedSizeThingSetBinaryDecoder<BINARY_DECODER_DEFAULT_MAX_DEPTH>;
+using DefaultFixedDepthThingSetBinaryDecoder = FixedDepthThingSetBinaryDecoder<BINARY_DECODER_DEFAULT_MAX_DEPTH>;
 
 } // namespace ThingSet

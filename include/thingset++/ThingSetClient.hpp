@@ -26,7 +26,7 @@ public:
     {
         uint8_t buffer[1024];
         buffer[0] = ThingSetRequestType::get;
-        FixedSizeThingSetBinaryEncoder encoder(buffer + 1, sizeof(buffer) - 1);
+        FixedDepthThingSetBinaryEncoder encoder(buffer + 1, sizeof(buffer) - 1);
         if (!encoder.encode(id)) {
             return false;
         }
@@ -35,7 +35,7 @@ public:
         }
         int read = _transport.read(buffer, 1024);
         if (read > 1) {
-            FixedSizeThingSetBinaryDecoder decoder(buffer + 1, read - 1);
+            FixedDepthThingSetBinaryDecoder decoder(buffer + 1, read - 1);
             uint32_t id;
             decoder.decode(&id);
             return decoder.decode(result);
@@ -50,7 +50,7 @@ public:
             uint16_t id;
             decoder.decode(&id); // subset ID
             size_t pos = decoder.getDecodedLength();
-            decoder = FixedSizeThingSetBinaryDecoder(buffer + pos, len - pos);
+            decoder = FixedDepthThingSetBinaryDecoder(buffer + pos, len - pos);
             if (decoder.skipUntil(ZCBOR_MAJOR_TYPE_MAP)) {
                 decoder.template decodeMap<uint16_t>([&decoder, items](uint16_t &) { return decoder.decode(items); });
             }

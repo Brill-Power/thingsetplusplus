@@ -23,8 +23,8 @@ struct ThingSetRequestContext
     uint8_t *response;
     bool useIds;
     std::string path;
-    DefaultFixedSizeThingSetBinaryEncoder encoder;
-    DefaultFixedSizeThingSetBinaryDecoder decoder;
+    DefaultFixedDepthThingSetBinaryEncoder encoder;
+    DefaultFixedDepthThingSetBinaryDecoder decoder;
 };
 
 } // namespace ThingSet

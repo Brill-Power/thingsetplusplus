@@ -8,7 +8,7 @@ TEST(BinaryDecoder, DecodeArrayOfFloats)
     uint8_t buffer[] = {
         0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
     };
-    FixedSizeThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
     std::array<float, 3> three;
     ASSERT_TRUE(decoder.decode(&three));
 }
@@ -18,7 +18,7 @@ TEST(BinaryDecoder, FailToDecodeUndersizeArray)
     uint8_t buffer[] = {
         0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
     };
-    FixedSizeThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
     std::array<float, 4> four;
     ASSERT_FALSE(decoder.decode(&four));
 }
@@ -27,7 +27,7 @@ TEST(BinaryDecoder, SkipUndersizeArrayAndSuccessfullyDecodeNextElement)
 {
     uint8_t buffer[] = { 0x82, 0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91,
                          0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1, 0x19, 0x60, 0x7b };
-    FixedSizeThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
     ASSERT_TRUE(decoder.decodeListStart());
     std::array<float, 4> four;
     ASSERT_FALSE(decoder.decode(&four));
@@ -42,7 +42,8 @@ TEST(BinaryDecoder, DecodeUndersizeArray)
     uint8_t buffer[] = {
         0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
     };
-    FixedSizeThingSetBinaryDecoder decoder(buffer, sizeof(buffer), ThingSetBinaryDecoderOptions::allowUndersizedArrays);
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer),
+                                            ThingSetBinaryDecoderOptions::allowUndersizedArrays);
     std::array<float, 4> four;
     ASSERT_TRUE(decoder.decode(&four));
     ASSERT_EQ(1.23f, four[0]);
@@ -54,7 +55,7 @@ TEST(BinaryDecoder, DecodeMap)
     uint8_t buffer[] = { 0xA3, 0x18, 0x1D, 0x70, 0x45, 0x39, 0x33, 0x41, 0x31, 0x34, 0x32, 0x42, 0x32, 0x38, 0x32,
                          0x43, 0x34, 0x41, 0x44, 0x30, 0x19, 0x02, 0x8c, 0x10, 0x19, 0x60, 0x60, 0x83, 0xFA, 0x3F,
                          0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1 };
-    FixedSizeThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
     char nodeId[16];
     uint8_t canAddr;
     std::array<float, 3> three;
