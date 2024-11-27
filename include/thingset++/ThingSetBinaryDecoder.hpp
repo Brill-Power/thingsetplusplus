@@ -220,7 +220,7 @@ private:
 };
 
 template <int depth = BINARY_DECODER_DEFAULT_MAX_DEPTH>
-class FixedDepthThingSetBinaryDecoder : public ThingSetBinaryDecoder
+class FixedDepthThingSetBinaryDecoder : public virtual ThingSetBinaryDecoder
 {
 private:
     // The start of the buffer
