@@ -46,7 +46,7 @@ public:
     template <typename T> void subscribe(T *items)
     {
         _transport.subscribe([items](auto buffer, auto len) {
-            FixedSizeThingSetBinaryDecoder decoder(buffer, len);
+            FixedDepthThingSetBinaryDecoder decoder(buffer, len);
             uint16_t id;
             decoder.decode(&id); // subset ID
             size_t pos = decoder.getDecodedLength();
