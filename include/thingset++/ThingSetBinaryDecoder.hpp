@@ -81,7 +81,7 @@ public:
     bool decodeListEnd();
 
     zcbor_major_type_t peekType();
-    bool skip();
+    virtual bool skip();
     bool skipUntil(zcbor_major_type_t sought);
 
     /// @brief Decode a list into a tuple.

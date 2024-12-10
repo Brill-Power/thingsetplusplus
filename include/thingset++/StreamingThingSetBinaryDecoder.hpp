@@ -37,6 +37,35 @@ public:
 #endif
     }
 
+    bool skip() override
+    {
+        switch (this->peekType()) {
+            case ZCBOR_MAJOR_TYPE_LIST:
+                return decodeList([&](size_t) { return zcbor_any_skip(this->getState(), NULL); });
+            case ZCBOR_MAJOR_TYPE_MAP: {
+                if (!zcbor_list_start_decode(this->getState())) {
+                    return false;
+                }
+                size_t entryCount = this->getState()->elem_count / 2;
+                for (size_t i = 0; i < entryCount; i++) {
+                    // skip key
+                    if (!zcbor_any_skip(this->getState(), NULL)) {
+                        return false;
+                    }
+
+                    // skip value
+                    if (!zcbor_any_skip(this->getState(), NULL)) {
+                        return false;
+                    }
+                }
+                return zcbor_list_end_decode(this->getState());
+            }
+            default:
+                // hope
+                return zcbor_any_skip(this->getState(), NULL);
+        }
+    }
+
 protected:
     zcbor_state_t *getState() override
     {
