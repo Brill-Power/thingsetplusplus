@@ -1,16 +1,17 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
-#include "thingset++/can/ThingSetCanClientTransport.hpp"
 #include "ThingSetZephyrCanInterface.hpp"
+#include "thingset++/can/ThingSetCanClientTransport.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
-class ThingSetZephyrCanClientTransport : public ThingSetCanClientTransport {
+class ThingSetZephyrCanClientTransport : public ThingSetCanClientTransport
+{
 private:
     ThingSetZephyrCanInterface &_canInterface;
 
@@ -21,4 +22,4 @@ public:
     bool write(uint8_t *buffer, size_t len) override;
 };
 
-} // ThingSet::Can::Zephyr
+} // namespace ThingSet::Can::Zephyr

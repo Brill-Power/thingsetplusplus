@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
 #include "thingset++/Eui.hpp"
@@ -80,8 +80,8 @@ void ThingSetZephyrCanInterface::onRequestResponseReceived(net_buf *buffer, int 
     if ((taken = (result == 0))) {
         net_buf_linearize(self->_rxBuffer, self->_rxBufferSize, buffer, 0, len);
         // if a response to a request we sent, dispatch accordingly
-        if (self->_rxBuffer[0] >= ThingSetStatusCode::created && self->_rxBuffer[0] <= ThingSetStatusCode::notAGateway) {
-
+        if (self->_rxBuffer[0] >= ThingSetStatusCode::created && self->_rxBuffer[0] <= ThingSetStatusCode::notAGateway)
+        {
         }
         else if (self->_rxBuffer[0] >= ThingSetRequestType::get && self->_rxBuffer[0] <= ThingSetRequestType::update) {
             // otherwise assume it is a new request inbound
@@ -94,7 +94,8 @@ void ThingSetZephyrCanInterface::onRequestResponseReceived(net_buf *buffer, int 
                 txBuffer = errorResponse;
                 len = 1;
             }
-        } else {
+        }
+        else {
             errorResponse[0] = ThingSetStatusCode::badRequest;
             txBuffer = errorResponse;
             len = 1;
@@ -138,8 +139,7 @@ void ThingSetZephyrCanInterface::onAddressDiscoverSent(const device *dev, int er
     }
 }
 
-void ThingSetZephyrCanInterface::onAnyAddressDiscoverReceived(const device *dev, can_frame *frame,
-                                                              void *arg)
+void ThingSetZephyrCanInterface::onAnyAddressDiscoverReceived(const device *dev, can_frame *frame, void *arg)
 {
     ThingSetZephyrCanInterface *self = (ThingSetZephyrCanInterface *)arg;
     auto canId = CanID::create(frame->id);
@@ -181,7 +181,7 @@ int ThingSetZephyrCanInterface::addFilter(CanID &canId, void (*callback)(const d
         .mask = canId.getMask(),
         .flags = CAN_FILTER_IDE
 #ifdef CAN_FILTER_DATA
-                    | CAN_FILTER_DATA
+                 | CAN_FILTER_DATA
 #endif
         ,
     };
@@ -248,7 +248,8 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
 
         can_remove_rx_filter(_canDevice, filterId);
 
-        filterId = addFilter(CanID().setSource(CanID::anonymousAddress).setTarget(_nodeAddress), onAddressDiscoverReceived);
+        filterId =
+            addFilter(CanID().setSource(CanID::anonymousAddress).setTarget(_nodeAddress), onAddressDiscoverReceived);
         if (filterId < 0) {
             LOG_ERR("Failed to add address discovery filter: %d", filterId);
             return false;

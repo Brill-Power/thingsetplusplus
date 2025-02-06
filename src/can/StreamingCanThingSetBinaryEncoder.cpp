@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
 #include "thingset++/ThingSetStatus.hpp"
@@ -12,8 +12,7 @@ StreamingCanThingSetBinaryEncoder::StreamingCanThingSetBinaryEncoder(Can::ThingS
     : StreamingThingSetBinaryEncoder::StreamingThingSetBinaryEncoder(), _transport(transport), _sequenceNumber(0)
 {
     _buffer[0] = ThingSetRequestType::report;
-    zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[1],
-                           _buffer.size() - 1, 1);
+    zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[1], _buffer.size() - 1, 1);
 }
 
 bool StreamingCanThingSetBinaryEncoder::send(Can::MultiFrameMessageType frameType, size_t length)
@@ -28,9 +27,10 @@ bool StreamingCanThingSetBinaryEncoder::send(Can::MultiFrameMessageType frameTyp
 
 bool StreamingCanThingSetBinaryEncoder::write(size_t length, bool flushing)
 {
-    return send(this->_exportedLength == 0 ?
-        (flushing ? Can::MultiFrameMessageType::single : Can::MultiFrameMessageType::first) :
-        (flushing ? MultiFrameMessageType::last : Can::MultiFrameMessageType::consecutive), length);
+    return send(this->_exportedLength == 0
+                    ? (flushing ? Can::MultiFrameMessageType::single : Can::MultiFrameMessageType::first)
+                    : (flushing ? MultiFrameMessageType::last : Can::MultiFrameMessageType::consecutive),
+                length);
 }
 
-}
+} // namespace ThingSet::Can

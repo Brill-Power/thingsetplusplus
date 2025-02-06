@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/ThingSetZephyrCanServerTransport.hpp"
 
@@ -11,7 +11,8 @@ ThingSetZephyrCanServerTransport::ThingSetZephyrCanServerTransport(_ThingSetZeph
     : ThingSetCanServerTransport(), _canInterface(canInterface)
 {}
 
-ThingSetCanInterface &ThingSetZephyrCanServerTransport::getInterface() {
+ThingSetCanInterface &ThingSetZephyrCanServerTransport::getInterface()
+{
     return _canInterface;
 }
 
@@ -20,4 +21,4 @@ bool ThingSetZephyrCanServerTransport::bind(uint8_t nodeAddress)
     return _canInterface.bind(nodeAddress);
 }
 
-} // namespace ThingSet::Can::SocketCan
+} // namespace ThingSet::Can::Zephyr

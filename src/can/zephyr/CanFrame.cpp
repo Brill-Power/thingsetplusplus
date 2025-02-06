@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/CanFrame.hpp"
 #include <string.h>
@@ -29,7 +29,8 @@ CanID CanFrame::getId() const
     return CanID::create(_frame.id);
 }
 
-bool CanFrame::getFd() const {
+bool CanFrame::getFd() const
+{
     return (_frame.flags & CAN_FRAME_FDF);
 }
 
@@ -38,7 +39,8 @@ CanFrame &CanFrame::setFd(bool value)
     if (IS_ENABLED(CONFIG_CAN_FD_MODE)) {
         if (value) {
             _frame.flags |= CAN_FRAME_FDF;
-        } else {
+        }
+        else {
             _frame.flags &= ~CAN_FRAME_FDF;
         }
     }

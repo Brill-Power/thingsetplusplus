@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
@@ -11,8 +11,7 @@ namespace ThingSet {
 
 /// @brief Base class for streaming encoders.
 /// @tparam Size The size of the chunks to write.
-template <size_t Size>
-class StreamingThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
+template <size_t Size> class StreamingThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
 {
 protected:
     zcbor_state_t _state[BINARY_ENCODER_DEFAULT_MAX_DEPTH];
@@ -23,11 +22,13 @@ public:
     StreamingThingSetBinaryEncoder() : _exportedLength(0)
     {}
 
-    size_t getEncodedLength() const override {
+    size_t getEncodedLength() const override
+    {
         return _exportedLength;
     }
 
-    bool getIsForwardOnly() const override {
+    bool getIsForwardOnly() const override
+    {
         return true;
     }
 
@@ -48,11 +49,13 @@ public:
     }
 
 protected:
-    bool ensureState() override {
+    bool ensureState() override
+    {
         return writeIfNecessary();
     }
 
-    zcbor_state_t *getState() override {
+    zcbor_state_t *getState() override
+    {
         return _state;
     }
 
@@ -80,4 +83,4 @@ private:
     }
 };
 
-} // namespace ThingSet::Can
+} // namespace ThingSet

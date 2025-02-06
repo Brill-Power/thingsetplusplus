@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "can/socketcan/ThingSetSocketCanServerTransport.hpp"
 
@@ -11,7 +11,8 @@ ThingSetSocketCanServerTransport::ThingSetSocketCanServerTransport(const std::st
     : ThingSetCanServerTransport(), _canInterface(deviceName)
 {}
 
-ThingSetCanInterface &ThingSetSocketCanServerTransport::getInterface() {
+ThingSetCanInterface &ThingSetSocketCanServerTransport::getInterface()
+{
     return _canInterface;
 }
 

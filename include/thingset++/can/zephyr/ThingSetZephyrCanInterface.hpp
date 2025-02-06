@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
@@ -72,7 +72,7 @@ private:
     static void onAddressClaimReceived(const device *dev, can_frame *frame, void *arg);
     static void onAddressDiscoverSent(const device *dev, int error, void *arg);
     static void onRequestResponseReceived(net_buf *buffer, int remainingLength, isotp_fast_addr address, void *arg);
-    int addFilter(CanID &canId, void (*callback)(const device *,  can_frame *, void *));
+    int addFilter(CanID &canId, void (*callback)(const device *, can_frame *, void *));
     bool claimAddress(uint8_t nodeAddress);
 };
 

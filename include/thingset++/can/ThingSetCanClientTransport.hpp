@@ -1,16 +1,17 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
-#include "thingset++/ThingSetClientTransport.hpp"
 #include "CanID.hpp"
+#include "thingset++/ThingSetClientTransport.hpp"
 
 namespace ThingSet::Can {
 
-class ThingSetCanClientTransport : public ThingSetClientTransport {
+class ThingSetCanClientTransport : public ThingSetClientTransport
+{
 private:
     uint8_t _targetNodeAddress;
 

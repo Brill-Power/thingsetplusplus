@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
-#include "thingset++/StreamingThingSetBinaryEncoder.hpp"
 #include "ThingSetCanServerTransport.hpp"
+#include "thingset++/StreamingThingSetBinaryEncoder.hpp"
 
 #if defined(__ZEPHYR__)
 #include "zephyr/drivers/can.h"
@@ -36,4 +36,4 @@ private:
     bool send(Can::MultiFrameMessageType frameType, size_t length);
 };
 
-}
+} // namespace ThingSet::Can

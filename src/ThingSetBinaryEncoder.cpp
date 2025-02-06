@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/ThingSetBinaryEncoder.hpp"
 
@@ -44,7 +44,8 @@ bool ThingSetBinaryEncoder::encode(const char *value)
 #ifdef zcbor_tstr_put_term
     return this->ensureState() && zcbor_tstr_put_term(this->getState(), value);
 #else
-    return this->ensureState() && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+    return this->ensureState()
+           && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif
 }
 
@@ -53,7 +54,8 @@ bool ThingSetBinaryEncoder::encode(char *value)
 #ifdef zcbor_tstr_put_term
     return this->ensureState() && zcbor_tstr_put_term(this->getState(), value);
 #else
-    return this->ensureState() && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+    return this->ensureState()
+           && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif
 }
 

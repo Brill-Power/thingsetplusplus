@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
-#include "thingset++/ThingSetServerTransport.hpp"
-#include "ThingSetCanInterface.hpp"
 #include "CanID.hpp"
+#include "ThingSetCanInterface.hpp"
+#include "thingset++/ThingSetServerTransport.hpp"
 
 namespace ThingSet::Can {
 

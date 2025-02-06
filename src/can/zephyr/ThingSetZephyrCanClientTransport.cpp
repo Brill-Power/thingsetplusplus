@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/ThingSetZephyrCanClientTransport.hpp"
 
-namespace ThingSet::Can::Zephyr
-{
+namespace ThingSet::Can::Zephyr {
 ThingSetZephyrCanClientTransport::ThingSetZephyrCanClientTransport(ThingSetZephyrCanInterface &canInterface,
-                                                             uint8_t targetNodeAddress) : _canInterface(canInterface), ThingSetCanClientTransport(targetNodeAddress)
+                                                                   uint8_t targetNodeAddress)
+    : _canInterface(canInterface), ThingSetCanClientTransport(targetNodeAddress)
 {}
 
 int ThingSetZephyrCanClientTransport::read(uint8_t *buffer, size_t len)

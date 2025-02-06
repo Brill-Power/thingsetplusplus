@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2024 Brill Power. All rights reserved.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
-#include "thingset++/can/ThingSetCanServerTransport.hpp"
 #include "ThingSetZephyrCanInterface.hpp"
+#include "thingset++/can/ThingSetCanServerTransport.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
