@@ -16,45 +16,47 @@ class ThingSetClient
 {
 private:
     ThingSetClientTransport &_transport;
+    uint8_t *_rxBuffer;
+    size_t _rxBufferSize;
+    uint8_t *_txBuffer;
+    size_t _txBufferSize;
 
 public:
-    ThingSetClient(ThingSetClientTransport &transport);
+    ThingSetClient(ThingSetClientTransport &transport, uint8_t *rxBuffer, size_t rxBufferSize, uint8_t *txBuffer,
+                   size_t txBufferSize);
 
-    void connect();
+    bool connect();
+
+    template <typename... TArg> bool exec(uint16_t id, TArg... args)
+    {
+        _txBuffer[0] = ThingSetRequestType::exec;
+        FixedDepthThingSetBinaryEncoder encoder(_txBuffer + 1, _txBufferSize);
+        if (!encoder.encode(id) || !encoder.encodeList(args...)) {
+            return false;
+        }
+        if (!_transport.write(_txBuffer, 1 + encoder.getEncodedLength())) {
+            return false;
+        }
+    }
 
     template <typename T> bool get(uint16_t id, T &result)
     {
-        uint8_t buffer[1024];
-        buffer[0] = ThingSetRequestType::get;
-        FixedDepthThingSetBinaryEncoder encoder(buffer + 1, sizeof(buffer) - 1);
+        _txBuffer[0] = ThingSetRequestType::get;
+        FixedDepthThingSetBinaryEncoder encoder(_txBuffer + 1, _txBufferSize - 1);
         if (!encoder.encode(id)) {
             return false;
         }
-        if (!_transport.write(buffer, 1 + encoder.getEncodedLength())) {
+        if (!_transport.write(_txBuffer, 1 + encoder.getEncodedLength())) {
             return false;
         }
-        int read = _transport.read(buffer, 1024);
+        int read = _transport.read(_rxBuffer, _rxBufferSize);
         if (read > 1) {
-            FixedDepthThingSetBinaryDecoder decoder(buffer + 1, read - 1);
+            FixedDepthThingSetBinaryDecoder decoder(_rxBuffer + 1, read - 1);
             uint32_t id;
             decoder.decode(&id);
             return decoder.decode(result);
         }
         return false;
-    }
-
-    template <typename T> void subscribe(T *items)
-    {
-        _transport.subscribe([items](auto buffer, auto len) {
-            FixedDepthThingSetBinaryDecoder decoder(buffer, len);
-            uint16_t id;
-            decoder.decode(&id); // subset ID
-            size_t pos = decoder.getDecodedLength();
-            decoder = FixedDepthThingSetBinaryDecoder(buffer + pos, len - pos);
-            if (decoder.skipUntil(ZCBOR_MAJOR_TYPE_MAP)) {
-                decoder.template decodeMap<uint16_t>([&decoder, items](uint16_t &) { return decoder.decode(items); });
-            }
-        });
     }
 };
 

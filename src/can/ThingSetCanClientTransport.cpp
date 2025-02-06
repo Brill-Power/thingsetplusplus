@@ -1,0 +1,18 @@
+/*
+ * Copyright (c) 2024 Brill Power. All rights reserved.
+ *
+ * SPDX-License-Identifier: Proprietary
+ */
+#include "thingset++/can/ThingSetCanClientTransport.hpp"
+
+namespace ThingSet::Can {
+
+ThingSetCanClientTransport::ThingSetCanClientTransport(uint8_t targetNodeAddress) : _targetNodeAddress(targetNodeAddress)
+{}
+
+bool ThingSetCanClientTransport::connect()
+{
+    return true;
+}
+
+}

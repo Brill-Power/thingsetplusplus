@@ -6,10 +6,13 @@
 
 #include "thingset++/ThingSetClient.hpp"
 
-ThingSet::ThingSetClient::ThingSetClient(ThingSetClientTransport &transport) : _transport(transport)
+ThingSet::ThingSetClient::ThingSetClient(ThingSetClientTransport &transport, uint8_t *rxBuffer, size_t rxBufferSize,
+                                         uint8_t *txBuffer, size_t txBufferSize)
+    : _transport(transport), _rxBuffer(rxBuffer), _rxBufferSize(rxBufferSize), _txBuffer(txBuffer),
+      _txBufferSize(txBufferSize)
 {}
 
-void ThingSet::ThingSetClient::connect()
+bool ThingSet::ThingSetClient::connect()
 {
-    _transport.connect();
+    return _transport.connect();
 }

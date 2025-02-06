@@ -1,30 +1,31 @@
+#include <asio.hpp>
+#include <functional>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetClient.hpp>
-#include <thingset++/asio.hpp>
 #include <thingset++/asio/ThingSetAsyncSocketClientTransport.hpp>
-#include <functional>
 
 using namespace ThingSet;
+using namespace ThingSet::Async;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
 
 struct SupercellRecord
 {
-    ThingSetProperty<0x611, 0x610, "soc", float> soc;
-    ThingSetProperty<0x612, 0x610, "soh", float> soh;
+    ThingSetReadWriteProperty<0x611, 0x610, "soc", float> soc;
+    ThingSetReadWriteProperty<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
-    ThingSetProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetProperty<0x602, 0x600, "current", float> current;
-    ThingSetProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadWriteProperty<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadWriteProperty<0x602, 0x600, "current", float> current;
+    ThingSetReadWriteProperty<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadWriteProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadWriteProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-ThingSetProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
+ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
 std::array<ModuleRecord, 2> moduleRecords;
 

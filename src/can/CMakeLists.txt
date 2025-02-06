@@ -1,5 +1,6 @@
 target_sources(thingset++ PRIVATE CanID.cpp
     ThingSetCanInterface.cpp
+    ThingSetCanClientTransport.cpp
     ThingSetCanServerTransport.cpp)
 
 if(ENABLE_SOCKETCAN)

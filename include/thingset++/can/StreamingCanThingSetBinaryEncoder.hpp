@@ -6,7 +6,7 @@
 #pragma once
 
 #include "thingset++/StreamingThingSetBinaryEncoder.hpp"
-#include "thingset++/can/ThingSetCanServerTransport.hpp"
+#include "ThingSetCanServerTransport.hpp"
 
 #if defined(__ZEPHYR__)
 #include "zephyr/drivers/can.h"

@@ -15,6 +15,7 @@ class ThingSetCanInterface
 {
 protected:
     uint8_t _nodeAddress;
+    std::function<void(const uint8_t *, uint8_t)> _addressClaimCallback;
 
 public:
     uint8_t getNodeAddress();
@@ -25,6 +26,8 @@ public:
     virtual bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
 
     virtual bool publish(CanID &id, uint8_t *buffer, size_t length) = 0;
+
+    void setAddressClaimCallback(std::function<void(const uint8_t *, uint8_t)> callback);
 };
 
 } // namespace ThingSet::Can

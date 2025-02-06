@@ -24,7 +24,7 @@ asio::io_context &ThingSetAsyncSocketClientTransport::getContext()
     return _ioContext;
 }
 
-void ThingSetAsyncSocketClientTransport::connect()
+bool ThingSetAsyncSocketClientTransport::connect()
 {
     asio::error_code error;
     _requestResponseSocket.connect(_endpoint, error);
@@ -35,6 +35,7 @@ void ThingSetAsyncSocketClientTransport::connect()
     if (error) {
         throw std::system_error(error);
     }
+    return true;
 }
 
 int ThingSetAsyncSocketClientTransport::read(uint8_t *buffer, size_t len)
