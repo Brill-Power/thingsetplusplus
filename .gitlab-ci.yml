@@ -19,8 +19,6 @@ build:
 
 test:
   stage: test
-  tags:
-    - arm64
   variables:
     GIT_SUBMODULE_STRATEGY: "recursive"
   script:
