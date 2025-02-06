@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Brill Power. All rights reserved.
+ * Copyright (c) 2024 Brill Power.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
