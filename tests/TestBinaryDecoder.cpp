@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024 Brill Power.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 #include "thingset++/ThingSetBinaryDecoder.hpp"
 #include "gtest/gtest.h"
 
@@ -37,6 +42,19 @@ TEST(BinaryDecoder, SkipUndersizeArrayAndSuccessfullyDecodeNextElement)
     ASSERT_EQ(0x607b, court);
 }
 
+TEST(BinaryDecoder, DecodeUndersizeArray)
+{
+    uint8_t buffer[] = {
+        0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
+    };
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer),
+                                            ThingSetBinaryDecoderOptions::allowUndersizedArrays);
+    std::array<float, 4> four;
+    ASSERT_TRUE(decoder.decode(&four));
+    ASSERT_EQ(1.23f, four[0]);
+    ASSERT_EQ(4.56f, four[1]);
+}
+
 TEST(BinaryDecoder, DecodeMap)
 {
     uint8_t buffer[] = { 0xA3, 0x18, 0x1D, 0x70, 0x45, 0x39, 0x33, 0x41, 0x31, 0x34, 0x32, 0x42, 0x32, 0x38, 0x32,
@@ -61,17 +79,4 @@ TEST(BinaryDecoder, DecodeMap)
     ASSERT_STREQ("E93A142B282C4AD0", nodeId);
     ASSERT_EQ(0x10, canAddr);
     ASSERT_EQ(1.23f, three[0]);
-}
-
-TEST(BinaryDecoder, DecodeUndersizeArray)
-{
-    uint8_t buffer[] = {
-        0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
-    };
-    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer),
-                                            ThingSetBinaryDecoderOptions::allowUndersizedArrays);
-    std::array<float, 4> four;
-    ASSERT_TRUE(decoder.decode(&four));
-    ASSERT_EQ(1.23f, four[0]);
-    ASSERT_EQ(4.56f, four[1]);
 }
