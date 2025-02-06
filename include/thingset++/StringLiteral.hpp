@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2024 Brill Power.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 #pragma once
 
 #include <algorithm>
@@ -10,7 +5,14 @@
 #include <string>
 #include <string_view>
 
+// Adapted from the original in reflect-cpp
+// (https://github.com/getml/reflect-cpp/blob/main/include/rfl/internal/StringLiteral.hpp)
+
 namespace ThingSet {
+
+/// Normal strings cannot be used as template
+/// parameters, but this can. This is needed
+/// for the parameters names in the NamedTuples.
 template <size_t N> struct StringLiteral
 {
     constexpr StringLiteral(const auto... _chars) : arr_{ _chars..., '\0' }

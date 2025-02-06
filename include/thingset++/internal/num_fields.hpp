@@ -1,6 +1,9 @@
 #ifndef RFL_INTERNAL_NUM_FIELDS_HPP_
 #define RFL_INTERNAL_NUM_FIELDS_HPP_
 
+// Adapted from the original in reflect-cpp
+// (https://github.com/getml/reflect-cpp/blob/main/include/rfl/internal/num_fields.hpp)
+
 /*
 We infer the number of fields using by figuring out how many fields
 we need to construct it. This is done by implementing the constructible

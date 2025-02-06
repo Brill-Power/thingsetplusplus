@@ -1,6 +1,9 @@
 #ifndef RFL_ALWAYSFALSE_HPP_
 #define RFL_ALWAYSFALSE_HPP_
 
+// Adapted from the original in reflect-cpp
+// (https://github.com/getml/reflect-cpp/blob/main/include/rfl/always_false.hpp)
+
 namespace ThingSet {
 namespace internal {
 

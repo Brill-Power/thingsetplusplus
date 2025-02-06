@@ -1,6 +1,9 @@
 #ifndef RFL_INTERNAL_BIND_TO_TUPLE_HPP_
 #define RFL_INTERNAL_BIND_TO_TUPLE_HPP_
 
+// Adapted from the original in reflect-cpp
+// (https://github.com/getml/reflect-cpp/blob/main/include/rfl/internal/bind_to_tuple.hpp)
+
 #include <cstddef>
 #include <tuple>
 #include <type_traits>
