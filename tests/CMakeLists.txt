@@ -17,6 +17,7 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestCompatibility.cpp
     TestProperties.cpp
     TestFunctions.cpp)
+# figure out how to get this to compile with Clang
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_sources(testapp PRIVATE TestRecords.cpp)
 endif()
