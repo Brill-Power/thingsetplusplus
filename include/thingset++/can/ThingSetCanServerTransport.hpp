@@ -6,8 +6,8 @@
 #pragma once
 
 #include "thingset++/ThingSetServerTransport.hpp"
-#include "thingset++/can/ThingSetCanInterface.hpp"
-#include "thingset++/can/CanID.hpp"
+#include "ThingSetCanInterface.hpp"
+#include "CanID.hpp"
 
 namespace ThingSet::Can {
 

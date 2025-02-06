@@ -22,4 +22,9 @@ bool ThingSetCanInterface::bind()
     return bind(CanID::minAddress);
 }
 
+void ThingSetCanInterface::setAddressClaimCallback(std::function<void(const uint8_t *, uint8_t)> callback)
+{
+    _addressClaimCallback = callback;
+}
+
 } // namespace ThingSet::Can

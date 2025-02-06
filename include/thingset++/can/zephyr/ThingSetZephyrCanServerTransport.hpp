@@ -6,7 +6,7 @@
 #pragma once
 
 #include "thingset++/can/ThingSetCanServerTransport.hpp"
-#include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
+#include "ThingSetZephyrCanInterface.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
