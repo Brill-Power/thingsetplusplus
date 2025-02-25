@@ -1,0 +1,29 @@
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/C++.gitlab-ci.yml
+
+# use the official gcc image, based on debian
+# can use versions as well, like gcc:5.2
+# see https://hub.docker.com/_/gcc/
+
+image: gcc
+before_script:
+    - apt-get update --yes
+    - apt-get install --yes cmake
+
+build:
+  stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: "recursive"
+  script:
+    - cd tests && cmake -S . -B build && cd build && make
+
+test:
+  stage: test
+  variables:
+    GIT_SUBMODULE_STRATEGY: "recursive"
+  script:
+    - cd tests && cmake -S . -B build && cd build && make && ./testapp --gtest_output="xml:report.xml"
+  artifacts:
+    when: always
+    reports:
+      junit: tests/build/report.xml

@@ -1,0 +1,15 @@
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: NordicSemiconductor
+      url-base: https://github.com/NordicSemiconductor
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v3.3-branch
+      import:
+        name-allowlist:
+          - edtt
+          - zcbor

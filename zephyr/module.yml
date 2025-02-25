@@ -1,0 +1,4 @@
+name: thingset++
+build:
+  cmake: zephyr
+  kconfig: zephyr/Kconfig

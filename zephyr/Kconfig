@@ -1,0 +1,15 @@
+config THINGSET_PLUS_PLUS
+	bool "ThingSet C++"
+	select ZCBOR
+
+if THINGSET_PLUS_PLUS
+
+config THINGSET_PLUS_PLUS_SERVER
+	bool "Enable server"
+	default false
+
+module = THINGSET_PLUS_PLUS
+module-str = thingsetplusplus
+source "../zephyr/subsys/logging/Kconfig.template.log_config"
+
+endif
