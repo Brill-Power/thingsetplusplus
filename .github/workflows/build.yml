@@ -1,0 +1,22 @@
+name: Unit testing
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: gcc
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: thingsetplusplus
+          submodules: 'true'
+      - name: Build
+        working-directory: thingsetplusplus
+        run: |
+          apt-get update && apt-get install -y cmake && cd tests && cmake -S . -B build && cd build && make
+      - name: Test
+        working-directory: thingsetplusplus
+        run: |
+          cd tests && cmake -S . -B build && cd build && make && ./testapp --gtest_output="xml:report.xml"
