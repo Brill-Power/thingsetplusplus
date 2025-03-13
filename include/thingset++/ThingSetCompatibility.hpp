@@ -7,7 +7,7 @@
 
 #include "ThingSet.hpp"
 
-namespace ThingSet {
+#define TS_ID_ROOT 0x00
 
 #define THINGSET_ROLE_USR (1U << 0) /**< Normal user */
 #define THINGSET_ROLE_EXP (1U << 1) /**< Expert user */
@@ -43,6 +43,8 @@ namespace ThingSet {
 #define THINGSET_MFR_RW THINGSET_READ_WRITE(THINGSET_ROLE_MFR) /**< Read/write access for manufacturer */
 #define THINGSET_ANY_RW THINGSET_READ_WRITE(THINGSET_ROLE_ANY) /**< Read/write access for any user */
 
+namespace ThingSet {
+
 template <unsigned T> struct convertAccess
 {
     static const ThingSetAccess value;
@@ -63,8 +65,40 @@ template <> struct convertAccess<THINGSET_ANY_R | THINGSET_MFR_W>
     static const ThingSetAccess value = ThingSetAccess::userRead | ThingSetAccess::manufacturerWrite;
 };
 
+template <> struct convertAccess<THINGSET_ANY_R | THINGSET_EXP_W | THINGSET_MFR_W>
+{
+    static const ThingSetAccess value = ThingSetAccess::userRead | ThingSetAccess::advancedWrite | ThingSetAccess::manufacturerWrite;
+};
+
+/// @brief Shim class to facilitate compatibility with two-stage array property
+/// declarations in C ThingSet.
+/// @tparam T The type of the elements in the array.
+template <typename T> struct __ArrayHolder {
+    T* array;
+    size_t maxElements;
+    size_t numElements;
+};
+
+/// @brief Facilitates the construction of properties where the type is to be inferred.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container.
+/// @tparam Name The name of the property.
+/// @tparam Access The access permissions for this property.
+template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access> struct __PropertyBuilder
+{
+    template <typename T>
+    static ThingSetProperty<Id, ParentId, Name, Access, T*> build(T** value) {
+        return ThingSetProperty<Id, ParentId, Name, Access, T*>(*value);
+    }
+};
+
+} // namespace ThingSet
+
+#define THINGSET_ADD_GROUP(parentId, id, name, callback) \
+    ThingSet::ThingSetGroup<id, parentId, name> thingset_##id;
+
 #define THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, type)                                          \
-    ThingSetProperty<id, parentId, name, convertAccess<access>::value, type *> thingset_##id(pointer);
+    ThingSet::ThingSetProperty<id, parentId, name, ThingSet::convertAccess<access>::value, type *> thingset_##id(pointer);
 
 #define THINGSET_ADD_ITEM_BOOL(parentId, id, name, pointer, access, subsets)                                           \
     THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, bool)
@@ -99,4 +133,10 @@ template <> struct convertAccess<THINGSET_ANY_R | THINGSET_MFR_W>
 #define THINGSET_ADD_ITEM_STRING(parentId, id, name, pointer, length, access, subsets)                                 \
     THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, char)
 
-} // namespace ThingSet
+#define THINGSET_DEFINE_FLOAT_ARRAY(variableName, numDecimals, arr, usedElements) \
+    ThingSet::__ArrayHolder<float> variableName = { .array = arr, .maxElements = sizeof(arr), .numElements = usedElements };
+
+#define THINGSET_ADD_ITEM_ARRAY(parentId, id, name, arrayHolder, access, subsets) \
+    auto thingset_##id = ThingSet::__PropertyBuilder<parentId, id, name, ThingSet::convertAccess<access>::value>::build(arrayHolder.array);
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
