@@ -17,13 +17,20 @@ class ThingSetClient
 private:
     ThingSetClientTransport &_transport;
     uint8_t *_rxBuffer;
-    size_t _rxBufferSize;
+    const size_t _rxBufferSize;
     uint8_t *_txBuffer;
-    size_t _txBufferSize;
+    const size_t _txBufferSize;
 
 public:
-    ThingSetClient(ThingSetClientTransport &transport, uint8_t *rxBuffer, size_t rxBufferSize, uint8_t *txBuffer,
-                   size_t txBufferSize);
+    ThingSetClient(ThingSetClient &&) = delete;
+    ThingSetClient(const ThingSetClient &) = delete;
+    ThingSetClient(ThingSetClientTransport &transport, uint8_t *rxBuffer, const size_t rxBufferSize, uint8_t *txBuffer,
+                   const size_t txBufferSize);
+    template <size_t RxSize, size_t TxSize>
+    ThingSetClient(ThingSetClientTransport &transport, std::array<uint8_t, RxSize> &rxBuffer,
+                   std::array<uint8_t, TxSize> &txBuffer)
+        : ThingSetClient(transport, rxBuffer.data(), rxBuffer.size(), txBuffer.data(), txBuffer.size())
+    {}
 
     bool connect();
 
