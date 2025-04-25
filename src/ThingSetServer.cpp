@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Brill Power.
+ * Copyright (c) 2024-2025 Brill Power.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -9,6 +9,7 @@
 #include "thingset++/ThingSet.hpp"
 #include "thingset++/ThingSetCustomRequestHandler.hpp"
 #include "thingset++/ThingSetRegistry.hpp"
+#include "thingset++/internal/logging.hpp"
 #include <list>
 
 namespace ThingSet {
@@ -52,12 +53,16 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
     }
     switch (request[0]) {
         case ThingSetRequestType::get:
+            LOG_SMART("Handling get for node ", context.node->getName());
             return handleGet(context);
         case ThingSetRequestType::fetch:
+            LOG_SMART("Handling fetch for node ", context.node->getName());
             return handleFetch(context);
         case ThingSetRequestType::update:
+            LOG_SMART("Handling update for node ", context.node->getName());
             return handleUpdate(context);
         case ThingSetRequestType::exec:
+            LOG_SMART("Handling exec for node ", context.node->getName());
             return handleExec(context);
         default:
             break;
@@ -147,6 +152,7 @@ int ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     }
     ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
     context.response[0] = ThingSetStatusCode::changed;
+    context.encoder.encodeNull();
     if (context.decoder.decodeMap<std::string>([&](auto &key) {
             // concoct full path to node
             std::string fullPath = std::string(context.path) + (context.path.length() > 1 ? "/" : "") + key;
@@ -194,6 +200,7 @@ int ThingSetServer::handleExec(ThingSetRequestContext &context)
     void *target;
     if (context.node->tryCastTo(ThingSetNodeType::function, &target)) {
         ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
+        context.encoder.encodeNull();
         if (invocable->invoke(context.decoder, context.encoder)) {
             context.response[0] = ThingSetStatusCode::changed;
             return context.encoder.getEncodedLength() + 1;

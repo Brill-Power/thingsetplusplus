@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Brill Power.
+ * Copyright (c) 2024-2025 Brill Power.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,6 +12,7 @@ LOG_MODULE_REGISTER(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
 LOG_MODULE_DECLARE(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
 #endif // __THINGSET_PLUS_PLUS_LOGGING_REGISTERED
 #elif defined(DEBUG_LOGGING)
+#include <iostream>
 
 #define LOCAL_DEBUG_LEVEL 3
 
@@ -34,11 +35,21 @@ LOG_MODULE_DECLARE(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
     printf(__VA_ARGS__);                                                                                               \
     printf("\n");
 
+template <typename ... T>
+void LOG_SMART(T... args)
+{
+    (std::cout << ... << args) << std::endl;
+}
 #else
 
 #define LOG_DBG(...)
 #define LOG_INF(...)
 #define LOG_WRN(...)
 #define LOG_ERR(...)
+
+template <typename ... T>
+void LOG_SMART(T...)
+{
+}
 
 #endif

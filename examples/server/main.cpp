@@ -1,4 +1,10 @@
-#include <asio.hpp>
+/*
+ * Copyright (c) 2024-2025 Brill Power.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+ #include <asio.hpp>
 #include <functional>
 #include <iostream>
 #include <thingset++/ThingSet.hpp>
@@ -29,6 +35,9 @@ struct ModuleRecord
 ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
 std::array<ModuleRecord, 2> moduleRecords;
+//ThingSetReadWriteProperty<0x610, 0x0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
+
+ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
 void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer *server)
 {

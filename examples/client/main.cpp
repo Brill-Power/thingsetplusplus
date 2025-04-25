@@ -1,8 +1,15 @@
+/*
+ * Copyright (c) 2024-2025 Brill Power.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <asio.hpp>
 #include <functional>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetClient.hpp>
 #include <thingset++/asio/ThingSetAsyncSocketClientTransport.hpp>
+#include <iostream>
 
 using namespace ThingSet;
 using namespace ThingSet::Async;
@@ -29,19 +36,36 @@ ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
 std::array<ModuleRecord, 2> moduleRecords;
 
+std::array<uint8_t, 1024> rxBuffer;
+std::array<uint8_t, 1024> txBuffer;
+
 int main()
 {
     moduleRecords[0].voltage = 23.9;
     moduleRecords[0].current = 15;
     auto endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), 9001);
     ThingSetAsyncSocketClientTransport transport(endpoint);
-    ThingSetClient client(transport);
+    ThingSetClient client(transport, rxBuffer, txBuffer);
 
     asio::signal_set signals(transport.getContext(), SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto) { transport.getContext().stop(); });
 
     client.connect();
-    client.subscribe(&moduleRecords);
+
+    // gets the value of voltage
+    float voltage;
+    if (client.get(0x300, voltage)) {
+        std::cout << "Voltage: " << voltage << std::endl;
+    }
+
+    // invokes a method which adds 2 + 3 and returns the result
+    int result;
+    if (client.exec(0x1000, &result, 2, 3)) {
+        std::cout << "Executed: " << result << std::endl;
+    }
+
+    // TODO: implement subscriptions (again?)
+    //client.subscribe(&moduleRecords);
 
     transport.getContext().run();
     return 0;
