@@ -9,9 +9,11 @@
 #include "ThingSetBinaryDecoder.hpp"
 #include "ThingSetBinaryEncoder.hpp"
 #include "ThingSetNode.hpp"
+#include "ThingSetProperty.hpp"
 #include "ThingSetRequestContext.hpp"
 #include "ThingSetServerTransport.hpp"
 #include "ThingSetStatus.hpp"
+#include "StringLiteral.hpp"
 
 namespace ThingSet {
 
@@ -27,6 +29,11 @@ public:
     ThingSetServer(ThingSetServerTransport &transport);
 
     bool listen();
+
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T> bool publish(ThingSetProperty<Id, ParentId, Name, Access, T> &property)
+    {
+        return publish(property.getId(), property.getValue());
+    }
 
     template <typename T> bool publish(uint16_t id, T &value)
     {

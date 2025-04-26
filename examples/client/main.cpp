@@ -34,15 +34,13 @@ struct ModuleRecord
 
 ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
-std::array<ModuleRecord, 2> moduleRecords;
+ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
 
 std::array<uint8_t, 1024> rxBuffer;
 std::array<uint8_t, 1024> txBuffer;
 
 int main()
 {
-    moduleRecords[0].voltage = 23.9;
-    moduleRecords[0].current = 15;
     auto endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), 9001);
     ThingSetAsyncSocketClientTransport transport(endpoint);
     ThingSetClient client(transport, rxBuffer, txBuffer);
@@ -64,8 +62,13 @@ int main()
         std::cout << "Executed: " << result << std::endl;
     }
 
-    // TODO: implement subscriptions (again?)
-    //client.subscribe(&moduleRecords);
+    client.subscribe([&](auto id) {
+        for (size_t i = 0; i < moduleRecords.size(); i++)
+        {
+            std::cout << "Module " << i << "; voltage: " << moduleRecords[i].voltage << std::endl;
+        }
+
+    });
 
     transport.getContext().run();
     return 0;

@@ -65,9 +65,14 @@ awaitable<void> ThingSetAsyncSocketClientTransport::listener(std::function<void(
     for (;;) {
         auto buffer = asio::buffer(_buffer, 1024);
         size_t length = co_await _subscribeSocket.async_receive(buffer, use_awaitable);
-        if (length > 1) {
-            if (_buffer[0] == ThingSetRequestType::report) {
-                callback(&_buffer[3], length);
+        if (length > 4) {
+            if (_buffer[0] != ThingSetRequestType::report) {
+                continue;
+            }
+            // get actual length from message body to check we have received everything
+            size_t actualLength = _buffer[1] | (_buffer[2] << 8);
+            if (actualLength == length - 3) {
+                callback(&_buffer[3], actualLength);
             }
         }
     }

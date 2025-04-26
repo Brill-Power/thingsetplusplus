@@ -36,7 +36,8 @@ public:
 
     bool connect();
 
-public:
+    bool subscribe(std::function<void(uint16_t &)> callback);
+
     /// @brief Execute a function which returns a value.
     /// @tparam Result The type of the return value of the function.
     /// @tparam ...TArg The types of the arguments to the function.

@@ -34,15 +34,21 @@ struct ModuleRecord
 
 ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
-std::array<ModuleRecord, 2> moduleRecords;
-//ThingSetReadWriteProperty<0x610, 0x0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
+ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
 
 ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
 void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer *server)
 {
     std::cout << "Publishing report" << std::endl;
-    server->publish(0x600, moduleRecords);
+    for (int i = 0; i < moduleRecords.size(); i++) {
+        auto increment = 0.25 * (std::rand() % 4);
+        if (std::rand() % 1 == 0) {
+            increment *= -1;
+        }
+        moduleRecords[i].voltage += increment;
+    }
+    server->publish(moduleRecords);
 
     t->expires_at(t->expiry() + asio::chrono::seconds(1));
     t->async_wait(std::bind(publishCallback, asio::placeholders::error, t, server));
