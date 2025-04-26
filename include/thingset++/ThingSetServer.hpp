@@ -17,6 +17,13 @@
 
 namespace ThingSet {
 
+/// Specifies a type which is probably a ThingSet property.
+template <typename T>
+concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> &&
+    std::is_base_of_v<ThingSetBinaryEncodable, T> &&
+    std::is_base_of_v<ThingSetBinaryDecodable, T>;
+
+/// @brief Core server implementation.
 class ThingSetServer
 {
 private:
@@ -30,22 +37,22 @@ public:
 
     bool listen();
 
-    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T> bool publish(ThingSetProperty<Id, ParentId, Name, Access, T> &property)
-    {
-        return publish(property.getId(), property.getValue());
-    }
-
-    template <typename T> bool publish(uint16_t id, T &value)
+    /// @brief Broadcasts one or more properties as a report.
+    /// @tparam ...Property The types of the properties.
+    /// @param ...properties The properties to publish.
+    /// @return True if publishing succeeded.
+    template <EncodableDecodableNode ... Property> bool publish(Property &...properties)
     {
         uint8_t buffer[1024];
         buffer[0] = ThingSetRequestType::report;
-        FixedDepthThingSetBinaryEncoder encoder(buffer + 3, 1024 - 3);
-        encoder.encode(0); // fake subset ID
-        size_t len = 3 + encoder.getEncodedLength();
-        // reset encoder
-        encoder = FixedDepthThingSetBinaryEncoder(buffer + len, 1024 - len);
-        encoder.encodeMapStart() && encoder.encode(id) && encoder.encode(value) && encoder.encodeMapEnd();
-        len = encoder.getEncodedLength() + 1; // TODO; this +1 should not be necessary
+        FixedDepthThingSetBinaryEncoder encoder(buffer + 3, 1024 - 3, 2);
+        if (!encoder.encode(0) || // fake subset ID
+            !encoder.encodeMapStart() ||
+            !encode(encoder, properties...) ||
+            !encoder.encodeMapEnd()) {
+            return false;
+        }
+        size_t len = encoder.getEncodedLength();
         buffer[1] = (uint8_t)len;
         buffer[2] = (uint8_t)(len >> 8);
         return _transport.publish(buffer, 3 + len);
@@ -56,6 +63,17 @@ private:
     int handleFetch(ThingSetRequestContext &context);
     int handleUpdate(ThingSetRequestContext &context);
     int handleExec(ThingSetRequestContext &context);
+
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, EncodableDecodableNode ... Property>
+    bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property, Property &... properties)
+    {
+        return encode(encoder, property) && encode(encoder, properties...);
+    }
+
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T> bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
+    {
+        return encoder.encode(property.getId()) && encoder.encode(property.getValue());
+    }
 };
 
 } // namespace ThingSet

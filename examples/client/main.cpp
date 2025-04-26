@@ -63,6 +63,7 @@ int main()
     }
 
     client.subscribe([&](auto id) {
+        printf("Received report for 0x%x\n", id);
         for (size_t i = 0; i < moduleRecords.size(); i++)
         {
             std::cout << "Module " << i << "; voltage: " << moduleRecords[i].voltage << std::endl;

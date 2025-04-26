@@ -223,9 +223,13 @@ protected:
     }
 
 public:
-    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size) : _buffer(buffer)
+    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size) : FixedDepthThingSetBinaryEncoder(buffer, size, 1)
     {
-        zcbor_new_encode_state(_state, depth, buffer, size, 1);
+    }
+
+    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount) : _buffer(buffer)
+    {
+        zcbor_new_encode_state(_state, depth, buffer, size, elementCount);
     }
 
     size_t getEncodedLength() const override

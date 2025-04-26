@@ -48,7 +48,7 @@ void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, Thin
         }
         moduleRecords[i].voltage += increment;
     }
-    server->publish(moduleRecords);
+    server->publish(moduleRecords, totalVoltage);
 
     t->expires_at(t->expiry() + asio::chrono::seconds(1));
     t->async_wait(std::bind(publishCallback, asio::placeholders::error, t, server));
