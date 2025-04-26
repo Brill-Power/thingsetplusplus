@@ -9,6 +9,7 @@
 
 namespace ThingSet {
 
+/// @brief Specifies the type of a ThingSet request.
 enum ThingSetRequestType : uint8_t
 {
     get = 0x01,
@@ -21,6 +22,7 @@ enum ThingSetRequestType : uint8_t
     report = 0x1f
 };
 
+/// @brief Specifies the status of a ThingSet request.
 enum ThingSetStatusCode : uint8_t
 {
     created = 0x81,

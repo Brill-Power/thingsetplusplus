@@ -9,14 +9,15 @@
 
 namespace ThingSet {
 
+/// @brief Specifies ThingSet access controls.
 enum ThingSetAccess
 {
-    userRead = 1,
-    userWrite = 2,
-    advancedRead = 8,
-    advancedWrite = 16,
-    manufacturerRead = 64,
-    manufacturerWrite = 128,
+    userRead = 1 << 0,
+    userWrite = 1 << 1,
+    advancedRead = 1 << 3,
+    advancedWrite = 1 << 4,
+    manufacturerRead = 1 << 6,
+    manufacturerWrite = 1 << 7,
 };
 
 constexpr inline ThingSetAccess operator|(ThingSetAccess lhs, ThingSetAccess rhs)
