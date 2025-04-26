@@ -191,7 +191,17 @@ public:
             context.response[0] = ThingSetStatusCode::content;
             context.encoder.encodeNull();
             if (context.index == SIZE_MAX) {
-                context.encoder.encode(this->_value.size());
+                context.encoder.encode(
+#if defined(__APPLE__)
+// working round ambiguity on macOS
+// https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
+static_cast<uint32_t>(
+#endif
+                    this->_value.size()
+#if defined(__APPLE__)
+)
+#endif
+                );
             }
             else {
                 context.encoder.encode(this->_value[context.index]);
