@@ -19,10 +19,10 @@ if(ENABLE_ASIO)
         asio/ThingSetAsyncSocketClientTransport.cpp)
 endif()
 
-if(ENABLE_SOCKETCAN)
+if (ENABLE_CAN)
     add_subdirectory(can)
 endif()
 
-if(ENABLE_ZEPHYR)
-    add_subdirectory(can)
+if (ENABLE_ZSOCK)
+    target_sources(thingset++ PRIVATE zsock/ThingSetZephyrSocketClientTransport.cpp)
 endif()
