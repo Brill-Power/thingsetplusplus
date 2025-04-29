@@ -44,7 +44,7 @@ std::array<uint8_t, 1024> txBuffer;
 int main()
 {
     auto ioContext = asio::io_context(1);
-    auto endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), 9001);
+    auto endpoint = asio::ip::tcp::endpoint(asio::ip::make_address("192.0.2.1"), 9001);
     ThingSetAsyncSocketClientTransport clientTransport(ioContext, endpoint);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
     ThingSetAsyncSocketSubscriptionTransport subscriptionTransport(ioContext);

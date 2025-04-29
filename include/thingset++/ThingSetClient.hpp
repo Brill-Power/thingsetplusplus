@@ -117,7 +117,7 @@ private:
         }
 
         if (!_transport.write(_txBuffer, 1 + encoder.getEncodedLength())) {
-            LOG_ERR("Failed to send request");
+            //LOG_ERR("Failed to send request");
             return false;
         }
 
