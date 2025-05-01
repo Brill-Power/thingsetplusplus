@@ -11,7 +11,8 @@ if(ENABLE_SERVER)
 endif()
 
 if(ENABLE_CLIENT)
-    target_sources(thingset++ PRIVATE ThingSetClient.cpp)
+    message("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+    target_sources(thingset++ PRIVATE ThingSetClient.cpp ThingSetRegistry.cpp ThingSetParentNode.cpp)
 endif()
 
 if(ENABLE_ASIO)
