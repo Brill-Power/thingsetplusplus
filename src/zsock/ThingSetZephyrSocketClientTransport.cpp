@@ -56,8 +56,8 @@ bool ThingSetZephyrSocketClientTransport::set_client_connection_params(const cha
 
 bool ThingSetZephyrSocketClientTransport::connect()
 {
-    // int ret = zsock_connect(_requestResponseSocket, (struct sockaddr *)&_clientaddr, sizeof(_clientaddr));
-    int ret = zsock_bind(_subscribeSocket, (struct sockaddr *)&_udpaddr, sizeof(_udpaddr));
+    int ret = zsock_connect(_requestResponseSocket, (struct sockaddr *)&_clientaddr, sizeof(_clientaddr));
+    ret |= zsock_bind(_subscribeSocket, (struct sockaddr *)&_udpaddr, sizeof(_udpaddr));
 
     return ret == 0;
 }
