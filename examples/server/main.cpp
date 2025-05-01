@@ -38,7 +38,7 @@ ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> mo
 
 ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
-void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer *server)
+void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer<STREAMING_ENCODER_UDP_PUBLICATION_SIZE, StreamingTransportThingSetBinaryEncoder<STREAMING_ENCODER_UDP_PUBLICATION_SIZE>, ThingSetAsyncSocketServerTransport> *server)
 {
     std::cout << "Publishing report" << std::endl;
     for (int i = 0; i < moduleRecords.size(); i++) {
@@ -91,7 +91,7 @@ int main()
                       } };
 
     ThingSetAsyncSocketServerTransport transport;
-    ThingSetServer server(transport);
+    ThingSetServer<STREAMING_ENCODER_UDP_PUBLICATION_SIZE, StreamingTransportThingSetBinaryEncoder<STREAMING_ENCODER_UDP_PUBLICATION_SIZE>, ThingSetAsyncSocketServerTransport> server(transport);
 
     asio::steady_timer t(transport.getContext(), asio::chrono::seconds(1));
     t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));

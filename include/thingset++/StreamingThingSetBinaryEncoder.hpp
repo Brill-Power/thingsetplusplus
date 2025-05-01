@@ -54,10 +54,10 @@ template <size_t Size> class StreamingThingSetBinaryEncoder : public _StreamingT
 protected:
     std::array<uint8_t, Size * 2> _buffer;
 
-public:
     StreamingThingSetBinaryEncoder() : _StreamingThingSetBinaryEncoder()
     {}
 
+public:
     /// @brief Write remaining buffer to the output.
     bool flush() override
     {

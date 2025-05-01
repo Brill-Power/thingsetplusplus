@@ -26,13 +26,8 @@ protected:
     _ThingSetServer() : _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
     {}
 
+protected:
     int requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
-
-private:
-    int handleGet(ThingSetRequestContext &context);
-    int handleFetch(ThingSetRequestContext &context);
-    int handleUpdate(ThingSetRequestContext &context);
-    int handleExec(ThingSetRequestContext &context);
 
     template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, EncodableDecodableNode ... Property>
     bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property, Property &... properties)
@@ -44,6 +39,12 @@ private:
     {
         return encoder.encode(property.getId()) && encoder.encode(property.getValue());
     }
+
+private:
+    int handleGet(ThingSetRequestContext &context);
+    int handleFetch(ThingSetRequestContext &context);
+    int handleUpdate(ThingSetRequestContext &context);
+    int handleExec(ThingSetRequestContext &context);
 };
 
 /// @brief Core server implementation.
@@ -69,19 +70,14 @@ public:
     /// @return True if publishing succeeded.
     template <EncodableDecodableNode ... Property> bool publish(Property &...properties)
     {
-        uint8_t buffer[1024];
-        buffer[0] = ThingSetRequestType::report;
-        FixedDepthThingSetBinaryEncoder encoder(buffer + 3, 1024 - 3, 2);
+        auto encoder = _transport.getPublishingEncoder();
         if (!encoder.encode(0) || // fake subset ID
             !encoder.encodeMapStart() ||
             !encode(encoder, properties...) ||
             !encoder.encodeMapEnd()) {
             return false;
         }
-        size_t len = encoder.getEncodedLength();
-        buffer[1] = (uint8_t)len;
-        buffer[2] = (uint8_t)(len >> 8);
-        return _transport.publish(buffer, 3 + len);
+        return encoder.flush();
     }
 };
 
