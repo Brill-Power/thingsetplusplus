@@ -8,13 +8,17 @@
 #include <cstdint>
 #include <cstdio>
 #include <functional>
+#include "thingset++/StreamingThingSetBinaryEncoder.hpp"
 
 namespace ThingSet {
 
 /// @brief Interface for transports for ThingSet servers.
-class ThingSetServerTransport
+template <size_t Size, typename T>
+concept StreamingBinaryEncoder = std::is_base_of_v<StreamingThingSetBinaryEncoder<Size>, T>;
+
+class _ThingSetServerTransport
 {
-public:
+    public:
     /// @brief Core listening method. The supplied callback is invoked when a request
     /// is received.
     /// @param callback The callback to be invoked when a request is received.
@@ -27,6 +31,14 @@ public:
     /// @param len The length of the data in the buffer.
     /// @return True.
     virtual bool publish(uint8_t *buffer, size_t len) = 0;
+};
+
+template <size_t StreamingFrameSize, typename StreamingEncoder>
+    requires StreamingBinaryEncoder<StreamingFrameSize, StreamingEncoder>
+class ThingSetServerTransport : public _ThingSetServerTransport
+{
+public:
+    virtual StreamingEncoder getPublishingEncoder() = 0;
 };
 
 } // namespace ThingSet

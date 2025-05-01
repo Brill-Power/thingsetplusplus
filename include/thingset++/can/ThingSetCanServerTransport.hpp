@@ -5,13 +5,14 @@
  */
 #pragma once
 
-#include "CanID.hpp"
-#include "ThingSetCanInterface.hpp"
+#include "thingset++/can/CanID.hpp"
+#include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
 
 namespace ThingSet::Can {
 
-class ThingSetCanServerTransport : public ThingSetServerTransport
+class ThingSetCanServerTransport : public ThingSetServerTransport<THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE, StreamingCanThingSetBinaryEncoder>
 {
 protected:
     uint8_t _messageNumber;
@@ -27,6 +28,8 @@ public:
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
 
     bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+
+    StreamingCanThingSetBinaryEncoder getPublishingEncoder() override;
 };
 
 } // namespace ThingSet::Can

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/ThingSetCanServerTransport.hpp"
+#include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
 
 namespace ThingSet::Can {
 
@@ -42,6 +43,11 @@ bool ThingSetCanServerTransport::publish(uint8_t *buffer, size_t length)
                        .setMultiFrameMessageType(MultiFrameMessageType::single)
                        .setMessagePriority(MessagePriority::reportLow),
                    buffer, length);
+}
+
+StreamingCanThingSetBinaryEncoder ThingSetCanServerTransport::getPublishingEncoder()
+{
+    return StreamingCanThingSetBinaryEncoder(*this);
 }
 
 } // namespace ThingSet::Can

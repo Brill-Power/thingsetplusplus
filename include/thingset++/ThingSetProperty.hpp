@@ -17,6 +17,12 @@ namespace ThingSet {
 template <typename T, typename Base, unsigned Id, unsigned ParentId, StringLiteral Name>
 concept IdentifiableBase = std::is_base_of_v<_IdentifiableThingSetNode<Base, Id, ParentId, Name>, T>;
 
+/// Specifies a type which is probably a ThingSet property.
+template <typename T>
+concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> &&
+    std::is_base_of_v<ThingSetBinaryEncodable, T> &&
+    std::is_base_of_v<ThingSetBinaryDecodable, T>;
+
 template <unsigned Id, unsigned ParentId, StringLiteral Name, NodeBase NodeBase,
           IdentifiableBase<NodeBase, Id, ParentId, Name> Base, ThingSetAccess Access, typename T>
 class _ThingSetProperty : public ThingSetValue<T>, public Base

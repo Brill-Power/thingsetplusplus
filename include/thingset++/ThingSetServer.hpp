@@ -17,25 +17,51 @@
 
 namespace ThingSet {
 
-/// Specifies a type which is probably a ThingSet property.
-template <typename T>
-concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> &&
-    std::is_base_of_v<ThingSetBinaryEncodable, T> &&
-    std::is_base_of_v<ThingSetBinaryDecodable, T>;
-
-/// @brief Core server implementation.
-class ThingSetServer
+class _ThingSetServer
 {
 private:
-    ThingSetServerTransport &_transport;
     ThingSetAccess _access;
+
+protected:
+    _ThingSetServer() : _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
+    {}
 
     int requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
 
-public:
-    ThingSetServer(ThingSetServerTransport &transport);
+private:
+    int handleGet(ThingSetRequestContext &context);
+    int handleFetch(ThingSetRequestContext &context);
+    int handleUpdate(ThingSetRequestContext &context);
+    int handleExec(ThingSetRequestContext &context);
 
-    bool listen();
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, EncodableDecodableNode ... Property>
+    bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property, Property &... properties)
+    {
+        return encode(encoder, property) && encode(encoder, properties...);
+    }
+
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T> bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
+    {
+        return encoder.encode(property.getId()) && encoder.encode(property.getValue());
+    }
+};
+
+/// @brief Core server implementation.
+template <size_t StreamingFrameSize, typename StreamingEncoder, typename Transport>
+    requires std::is_base_of_v<ThingSetServerTransport<StreamingFrameSize, StreamingEncoder>, Transport>
+class ThingSetServer : public _ThingSetServer
+{
+private:
+    Transport &_transport;
+
+public:
+    ThingSetServer(Transport &transport) : _ThingSetServer(), _transport(transport)
+    {}
+
+    bool listen() {
+        return _transport.listen(
+            [this](auto req, auto reql, auto res, auto resl) { return requestCallback(req, reql, res, resl); });
+    }
 
     /// @brief Broadcasts one or more properties as a report.
     /// @tparam ...Property The types of the properties.
@@ -56,23 +82,6 @@ public:
         buffer[1] = (uint8_t)len;
         buffer[2] = (uint8_t)(len >> 8);
         return _transport.publish(buffer, 3 + len);
-    }
-
-private:
-    int handleGet(ThingSetRequestContext &context);
-    int handleFetch(ThingSetRequestContext &context);
-    int handleUpdate(ThingSetRequestContext &context);
-    int handleExec(ThingSetRequestContext &context);
-
-    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, EncodableDecodableNode ... Property>
-    bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property, Property &... properties)
-    {
-        return encode(encoder, property) && encode(encoder, properties...);
-    }
-
-    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T> bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
-    {
-        return encoder.encode(property.getId()) && encoder.encode(property.getValue());
     }
 };
 

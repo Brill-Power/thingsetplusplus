@@ -16,11 +16,7 @@ namespace ThingSet {
 
 static inline ThingSetProperty<0x1d, 0, "NodeID", ThingSetAccess::userRead, std::string> nodeId(Eui::getString());
 
-ThingSetServer::ThingSetServer(ThingSetServerTransport &transport)
-    : _transport(transport), _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
-{}
-
-int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+int _ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
 {
     ThingSetRequestContext context(request, requestLen, response, responseLen);
 
@@ -71,7 +67,7 @@ int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t
     return 1;
 }
 
-int ThingSetServer::handleGet(ThingSetRequestContext &context)
+int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
     context.encoder.encodeNull();
@@ -86,7 +82,7 @@ int ThingSetServer::handleGet(ThingSetRequestContext &context)
     return 1;
 }
 
-int ThingSetServer::handleFetch(ThingSetRequestContext &context)
+int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
     context.encoder.encodeNull();
@@ -143,7 +139,7 @@ int ThingSetServer::handleFetch(ThingSetRequestContext &context)
     }
 }
 
-int ThingSetServer::handleUpdate(ThingSetRequestContext &context)
+int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
 {
     void *target;
     if (!context.node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
@@ -191,7 +187,7 @@ int ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     return 1;
 }
 
-int ThingSetServer::handleExec(ThingSetRequestContext &context)
+int _ThingSetServer::handleExec(ThingSetRequestContext &context)
 {
     if (!context.node->checkAccess(_access)) {
         context.response[0] = ThingSetStatusCode::forbidden;
@@ -208,12 +204,6 @@ int ThingSetServer::handleExec(ThingSetRequestContext &context)
     }
     context.response[0] = ThingSetStatusCode::badRequest;
     return 1;
-}
-
-bool ThingSetServer::listen()
-{
-    return _transport.listen(
-        [this](auto req, auto reql, auto res, auto resl) { return requestCallback(req, reql, res, resl); });
 }
 
 } // namespace ThingSet

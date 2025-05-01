@@ -9,19 +9,17 @@
 
 namespace ThingSet {
 
-/// @brief Base class for streaming encoders.
-/// @tparam Size The size of the chunks to write.
-template <size_t Size> class StreamingThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
+class _StreamingThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
 {
 protected:
     zcbor_state_t _state[BINARY_ENCODER_DEFAULT_MAX_DEPTH];
-    std::array<uint8_t, Size * 2> _buffer;
     size_t _exportedLength;
 
-public:
-    StreamingThingSetBinaryEncoder() : _exportedLength(0)
+protected:
+    _StreamingThingSetBinaryEncoder() : _exportedLength(0)
     {}
 
+public:
     size_t getEncodedLength() const override
     {
         return _exportedLength;
@@ -37,8 +35,31 @@ public:
         return encode(id) && encode(value);
     }
 
+    virtual bool flush() = 0;
+
+protected:
+
+    zcbor_state_t *getState() override
+    {
+        return _state;
+    }
+
+    virtual bool write(size_t length, bool flushing) = 0;
+};
+
+/// @brief Base class for streaming encoders.
+/// @tparam Size The size of the chunks to write.
+template <size_t Size> class StreamingThingSetBinaryEncoder : public _StreamingThingSetBinaryEncoder
+{
+protected:
+    std::array<uint8_t, Size * 2> _buffer;
+
+public:
+    StreamingThingSetBinaryEncoder() : _StreamingThingSetBinaryEncoder()
+    {}
+
     /// @brief Write remaining buffer to the output.
-    bool flush()
+    bool flush() override
     {
         size_t currentLength = _state->payload - &_buffer[0];
         size_t remainder = _buffer.size() - currentLength;
@@ -53,13 +74,6 @@ protected:
     {
         return writeIfNecessary();
     }
-
-    zcbor_state_t *getState() override
-    {
-        return _state;
-    }
-
-    virtual bool write(size_t length, bool flushing) = 0;
 
 private:
     /// @brief If the buffer contains more than @tparam Size bytes worth of data,

@@ -83,4 +83,10 @@ bool ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size_t len)
     return false;
 }
 
+StreamingTransportThingSetBinaryEncoder<STREAMING_ENCODER_UDP_PUBLICATION_SIZE>
+ThingSetAsyncSocketServerTransport::getPublishingEncoder()
+{
+    return StreamingTransportThingSetBinaryEncoder<STREAMING_ENCODER_UDP_PUBLICATION_SIZE>(*this);
+}
+
 } // namespace ThingSet::Async
