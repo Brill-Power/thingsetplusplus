@@ -6,6 +6,7 @@ zephyr_include_directories(${THINGSET_BASE}/include)
 
 set(ENABLE_ZEPHYR ON)
 set(ENABLE_ZSOCK ON)
+set(ENABLE_CLIENT ON)
 
 if(DEFINED CONFIG_THINGSET_PLUS_PLUS_SERVER)
     set(ENABLE_SERVER ON)
