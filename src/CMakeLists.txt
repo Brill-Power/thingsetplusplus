@@ -23,5 +23,5 @@ if (ENABLE_CAN)
 endif()
 
 if (ENABLE_ZSOCK)
-    target_sources(thingset++ PRIVATE zsock/ThingSetZephyrSocketClientTransport.cpp)
+    target_sources(thingset++ PRIVATE zsock/ThingSetZephyrSocketClientTransport.cpp zsock/ThingSetZephyrSocketServerTransport.cpp)
 endif()
