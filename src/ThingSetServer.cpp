@@ -17,7 +17,7 @@
 namespace ThingSet {
 
 static inline ThingSetProperty<0x1d, 0, "NodeID", ThingSetAccess::userRead, std::string> nodeId(Eui::getString());
-
+ 
 ThingSetServer::ThingSetServer(ThingSetServerTransport &transport)
     : _transport(transport), _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
 {}
