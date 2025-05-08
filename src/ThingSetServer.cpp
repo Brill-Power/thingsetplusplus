@@ -9,69 +9,16 @@
 #include "thingset++/ThingSet.hpp"
 #include "thingset++/ThingSetCustomRequestHandler.hpp"
 #include "thingset++/ThingSetRegistry.hpp"
-#include "thingset++/internal/logging.hpp"
 #include <list>
 
 namespace ThingSet {
 
 static inline ThingSetProperty<0x1d, 0, "NodeID", ThingSetAccess::userRead, std::string> nodeId(Eui::getString());
 
-ThingSetServer::ThingSetServer(ThingSetServerTransport &transport)
-    : _transport(transport), _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
+_ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
 {}
 
-int ThingSetServer::requestCallback(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
-{
-    ThingSetRequestContext context(request, requestLen, response, responseLen);
-
-    uint16_t id;
-    if (context.decoder.decode(&context.path)) {
-        if (!ThingSetRegistry::findByName(context.path, &context.node, &context.index)) {
-            response[0] = ThingSetStatusCode::notFound;
-            return 1;
-        }
-    }
-    else if (context.decoder.decode(&id)) {
-        if (!ThingSetRegistry::findById(id, &context.node)) {
-            response[0] = ThingSetStatusCode::notFound;
-            return 1;
-        }
-        context.useIds = true;
-    }
-    else {
-        // fail
-        response[0] = ThingSetStatusCode::badRequest;
-        return 1;
-    }
-    void *target;
-    if (context.node->tryCastTo(ThingSetNodeType::requestHandler, &target)) {
-        ThingSetCustomRequestHandler *handler = reinterpret_cast<ThingSetCustomRequestHandler *>(target);
-        int result = handler->handleRequest(context);
-        if (result != 0) {
-            return result;
-        }
-    }
-    switch (request[0]) {
-        case ThingSetRequestType::get:
-            LOG_SMART("Handling get for node ", context.node->getName());
-            return handleGet(context);
-        case ThingSetRequestType::fetch:
-            LOG_SMART("Handling fetch for node ", context.node->getName());
-            return handleFetch(context);
-        case ThingSetRequestType::update:
-            LOG_SMART("Handling update for node ", context.node->getName());
-            return handleUpdate(context);
-        case ThingSetRequestType::exec:
-            LOG_SMART("Handling exec for node ", context.node->getName());
-            return handleExec(context);
-        default:
-            break;
-    }
-    response[0] = ThingSetStatusCode::notImplemented;
-    return 1;
-}
-
-int ThingSetServer::handleGet(ThingSetRequestContext &context)
+int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
     context.encoder.encodeNull();
@@ -86,7 +33,7 @@ int ThingSetServer::handleGet(ThingSetRequestContext &context)
     return 1;
 }
 
-int ThingSetServer::handleFetch(ThingSetRequestContext &context)
+int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
     context.encoder.encodeNull();
@@ -143,7 +90,7 @@ int ThingSetServer::handleFetch(ThingSetRequestContext &context)
     }
 }
 
-int ThingSetServer::handleUpdate(ThingSetRequestContext &context)
+int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
 {
     void *target;
     if (!context.node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
@@ -191,7 +138,7 @@ int ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     return 1;
 }
 
-int ThingSetServer::handleExec(ThingSetRequestContext &context)
+int _ThingSetServer::handleExec(ThingSetRequestContext &context)
 {
     if (!context.node->checkAccess(_access)) {
         context.response[0] = ThingSetStatusCode::forbidden;
@@ -208,12 +155,6 @@ int ThingSetServer::handleExec(ThingSetRequestContext &context)
     }
     context.response[0] = ThingSetStatusCode::badRequest;
     return 1;
-}
-
-bool ThingSetServer::listen()
-{
-    return _transport.listen(
-        [this](auto req, auto reql, auto res, auto resl) { return requestCallback(req, reql, res, resl); });
 }
 
 } // namespace ThingSet

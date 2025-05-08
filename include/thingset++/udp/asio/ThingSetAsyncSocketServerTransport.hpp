@@ -12,25 +12,23 @@
 
 namespace ThingSet::Udp::Async {
 
-class ThingSetAsyncSocketServerTransport : public ThingSetServerTransport
+class ThingSetAsyncSocketServerTransport : public ThingSetServerTransport<asio::ip::tcp::endpoint>
 {
 private:
-    asio::io_context _ioContext;
+    asio::io_context &_ioContext;
     asio::ip::udp::socket _publishSocket;
 
 public:
-    ThingSetAsyncSocketServerTransport();
+    ThingSetAsyncSocketServerTransport(asio::io_context &ioContext);
 
-    asio::io_context &getContext();
-
-    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+    bool listen(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 
     bool publish(uint8_t *buffer, size_t len) override;
 
 private:
     asio::awaitable<void> handle(asio::ip::tcp::socket socket,
-                                 std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback);
-    asio::awaitable<void> listener(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback);
+                                 std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback);
+    asio::awaitable<void> listener(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback);
 };
 
 } // namespace ThingSet::Async
