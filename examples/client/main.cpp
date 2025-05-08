@@ -8,11 +8,13 @@
 #include <functional>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetClient.hpp>
-#include <thingset++/asio/ThingSetAsyncSocketClientTransport.hpp>
+#include <thingset++/ThingSetListener.hpp>
+#include <thingset++/udp/asio/ThingSetAsyncSocketClientTransport.hpp>
+#include <thingset++/udp/asio/ThingSetAsyncSocketSubscriptionTransport.hpp>
 #include <iostream>
 
 using namespace ThingSet;
-using namespace ThingSet::Async;
+using namespace ThingSet::Udp::Async;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
@@ -41,14 +43,18 @@ std::array<uint8_t, 1024> txBuffer;
 
 int main()
 {
+    auto ioContext = asio::io_context(1);
     auto endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), 9001);
-    ThingSetAsyncSocketClientTransport transport(endpoint);
-    ThingSetClient client(transport, rxBuffer, txBuffer);
+    ThingSetAsyncSocketClientTransport clientTransport(ioContext, endpoint);
+    ThingSetClient client(clientTransport, rxBuffer, txBuffer);
+    ThingSetAsyncSocketSubscriptionTransport subscriptionTransport(ioContext);
+    auto listener = ThingSetListener::build(subscriptionTransport);
 
-    asio::signal_set signals(transport.getContext(), SIGINT, SIGTERM);
-    signals.async_wait([&](auto, auto) { transport.getContext().stop(); });
+    asio::signal_set signals(ioContext, SIGINT, SIGTERM);
+    signals.async_wait([&](auto, auto) { ioContext.stop(); });
 
     client.connect();
+    listener.connect();
 
     // gets the value of voltage
     float voltage;
@@ -62,15 +68,14 @@ int main()
         std::cout << "Executed: " << result << std::endl;
     }
 
-    client.subscribe([&](auto id) {
-        printf("Received report for 0x%x\n", id);
+    listener.subscribe([&](auto sender, auto id) {
+        std::cout << "Received report for " << id << " from " << sender << std::endl;
         for (size_t i = 0; i < moduleRecords.size(); i++)
         {
             std::cout << "Module " << i << "; voltage: " << moduleRecords[i].voltage << std::endl;
         }
-
     });
 
-    transport.getContext().run();
+    ioContext.run();
     return 0;
 }

@@ -9,10 +9,10 @@
 #include <iostream>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
-#include <thingset++/asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/udp/asio/ThingSetAsyncSocketServerTransport.hpp>
 
 using namespace ThingSet;
-using namespace ThingSet::Async;
+using namespace ThingSet::Udp::Async;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;

@@ -15,8 +15,7 @@ if(ENABLE_CLIENT)
 endif()
 
 if(ENABLE_ASIO)
-    target_sources(thingset++ PRIVATE asio/ThingSetAsyncSocketServerTransport.cpp
-        asio/ThingSetAsyncSocketClientTransport.cpp)
+    add_subdirectory(udp)
 endif()
 
 if(ENABLE_SOCKETCAN)

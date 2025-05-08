@@ -70,7 +70,8 @@ private:
         return encode(encoder, property) && encode(encoder, properties...);
     }
 
-    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T> bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
+    bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
     {
         return encoder.encode(property.getId()) && encoder.encode(property.getValue());
     }

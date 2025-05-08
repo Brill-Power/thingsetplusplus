@@ -5,11 +5,11 @@
  */
 #pragma once
 
-#include "ThingSetBinaryDecoder.hpp"
-#include "ThingSetBinaryEncoder.hpp"
-#include "ThingSetClientTransport.hpp"
-#include "ThingSetStatus.hpp"
-#include "internal/logging.hpp"
+#include "thingset++/ThingSetBinaryDecoder.hpp"
+#include "thingset++/ThingSetBinaryEncoder.hpp"
+#include "thingset++/ThingSetClientTransport.hpp"
+#include "thingset++/ThingSetStatus.hpp"
+#include "thingset++/internal/logging.hpp"
 
 namespace ThingSet {
 
@@ -35,8 +35,6 @@ public:
     {}
 
     bool connect();
-
-    bool subscribe(std::function<void(uint16_t &)> callback);
 
     /// @brief Execute a function which returns a value.
     /// @tparam Result The type of the return value of the function.

@@ -10,7 +10,7 @@
 #include <asio/ip/tcp.hpp>
 #include <asio/ip/udp.hpp>
 
-namespace ThingSet::Async {
+namespace ThingSet::Udp::Async {
 
 class ThingSetAsyncSocketServerTransport : public ThingSetServerTransport
 {

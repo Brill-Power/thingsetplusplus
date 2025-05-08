@@ -10,7 +10,7 @@
 #include <asio/ip/udp.hpp>
 #include <asio/signal_set.hpp>
 #include <asio/write.hpp>
-#include <thingset++/asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/udp/asio/ThingSetAsyncSocketServerTransport.hpp>
 
 #define SOCKET_TRANSPORT_MAX_CONNECTIONS 10
 
@@ -21,7 +21,7 @@ using asio::use_awaitable;
 using asio::ip::tcp;
 using asio::ip::udp;
 
-namespace ThingSet::Async {
+namespace ThingSet::Udp::Async {
 
 ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport() : _ioContext(1), _publishSocket(_ioContext)
 {}
