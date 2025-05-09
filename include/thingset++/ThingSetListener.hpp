@@ -13,13 +13,13 @@ namespace ThingSet {
 
 /// @brief ThingSet broadcast listener.
 template <typename Identifier>
-class _ThingSetListener
+class ThingSetListener
 {
 private:
     ThingSetSubscriptionTransport<Identifier> &_transport;
 
 public:
-    _ThingSetListener(ThingSetSubscriptionTransport<Identifier> &transport) : _transport(transport)
+    ThingSetListener(ThingSetSubscriptionTransport<Identifier> &transport) : _transport(transport)
     {}
 
     bool connect() {
@@ -58,12 +58,12 @@ public:
     }
 };
 
-class ThingSetListener
+class ThingSetListenerBuilder
 {
 public:
     template <typename Identifier>
-    static _ThingSetListener<Identifier> build(ThingSetSubscriptionTransport<Identifier> &transport) {
-        return _ThingSetListener<Identifier>(transport);
+    static ThingSetListener<Identifier> build(ThingSetSubscriptionTransport<Identifier> &transport) {
+        return ThingSetListener<Identifier>(transport);
     }
 };
 

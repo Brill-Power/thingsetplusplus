@@ -20,6 +20,7 @@ private:
 
 public:
     ThingSetAsyncSocketServerTransport(asio::io_context &ioContext);
+    ~ThingSetAsyncSocketServerTransport();
 
     bool listen(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 

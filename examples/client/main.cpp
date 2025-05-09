@@ -48,7 +48,7 @@ int main()
     ThingSetAsyncSocketClientTransport clientTransport(ioContext, endpoint);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
     ThingSetAsyncSocketSubscriptionTransport subscriptionTransport(ioContext);
-    auto listener = ThingSetListener::build(subscriptionTransport);
+    auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
 
     asio::signal_set signals(ioContext, SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto) { ioContext.stop(); });

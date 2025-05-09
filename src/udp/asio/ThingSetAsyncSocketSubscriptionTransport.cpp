@@ -29,6 +29,13 @@ bool ThingSetAsyncSocketSubscriptionTransport::connect()
     return true;
 }
 
+ThingSetAsyncSocketSubscriptionTransport::~ThingSetAsyncSocketSubscriptionTransport()
+{
+    asio::error_code error;
+    _subscribeSocket.shutdown(asio::socket_base::shutdown_type::shutdown_both, error);
+    _subscribeSocket.close(error);
+}
+
 awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function<void(asio::ip::udp::endpoint &, uint8_t *, size_t)> callback)
 {
     for (;;) {

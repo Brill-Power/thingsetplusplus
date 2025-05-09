@@ -12,6 +12,13 @@ ThingSetAsyncSocketClientTransport::ThingSetAsyncSocketClientTransport(asio::io_
     : _ioContext(ioContext), _requestResponseSocket(ioContext), _endpoint(endpoint)
 {}
 
+ThingSetAsyncSocketClientTransport::~ThingSetAsyncSocketClientTransport()
+{
+    asio::error_code error;
+    _requestResponseSocket.shutdown(asio::socket_base::shutdown_type::shutdown_both, error);
+    _requestResponseSocket.close(error);
+}
+
 bool ThingSetAsyncSocketClientTransport::connect()
 {
     asio::error_code error;

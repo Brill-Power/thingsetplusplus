@@ -39,6 +39,13 @@ awaitable<void> ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket
     }
 }
 
+ThingSetAsyncSocketServerTransport::~ThingSetAsyncSocketServerTransport()
+{
+    asio::error_code error;
+    _publishSocket.shutdown(asio::socket_base::shutdown_type::shutdown_both, error);
+    _publishSocket.close(error);
+}
+
 awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     auto executor = co_await asio::this_coro::executor;

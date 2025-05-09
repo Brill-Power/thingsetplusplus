@@ -22,6 +22,7 @@ private:
 
 public:
     ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, asio::ip::tcp::endpoint &endpoint);
+    ~ThingSetAsyncSocketClientTransport();
 
     bool connect() override;
     int read(uint8_t *buffer, size_t len) override;
