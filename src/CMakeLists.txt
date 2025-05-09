@@ -11,17 +11,17 @@ if(ENABLE_SERVER)
 endif()
 
 if(ENABLE_CLIENT)
-    target_sources(thingset++ PRIVATE ThingSetClient.cpp)
+    target_sources(thingset++ PRIVATE ThingSetNode.cpp ThingSetClient.cpp ThingSetRegistry.cpp ThingSetParentNode.cpp)
 endif()
 
 if(ENABLE_ASIO)
     add_subdirectory(udp)
 endif()
 
-if(ENABLE_SOCKETCAN)
+if (ENABLE_CAN)
     add_subdirectory(can)
 endif()
 
-if(ENABLE_ZEPHYR)
-    add_subdirectory(can)
+if (ENABLE_ZSOCK)
+    target_sources(thingset++ PRIVATE zsock/ThingSetZephyrSocketClientTransport.cpp)
 endif()
