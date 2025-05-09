@@ -12,7 +12,6 @@
 #include "thingset++/StringLiteral.hpp"
 #include "thingset++/internal/logging.hpp"
 
-
 namespace ThingSet {
 
 /// Specifies a type which is probably a ThingSet property.
@@ -79,7 +78,7 @@ public:
     {
         Encoder encoder = _transport.getPublishingEncoder();
         if (!encoder.encode(0) || // fake subset ID
-            !encoder.encodeMapStart() ||
+            !encoder.encodeMapStart(sizeof...(properties)) ||
             !encode(encoder, properties...) ||
             !encoder.encodeMapEnd()) {
             return false;
