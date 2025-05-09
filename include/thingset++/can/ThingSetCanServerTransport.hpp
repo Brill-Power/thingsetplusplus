@@ -8,10 +8,11 @@
 #include "thingset++/ThingSetServerTransport.hpp"
 #include "thingset++/can/CanID.hpp"
 #include "thingset++/can/ThingSetCanInterface.hpp"
+#include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
 
 namespace ThingSet::Can {
 
-class ThingSetCanServerTransport : public ThingSetServerTransport<CanID>
+class ThingSetCanServerTransport : public ThingSetServerTransport<CanID, THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE, StreamingCanThingSetBinaryEncoder>
 {
 protected:
     uint8_t _messageNumber;
@@ -23,7 +24,8 @@ protected:
 public:
     uint8_t getNodeAddress();
 
-    bool publish(uint8_t *buffer, size_t len) override;
+    StreamingCanThingSetBinaryEncoder getPublishingEncoder() override;
+
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
 
     bool listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;

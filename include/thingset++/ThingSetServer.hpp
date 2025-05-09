@@ -51,14 +51,17 @@ protected:
 };
 
 /// @brief Core server implementation.
-template <typename Identifier>
+/// @tparam Identifier Type of client identifier
+/// @tparam Size Size of broadcast message frames
+/// @tparam Encoder Type of streaming encoder
+template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
 class ThingSetServer : public _ThingSetServer
 {
 private:
-    ThingSetServerTransport<Identifier> &_transport;
+    ThingSetServerTransport<Identifier, Size, Encoder> &_transport;
 
 public:
-    ThingSetServer(ThingSetServerTransport<Identifier> &transport)
+    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
     : _ThingSetServer(), _transport(transport)
     {}
 
@@ -74,19 +77,18 @@ public:
     /// @return True if publishing succeeded.
     template <EncodableDecodableNode ... Property> bool publish(Property &...properties)
     {
-        uint8_t buffer[1024];
-        buffer[0] = ThingSetRequestType::report;
-        FixedDepthThingSetBinaryEncoder encoder(buffer + 3, 1024 - 3, 2);
+        Encoder encoder = _transport.getPublishingEncoder();
         if (!encoder.encode(0) || // fake subset ID
             !encoder.encodeMapStart() ||
             !encode(encoder, properties...) ||
             !encoder.encodeMapEnd()) {
             return false;
         }
-        size_t len = encoder.getEncodedLength();
-        buffer[1] = (uint8_t)len;
-        buffer[2] = (uint8_t)(len >> 8);
-        return _transport.publish(buffer, 3 + len);
+        return encoder.flush();
+        // size_t len = encoder.getEncodedLength();
+        // buffer[1] = (uint8_t)len;
+        // buffer[2] = (uint8_t)(len >> 8);
+        // return _transport.publish(buffer, 3 + len);
     }
 
 private:
