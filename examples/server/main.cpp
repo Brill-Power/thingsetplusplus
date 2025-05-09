@@ -94,7 +94,7 @@ int main()
 
     asio::io_context ioContext(1);
     ThingSetAsyncSocketServerTransport transport(ioContext);
-    ThingSetServer<asio::ip::tcp::endpoint, THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<asio::ip::tcp::endpoint>> server(transport);
+    auto server = ThingSetServerBuilder::build(transport);
 
     asio::steady_timer t(ioContext, asio::chrono::seconds(1));
     t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));

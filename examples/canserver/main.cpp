@@ -92,7 +92,7 @@ int main()
                       } };
 
     ThingSetSocketCanServerTransport transport("vcan0");
-    ThingSetServer server(transport);
+    auto server = ThingSetServerBuilder::build(transport);
 
     std::thread publisher([&]() {
         while (true) {
