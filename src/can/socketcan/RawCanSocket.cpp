@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "can/socketcan/RawCanSocket.hpp"
+#include "thingset++/can/socketcan/RawCanSocket.hpp"
 #include <linux/can/raw.h>
 #include <net/if.h>
 

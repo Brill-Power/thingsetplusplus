@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "can/AbstractCanFrame.hpp"
+#include "thingset++/can/AbstractCanFrame.hpp"
 #include "linux/can.h"
 #include "linux/can/raw.h"
 #include <array>

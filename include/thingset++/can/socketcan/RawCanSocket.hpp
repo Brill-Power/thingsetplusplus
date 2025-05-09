@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "CanFrame.hpp"
-#include "can/CanID.hpp"
+#include "thingset++/can/socketcan/CanFrame.hpp"
+#include "thingset++/can/CanID.hpp"
 #include <chrono>
 #include <linux/can.h>
 #include <poll.h>

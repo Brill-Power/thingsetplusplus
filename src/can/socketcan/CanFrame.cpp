@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "can/socketcan/CanFrame.hpp"
+#include "thingset++/can/socketcan/CanFrame.hpp"
 #include <string.h>
 
 namespace ThingSet::Can::SocketCan {

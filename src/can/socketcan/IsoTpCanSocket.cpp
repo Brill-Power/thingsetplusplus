@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "can/socketcan/IsoTpCanSocket.hpp"
+#include "thingset++/can/socketcan/IsoTpCanSocket.hpp"
 #include <linux/can/isotp.h>
 #include <net/if.h>
 #include <poll.h>
@@ -84,7 +84,7 @@ IsoTpCanSocket::IsoTpCanSocketListener::~IsoTpCanSocketListener()
 }
 
 bool IsoTpCanSocket::IsoTpCanSocketListener::listen(const Can::CanID &address,
-                                                    std::function<void(IsoTpCanSocket)> callback)
+                                                    std::function<void(CanID &, IsoTpCanSocket)> callback)
 {
     _listenSocket.setFilter(address);
     _listenSocket.bind(_deviceName);
@@ -101,7 +101,8 @@ bool IsoTpCanSocket::IsoTpCanSocketListener::listen(const Can::CanID &address,
                 // this is a despicable hack: put the frame we just received back on
                 // the wire so that the ISO-TP socket we've just created and bound sees it
                 _listenSocket.write(frame);
-                callback(std::move(client));
+                CanID sender = frame.getId();
+                callback(sender, std::move(client));
             }
         }
     };

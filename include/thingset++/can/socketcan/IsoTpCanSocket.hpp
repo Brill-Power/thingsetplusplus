@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "RawCanSocket.hpp"
-#include "can/CanID.hpp"
+#include "thingset++/can/socketcan/RawCanSocket.hpp"
+#include "thingset++/can/CanID.hpp"
 #include <chrono>
 #include <functional>
 #include <string>
@@ -30,7 +30,7 @@ public:
         IsoTpCanSocketListener(const std::string &deviceName, bool fd);
         ~IsoTpCanSocketListener();
 
-        bool listen(const Can::CanID &address, std::function<void(IsoTpCanSocket)> callback);
+        bool listen(const Can::CanID &address, std::function<void(CanID &, IsoTpCanSocket)> callback);
     };
 
 private:

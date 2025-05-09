@@ -1,7 +1,13 @@
+/*
+ * Copyright (c) 2024-2025 Brill Power.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include "thingset++/Eui.hpp"
 #include "thingset++/ThingSet.hpp"
 #include "thingset++/ThingSetServer.hpp"
-#include "thingset++/can/StreamingThingSetBinaryEncoder.hpp"
+#include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
 #include "thingset++/can/socketcan/ThingSetSocketCanServerTransport.hpp"
 #include "format.hpp"
 #include <functional>
@@ -12,8 +18,7 @@ using namespace ThingSet::Can::SocketCan;
 
 static bool onConfigChange(ThingSetNode *node, ThingSetCallbackReason reason)
 {
-    auto s = std::format("Node {} {}", node->getName(), reason);
-    printf("%s\n", s.c_str());
+    std::cout << "Node " << node->getName() << " " << reason << std::endl;
     return true;
 }
 
@@ -93,7 +98,7 @@ int main()
     std::thread publisher([&]() {
         while (true) {
             sleep(5);
-            Can::StreamingThingSetBinaryEncoder encoder(transport);
+            Can::StreamingCanThingSetBinaryEncoder encoder(transport);
             encoder.encode(0x0);
             encoder.encodeMapStart(1);
             encoder.encodePair(0x650, moduleRecords.getValue());

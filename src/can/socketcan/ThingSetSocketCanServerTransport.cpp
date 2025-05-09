@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "can/socketcan/ThingSetSocketCanServerTransport.hpp"
+#include "thingset++/can/socketcan/ThingSetSocketCanServerTransport.hpp"
 
 namespace ThingSet::Can::SocketCan {
 

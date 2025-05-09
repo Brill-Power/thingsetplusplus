@@ -23,7 +23,7 @@ public:
     bool bind();
     virtual bool bind(uint8_t nodeAddress) = 0;
 
-    virtual bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
+    virtual bool listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
 
     virtual bool publish(CanID &id, uint8_t *buffer, size_t length) = 0;
 

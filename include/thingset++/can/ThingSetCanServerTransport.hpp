@@ -5,13 +5,13 @@
  */
 #pragma once
 
-#include "CanID.hpp"
-#include "ThingSetCanInterface.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
+#include "thingset++/can/CanID.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
 
 namespace ThingSet::Can {
 
-class ThingSetCanServerTransport : public ThingSetServerTransport
+class ThingSetCanServerTransport : public ThingSetServerTransport<CanID>
 {
 protected:
     uint8_t _messageNumber;
@@ -26,7 +26,7 @@ public:
     bool publish(uint8_t *buffer, size_t len) override;
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
 
-    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+    bool listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 };
 
 } // namespace ThingSet::Can

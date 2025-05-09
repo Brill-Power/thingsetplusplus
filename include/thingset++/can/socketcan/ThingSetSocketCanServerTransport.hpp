@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "can/ThingSetCanServerTransport.hpp"
-#include "can/socketcan/ThingSetSocketCanInterface.hpp"
+#include "thingset++/can/ThingSetCanServerTransport.hpp"
+#include "thingset++/can/socketcan/ThingSetSocketCanInterface.hpp"
 
 namespace ThingSet::Can::SocketCan {
 

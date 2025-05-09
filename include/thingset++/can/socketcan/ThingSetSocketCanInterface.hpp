@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include "can/ThingSetCanInterface.hpp"
-#include "can/socketcan/IsoTpCanSocket.hpp"
-#include "can/socketcan/RawCanSocket.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
+#include "thingset++/can/socketcan/IsoTpCanSocket.hpp"
+#include "thingset++/can/socketcan/RawCanSocket.hpp"
 #include <functional>
 #include <string>
 #include <thread>
@@ -47,7 +47,7 @@ public:
     using ThingSetCanInterface::bind;
     bool bind(uint8_t nodeAddress) override;
 
-    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+    bool listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 
     bool publish(CanID &id, uint8_t *buffer, size_t length) override;
 };
