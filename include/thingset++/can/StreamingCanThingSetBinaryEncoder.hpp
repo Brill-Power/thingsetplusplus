@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "ThingSetCanServerTransport.hpp"
 #include "thingset++/StreamingThingSetBinaryEncoder.hpp"
+#include "thingset++/can/CanID.hpp"
 
 #if defined(__ZEPHYR__)
 #include "zephyr/drivers/can.h"
@@ -18,6 +18,8 @@
 #endif
 
 namespace ThingSet::Can {
+
+class ThingSetCanServerTransport;
 
 /// @brief Encodes data to successive CAN messages in a multi-frame report.
 class StreamingCanThingSetBinaryEncoder : public StreamingThingSetBinaryEncoder<THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE>
@@ -33,7 +35,7 @@ protected:
     bool write(size_t length, bool flushing) override;
 
 private:
-    bool send(Can::MultiFrameMessageType frameType, size_t length);
+    bool send(MultiFrameMessageType frameType, size_t length);
 };
 
 } // namespace ThingSet::Can

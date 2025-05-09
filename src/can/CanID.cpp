@@ -163,4 +163,10 @@ CanID CanID::create(uint32_t id)
     return CanID(id, CAN_FULL_MASK);
 }
 
+std::ostream& operator<<(std::ostream &os, const CanID &id)
+{
+    os << "0x" << std::hex << id.getId();
+    return os;
+}
+
 } // namespace ThingSet::Can

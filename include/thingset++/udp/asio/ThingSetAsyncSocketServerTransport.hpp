@@ -5,14 +5,14 @@
  */
 #pragma once
 
-#include "thingset++/ThingSetServerTransport.hpp"
+#include "thingset++/udp/ThingSetUdpServerTransport.hpp"
 #include <asio/awaitable.hpp>
 #include <asio/ip/tcp.hpp>
 #include <asio/ip/udp.hpp>
 
 namespace ThingSet::Udp::Async {
 
-class ThingSetAsyncSocketServerTransport : public ThingSetServerTransport<asio::ip::tcp::endpoint>
+class ThingSetAsyncSocketServerTransport : public ThingSetUdpServerTransport<asio::ip::tcp::endpoint>
 {
 private:
     asio::io_context &_ioContext;

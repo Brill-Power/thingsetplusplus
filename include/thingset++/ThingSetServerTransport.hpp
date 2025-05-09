@@ -8,11 +8,15 @@
 #include <cstdint>
 #include <cstdio>
 #include <functional>
+#include "thingset++/StreamingThingSetBinaryEncoder.hpp"
 
 namespace ThingSet {
 
 /// @brief Interface for transports for ThingSet servers.
-template <typename Identifier>
+/// @tparam Identifier Type of client identifier
+/// @tparam Size Size of broadcast message frames
+/// @tparam Encoder Type of streaming encoder
+template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
 class ThingSetServerTransport
 {
 public:
@@ -22,12 +26,7 @@ public:
     /// @return True.
     virtual bool listen(std::function<int(Identifier &, uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
 
-    /// @brief Publish a request using a broadcast mechanism appropriate to the underlying
-    /// transport.
-    /// @param buffer A pointer to the buffer to be broadcasted.
-    /// @param len The length of the data in the buffer.
-    /// @return True.
-    virtual bool publish(uint8_t *buffer, size_t len) = 0;
+    virtual Encoder getPublishingEncoder() = 0;
 };
 
 } // namespace ThingSet

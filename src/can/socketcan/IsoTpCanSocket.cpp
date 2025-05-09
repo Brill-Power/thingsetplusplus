@@ -38,6 +38,7 @@ IsoTpCanSocket &IsoTpCanSocket::setIsFd(bool value)
     can_isotp_ll_options linkLayerOptions = {
         .mtu = (uint8_t)(value ? CANFD_MTU : CAN_MTU),
         .tx_dl = (uint8_t)(value ? CANFD_MAX_DLEN : CAN_MAX_DLEN),
+        .tx_flags = 0,
     };
     //.tx_flags = (uint8_t)(value ? CANFD_BRS : 0),
     setsockopt(_canSocket, SOL_CAN_ISOTP, CAN_ISOTP_LL_OPTS, &linkLayerOptions, sizeof(linkLayerOptions));

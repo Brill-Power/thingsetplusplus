@@ -10,8 +10,10 @@
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/udp/asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/udp/StreamingUdpThingSetBinaryEncoder.hpp>
 
 using namespace ThingSet;
+using namespace ThingSet::Udp;
 using namespace ThingSet::Udp::Async;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
@@ -38,7 +40,7 @@ ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> mo
 
 ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
-void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer<asio::ip::tcp::endpoint> *server)
+void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer<asio::ip::tcp::endpoint, THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<asio::ip::tcp::endpoint>> *server)
 {
     std::cout << "Publishing report" << std::endl;
     for (int i = 0; i < moduleRecords.size(); i++) {
@@ -92,7 +94,7 @@ int main()
 
     asio::io_context ioContext(1);
     ThingSetAsyncSocketServerTransport transport(ioContext);
-    ThingSetServer<asio::ip::tcp::endpoint> server(transport);
+    auto server = ThingSetServerBuilder::build(transport);
 
     asio::steady_timer t(ioContext, asio::chrono::seconds(1));
     t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));

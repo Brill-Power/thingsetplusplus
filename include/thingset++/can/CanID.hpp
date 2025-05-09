@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <iostream>
 
 #define THINGSET_CAN_ID_POSITION_SOURCE   0
 #define THINGSET_CAN_ID_POSITION_TARGET   8
@@ -136,5 +137,7 @@ public:
 
     static CanID create(uint32_t);
 };
+
+std::ostream& operator<<(std::ostream &os, const CanID &id);
 
 } // namespace ThingSet::Can

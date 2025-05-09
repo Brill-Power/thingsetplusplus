@@ -15,10 +15,8 @@ namespace ThingSet::Udp::Async {
 class ThingSetAsyncSocketClientTransport : public ThingSetClientTransport
 {
 private:
-    asio::io_context &_ioContext;
     asio::ip::tcp::socket _requestResponseSocket;
     asio::ip::tcp::endpoint &_endpoint;
-    uint8_t _buffer[1024];
 
 public:
     ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, asio::ip::tcp::endpoint &endpoint);
