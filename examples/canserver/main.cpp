@@ -96,13 +96,9 @@ int main()
 
     std::thread publisher([&]() {
         while (true) {
-            sleep(5);
-            Can::StreamingCanThingSetBinaryEncoder encoder(transport);
-            encoder.encode(0x0);
-            encoder.encodeMapStart(1);
-            encoder.encodePair(0x650, moduleRecords.getValue());
-            encoder.encodeMapEnd();
-            encoder.flush();
+            sleep(1);
+            std::cout << "Publishing report" << std::endl;
+            server.publish(moduleRecords);
         }
     });
 

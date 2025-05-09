@@ -85,10 +85,6 @@ public:
             return false;
         }
         return encoder.flush();
-        // size_t len = encoder.getEncodedLength();
-        // buffer[1] = (uint8_t)len;
-        // buffer[2] = (uint8_t)(len >> 8);
-        // return _transport.publish(buffer, 3 + len);
     }
 
 private:
