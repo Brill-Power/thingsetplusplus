@@ -10,7 +10,7 @@
 #include <asio/ip/udp.hpp>
 #include <asio/signal_set.hpp>
 #include <asio/write.hpp>
-#include <thingset++/asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/udp/asio/ThingSetAsyncSocketServerTransport.hpp>
 
 #define SOCKET_TRANSPORT_MAX_CONNECTIONS 10
 
@@ -21,31 +21,32 @@ using asio::use_awaitable;
 using asio::ip::tcp;
 using asio::ip::udp;
 
-namespace ThingSet::Async {
+namespace ThingSet::Udp::Async {
 
-ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport() : _ioContext(1), _publishSocket(_ioContext)
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) : _ioContext(ioContext), _publishSocket(ioContext)
 {}
 
-asio::io_context &ThingSetAsyncSocketServerTransport::getContext()
-{
-    return _ioContext;
-}
-
-awaitable<void>
-ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket socket,
-                                           std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
+awaitable<void> ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket socket,
+                                           std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     char request[1024];
     char response[1024];
     for (;;) {
         std::size_t n = co_await socket.async_read_some(asio::buffer(request), use_awaitable);
-        auto responseLength = callback((uint8_t *)request, n, (uint8_t *)response, sizeof(response));
+        auto remoteEndpoint = socket.remote_endpoint();
+        auto responseLength = callback(remoteEndpoint, (uint8_t *)request, n, (uint8_t *)response, sizeof(response));
         co_await async_write(socket, asio::buffer(response, responseLength), use_awaitable);
     }
 }
 
-awaitable<void>
-ThingSetAsyncSocketServerTransport::listener(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
+ThingSetAsyncSocketServerTransport::~ThingSetAsyncSocketServerTransport()
+{
+    asio::error_code error;
+    _publishSocket.shutdown(asio::socket_base::shutdown_type::shutdown_both, error);
+    _publishSocket.close(error);
+}
+
+awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     auto executor = co_await asio::this_coro::executor;
     tcp::acceptor acceptor(executor, { tcp::v4(), 9001 });
@@ -62,7 +63,7 @@ ThingSetAsyncSocketServerTransport::listener(std::function<int(uint8_t *, size_t
     }
 }
 
-bool ThingSetAsyncSocketServerTransport::listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetAsyncSocketServerTransport::listen(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     asio::signal_set signals(_ioContext, SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto) { _ioContext.stop(); });

@@ -5,7 +5,6 @@
  */
 #pragma once
 
-#include "CanID.hpp"
 #include "thingset++/ThingSetClientTransport.hpp"
 
 namespace ThingSet::Can {

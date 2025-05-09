@@ -9,10 +9,10 @@
 #include <iostream>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
-#include <thingset++/asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/udp/asio/ThingSetAsyncSocketServerTransport.hpp>
 
 using namespace ThingSet;
-using namespace ThingSet::Async;
+using namespace ThingSet::Udp::Async;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
@@ -38,7 +38,7 @@ ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> mo
 
 ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
-void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer *server)
+void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer<asio::ip::tcp::endpoint> *server)
 {
     std::cout << "Publishing report" << std::endl;
     for (int i = 0; i < moduleRecords.size(); i++) {
@@ -90,10 +90,11 @@ int main()
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
 
-    ThingSetAsyncSocketServerTransport transport;
-    ThingSetServer server(transport);
+    asio::io_context ioContext(1);
+    ThingSetAsyncSocketServerTransport transport(ioContext);
+    ThingSetServer<asio::ip::tcp::endpoint> server(transport);
 
-    asio::steady_timer t(transport.getContext(), asio::chrono::seconds(1));
+    asio::steady_timer t(ioContext, asio::chrono::seconds(1));
     t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));
 
     server.listen();
