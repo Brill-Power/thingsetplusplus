@@ -9,7 +9,6 @@
 #include "thingset++/ThingSetServer.hpp"
 #include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
 #include "thingset++/can/socketcan/ThingSetSocketCanServerTransport.hpp"
-#include "format.hpp"
 #include <functional>
 #include <iostream>
 
@@ -41,7 +40,7 @@ struct ModuleRecord
     ThingSetReadOnlyProperty<0x610, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-static inline ThingSetReadOnlyProperty<0x1d, 0, "NodeID", std::string> nodeId = std::format("{:x}", Eui::getValue());
+static inline ThingSetReadOnlyProperty<0x1d, 0, "NodeID", std::string> nodeId = Eui::getString();
 
 ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 

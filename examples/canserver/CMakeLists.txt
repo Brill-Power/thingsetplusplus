@@ -14,16 +14,6 @@ add_subdirectory(../../ thingset++)
 add_executable(canserver)
 include_directories(include ../../include ../../zcbor/include)
 
-include(CheckIncludeFileCXX)
-check_include_file_cxx("format" CXX_FORMAT_SUPPORT)
-if (NOT CXX_FORMAT_SUPPORT)
-    find_package(fmt REQUIRED)
-endif()
-
-if (NOT CXX_FORMAT_SUPPORT)
-    target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
-endif()
-
 target_sources(canserver PRIVATE main.cpp)
 
 target_link_libraries(canserver PRIVATE thingset++)

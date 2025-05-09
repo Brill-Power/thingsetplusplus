@@ -132,11 +132,11 @@ bool ThingSetSocketCanInterface::listen(std::function<int(CanID &, uint8_t *, si
                      [&](auto sender, auto socket) {
                          uint8_t request[THINGSET_REQUEST_BUFFER_SIZE];
                          int size = socket.read(request, sizeof(request));
-                         printf("Got request of size %d bytes\n", size);
+                         printf("Got request of size %d bytes from 0x%x\n", size, sender.getId());
                          uint8_t response[THINGSET_RESPONSE_BUFFER_SIZE];
                          int responseLength = callback(sender, request, size, response, sizeof(response));
                          socket.write(response, responseLength);
-                         printf("Sent response of size %d bytes\n", responseLength);
+                         printf("Sent response of size %d bytes to 0x%x\n", responseLength, sender.getReplyId().getId());
                      });
     return true;
 }
