@@ -30,7 +30,7 @@ bool RawCanSocket::getIsFd()
 RawCanSocket &RawCanSocket::setIsFd(bool value)
 {
     int enableFd = (value ? 1 : 0);
-    int result = setsockopt(_canSocket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enableFd, sizeof(enableFd));
+    setsockopt(_canSocket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &enableFd, sizeof(enableFd));
     return *this;
 }
 

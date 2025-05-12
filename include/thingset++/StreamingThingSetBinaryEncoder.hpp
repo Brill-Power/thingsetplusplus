@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "ThingSetBinaryEncoder.hpp"
+#include "thingset++/ThingSetBinaryEncoder.hpp"
 
 namespace ThingSet {
 
@@ -82,5 +82,8 @@ private:
         return true;
     }
 };
+
+template <typename T, size_t Size>
+concept StreamingBinaryEncoder = std::is_base_of_v<StreamingThingSetBinaryEncoder<Size>, T>;
 
 } // namespace ThingSet

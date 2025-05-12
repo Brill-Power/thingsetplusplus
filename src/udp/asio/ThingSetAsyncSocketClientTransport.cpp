@@ -9,7 +9,7 @@
 namespace ThingSet::Udp::Async {
 
 ThingSetAsyncSocketClientTransport::ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, asio::ip::tcp::endpoint &endpoint)
-    : _ioContext(ioContext), _requestResponseSocket(ioContext), _endpoint(endpoint)
+    : _requestResponseSocket(ioContext), _endpoint(endpoint)
 {}
 
 ThingSetAsyncSocketClientTransport::~ThingSetAsyncSocketClientTransport()
