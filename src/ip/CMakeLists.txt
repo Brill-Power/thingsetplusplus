@@ -1,4 +1,4 @@
 if(ENABLE_ASIO)
-    message("ASIO UDP support enabled")
+    message("ASIO IP support enabled")
     add_subdirectory(asio)
 endif()
