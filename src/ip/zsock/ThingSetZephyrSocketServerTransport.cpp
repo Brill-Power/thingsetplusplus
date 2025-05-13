@@ -23,7 +23,6 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
     : _pub_sock(-1), _tcpSocket(-1), _listenerThreadID(-1)
 {
     net_addr_pton(AF_INET, "255.255.255.255", &_pub_addr.sin_addr);
-
     _pub_addr.sin_family = AF_INET;
     _pub_addr.sin_port = htons(9002);
 
@@ -37,6 +36,16 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
     int ret = zsock_setsockopt(_pub_sock, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
     ret |= zsock_setsockopt(_pub_sock, SOL_SOCKET, SO_BROADCAST, &opt_val, sizeof(opt_val));
     __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
+
+    net_addr_pton(AF_INET, ip, &_req_addr.sin_addr);
+    _req_addr.sin_family = AF_INET;
+    _req_addr.sin_port = htons(9001);
+
+    addr = net_if_ipv4_addr_add(iface, &_req_addr.sin_addr, NET_ADDR_MANUAL, 0);
+    __ASSERT(addr != NULL, "Failed to add IP address to interface: %d", errno);
+
+    _req_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    __ASSERT(_req_sock >= 0, "Failed to create TCP socket: %d", errno);
 }
 
 bool ThingSetZephyrSocketServerTransport::start(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)

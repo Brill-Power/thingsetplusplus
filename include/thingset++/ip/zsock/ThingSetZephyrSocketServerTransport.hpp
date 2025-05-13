@@ -18,12 +18,11 @@ class ThingSetZephyrSocketServerTransport : public ThingSetServerTransport
 {
     private:
         struct sockaddr_in _pub_addr;
-        struct sockaddr_in _tcp_addr;
+        struct sockaddr_in _req_addr;
         int _pub_sock;
-        int _tcpSocket;
-
-        int _listenerThreadID;
-        std::function<int(uint8_t *, size_t, uint8_t *, size_t)> _listenerCallback;
+        int _req_sock;
+        int _listener_tid;
+        std::function<int(uint8_t *, size_t, uint8_t *, size_t)> _listener_callback;
 
     public:
         ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip);
