@@ -11,16 +11,17 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 
-#define TCP_THREAD_STACK_SIZE 1024
-#define TCP_THREAD_PRIORITY   2
+#define REQ_THREAD_STACK_SIZE 1024
+#define REQ_THREAD_PRIORITY   2
 
-K_THREAD_STACK_DEFINE(tcp_thread_stack, tcp_THREAD_STACK_SIZE);
-static struct k_thread tcp_thread;
-
+K_THREAD_STACK_DEFINE(req_thread_stack, REQ_THREAD_STACK_SIZE);
+static struct k_thread req_thread;
 namespace ThingSet::Ip::Zsock {
 
+void req_thread_loop(void *p1, void *p2, void *p3);
+
 ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip)
-    : _pub_sock(-1), _tcpSocket(-1), _listenerThreadID(-1)
+    : _pub_sock(-1), _req_sock(-1), _listener_tid(-1)
 {
     net_addr_pton(AF_INET, "255.255.255.255", &_pub_addr.sin_addr);
     _pub_addr.sin_family = AF_INET;
@@ -50,24 +51,17 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
 
 bool ThingSetZephyrSocketServerTransport::start(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
-    // struct sockaddr_in _tcp_addr = {
-    //     .sin_family = AF_INET,
-    //     .sin_addr.s_addr = 1,
-    //     .sin_port = htons(9001),
-    // };
-
-    // _tcpSocket = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-
-    // _listenerCallback = callback;
-    // _listenerThreadID = (int)k_thread_create(&tcp_thread, tcp_thread_stack, K_THREAD_STACK_SIZEOF(tcp_thread_stack),
-    //                                          tcp_thread_loop, this, NULL, NULL, TCP_THREAD_PRIORITY, 0, K_NO_WAIT);
-
-    // return zsock_bind(_sub_sock, (struct sockaddr *)&_udp_addr, sizeof(_udp_addr)) == 0;
-
     if (zsock_bind(_pub_sock, (struct sockaddr *)&_pub_addr, sizeof(_pub_addr))) {
         return false;
     }
+
+    if (zsock_bind(_req_sock, (struct sockaddr *)&_req_addr, sizeof(_req_addr))) {
+        return false;
+    }
+
+    _listener_callback = callback;
+    _listener_tid = (int)k_thread_create(&req_thread, req_thread_stack, K_THREAD_STACK_SIZEOF(req_thread_stack),
+                                          req_thread_loop, this, NULL, NULL, REQ_THREAD_PRIORITY, 0, K_NO_WAIT);
 
     return true;
 }
@@ -88,6 +82,16 @@ bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
     ssize_t sent = zsock_sendto(_pub_sock, buffer, len, 0, (struct sockaddr *)&_pub_addr, sizeof(_pub_addr));
     return sent == (ssize_t)len;
+}
+
+void req_thread_loop(void *p1, void *p2, void *p3)
+{
+    ARG_UNUSED(p2);
+    ARG_UNUSED(p3);
+
+    ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
+
+    // do a listen, accept, etc...
 }
 
 } // namespace ThingSet::Ip::Zsock
