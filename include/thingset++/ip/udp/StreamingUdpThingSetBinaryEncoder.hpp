@@ -10,7 +10,7 @@
 
 #define THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE 4096
 
-namespace ThingSet::Udp {
+namespace ThingSet::Ip::Udp {
 
 template <typename Identifier>
 class ThingSetUdpServerTransport;
@@ -39,4 +39,4 @@ protected:
     }
 };
 
-} // namespace ThingSet::Can
+} // namespace ThingSet::Ip::Udp

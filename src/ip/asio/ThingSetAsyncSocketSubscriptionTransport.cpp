@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "thingset++/udp/asio/ThingSetAsyncSocketSubscriptionTransport.hpp"
+#include "thingset++/ip/asio/ThingSetAsyncSocketSubscriptionTransport.hpp"
 #include "thingset++/ThingSetStatus.hpp"
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
@@ -14,7 +14,7 @@ using asio::co_spawn;
 using asio::detached;
 using asio::use_awaitable;
 
-namespace ThingSet::Udp::Async {
+namespace ThingSet::Ip::Async {
 
 ThingSetAsyncSocketSubscriptionTransport::ThingSetAsyncSocketSubscriptionTransport(asio::io_context &ioContext) : _ioContext(ioContext), _subscribeSocket(ioContext)
 {}
@@ -66,4 +66,4 @@ void ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(asio
     co_spawn(_ioContext, listener(callback), detached);
 }
 
-}
+} // namespace ThingSet::Ip::Async

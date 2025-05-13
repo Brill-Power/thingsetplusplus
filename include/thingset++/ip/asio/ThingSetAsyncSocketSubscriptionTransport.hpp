@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace ThingSet::Udp::Async {
+namespace ThingSet::Ip::Async {
 
 class ThingSetAsyncSocketSubscriptionTransport : public ThingSetSubscriptionTransport<asio::ip::udp::endpoint>
 {
@@ -31,4 +31,4 @@ private:
     asio::awaitable<void> listener(std::function<void(asio::ip::udp::endpoint &, uint8_t *, size_t)> callback);
 };
 
-} // namespace ThingSet::Async
+} // namespace ThingSet::Ip::Async

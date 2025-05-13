@@ -9,12 +9,12 @@
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetClient.hpp>
 #include <thingset++/ThingSetListener.hpp>
-#include <thingset++/udp/asio/ThingSetAsyncSocketClientTransport.hpp>
-#include <thingset++/udp/asio/ThingSetAsyncSocketSubscriptionTransport.hpp>
+#include <thingset++/ip/asio/ThingSetAsyncSocketClientTransport.hpp>
+#include <thingset++/ip/asio/ThingSetAsyncSocketSubscriptionTransport.hpp>
 #include <iostream>
 
 using namespace ThingSet;
-using namespace ThingSet::Udp::Async;
+using namespace ThingSet::Ip::Async;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;

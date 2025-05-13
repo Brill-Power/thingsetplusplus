@@ -6,9 +6,9 @@
 #pragma once
 
 #include "thingset++/ThingSetServerTransport.hpp"
-#include "thingset++/udp/StreamingUdpThingSetBinaryEncoder.hpp"
+#include "thingset++/ip/udp/StreamingUdpThingSetBinaryEncoder.hpp"
 
-namespace ThingSet::Udp {
+namespace ThingSet::Ip::Udp {
 
 /// @brief Server transport for UDP protocol.
 /// @tparam Identifier Type of client identifier
@@ -32,4 +32,4 @@ public:
     virtual bool publish(uint8_t *buffer, size_t len) = 0;
 };
 
-} // namespace ThingSet::Can
+} // namespace ThingSet::Ip::Udp

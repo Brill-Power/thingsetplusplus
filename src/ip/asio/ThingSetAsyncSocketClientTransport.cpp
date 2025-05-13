@@ -3,10 +3,10 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "thingset++/udp/asio/ThingSetAsyncSocketClientTransport.hpp"
+#include "thingset++/ip/asio/ThingSetAsyncSocketClientTransport.hpp"
 #include "thingset++/ThingSetStatus.hpp"
 
-namespace ThingSet::Udp::Async {
+namespace ThingSet::Ip::Async {
 
 ThingSetAsyncSocketClientTransport::ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, asio::ip::tcp::endpoint &endpoint)
     : _requestResponseSocket(ioContext), _endpoint(endpoint)
@@ -51,4 +51,4 @@ bool ThingSetAsyncSocketClientTransport::write(uint8_t *buffer, size_t len)
     return written == len;
 }
 
-} // namespace ThingSet::Async
+} // namespace ThingSet::Ip::Async
