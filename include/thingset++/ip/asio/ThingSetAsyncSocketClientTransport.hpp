@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace ThingSet::Udp::Async {
+namespace ThingSet::Ip::Async {
 
 class ThingSetAsyncSocketClientTransport : public ThingSetClientTransport
 {
@@ -27,4 +27,4 @@ public:
     bool write(uint8_t *buffer, size_t len) override;
 };
 
-} // namespace ThingSet::Async
+} // namespace ThingSet::Ip::Async

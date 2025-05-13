@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
- #include <asio.hpp>
+#include <asio.hpp>
 #include <functional>
 #include <iostream>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
-#include <thingset++/udp/asio/ThingSetAsyncSocketServerTransport.hpp>
-#include <thingset++/udp/StreamingUdpThingSetBinaryEncoder.hpp>
+#include <thingset++/ip/asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/ip/udp/StreamingUdpThingSetBinaryEncoder.hpp>
 
 using namespace ThingSet;
-using namespace ThingSet::Udp;
-using namespace ThingSet::Udp::Async;
+using namespace ThingSet::Ip::Async;
+using namespace ThingSet::Ip::Udp;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;

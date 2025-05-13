@@ -15,7 +15,7 @@ if(ENABLE_CLIENT)
 endif()
 
 if(ENABLE_ASIO)
-    add_subdirectory(udp)
+    add_subdirectory(ip)
 endif()
 
 if(ENABLE_SOCKETCAN)
