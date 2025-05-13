@@ -30,9 +30,6 @@ class ThingSetZephyrSocketServerTransport : public ThingSetServerTransport
 
         bool start(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
         bool publish(uint8_t *buffer, size_t len) override;
-
-    private:
-        bool pub_sock_is_bound(void);
 };
 
 } // namespace ThingSet::Ip::Zsock
