@@ -1,0 +1,4 @@
+target_sources(thingset++ PRIVATE
+    ThingSetZephyrSocketClientTransport.cpp
+    ThingSetZephyrSocketServerTransport.cpp
+)
