@@ -28,7 +28,7 @@ protected:
     _ThingSetServer();
 
 public:
-    virtual bool listen() = 0;
+    virtual bool start() = 0;
 
 protected:
     int handleGet(ThingSetRequestContext &context);
@@ -64,9 +64,9 @@ public:
     : _ThingSetServer(), _transport(transport)
     {}
 
-    bool listen() override
+    bool start() override
     {
-        return _transport.listen(
+        return _transport.start(
             [this](auto sender, auto req, auto reql, auto res, auto resl) { return requestCallback(sender, req, reql, res, resl); });
     }
 

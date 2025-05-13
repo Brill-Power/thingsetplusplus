@@ -36,7 +36,7 @@ ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTrans
     __ASSERT(_sub_sock >= 0, "Failed to create UDP socket: %d", errno);
 }
 
-bool ThingSetZephyrSocketSubscriptionTransport::connect()
+bool ThingSetZephyrSocketSubscriptionTransport::listen()
 {
     return zsock_bind(_sub_sock, (struct sockaddr *)&_udp_addr, sizeof(_udp_addr)) == 0;
 }
@@ -44,6 +44,7 @@ bool ThingSetZephyrSocketSubscriptionTransport::connect()
 ThingSetZephyrSocketSubscriptionTransport::~ThingSetAsyncSocketSubscriptionTransport()
 {
     zsock_close(_sub_sock);
+    _sub_sock = -1;
 }
 
 void ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(uint8_t *, size_t)> callback)

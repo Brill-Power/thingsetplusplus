@@ -25,7 +25,7 @@ public:
     ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface);
     ~ThingSetZephyrSocketSubscriptionTransport();
 
-    bool connect() override;
+    bool listen() override;
     void subscribe(std::function<void(uint8_t *, size_t)> callback) override;
 
 private:

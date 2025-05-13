@@ -54,7 +54,7 @@ int main()
     signals.async_wait([&](auto, auto) { ioContext.stop(); });
 
     client.connect();
-    listener.connect();
+    listener.listen();
 
     // gets the value of voltage
     float voltage;

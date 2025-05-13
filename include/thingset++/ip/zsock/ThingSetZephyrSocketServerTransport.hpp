@@ -17,9 +17,9 @@ namespace ThingSet::Ip::Zsock {
 class ThingSetZephyrSocketServerTransport : public ThingSetServerTransport
 {
     private:
-        struct sockaddr_in _broadcast_addr;
+        struct sockaddr_in _pub_addr;
         struct sockaddr_in _tcp_addr;
-        int _broadcastSocket;
+        int _pub_sock;
         int _tcpSocket;
 
         int _listenerThreadID;
@@ -28,7 +28,7 @@ class ThingSetZephyrSocketServerTransport : public ThingSetServerTransport
     public:
         ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip);
 
-        bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+        bool start(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
         bool publish(uint8_t *buffer, size_t len) override;
 
     private:

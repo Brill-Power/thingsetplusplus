@@ -24,7 +24,7 @@ public:
     ThingSetAsyncSocketSubscriptionTransport(asio::io_context &ioContext);
     ~ThingSetAsyncSocketSubscriptionTransport();
 
-    bool connect() override;
+    bool listen() override;
     void subscribe(std::function<void(asio::ip::udp::endpoint &, uint8_t *, size_t)> callback) override;
 
 private:

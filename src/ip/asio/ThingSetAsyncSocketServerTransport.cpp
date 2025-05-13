@@ -63,7 +63,7 @@ awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(a
     }
 }
 
-bool ThingSetAsyncSocketServerTransport::listen(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetAsyncSocketServerTransport::start(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     asio::signal_set signals(_ioContext, SIGINT, SIGTERM);
     signals.async_wait([&](auto, auto) { _ioContext.stop(); });

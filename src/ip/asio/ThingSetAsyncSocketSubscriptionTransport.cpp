@@ -19,7 +19,7 @@ namespace ThingSet::Ip::Async {
 ThingSetAsyncSocketSubscriptionTransport::ThingSetAsyncSocketSubscriptionTransport(asio::io_context &ioContext) : _ioContext(ioContext), _subscribeSocket(ioContext)
 {}
 
-bool ThingSetAsyncSocketSubscriptionTransport::connect()
+bool ThingSetAsyncSocketSubscriptionTransport::listen()
 {
     asio::error_code error;
     _subscribeSocket.open(asio::ip::udp::v4(), error);

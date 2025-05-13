@@ -22,8 +22,8 @@ public:
     ThingSetListener(ThingSetSubscriptionTransport<Identifier> &transport) : _transport(transport)
     {}
 
-    bool connect() {
-        return _transport.connect();
+    bool listen() {
+        return _transport.listen();
     }
 
     bool subscribe(std::function<void(Identifier &, uint16_t &)> callback) {

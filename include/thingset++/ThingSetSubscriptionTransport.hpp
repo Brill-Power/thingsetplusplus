@@ -16,7 +16,7 @@ template <typename Identifier>
 class ThingSetSubscriptionTransport
 {
 public:
-    virtual bool connect() = 0;
+    virtual bool listen() = 0;
     /// @brief Subscribes for publications delivered via the transport's
     /// broadcast mechanism.
     /// @param callback A callback that is invoked when a published message
