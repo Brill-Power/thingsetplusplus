@@ -12,7 +12,7 @@
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
 
-namespace ThingSet::Zsock {
+namespace ThingSet::Ip::Zsock {
 
 class ThingSetZephyrSocketServerTransport : public ThingSetServerTransport
 {
@@ -35,4 +35,4 @@ class ThingSetZephyrSocketServerTransport : public ThingSetServerTransport
         bool pub_sock_is_bound(void);
 };
 
-} // namespace ThingSet::Zsock
+} // namespace ThingSet::Ip::Zsock

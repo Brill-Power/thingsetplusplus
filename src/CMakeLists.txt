@@ -23,5 +23,5 @@ if (ENABLE_CAN)
 endif()
 
 if (ENABLE_ZSOCK)
-    add_subdirectory(udp)
+    add_subdirectory(ip)
 endif()

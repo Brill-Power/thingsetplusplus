@@ -4,6 +4,6 @@ if(ENABLE_ASIO)
 endif()
 
 if (ENABLE_ZSOCK)
-    message("Zephyr Socket UDP support enabled")
+    message("Zephyr Socket IP support enabled")
     add_subdirectory(zsock)
 endif()

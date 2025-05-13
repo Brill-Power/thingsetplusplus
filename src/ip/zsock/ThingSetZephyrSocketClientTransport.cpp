@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "thingset++/zsock/ThingSetZephyrSocketClientTransport.hpp"
+#include "thingset++/ip/zsock/ThingSetZephyrSocketClientTransport.hpp"
 #include "thingset++/ThingSetStatus.hpp"
 #include <assert.h>
 #include <zephyr/kernel.h>
@@ -18,7 +18,7 @@
 K_THREAD_STACK_DEFINE(udp_thread_stack, UDP_THREAD_STACK_SIZE);
 static struct k_thread udp_thread;
 
-namespace ThingSet::Zsock {
+namespace ThingSet::Ip::Zsock {
 
 ThingSetZephyrSocketClientTransport::ThingSetZephyrSocketClientTransport(struct net_if *iface, const char *ip,
                                                                          uint16_t port)
@@ -130,4 +130,4 @@ void ThingSetZephyrSocketClientTransport::subscribe(std::function<void(uint8_t *
                                              udp_thread_loop, this, NULL, NULL, UDP_THREAD_PRIORITY, 0, K_NO_WAIT);
 }
 
-} // namespace ThingSet::Zsock
+} // namespace ThingSet::Ip::Zsock

@@ -12,7 +12,7 @@
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
 
-namespace ThingSet::Zsock {
+namespace ThingSet::Ip::Zsock {
 
 class ThingSetZephyrSocketClientTransport : public ThingSetClientTransport
 {
@@ -53,4 +53,4 @@ class ThingSetZephyrSocketClientTransport : public ThingSetClientTransport
         std::function<void(uint8_t *, size_t)> get_callback(void);
 };
 
-} // namespace ThingSet::Zsock
+} // namespace ThingSet::Ip::Zsock

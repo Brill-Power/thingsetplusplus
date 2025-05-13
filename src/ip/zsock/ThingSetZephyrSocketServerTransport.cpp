@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "thingset++/zsock/ThingSetZephyrSocketServerTransport.hpp"
+#include "thingset++/ip/zsock/ThingSetZephyrSocketServerTransport.hpp"
 #include <assert.h>
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
@@ -17,7 +17,7 @@
 K_THREAD_STACK_DEFINE(tcp_thread_stack, tcp_THREAD_STACK_SIZE);
 static struct k_thread tcp_thread;
 
-namespace ThingSet::Zsock {
+namespace ThingSet::Ip::Zsock {
 
 ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip)
     : _broadcastSocket(-1), _tcpSocket(-1), _listenerThreadID(-1)
@@ -122,4 +122,4 @@ bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
     return false;
 }
 
-} // namespace ThingSet::Zsock
+} // namespace ThingSet::Ip::Zsock
