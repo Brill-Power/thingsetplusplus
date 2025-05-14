@@ -20,14 +20,7 @@ class ThingSetZephyrSocketClientTransport : public ThingSetClientTransport
         struct sockaddr_in _nodeaddr;
         struct sockaddr_in _clientaddr;
 
-        struct sockaddr_in _udpaddr;
-
         int _requestResponseSocket;
-        int _subscribeSocket;
-
-        int _listenerThreadID;
-        std::function<void(uint8_t *, size_t)> _listenerCallback;
-        uint8_t _buffer[1024];
 
     public:
         ThingSetZephyrSocketClientTransport(struct net_if *iface, const char *ip, uint16_t port);
@@ -37,7 +30,6 @@ class ThingSetZephyrSocketClientTransport : public ThingSetClientTransport
         bool connect() override;
         int read(uint8_t *buffer, size_t len) override;
         bool write(uint8_t *buffer, size_t len) override;
-        void subscribe(std::function<void(uint8_t *, size_t)> callback) override;
 
         /// @brief Must be called before connect().
         /// @param ip A null-terminated array containing the IP address of the device to which
@@ -45,12 +37,6 @@ class ThingSetZephyrSocketClientTransport : public ThingSetClientTransport
         /// @param port The port of the service running on the device to which to connect.
         /// @return True if the connection parameters were successfully set.
         bool set_client_connection_params(const char *ip, uint16_t port);
-
-        uint8_t *get_buffer(void);
-
-        int get_sub_sock(void);
-
-        std::function<void(uint8_t *, size_t)> get_callback(void);
 };
 
 } // namespace ThingSet::Ip::Zsock

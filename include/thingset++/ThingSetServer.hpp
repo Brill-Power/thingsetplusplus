@@ -120,16 +120,16 @@ private:
         }
         switch (request[0]) {
             case ThingSetRequestType::get:
-                LOG_SMART("Handling get for node ", context.node->getName(), " from ", identifier);
+               // LOG_SMART("Handling get for node ", context.node->getName(), " from ", identifier);
                 return handleGet(context);
             case ThingSetRequestType::fetch:
-                LOG_SMART("Handling fetch for node ", context.node->getName(), " from ", identifier);
+               // LOG_SMART("Handling fetch for node ", context.node->getName(), " from ", identifier);
                 return handleFetch(context);
             case ThingSetRequestType::update:
-                LOG_SMART("Handling update for node ", context.node->getName(), " from ", identifier);
+               // LOG_SMART("Handling update for node ", context.node->getName(), " from ", identifier);
                 return handleUpdate(context);
             case ThingSetRequestType::exec:
-                LOG_SMART("Handling exec for node ", context.node->getName(), " from ", identifier);
+               // LOG_SMART("Handling exec for node ", context.node->getName(), " from ", identifier);
                 return handleExec(context);
             default:
                 break;

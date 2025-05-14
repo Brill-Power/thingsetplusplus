@@ -49,7 +49,15 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
     __ASSERT(_req_sock >= 0, "Failed to create TCP socket: %d", errno);
 }
 
-bool ThingSetZephyrSocketServerTransport::start(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback)
+ThingSetZephyrSocketServerTransport::~ThingSetZephyrSocketServerTransport()
+{
+    zsock_close(_pub_sock);
+    zsock_close(_req_sock);
+    _pub_sock = -1;
+    _req_sock = -1;
+}
+
+bool ThingSetZephyrSocketServerTransport::start(std::function<int(DummyEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     if (zsock_bind(_pub_sock, (struct sockaddr *)&_pub_addr, sizeof(_pub_addr))) {
         return false;
@@ -84,6 +92,14 @@ bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
     return sent == (ssize_t)len;
 }
 
+int ThingSetZephyrSocketServerTransport::pub_sock() {
+    return _pub_sock;
+}
+
+int ThingSetZephyrSocketServerTransport::req_sock() {
+    return _req_sock;
+}
+
 void req_thread_loop(void *p1, void *p2, void *p3)
 {
     ARG_UNUSED(p2);
@@ -91,7 +107,47 @@ void req_thread_loop(void *p1, void *p2, void *p3)
 
     ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
 
-    // do a listen, accept, etc...
+    struct sockaddr_in client;
+
+    while (1) {
+        if (zsock_listen(transport->pub_sock(), 10) != 0) {
+            return;
+        }
+
+        socklen_t client_length = sizeof(client);
+
+        while (1) {
+            char client_addr_str[32];
+
+            int client_sock = zsock_accept(transport->req_sock(), (struct sockaddr *)&client, &client_length);
+
+            if (client_sock < 0) {
+                continue;
+            }
+
+            zsock_inet_ntop(client.sin_family, &client.sin_addr, client_addr_str, sizeof(client_addr_str));
+            printk("Connection from %s\n", client_addr_str);
+
+            while (1) {
+                int rx_len = 0;
+                uint8_t rx_buf[128] = { 0 };
+
+                rx_len = zsock_recv(client_sock, rx_buf, sizeof(rx_buf), 0);
+
+                if (rx_len < 0) {
+                    printk("rx_err: %d\n", rx_len);
+                } 
+                else if (rx_len == 0) {
+                    break;
+                }
+                else {
+                    printk("rx: %s\n", rx_buf);
+                }
+            }
+
+            zsock_close(client_sock);
+        }
+    }
 }
 
 } // namespace ThingSet::Ip::Zsock
