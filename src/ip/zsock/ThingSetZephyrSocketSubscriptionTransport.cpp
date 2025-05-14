@@ -22,7 +22,7 @@ namespace ThingSet::Ip::Zsock {
 
 void subscribe_thread_loop(void *p1, void *p2, void *p3);
 
-ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface) : _subscribeSocket(-1)
+ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface) : _sub_sock(-1)
 {
     net_addr_pton(AF_INET, "0.0.0.0", &_udp_addr.sin_addr);
 
@@ -41,13 +41,13 @@ bool ThingSetZephyrSocketSubscriptionTransport::listen()
     return zsock_bind(_sub_sock, (struct sockaddr *)&_udp_addr, sizeof(_udp_addr)) == 0;
 }
 
-ThingSetZephyrSocketSubscriptionTransport::~ThingSetAsyncSocketSubscriptionTransport()
+ThingSetZephyrSocketSubscriptionTransport::~ThingSetZephyrSocketSubscriptionTransport()
 {
     zsock_close(_sub_sock);
     _sub_sock = -1;
 }
 
-void ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(uint8_t *, size_t)> callback)
+void ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(DummyEndpoint &, uint8_t *, size_t)> callback)
 {
     _listener_callback = callback;
     _listener_tid =
@@ -60,7 +60,7 @@ uint8_t *ThingSetZephyrSocketSubscriptionTransport::get_buffer(void)
     return _buffer;
 }
 
-std::function<void(uint8_t *, size_t)> ThingSetZephyrSocketSubscriptionTransport::get_callback(void)
+std::function<void(DummyEndpoint &, uint8_t *, size_t)> ThingSetZephyrSocketSubscriptionTransport::get_callback(void)
 {
     return _listener_callback;
 }
@@ -100,7 +100,8 @@ void subscribe_thread_loop(void *p1, void *p2, void *p3)
             size_t actual_length = buf[1] | (buf[2] << 8);
 
             if (actual_length == (length - 3)) {
-                transport->get_callback()(&buf[3], actual_length);
+                DummyEndpoint E;
+                transport->get_callback()(E, &buf[3], actual_length);
             }
         }
     }

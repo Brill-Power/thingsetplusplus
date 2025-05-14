@@ -34,8 +34,8 @@ class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<Du
         bool start(std::function<int(DummyEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
         bool publish(uint8_t *buffer, size_t len) override;
 
-        int pub_sock();
-        int req_sock();
+        int pub_sock(void);
+        int req_sock(void);
 };
 
 } // namespace ThingSet::Ip::Zsock

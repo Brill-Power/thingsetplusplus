@@ -35,7 +35,7 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
 
     int opt_val = 1;
     int ret = zsock_setsockopt(_pub_sock, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
-    ret |= zsock_setsockopt(_pub_sock, SOL_SOCKET, SO_BROADCAST, &opt_val, sizeof(opt_val));
+    // ret |= zsock_setsockopt(_pub_sock, SOL_SOCKET, SO_BROADCAST, &opt_val, sizeof(opt_val));
     __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
 
     net_addr_pton(AF_INET, ip, &_req_addr.sin_addr);
@@ -92,11 +92,11 @@ bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
     return sent == (ssize_t)len;
 }
 
-int ThingSetZephyrSocketServerTransport::pub_sock() {
+int ThingSetZephyrSocketServerTransport::pub_sock(void) {
     return _pub_sock;
 }
 
-int ThingSetZephyrSocketServerTransport::req_sock() {
+int ThingSetZephyrSocketServerTransport::req_sock(void) {
     return _req_sock;
 }
 
@@ -110,7 +110,7 @@ void req_thread_loop(void *p1, void *p2, void *p3)
     struct sockaddr_in client;
 
     while (1) {
-        if (zsock_listen(transport->pub_sock(), 10) != 0) {
+        if (zsock_listen(transport->req_sock(), 10) != 0) {
             return;
         }
 
