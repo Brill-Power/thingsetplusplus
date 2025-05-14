@@ -27,7 +27,7 @@ ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTrans
     net_addr_pton(AF_INET, "0.0.0.0", &_udp_addr.sin_addr);
 
     _udp_addr.sin_family = AF_INET;
-    _udp_addr.sin_port = htons(9002);
+    _udp_addr.sin_port = htons(9003);
 
     struct net_if_addr *addr = net_if_ipv4_addr_add(iface, &_udp_addr.sin_addr, NET_ADDR_MANUAL, 0);
     __ASSERT(addr != NULL, "Failed to add any address to interface: %d", errno);

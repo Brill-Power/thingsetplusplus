@@ -57,7 +57,7 @@ ThingSetZephyrSocketServerTransport::~ThingSetZephyrSocketServerTransport()
     _req_sock = -1;
 }
 
-bool ThingSetZephyrSocketServerTransport::start(std::function<int(DummyEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetZephyrSocketServerTransport::start(std::function<int(DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     if (zsock_bind(_pub_sock, (struct sockaddr *)&_pub_addr, sizeof(_pub_addr))) {
         return false;

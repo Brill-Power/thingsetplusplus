@@ -15,9 +15,9 @@
 namespace ThingSet::Ip::Zsock {
 
 using ThingSet::Ip::Udp::ThingSetUdpServerTransport;
-struct DummyEndpoint {};
+struct DummyServerEndpoint {};
 
-class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<DummyEndpoint>
+class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<DummyServerEndpoint>
 {
     private:
         struct sockaddr_in _pub_addr;
@@ -25,13 +25,13 @@ class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<Du
         int _pub_sock;
         int _req_sock;
         int _listener_tid;
-        std::function<int(DummyEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _listener_callback;
+        std::function<int(DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _listener_callback;
 
     public:
         ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip);
         ~ThingSetZephyrSocketServerTransport();
 
-        bool start(std::function<int(DummyEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+        bool start(std::function<int(DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
         bool publish(uint8_t *buffer, size_t len) override;
 
         int pub_sock(void);
