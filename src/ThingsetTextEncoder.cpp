@@ -5,284 +5,297 @@
  */
 
 #include "thingset++/ThingSetTextEncoder.hpp"
+#include "inttypes.h"
 
 namespace ThingSet {
 
 static bool encodeListMapEnd(zcbor_state_t *state);
 
-// todo store string here in useful place, remove names and maybe use sprintf to store in buffer?
-template <typename T> bool serializeValue(const T value)
+inline bool encodeStart(struct thingset_context *ts, char c)
 {
-    std::ostringstream oss;
-    oss << values[i] << ",";
-    return 1;
+    if (ts->rsp_size > ts->rsp_pos + 2) {
+        ts->rsp[ts->rsp_pos++] = c;
+        return true;
+    }
+    else {
+        ts->rsp_pos = 0;
+        return false;
+    }
 }
 
-char *ThingSetTextEncoder::getState()
+inline bool encodeEnd(struct thingset_context *ts, char c)
 {
-    return _buffer;
+    if (ts->rsp_size > ts->rsp_pos + 3) {
+        if (ts->rsp[ts->rsp_pos - 1] == ',') {
+            ts->rsp_pos--;
+        }
+        ts->rsp[ts->rsp_pos++] = c;
+        ts->rsp[ts->rsp_pos++] = ',';
+        return true;
+    }
+    else {
+        ts->rsp_pos = 0;
+        return false;
+    }
 }
 
-bool ThingSetTextEncoder::getIsForwardOnly() const
+// todo delete this comment
+// encode(jsonEncoderState, T Property) returns true/flase, buf[1] = "a", buf[2] = "d", etc... cur_pos = 14
+
+template <typename T>
+bool encode(struct thingset_context *ts, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
 {
-    return false;
+    returns true / flase, buf[1] = "a", buf[2] = "d",
+                          etc... cur_pos = 14
+
+                          if (ts->rsp_size > ts->rsp_pos + 2)
+    {
+        ts->rsp[ts->rsp_pos++] = c;
+        return true;
+    }
+    else {
+        ts->rsp_pos = 0;
+        return false;
+    }
 }
 
-bool ThingSetTextEncoder::encode(const std::string_view &value)
+// encodes a value of a simple type using a format specifier (eg %i, %f etc), convert this to work in this application
+template <typename T> inline bool encodeSimpleValue(struct thingset_context *ts, T value, const char *format)
 {
-    return encode(std::string(value));
+    int bytes_required = snprintf(nullptr, 0, format, value); // determine the length of value as a string
+
+    if (sizeof(ts->rsp) < ts->rsp_pos + bytes_required) {
+        return false;
+    }
+
+    int bytes_written = snprintf(ts->rsp + ts->rsp_pos, sizeof(ts->rsp) - ts->rsp_pos, format, value);
+    ts->rsp_pos += bytes_written;
+
+    return true;
 }
 
-bool ThingSetTextEncoder::encode(std::string_view &value)
-{
-    return encode(std::string(value));
-}
+// todo may not be needed?
+// char *ThingSetTextEncoder::getState()
+// {
+//     return _buffer;
+// }
+
+// bool ThingSetTextEncoder::getIsForwardOnly() const
+// {
+//     return false;
+// }
+
+// todo not sure what to do here
+// bool ThingSetTextEncoder::encode(const std::string_view &value)
+// {
+//     return encode(std::string(value));
+// }
+
+// bool ThingSetTextEncoder::encode(std::string_view &value)
+// {
+//     return encode(std::string(value));
+// }
 
 bool ThingSetTextEncoder::encode(const std::string &value)
 {
-    return encode(value.c_str());
+    return encodeSimpleValue(value, "%s");
 }
 
 bool ThingSetTextEncoder::encode(std::string &value)
 {
-    return encode(value.c_str());
+    return encodeSimpleValue(value, "%s");
 }
 
 bool ThingSetTextEncoder::encode(const char *value)
 {
-    return serializeValue(value); // todo change this here and everywhere else?
+    return encodeSimpleValue(value, "%s");
 }
 
 bool ThingSetTextEncoder::encode(char *value)
 {
-#ifdef zcbor_tstr_put_term
-    return zcbor_tstr_put_term(this->getState(), value);
-#else
-    return zcbor_tstr_put_term(this->getState(), value, TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
-#endif
+    return encodeSimpleValue(value, "%s");
 }
 
 bool ThingSetTextEncoder::encode(const float &value)
 {
-    return zcbor_float32_encode(this->getState(), &value);
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float &value)
 {
-    return encode(&value);
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float *value)
 {
-    return zcbor_float32_encode(this->getState(), value);
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(const double &value)
 {
-    return zcbor_float64_encode(this->getState(), &value);
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(double &value)
 {
-    return encode(&value);
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(double *value)
 {
-    return zcbor_float64_encode(this->getState(), value);
+    return encodeSimpleValue(value, "%f");
 }
 
-bool ThingSetTextEncoder::encode(const bool &value)
-{
-    return zcbor_bool_put(this->getState(), value);
-}
+// todo bool may not be needed as handled by int (1/0 instead of true/false)
+// bool ThingSetTextEncoder::encode(const bool &value)
+// {
+//     return zcbor_bool_put(this->getState(), value);
+// }
 
-bool ThingSetTextEncoder::encode(bool &value)
-{
-    return zcbor_bool_put(this->getState(), value);
-}
+// bool ThingSetTextEncoder::encode(bool &value)
+// {
+//     return zcbor_bool_put(this->getState(), value);
+// }
 
 bool ThingSetTextEncoder::encode(const uint8_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(uint8_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(uint8_t *value)
 {
-    return encode(*value);
+    return encodeSimpleValue(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(const uint16_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(uint16_t &value)
 {
-    return zcbor_uint32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(uint16_t *value)
 {
-    return encode(*value);
+    return encodeSimpleValue(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(const uint32_t &value)
 {
-    return zcbor_uint32_encode(this->getState(), &value);
+    return encodeSimpleValue(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(uint32_t &value)
 {
-    return encode(&value);
+    return encodeSimpleValue(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(uint32_t *value)
 {
-    return zcbor_uint32_encode(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(const uint64_t &value)
 {
-    return zcbor_uint64_encode(this->getState(), &value);
+    return encodeSimpleValue(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(uint64_t &value)
 {
-    return encode(&value);
+    return encodeSimpleValue(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(uint64_t *value)
 {
-    return zcbor_uint64_encode(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(const int8_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(int8_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(const int16_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(int16_t &value)
 {
-    return zcbor_int32_put(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIi16);
+}
+
+bool ThingSetTextEncoder::encode(int16_t *value)
+{
+    return encodeSimpleValue(value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(const int32_t &value)
 {
-    return zcbor_int32_encode(this->getState(), &value);
+    return encodeSimpleValue(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(int32_t &value)
 {
-    return encode(&value);
+    return encodeSimpleValue(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(int32_t *value)
 {
-    return zcbor_int32_encode(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(const int64_t &value)
 {
-    return zcbor_int64_encode(this->getState(), &value);
+    return encodeSimpleValue(value, "%" PRIi64);
 }
 
 bool ThingSetTextEncoder::encode(int64_t &value)
 {
-    return encode(&value);
+    return encodeSimpleValue(value, "%" PRIi64);
 }
 
 bool ThingSetTextEncoder::encode(int64_t *value)
 {
-    return zcbor_int64_encode(this->getState(), value);
+    return encodeSimpleValue(value, "%" PRIi64);
 }
 
-bool ThingSetTextEncoder::encodeNull()
+// todo not sure what to do here
+// bool ThingSetTextEncoder::encodeNull()
+// {
+//     return zcbor_nil_put(this->getState(), NULL);
+// }
+
+bool ThingSetTextEncoder::encodeMapStart(struct thingset_context *ts)
 {
-    return zcbor_nil_put(this->getState(), NULL);
+    return encodeStart(ts, '{');
 }
 
-bool ThingSetTextEncoder::encodeListStart()
+bool ThingSetTextEncoder::encodeMapEnd(struct thingset_context *ts)
 {
-    return encodeListStart(UINT8_MAX);
+    return encodeEnd(ts, '}');
 }
 
-bool ThingSetTextEncoder::encodeListStart(uint32_t count)
+bool ThingSetTextEncoder::encodeListStart(struct thingset_context *ts)
 {
-    return zcbor_list_start_encode(this->getState(), count);
+    return encodeStart(ts, '[');
 }
 
-bool ThingSetTextEncoder::encodeListEnd()
+bool ThingSetTextEncoder::encodeListEnd(struct thingset_context *ts)
 {
-    return encodeListEnd(UINT8_MAX);
-}
-
-bool ThingSetTextEncoder::encodeListEnd(uint32_t count)
-{
-    if (this->getIsForwardOnly()) {
-        return encodeListMapEnd(this->getState());
-    }
-    else {
-        return zcbor_list_end_encode(this->getState(), count);
-    }
-}
-
-bool ThingSetTextEncoder::encodeMapStart()
-{
-    return encodeMapStart(UINT8_MAX);
-}
-
-bool ThingSetTextEncoder::encodeMapStart(uint32_t count)
-{
-    return zcbor_map_start_encode(this->getState(), count);
-}
-
-bool ThingSetTextEncoder::encodeMapEnd()
-{
-    return encodeMapEnd(UINT8_MAX);
-}
-
-bool ThingSetTextEncoder::encodeMapEnd(uint32_t count)
-{
-    if (this->getIsForwardOnly()) {
-        return encodeListMapEnd(this->getState());
-    }
-    else {
-        return zcbor_map_end_encode(this->getState(), count);
-    }
-}
-
-/// @brief End a list or map without going back and rewriting the header. Useful in forward-only encoding scenarios.
-/// @param state The encoder state array.
-/// @return True.
-static bool encodeListMapEnd(zcbor_state_t *state)
-{
-    // zcbor_list_map_end_force_encode is broken; it resets the pointer
-    // back to where the list started, rendering it pointless, so we reimplement
-    // it here, passing in the necessary TRANSFER/KEEP_PAYLOAD flag to make it behave
-    // properly
-    auto flags = ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME;
-#ifdef ZCBOR_FLAG_TRANSFER_PAYLOAD
-    flags |= ZCBOR_FLAG_TRANSFER_PAYLOAD;
-#else
-    flags |= ZCBOR_FLAG_KEEP_PAYLOAD;
-#endif
-    return zcbor_process_backup(state, flags, ZCBOR_MAX_ELEM_COUNT);
+    return encodeEnd(ts, ']');
 }
 
 } // namespace ThingSet
