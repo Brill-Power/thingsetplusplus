@@ -7,7 +7,9 @@
 
 namespace ThingSet::Can {
 
-#define CAN_FULL_MASK 0x1FFFFFFF
+#define CAN_SFF_MASK 0x000007FF
+#define CAN_EFF_MASK 0x1FFFFFFF
+#define CAN_EFF_FLAG 0x80000000
 
 CanID::CanID() : _id(0), _mask(0)
 {}
@@ -20,7 +22,7 @@ CanID::CanID(const CanID &other) : CanID(other._id, other._mask)
 
 CanID::operator uint32_t() const
 {
-    return _id;
+    return getId();
 }
 
 CanID CanID::getReplyId() const
@@ -28,6 +30,11 @@ CanID CanID::getReplyId() const
     CanID reply(*this);
     reply.setTarget(getSource()).setSource(getTarget());
     return reply;
+}
+
+uint32_t CanID::getIdWithFlags() const
+{
+    return _id > CAN_SFF_MASK ? (_id | CAN_EFF_FLAG) : _id;
 }
 
 uint32_t CanID::getId() const
@@ -160,7 +167,7 @@ CanID &CanID::setMessagePriority(const MessagePriority value)
 
 CanID CanID::create(uint32_t id)
 {
-    return CanID(id, CAN_FULL_MASK);
+    return CanID(id, id <= CAN_SFF_MASK ? CAN_SFF_MASK : CAN_EFF_MASK);
 }
 
 std::ostream& operator<<(std::ostream &os, const CanID &id)

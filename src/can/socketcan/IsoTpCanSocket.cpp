@@ -8,6 +8,7 @@
 #include <net/if.h>
 #include <poll.h>
 #include <unistd.h>
+#include <errno.h>
 
 namespace ThingSet::Can::SocketCan {
 
@@ -45,19 +46,24 @@ IsoTpCanSocket &IsoTpCanSocket::setIsFd(bool value)
     return *this;
 }
 
-bool IsoTpCanSocket::bind(const std::string &deviceName, const Can::CanID &rxId, const Can::CanID &txId)
+bool IsoTpCanSocket::bind(const std::string deviceName, const Can::CanID &rxId, const Can::CanID &txId)
 {
     sockaddr_can listenAddress = {
         .can_family = AF_CAN,
         .can_ifindex = (int)if_nametoindex(deviceName.c_str()),
         .can_addr = {
             .tp = {
-                .rx_id = rxId,
-                .tx_id = txId,
+                .rx_id = rxId.getIdWithFlags(),
+                .tx_id = txId.getIdWithFlags(),
             }
         },
     };
-    return ::bind(_canSocket, (sockaddr *)&listenAddress, sizeof(listenAddress)) == 0;
+    if (::bind(_canSocket, (sockaddr *)&listenAddress, sizeof(listenAddress)) == -1)
+    {
+        printf("Error %d\n", errno);
+        return false;
+    }
+    return true;
 }
 
 int IsoTpCanSocket::read(uint8_t *buffer, size_t size)
@@ -70,13 +76,13 @@ int IsoTpCanSocket::write(uint8_t *buffer, size_t length)
     return ::write(_canSocket, buffer, length);
 }
 
-IsoTpCanSocket::IsoTpCanSocketListener::IsoTpCanSocketListener(const std::string &deviceName, bool fd)
+IsoTpCanSocket::Listener::Listener(const std::string &deviceName, bool fd)
     : _deviceName(deviceName), _run(true)
 {
     _listenSocket.setIsFd(fd);
 }
 
-IsoTpCanSocket::IsoTpCanSocketListener::~IsoTpCanSocketListener()
+IsoTpCanSocket::Listener::~Listener()
 {
     _run = false;
     if (_listenThread.joinable()) {
@@ -84,7 +90,7 @@ IsoTpCanSocket::IsoTpCanSocketListener::~IsoTpCanSocketListener()
     }
 }
 
-bool IsoTpCanSocket::IsoTpCanSocketListener::listen(const Can::CanID &address,
+bool IsoTpCanSocket::Listener::listen(const Can::CanID &address,
                                                     std::function<void(CanID &, IsoTpCanSocket)> callback)
 {
     _listenSocket.setFilter(address);

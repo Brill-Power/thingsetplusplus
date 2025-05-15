@@ -36,7 +36,7 @@ ThingSetAsyncSocketSubscriptionTransport::~ThingSetAsyncSocketSubscriptionTransp
     _subscribeSocket.close(error);
 }
 
-awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function<void(asio::ip::udp::endpoint &, uint8_t *, size_t)> callback)
+awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function<void(const asio::ip::udp::endpoint &, ThingSetBinaryDecoder &)> callback)
 {
     for (;;) {
         auto buffer = asio::buffer(_buffer, 1024);
@@ -49,13 +49,14 @@ awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function
             // get actual length from message body to check we have received everything
             size_t actualLength = _buffer[1] | (_buffer[2] << 8);
             if (actualLength == length - 3) {
-                callback(sender, &_buffer[3], actualLength);
+                DefaultFixedDepthThingSetBinaryDecoder decoder(&_buffer[3], actualLength, 2);
+                callback(sender, decoder);
             }
         }
     }
 }
 
-void ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(asio::ip::udp::endpoint &, uint8_t *, size_t)> callback)
+void ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(const asio::ip::udp::endpoint &, ThingSetBinaryDecoder &)> callback)
 {
     asio::ip::udp::endpoint localEndpoint(asio::ip::address_v4::any(), 9002);
     asio::error_code error;

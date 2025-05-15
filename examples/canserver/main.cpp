@@ -7,7 +7,6 @@
 #include "thingset++/Eui.hpp"
 #include "thingset++/ThingSet.hpp"
 #include "thingset++/ThingSetServer.hpp"
-#include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
 #include "thingset++/can/socketcan/ThingSetSocketCanServerTransport.hpp"
 #include <functional>
 #include <iostream>
@@ -91,7 +90,10 @@ int main()
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
 
-    ThingSetSocketCanServerTransport transport("vcan0");
+    ThingSetSocketCanInterface interface("vcan0");
+    interface.bind(0x01);
+
+    ThingSetSocketCanServerTransport transport(interface);
     auto server = ThingSetServerBuilder::build(transport);
 
     std::thread publisher([&]() {

@@ -6,14 +6,14 @@
 #pragma once
 
 #include "thingset++/ThingSetSubscriptionTransport.hpp"
-#include "thingset++/can/CanID.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
 
 namespace ThingSet::Can {
 
 class ThingSetCanSubscriptionTransport : public ThingSetSubscriptionTransport<CanID>
 {
-public:
-    void subscribe(std::function<void(CanID &, uint8_t *, size_t)> callback) override;
+protected:
+    virtual ThingSetCanInterface &getInterface() = 0;
 };
 
 } // namespace ThingSet::Can

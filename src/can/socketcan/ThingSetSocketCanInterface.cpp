@@ -4,17 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/socketcan/ThingSetSocketCanInterface.hpp"
-#include "thingset++/Eui.hpp"
+#include "thingset++/can/socketcan/StreamingCanThingSetBinaryDecoder.hpp"
 #include "thingset++/can/CanID.hpp"
+#include "thingset++/Eui.hpp"
+#include "thingset++/ThingSetStatus.hpp"
 #include "thingset++/internal/logging.hpp"
 #include <chrono>
 #include <random>
 #include <string.h>
 
 namespace ThingSet::Can::SocketCan {
-
-#define THINGSET_REQUEST_BUFFER_SIZE  1024
-#define THINGSET_RESPONSE_BUFFER_SIZE 1024
 
 static bool tryClaimAddress(uint8_t nodeAddress, RawCanSocket &socket)
 {
@@ -27,24 +26,6 @@ static bool tryClaimAddress(uint8_t nodeAddress, RawCanSocket &socket)
                    Eui::getArray());
     int result = socket.write(frame);
     return result > 0;
-}
-
-ThingSetSocketCanInterface::AddressClaimer::AddressClaimer()
-{
-    _run = true;
-}
-
-ThingSetSocketCanInterface::AddressClaimer::~AddressClaimer()
-{
-    shutdown();
-}
-
-void ThingSetSocketCanInterface::AddressClaimer::shutdown()
-{
-    _run = false;
-    if (_thread.joinable()) {
-        _thread.join();
-    }
 }
 
 void ThingSetSocketCanInterface::AddressClaimer::run(const std::string &deviceName, uint8_t nodeAddress)
@@ -64,13 +45,18 @@ void ThingSetSocketCanInterface::AddressClaimer::run(const std::string &deviceNa
     _thread = std::thread(runner);
 }
 
-ThingSetSocketCanInterface::ThingSetSocketCanInterface(const std::string &deviceName)
-    : _deviceName(deviceName), _listener(deviceName, true)
+ThingSetSocketCanInterface::ThingSetSocketCanInterface(const std::string deviceName)
+    : _deviceName(deviceName)
 {}
 
 ThingSetSocketCanInterface::~ThingSetSocketCanInterface()
 {
     _claimer.shutdown();
+}
+
+const std::string ThingSetSocketCanInterface::getDeviceName() const
+{
+    return _deviceName;
 }
 
 bool ThingSetSocketCanInterface::bind(uint8_t nodeAddress)
@@ -109,35 +95,6 @@ bool ThingSetSocketCanInterface::bind(uint8_t nodeAddress)
     }
 
     _claimer.run(_deviceName, _nodeAddress);
-    _publishSocket.setIsFd(true);
-    _publishSocket.bind(_deviceName);
-    return true;
-}
-
-bool ThingSetSocketCanInterface::publish(CanID &id, uint8_t *buffer, size_t length)
-{
-    CanFdFrame frame(id);
-    memcpy(frame.getData(), buffer, length);
-    frame.setLength(length);
-    return _publishSocket.write(frame) > 0;
-}
-
-bool ThingSetSocketCanInterface::listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
-{
-    _listener.listen(CanID()
-                         .setMessageType(MessageType::requestResponse)
-                         .setMessagePriority(MessagePriority::channel)
-                         .setBridge(CanID::defaultBridge)
-                         .setTarget(_nodeAddress),
-                     [&](auto sender, auto socket) {
-                         uint8_t request[THINGSET_REQUEST_BUFFER_SIZE];
-                         int size = socket.read(request, sizeof(request));
-                         printf("Got request of size %d bytes from 0x%x\n", size, sender.getId());
-                         uint8_t response[THINGSET_RESPONSE_BUFFER_SIZE];
-                         int responseLength = callback(sender, request, size, response, sizeof(response));
-                         socket.write(response, responseLength);
-                         printf("Sent response of size %d bytes to 0x%x\n", responseLength, sender.getReplyId().getId());
-                     });
     return true;
 }
 

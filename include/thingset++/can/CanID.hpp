@@ -97,6 +97,7 @@ public:
 
     /// @brief Gets the CAN ID as a value.
     uint32_t getId() const;
+    uint32_t getIdWithFlags() const;
     /// @brief Gets a mask that indicates the set bits of this CAN ID.
     uint32_t getMask() const;
 
