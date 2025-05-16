@@ -100,6 +100,13 @@ int main()
         while (true) {
             sleep(1);
             std::cout << "Publishing report" << std::endl;
+            for (int i = 0; i < moduleRecords.size(); i++) {
+                auto increment = 0.25 * (std::rand() % 4);
+                if (std::rand() % 1 == 0) {
+                    increment *= -1;
+                }
+                moduleRecords[i].voltage += increment;
+            }
             server.publish(moduleRecords);
         }
     });
