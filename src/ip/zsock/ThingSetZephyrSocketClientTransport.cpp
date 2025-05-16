@@ -12,54 +12,53 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 
-#define UDP_THREAD_STACK_SIZE 1024
-#define UDP_THREAD_PRIORITY   2
-
-K_THREAD_STACK_DEFINE(udp_thread_stack, UDP_THREAD_STACK_SIZE);
-static struct k_thread udp_thread;
-
 namespace ThingSet::Ip::Zsock {
 
-ThingSetZephyrSocketClientTransport::ThingSetZephyrSocketClientTransport(struct net_if *iface, const char *ip,
-                                                                         uint16_t port)
-    : _requestResponseSocket(-1)
+ThingSetZephyrSocketClientTransport::ThingSetZephyrSocketClientTransport(struct net_if *iface, const char *ip)
+    : _req_sock(-1)
 {
-    // TCP address configuration - uses user-supplied IP address and port
-    int ret = net_addr_pton(AF_INET, ip, &_nodeaddr.sin_addr);
-    _nodeaddr.sin_family = AF_INET;
-    _nodeaddr.sin_port = htons(port);
+    net_addr_pton(AF_INET, ip, &_req_addr.sin_addr);
+    _req_addr.sin_family = AF_INET;
+    _req_addr.sin_port = htons(9001);
 
-    // Add IP address to specified network interface
-    struct net_if_addr *addr = net_if_ipv4_addr_add(iface, &_nodeaddr.sin_addr, NET_ADDR_MANUAL, 0);
-
-    _requestResponseSocket = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-    __ASSERT(ret == 0, "Failed to convert %s to IP address: %d", ip, errno);
+    struct net_if_addr *addr = net_if_ipv4_addr_add(iface, &_req_addr.sin_addr, NET_ADDR_MANUAL, 0);
     __ASSERT(addr != NULL, "Failed to add IP address to interface: %d", errno);
-    __ASSERT(_requestResponseSocket >= 0, "Failed to create TCP socket: %d", errno);
+    
+    _req_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    __ASSERT(_req_sock >= 0, "Failed to create TCP socket: %d", errno);
 }
 
-bool ThingSetZephyrSocketClientTransport::set_client_connection_params(const char *ip, uint16_t port)
+ThingSetZephyrSocketClientTransport::~ThingSetZephyrSocketClientTransport()
 {
-    _clientaddr.sin_family = AF_INET;
-    _clientaddr.sin_port = htons(port);
-
-    return net_addr_pton(AF_INET, ip, &_clientaddr.sin_addr) == 0;
+    zsock_close(_req_sock);
+    _req_sock = -1;
 }
 
 bool ThingSetZephyrSocketClientTransport::connect()
 {
-    return zsock_connect(_requestResponseSocket, (struct sockaddr *)&_clientaddr, sizeof(_clientaddr)) == 0;
+    return false;
+}
+
+bool ThingSetZephyrSocketClientTransport::connect(const char *ip) 
+{
+    struct sockaddr_in _req_addr = {
+        .sin_family = AF_INET,
+        .sin_port = htons(9001),
+    };
+
+    net_addr_pton(AF_INET, ip, &_req_addr.sin_addr);
+
+    return zsock_connect(_req_sock, (struct sockaddr *)&_req_addr, sizeof(_req_addr)) == 0;
 }
 
 int ThingSetZephyrSocketClientTransport::read(uint8_t *buffer, size_t len)
 {
-    return zsock_recv(_requestResponseSocket, buffer, len, 0);
+    return zsock_recv(_req_sock, buffer, len, 0);
 }
 
 bool ThingSetZephyrSocketClientTransport::write(uint8_t *buffer, size_t len)
 {
-    return zsock_send(_requestResponseSocket, buffer, len, 0) == (ssize_t)len;
+    return zsock_send(_req_sock, buffer, len, 0) == (ssize_t)len;
 }
 
 } // namespace ThingSet::Ip::Zsock

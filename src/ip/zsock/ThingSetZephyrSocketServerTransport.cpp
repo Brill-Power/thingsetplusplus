@@ -35,7 +35,6 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
 
     int opt_val = 1;
     int ret = zsock_setsockopt(_pub_sock, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
-    // ret |= zsock_setsockopt(_pub_sock, SOL_SOCKET, SO_BROADCAST, &opt_val, sizeof(opt_val));
     __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
 
     net_addr_pton(AF_INET, ip, &_req_addr.sin_addr);

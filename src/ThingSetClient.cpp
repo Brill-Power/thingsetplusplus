@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#define THINGSET_REGISTER_LOGGING_MODULE
-
 #include "thingset++/ThingSetClient.hpp"
 #include "thingset++/ThingSetRegistry.hpp"
 
