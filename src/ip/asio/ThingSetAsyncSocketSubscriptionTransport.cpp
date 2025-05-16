@@ -53,10 +53,8 @@ bool ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(cons
     if (error) {
         throw std::system_error(error);
     }
-    return true;
 
     asio::ip::udp::endpoint localEndpoint(asio::ip::address_v4::any(), 9002);
-    asio::error_code error;
     _subscribeSocket.bind(localEndpoint, error);
     if (error) {
         throw std::system_error(error);
