@@ -76,7 +76,7 @@ int IsoTpCanSocket::write(uint8_t *buffer, size_t length)
     return ::write(_canSocket, buffer, length);
 }
 
-IsoTpCanSocket::Listener::Listener(const std::string &deviceName, bool fd)
+IsoTpCanSocket::Listener::Listener(const std::string deviceName, bool fd)
     : _deviceName(deviceName), _run(true)
 {
     _listenSocket.setIsFd(fd);
@@ -91,7 +91,7 @@ IsoTpCanSocket::Listener::~Listener()
 }
 
 bool IsoTpCanSocket::Listener::listen(const Can::CanID &address,
-                                                    std::function<void(CanID &, IsoTpCanSocket)> callback)
+                                                    std::function<void(const CanID &, IsoTpCanSocket)> callback)
 {
     _listenSocket.setFilter(address);
     _listenSocket.bind(_deviceName);
@@ -108,8 +108,7 @@ bool IsoTpCanSocket::Listener::listen(const Can::CanID &address,
                 // this is a despicable hack: put the frame we just received back on
                 // the wire so that the ISO-TP socket we've just created and bound sees it
                 _listenSocket.write(frame);
-                CanID sender = frame.getId();
-                callback(sender, std::move(client));
+                callback(frame.getId(), std::move(client));
             }
         }
     };

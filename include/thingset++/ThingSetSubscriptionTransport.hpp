@@ -21,7 +21,7 @@ public:
     /// broadcast mechanism.
     /// @param callback A callback that is invoked when a published message
     /// is received.
-    virtual void subscribe(std::function<void(const Identifier &, ThingSetBinaryDecoder &)> callback) = 0;
+    virtual bool subscribe(std::function<void(const Identifier &, ThingSetBinaryDecoder &)> callback) = 0;
 };
 
 template <typename Identifier, typename T>

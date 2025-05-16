@@ -19,16 +19,6 @@ namespace ThingSet::Ip::Async {
 ThingSetAsyncSocketSubscriptionTransport::ThingSetAsyncSocketSubscriptionTransport(asio::io_context &ioContext) : _ioContext(ioContext), _subscribeSocket(ioContext)
 {}
 
-bool ThingSetAsyncSocketSubscriptionTransport::connect()
-{
-    asio::error_code error;
-    _subscribeSocket.open(asio::ip::udp::v4(), error);
-    if (error) {
-        throw std::system_error(error);
-    }
-    return true;
-}
-
 ThingSetAsyncSocketSubscriptionTransport::~ThingSetAsyncSocketSubscriptionTransport()
 {
     asio::error_code error;
@@ -56,8 +46,15 @@ awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function
     }
 }
 
-void ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(const asio::ip::udp::endpoint &, ThingSetBinaryDecoder &)> callback)
+bool ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(const asio::ip::udp::endpoint &, ThingSetBinaryDecoder &)> callback)
 {
+    asio::error_code error;
+    _subscribeSocket.open(asio::ip::udp::v4(), error);
+    if (error) {
+        throw std::system_error(error);
+    }
+    return true;
+
     asio::ip::udp::endpoint localEndpoint(asio::ip::address_v4::any(), 9002);
     asio::error_code error;
     _subscribeSocket.bind(localEndpoint, error);
@@ -65,6 +62,7 @@ void ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(cons
         throw std::system_error(error);
     }
     co_spawn(_ioContext, listener(callback), detached);
+    return true;
 }
 
 } // namespace ThingSet::Ip::Async

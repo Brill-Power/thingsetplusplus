@@ -23,14 +23,14 @@ public:
     private:
         RawCanSocket _listenSocket;
         std::thread _listenThread;
-        const std::string &_deviceName;
+        const std::string _deviceName;
         bool _run;
 
     public:
-        Listener(const std::string &deviceName, bool fd);
+        Listener(const std::string deviceName, bool fd);
         ~Listener();
 
-        bool listen(const Can::CanID &address, std::function<void(CanID &, IsoTpCanSocket)> callback);
+        bool listen(const Can::CanID &address, std::function<void(const CanID &, IsoTpCanSocket)> callback);
     };
 
 private:

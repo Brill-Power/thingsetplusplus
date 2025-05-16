@@ -16,7 +16,7 @@ private:
     class SubscriptionListener : public RawCanSocketListener
     {
     public:
-        void run(const std::string &deviceName, std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback);
+        bool run(const std::string &deviceName, std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback);
     };
 
     ThingSetSocketCanInterface &_canInterface;
@@ -25,7 +25,7 @@ private:
 public:
     ThingSetSocketCanSubscriptionTransport(ThingSetSocketCanInterface &canInterface);
 
-    void subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) override;
+    bool subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) override;
 
 protected:
     ThingSetCanInterface &getInterface() override;

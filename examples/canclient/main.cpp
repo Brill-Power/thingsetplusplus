@@ -59,15 +59,18 @@ ThingSetReadOnlyProperty<0x600, 0, "Modules", std::array<ModuleRecord, 2>> modul
 std::array<uint8_t, 1024> rxBuffer;
 std::array<uint8_t, 1024> txBuffer;
 
+ThingSetSocketCanInterface interface("vcan0");
+ThingSetSocketCanClientTransport clientTransport(interface, 0x01);
+ThingSetClient client(clientTransport, rxBuffer, rxBuffer);
+ThingSetSocketCanSubscriptionTransport subscriptionTransport(interface);
+
 int main()
 {
-    ThingSetSocketCanInterface interface("vcan0");
     interface.bind();
     std::cout << "Successfully bound" << std::endl;
 
     std::cout << "Creating client...";
-    ThingSetSocketCanClientTransport clientTransport(interface, 0x01);
-    ThingSetClient client(clientTransport, rxBuffer, rxBuffer);
+
     if (client.connect()) {
         std::cout << "done" << std::endl;
     } else {
@@ -77,20 +80,23 @@ int main()
     float tv;
     if (client.get(0x300, tv)) {
         std::cout << "Got total voltage " << tv << std::endl;
+    } else {
+        std::cout << "Failed to get total voltage" << std::endl;
+        return -1;
     }
 
     std::cout << "Creating subscriber...";
-    ThingSetSocketCanSubscriptionTransport subscriptionTransport(interface);
     auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
     // ThingSetSocketCanClientTransport transport(interface);
     // ThingSetClient client(transport, rxBuffer, txBuffer);
-    listener.subscribe([&](auto sender, auto id) {
+    auto callback = [&](auto sender, auto id) {
         std::cout << "Received report for " << id << " from " << sender << std::endl;
         for (size_t i = 0; i < moduleRecords.size(); i++)
         {
             std::cout << "Module " << i << "; voltage: " << moduleRecords[i].voltage << std::endl;
         }
-    });
+    };
+    listener.subscribe(callback);
     std::cout << "done" << std::endl;
 
     sleep(-1);

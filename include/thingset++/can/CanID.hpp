@@ -90,7 +90,7 @@ private:
 
 public:
     CanID();
-    CanID(uint32_t id, uint32_t mask);
+    CanID(const uint32_t id, const uint32_t mask);
     CanID(const CanID &other);
 
     operator uint32_t() const;
@@ -100,6 +100,7 @@ public:
     uint32_t getIdWithFlags() const;
     /// @brief Gets a mask that indicates the set bits of this CAN ID.
     uint32_t getMask() const;
+    CanID &setMask(const uint32_t mask);
 
     /// @brief Gets the reply address equivalent of this CAN ID.
     CanID getReplyId() const;
@@ -108,24 +109,24 @@ public:
     uint8_t getSource() const;
     /// @brief Sets the source component of this CAN ID.
     /// @return The modified CAN ID.
-    CanID &setSource(uint8_t value);
+    CanID &setSource(const uint8_t value);
     /// @brief Gets the target component of this CAN ID.
     uint8_t getTarget() const;
     /// @brief Sets the target component of this CAN ID.
     /// @return The modified CAN ID.
-    CanID &setTarget(uint8_t value);
+    CanID &setTarget(const uint8_t value);
 
     uint16_t getDataID() const;
-    CanID &setDataID(uint16_t value);
+    CanID &setDataID(const uint16_t value);
 
     uint8_t getSequenceNumber() const;
-    CanID &setSequenceNumber(uint8_t value);
+    CanID &setSequenceNumber(const uint8_t value);
     uint8_t getMessageNumber() const;
-    CanID &setMessageNumber(uint8_t value);
+    CanID &setMessageNumber(const uint8_t value);
     uint8_t getBridge() const;
-    CanID &setBridge(uint8_t value);
+    CanID &setBridge(const uint8_t value);
     uint8_t getRandomElement() const;
-    CanID &setRandomElement(uint8_t value);
+    CanID &setRandomElement(const uint8_t value);
 
     MessageType getMessageType() const;
     CanID &setMessageType(const MessageType value);
@@ -136,7 +137,7 @@ public:
     MessagePriority getMessagePriority() const;
     CanID &setMessagePriority(const MessagePriority value);
 
-    static CanID create(uint32_t);
+    static CanID create(const uint32_t id);
 };
 
 std::ostream& operator<<(std::ostream &os, const CanID &id);

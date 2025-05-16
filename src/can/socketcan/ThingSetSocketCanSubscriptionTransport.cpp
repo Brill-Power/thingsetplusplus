@@ -17,25 +17,26 @@ ThingSetCanInterface &ThingSetSocketCanSubscriptionTransport::getInterface() {
     return _canInterface;
 }
 
-void ThingSetSocketCanSubscriptionTransport::subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) {
-    _listener.run(_canInterface.getDeviceName(), callback);
+bool ThingSetSocketCanSubscriptionTransport::subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) {
+    return _listener.run(_canInterface.getDeviceName(), callback);
 }
 
-void ThingSetSocketCanSubscriptionTransport::SubscriptionListener::run(const std::string &deviceName, std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
+bool ThingSetSocketCanSubscriptionTransport::SubscriptionListener::run(const std::string &deviceName, std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
 {
-    LOG_DBG("Starting subscription listener");
     _socket.setIsFd(true);
-    _socket.setFilter(CanID().setMessageType(MessageType::multiFrameReport)
-        .setMessagePriority(MessagePriority::reportHigh));
+    auto filter = CanID().setMessageType(MessageType::multiFrameReport)
+        .setMessagePriority(MessagePriority::reportHigh)
+        .setMask(CanID().setMessageType(MessageType::multiFrameReport).getMask() | MessagePriority::reportHigh); // override calculated mask
+    _socket.setFilter(filter);
     if (!_socket.bind(deviceName)) {
-        LOG_ERR("Failed");
+        // throw?
+        return false;
     }
-    std::map<uint8_t, StreamingCanThingSetBinaryDecoder> decodersByNodeAddress;
     auto runner = [&]() {
+        std::map<uint8_t, StreamingCanThingSetBinaryDecoder> decodersByNodeAddress;
         while (_run) {
             CanFdFrame frame;
             if (_socket.read(frame) > 0) {
-            //if (_socket.tryRead(frame, std::chrono::milliseconds(500)) > 0) {
                 uint8_t sender = frame.getId().getSource();
                 StreamingCanThingSetBinaryDecoder *decoder = nullptr;
                 if (frame.getData()[0] == ThingSetRequestType::report) {
@@ -49,13 +50,14 @@ void ThingSetSocketCanSubscriptionTransport::SubscriptionListener::run(const std
                     }
                 }
                 if (decoder && decoder->enqueue(std::move(frame))) {
-                    auto canId = frame.getId();
-                    callback(canId, *decoder);
+                    callback(frame.getId(), *decoder);
                 }
             }
         }
     };
     _thread = std::thread(runner);
+    _thread.join();
+    return true;
 }
 
 }

@@ -20,12 +20,13 @@ int StreamingCanThingSetBinaryDecoder::read()
 bool StreamingCanThingSetBinaryDecoder::enqueue(CanFdFrame &&frame)
 {
     _queue.push(std::move(frame));
-    auto messageType = frame.getId().getMultiFrameMessageType();
+    MultiFrameMessageType messageType = frame.getId().getMultiFrameMessageType();
     // for now, require reception of all frames before marking as ready
     // if we could make the pull parsing blocking, perhaps we can revise this
     if (messageType == MultiFrameMessageType::single || messageType == MultiFrameMessageType::last) {
         // fill buffer
-        read(0, THINGSET_STREAMING_DECODER_CAN_MSG_SIZE * 2);
+        read(0, -1 + THINGSET_STREAMING_DECODER_CAN_MSG_SIZE * 2);
+        zcbor_new_decode_state(_state, BINARY_DECODER_DEFAULT_MAX_DEPTH, &_buffer[1], _buffer.size() - 1, 2, NULL, 0);
         return true;
     }
     return false;
@@ -36,12 +37,10 @@ int StreamingCanThingSetBinaryDecoder::read(size_t pos, size_t maxSize)
     if (_queue.empty()) {
         return 0;
     }
-    while ((pos + THINGSET_STREAMING_DECODER_CAN_MSG_SIZE) <= maxSize) {
+    while (pos <= maxSize) {
         CanFdFrame &frame = _queue.front();
-        size_t offset = frame.getData()[0] == ThingSetRequestType::report ? 1: 0; // handle first frame
-        size_t length = frame.getLength() - offset;
-        memcpy(_buffer.data(), &frame.getData()[offset], length);
-        pos += length;
+        memcpy(&_buffer.data()[pos], frame.getData(), frame.getLength());
+        pos += frame.getLength();
         _queue.pop();
     }
     return pos;
