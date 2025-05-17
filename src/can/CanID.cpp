@@ -173,7 +173,8 @@ CanID &CanID::setMessagePriority(const MessagePriority value)
 
 CanID CanID::create(const uint32_t id)
 {
-    return CanID(id, id <= CAN_SFF_MASK ? CAN_SFF_MASK : CAN_EFF_MASK);
+    uint32_t mask = id <= CAN_SFF_MASK ? CAN_SFF_MASK : CAN_EFF_MASK;
+    return CanID(id & mask, mask);
 }
 
 std::ostream& operator<<(std::ostream &os, const CanID &id)
