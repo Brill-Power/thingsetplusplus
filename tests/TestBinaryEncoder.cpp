@@ -46,6 +46,15 @@ TEST(BinaryEncoder, EncodeString)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
+TEST(BinaryEncoder, EncodeStdString)
+{
+    SETUP(128)
+    const std::string bonjour = "monde";
+    encoder.encode(bonjour);
+    uint8_t expected[] = { 0x65, 0x6D, 0x6F, 0x6E, 0x64, 0x65 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
 TEST(BinaryEncoder, EncodeMap)
 {
     SETUP(128)

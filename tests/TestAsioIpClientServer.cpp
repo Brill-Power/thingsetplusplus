@@ -30,7 +30,6 @@ TEST(AsioIpClientServer, Name) \
     ThingSetAsyncSocketServerTransport serverTransport(serverContext); \
     auto server = ThingSetServerBuilder::build(serverTransport); \
     server.listen(); \
-    bool runServer = true; \
     std::thread serverThread([&]() \
     { \
         serverContext.run_for(chrono::seconds(5)); \
@@ -40,26 +39,26 @@ TEST(AsioIpClientServer, Name) \
     auto endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), 9001); \
     ThingSetAsyncSocketClientTransport clientTransport(clientContext, endpoint); \
     auto client = ThingSetClient(clientTransport, rxBuffer, txBuffer); \
-    bool clientRan = false; \
+    bool clientRanSuccessfully = false; \
     std::thread clientThread([&]() \
     { \
         std::this_thread::sleep_for(std::chrono::milliseconds(125)); \
         ASSERT_TRUE(client.connect()); \
         Body \
-        clientRan = true; \
+        clientRanSuccessfully = true; \
         serverContext.stop(); \
     }); \
 \
     clientThread.join(); \
     serverThread.join(); \
 \
-    ASSERT_TRUE(clientRan); \
+    ASSERT_TRUE(clientRanSuccessfully); \
 }
 
 ASIO_TEST(GetFloat,
-    float totalVoltage;
-    ASSERT_TRUE(client.get(0x300, totalVoltage));
-    ASSERT_EQ(24.0f, totalVoltage);
+    float tv;
+    ASSERT_TRUE(client.get(0x300, tv));
+    ASSERT_EQ(24.0f, tv);
 )
 
 ASIO_TEST(ExecFunction,
@@ -68,3 +67,7 @@ ASIO_TEST(ExecFunction,
     ASSERT_EQ(5, result);
 )
 
+ASIO_TEST(UpdateFloat,
+    ASSERT_TRUE(client.update("totalVoltage", 25.0f));
+    ASSERT_EQ(25.0, totalVoltage.getValue());
+)

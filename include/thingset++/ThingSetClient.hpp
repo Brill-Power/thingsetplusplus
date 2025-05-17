@@ -43,7 +43,7 @@ public:
     /// @param result A pointer to a variable which will hold the decoded return value.
     /// @param ...args The arguments to pass to the function.
     /// @return True if the function was successfully executed, otherwise false.
-    template <typename Result, typename... TArg> bool exec(uint16_t id, Result *result, TArg... args)
+    template <typename Result, typename... TArg> bool exec(const uint16_t &id, Result *result, TArg... args)
     {
         return doRequest(id, ThingSetRequestType::exec, [&](auto encoder) { return encoder->encodeList(args...); }, result);
     }
@@ -53,9 +53,9 @@ public:
     /// @param id The integer identifier of the function.
     /// @param ...args The arguments to pass to the function.
     /// @return True if the function was successfully executed, otherwise false.
-    template <typename... TArg> bool exec(uint16_t id, TArg... args)
+    template <typename... TArg> bool exec(const uint16_t &id, TArg... args)
     {
-        return doRequest(id, ThingSetRequestType::exec, [&](auto encoder) { return encoder->encodeList(args...); }, nullptr);
+        return doRequest(id, ThingSetRequestType::exec, [&](auto encoder) { return encoder->encodeList(args...); });
     }
 
     /// @brief Gets a value.
@@ -63,9 +63,22 @@ public:
     /// @param id The integer identifier of the value.
     /// @param result A reference to a variable which will hold the retrieved value.
     /// @return True if retrieval succeeded, otherwise false.
-    template <typename T> bool get(uint16_t id, T &result)
+    template <typename T> bool get(const uint16_t &id, T &result)
     {
         return doRequest(id, ThingSetRequestType::get, [](auto) { return true; }, &result);
+    }
+
+    template <typename T> bool update(const std::string &fullyQualifiedName, const T &value)
+    {
+        size_t index = fullyQualifiedName.find_last_of('/');
+        const std::string pathToParent = index != std::string::npos ? fullyQualifiedName.substr(0, index) : "";
+        const std::string key = fullyQualifiedName.substr(index + 1);
+        return doRequest(pathToParent, ThingSetRequestType::update, [&](auto encoder) {
+            return encoder->encodeMapStart() &&
+                encoder->encode(key) &&
+                encoder->encode(value) &&
+                encoder->encodeMapEnd();
+        });
     }
 
 private:
@@ -76,7 +89,26 @@ private:
     /// @param encode A function to encode any additional data in a request.
     /// @param result A pointer to a variable which will contain the decoded result, if any. Pass null if no result is expected.
     /// @return True if invocation succeeded, otherwise false.
-    template <typename T> bool doRequest(uint16_t id, ThingSetRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, T *result)
+    template <typename Id, typename T> bool doRequest(const Id &id, ThingSetRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, T *result)
+    {
+        uint8_t *responseBuffer;
+        size_t responseSize;
+        if (doRequestCore(id, type, encode, &responseBuffer, responseSize)) {
+            // decode result into pointer
+            FixedDepthThingSetBinaryDecoder decoder(responseBuffer, responseSize);
+            return decoder.decode(result);
+        }
+        return false;
+    }
+
+    template <typename Id> bool doRequest(const Id &id, ThingSetRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode)
+    {
+        uint8_t *responseBuffer;
+        size_t responseSize;
+        return doRequestCore(id, type, encode, &responseBuffer, responseSize);
+    }
+
+    template <typename Id> bool doRequestCore(const Id &id, ThingSetRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, uint8_t **responseBuffer, size_t &responseSize)
     {
         _txBuffer[0] = type;
         FixedDepthThingSetBinaryEncoder encoder(_txBuffer + 1, _txBufferSize - 1);
@@ -89,18 +121,9 @@ private:
             return false;
         }
 
-        size_t responseSize;
-        uint8_t *responseBuffer;
-        if (!read(&responseBuffer, responseSize)) {
+        if (!read(responseBuffer, responseSize)) {
             LOG_ERR("Failed to read response");
             return false;
-        }
-
-        // if we have been passed a pointer for a result, decode into it
-        // (e.g. executing a void function passes null to skip this)
-        if (result) {
-            FixedDepthThingSetBinaryDecoder decoder(responseBuffer, responseSize);
-            return decoder.decode(result);
         }
 
         return true;
