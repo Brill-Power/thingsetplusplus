@@ -27,7 +27,7 @@ ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_
 }
 
 awaitable<void> ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket socket,
-                                           std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+                                           std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     char request[1024];
     char response[1024];
