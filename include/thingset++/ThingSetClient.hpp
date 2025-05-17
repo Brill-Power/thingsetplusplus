@@ -89,7 +89,7 @@ private:
             return false;
         }
 
-        int responseSize;
+        size_t responseSize;
         uint8_t *responseBuffer;
         if (!read(&responseBuffer, responseSize)) {
             LOG_ERR("Failed to read response");
@@ -106,7 +106,7 @@ private:
         return true;
     }
 
-    bool read(uint8_t **responseBuffer, int &responseSize);
+    bool read(uint8_t **responseBuffer, size_t &responseSize);
 };
 
 } // namespace ThingSet

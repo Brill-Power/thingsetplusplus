@@ -29,15 +29,9 @@ _ThingSetZephyrCanInterface::_ThingSetZephyrCanInterface(const device *const can
     _nodeAddress = CanID::broadcastAddress;
 }
 
-bool _ThingSetZephyrCanInterface::publish(CanID &id, uint8_t *buffer, size_t length)
+const device *const _ThingSetZephyrCanInterface::getDevice()
 {
-    CanFrame frame(id);
-    memcpy(frame.getData(), buffer, length);
-    frame.setLength(length);
-    frame.setFd(true);
-    int result =
-        can_send(_canDevice, frame.getFrame(), K_MSEC(CONFIG_THINGSET_CAN_REPORT_SEND_TIMEOUT), nullptr, nullptr);
-    return result == 0;
+    return _canDevice;
 }
 
 ThingSetZephyrCanStubInterface::ThingSetZephyrCanStubInterface(const device *const canDevice)

@@ -18,7 +18,7 @@ namespace ThingSet::Can::SocketCan {
 class IsoTpCanSocket
 {
 public:
-    class IsoTpCanSocketListener
+    class Listener
     {
     private:
         RawCanSocket _listenSocket;
@@ -27,10 +27,10 @@ public:
         bool _run;
 
     public:
-        IsoTpCanSocketListener(const std::string &deviceName, bool fd);
-        ~IsoTpCanSocketListener();
+        Listener(const std::string deviceName, bool fd);
+        ~Listener();
 
-        bool listen(const Can::CanID &address, std::function<void(CanID &, IsoTpCanSocket)> callback);
+        bool listen(const Can::CanID &address, std::function<void(const CanID &, IsoTpCanSocket)> callback);
     };
 
 private:
@@ -47,7 +47,7 @@ public:
     int read(uint8_t *buffer, size_t size);
     int write(uint8_t *buffer, size_t length);
 
-    bool bind(const std::string &deviceName, const CanID &rxId, const CanID &txId);
+    bool bind(const std::string deviceName, const CanID &rxId, const CanID &txId);
 };
 
 } // namespace ThingSet::Can::SocketCan

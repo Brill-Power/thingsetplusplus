@@ -12,6 +12,7 @@
 namespace ThingSet {
 
 /// @brief ThingSet broadcast listener.
+/// @tparam Identifier Type of identifier of a node (e.g. IP address, CAN ID).
 template <typename Identifier>
 class ThingSetListener
 {
@@ -22,13 +23,8 @@ public:
     ThingSetListener(ThingSetSubscriptionTransport<Identifier> &transport) : _transport(transport)
     {}
 
-    bool connect() {
-        return _transport.connect();
-    }
-
-    bool subscribe(std::function<void(Identifier &, uint16_t &)> callback) {
-        _transport.subscribe([&](Identifier &identifier, uint8_t *buffer, size_t length) {
-            DefaultFixedDepthThingSetBinaryDecoder decoder(buffer, length, 2);
+    bool subscribe(std::function<void(const Identifier &, uint16_t &)> callback) {
+        _transport.subscribe([&](const Identifier &identifier, ThingSetBinaryDecoder &decoder) {
             uint16_t subsetId;
             if (!decoder.decode(&subsetId)) {
                 return;
