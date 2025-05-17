@@ -9,7 +9,6 @@
 #include "thingset++/can/CanID.hpp"
 #include "thingset++/can/socketcan/RawCanSocket.hpp"
 #include <queue>
-#include <atomic>
 
 #if defined(__ZEPHYR__)
 #include "zephyr/drivers/can.h"
