@@ -100,5 +100,6 @@ int main()
     t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));
 
     server.listen();
+    ioContext.run();
     return 0;
 }

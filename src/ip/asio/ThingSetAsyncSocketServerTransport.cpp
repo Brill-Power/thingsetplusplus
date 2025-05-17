@@ -8,7 +8,6 @@
 #include <asio/detached.hpp>
 #include <asio/ip/tcp.hpp>
 #include <asio/ip/udp.hpp>
-#include <asio/signal_set.hpp>
 #include <asio/write.hpp>
 #include <thingset++/ip/asio/ThingSetAsyncSocketServerTransport.hpp>
 
@@ -23,8 +22,9 @@ using asio::ip::udp;
 
 namespace ThingSet::Ip::Async {
 
-ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) : _ioContext(ioContext), _publishSocket(ioContext)
-{}
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) : _ioContext(ioContext), _publishSocket(ioContext), _signals(_ioContext, SIGINT, SIGTERM)
+{
+}
 
 awaitable<void> ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket socket,
                                            std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
@@ -50,14 +50,7 @@ awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(a
 {
     auto executor = co_await asio::this_coro::executor;
     tcp::acceptor acceptor(executor, { tcp::v4(), 9001 });
-    asio::error_code error;
-    _publishSocket.open(udp::v4(), error);
-    if (error) {
-        throw std::system_error(error);
-    }
-    _publishSocket.set_option(udp::socket::reuse_address(true));
-    _publishSocket.set_option(asio::socket_base::broadcast(true));
-    for (;;) {
+        for (;;) {
         tcp::socket socket = co_await acceptor.async_accept(use_awaitable);
         co_spawn(executor, handle(std::move(socket), callback), detached);
     }
@@ -65,12 +58,18 @@ awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(a
 
 bool ThingSetAsyncSocketServerTransport::listen(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
-    asio::signal_set signals(_ioContext, SIGINT, SIGTERM);
-    signals.async_wait([&](auto, auto) { _ioContext.stop(); });
+    _signals.async_wait([&](auto, auto) { _ioContext.stop(); });
+
+    asio::error_code error;
+    _publishSocket.open(udp::v4(), error);
+    if (error) {
+        throw std::system_error(error);
+    }
+    _publishSocket.set_option(udp::socket::reuse_address(true));
+    _publishSocket.set_option(asio::socket_base::broadcast(true));
 
     co_spawn(_ioContext, listener(callback), detached);
 
-    _ioContext.run();
     return true;
 }
 

@@ -7,6 +7,7 @@
 
 #include "thingset++/ip/udp/ThingSetUdpServerTransport.hpp"
 #include <asio/awaitable.hpp>
+#include <asio/signal_set.hpp>
 #include <asio/ip/tcp.hpp>
 #include <asio/ip/udp.hpp>
 
@@ -19,6 +20,7 @@ class ThingSetAsyncSocketServerTransport : public ThingSetUdpServerTransport<asi
 private:
     asio::io_context &_ioContext;
     asio::ip::udp::socket _publishSocket;
+    asio::signal_set _signals;
 
 public:
     ThingSetAsyncSocketServerTransport(asio::io_context &ioContext);

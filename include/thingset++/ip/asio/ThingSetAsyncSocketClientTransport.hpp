@@ -16,10 +16,10 @@ class ThingSetAsyncSocketClientTransport : public ThingSetClientTransport
 {
 private:
     asio::ip::tcp::socket _requestResponseSocket;
-    asio::ip::tcp::endpoint &_endpoint;
+    const asio::ip::tcp::endpoint &_endpoint;
 
 public:
-    ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, asio::ip::tcp::endpoint &endpoint);
+    ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, const asio::ip::tcp::endpoint &endpoint);
     ~ThingSetAsyncSocketClientTransport();
 
     bool connect() override;

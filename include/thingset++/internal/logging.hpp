@@ -42,6 +42,8 @@ void LOG_SMART(T... args)
 }
 #else
 
+#ifndef LOG_DBG
+
 #define LOG_DBG(...)
 #define LOG_INF(...)
 #define LOG_WRN(...)
@@ -51,5 +53,7 @@ template <typename ... T>
 void LOG_SMART(T...)
 {
 }
+
+#endif
 
 #endif
