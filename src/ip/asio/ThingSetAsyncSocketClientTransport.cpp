@@ -8,7 +8,7 @@
 
 namespace ThingSet::Ip::Async {
 
-ThingSetAsyncSocketClientTransport::ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, asio::ip::tcp::endpoint &endpoint)
+ThingSetAsyncSocketClientTransport::ThingSetAsyncSocketClientTransport(asio::io_context &ioContext, const asio::ip::tcp::endpoint &endpoint)
     : _requestResponseSocket(ioContext), _endpoint(endpoint)
 {}
 
