@@ -1,0 +1,1 @@
+target_sources(thingset++ PRIVATE isotp_fast.c)

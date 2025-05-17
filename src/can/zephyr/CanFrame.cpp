@@ -13,12 +13,12 @@ using namespace ThingSet::Can;
 CanFrame::CanFrame() : AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::AbstractCanFrame()
 {}
 
-CanFrame::CanFrame(CanID &id) : CanFrame()
+CanFrame::CanFrame(const CanID &id) : CanFrame()
 {
     setId(id);
 }
 
-CanFrame::CanFrame(CanID &id, std::array<uint8_t, CAN_MAX_DLEN> buffer) : CanFrame(id)
+CanFrame::CanFrame(const CanID &id, std::array<uint8_t, CAN_MAX_DLEN> buffer) : CanFrame(id)
 {
     memcpy(_frame.data, buffer.data(), buffer.size());
     setLength(buffer.size());
@@ -47,7 +47,7 @@ CanFrame &CanFrame::setFd(bool value)
     return *this;
 }
 
-CanFrame &CanFrame::setId(CanID &id)
+CanFrame &CanFrame::setId(const CanID &id)
 {
     _frame.id = id;
     if (_frame.id >= 0x800) {
@@ -61,7 +61,7 @@ uint8_t CanFrame::getLength() const
     return can_dlc_to_bytes(_frame.dlc);
 }
 
-CanFrame &CanFrame::setLength(uint8_t length)
+CanFrame &CanFrame::setLength(const uint8_t length)
 {
     _frame.dlc = can_bytes_to_dlc(length);
     return *this;
