@@ -32,8 +32,8 @@ public:
 
 private:
     asio::awaitable<void> handle(asio::ip::tcp::socket socket,
-                                 std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback);
-    asio::awaitable<void> listener(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback);
+                                 std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback);
+    asio::awaitable<void> listener(std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback);
 };
 
 } // namespace ThingSet::Ip::Async
