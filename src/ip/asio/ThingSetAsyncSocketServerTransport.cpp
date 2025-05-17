@@ -46,7 +46,7 @@ ThingSetAsyncSocketServerTransport::~ThingSetAsyncSocketServerTransport()
     _publishSocket.close(error);
 }
 
-awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     auto executor = co_await asio::this_coro::executor;
     tcp::acceptor acceptor(executor, { tcp::v4(), 9001 });
@@ -56,7 +56,7 @@ awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(a
     }
 }
 
-bool ThingSetAsyncSocketServerTransport::listen(std::function<int(asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetAsyncSocketServerTransport::listen(std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     _signals.async_wait([&](auto, auto) { _ioContext.stop(); });
 
