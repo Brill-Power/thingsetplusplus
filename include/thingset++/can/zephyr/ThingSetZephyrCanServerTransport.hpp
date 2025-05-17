@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "ThingSetZephyrCanInterface.hpp"
+#include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
 #include "thingset++/can/ThingSetCanServerTransport.hpp"
 
 namespace ThingSet::Can::Zephyr {
@@ -18,10 +18,10 @@ private:
 protected:
     ThingSetCanInterface &getInterface() override;
 
+    bool doPublish(Can::CanID &id, uint8_t *buffer, size_t length) override;
+
 public:
     ThingSetZephyrCanServerTransport(_ThingSetZephyrCanInterface &canInterface);
-
-    bool bind(uint8_t nodeAddress);
 };
 
 } // namespace ThingSet::Can::Zephyr

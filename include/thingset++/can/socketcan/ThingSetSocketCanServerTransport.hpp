@@ -10,16 +10,22 @@
 
 namespace ThingSet::Can::SocketCan {
 
-class ThingSetSocketCanServerTransport : public Can::ThingSetCanServerTransport
+class ThingSetSocketCanServerTransport : public ThingSetCanServerTransport
 {
 private:
-    ThingSetSocketCanInterface _canInterface;
+    ThingSetSocketCanInterface &_canInterface;
+    IsoTpCanSocket::Listener _listener;
+    RawCanSocket _publishSocket;
+
+public:
+    ThingSetSocketCanServerTransport(ThingSetSocketCanInterface &canInterface);
+
+    bool listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 
 protected:
     ThingSetCanInterface &getInterface() override;
 
-public:
-    ThingSetSocketCanServerTransport(const std::string &deviceName);
+    bool doPublish(Can::CanID &id, uint8_t *buffer, size_t length) override;
 };
 
 } // namespace ThingSet::Can::SocketCan

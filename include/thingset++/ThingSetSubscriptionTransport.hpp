@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "thingset++/ThingSetBinaryDecoder.hpp"
 
 namespace ThingSet {
 
@@ -16,12 +17,14 @@ template <typename Identifier>
 class ThingSetSubscriptionTransport
 {
 public:
-    virtual bool connect() = 0;
     /// @brief Subscribes for publications delivered via the transport's
     /// broadcast mechanism.
     /// @param callback A callback that is invoked when a published message
     /// is received.
-    virtual void subscribe(std::function<void(Identifier &, uint8_t *, size_t)> callback) = 0;
+    virtual bool subscribe(std::function<void(const Identifier &, ThingSetBinaryDecoder &)> callback) = 0;
 };
+
+template <typename Identifier, typename T>
+concept SubscriptionTransport = std::is_base_of_v<ThingSetSubscriptionTransport<Identifier>, T>;
 
 } // namespace ThingSet

@@ -20,15 +20,10 @@ StreamingCanThingSetBinaryEncoder ThingSetCanServerTransport::getPublishingEncod
     return StreamingCanThingSetBinaryEncoder(*this);
 }
 
-bool ThingSetCanServerTransport::listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
-{
-    return getInterface().bind() && getInterface().listen(callback);
-}
-
 bool ThingSetCanServerTransport::publish(CanID &id, uint8_t *buffer, size_t length)
 {
     id.setSource(getInterface().getNodeAddress()).setMessageNumber(_messageNumber);
-    bool result = getInterface().publish(id, buffer, length);
+    bool result = doPublish(id, buffer, length);
     auto type = id.getMultiFrameMessageType();
     if (type == MultiFrameMessageType::last || type == MultiFrameMessageType::single) {
         _messageNumber++;

@@ -31,7 +31,7 @@ public:
 
     bool setFilter(const CanID &canId);
 
-    bool bind(const std::string &deviceName);
+    bool bind(const std::string deviceName);
 
     template <typename Frame> int read(Frame &frame)
     {

@@ -7,12 +7,14 @@
 
 namespace ThingSet::Can {
 
-#define CAN_FULL_MASK 0x1FFFFFFF
+#define CAN_SFF_MASK 0x000007FF
+#define CAN_EFF_MASK 0x1FFFFFFF
+#define CAN_EFF_FLAG 0x80000000
 
 CanID::CanID() : _id(0), _mask(0)
 {}
 
-CanID::CanID(uint32_t id, uint32_t mask) : _id(id), _mask(mask)
+CanID::CanID(const uint32_t id, const uint32_t mask) : _id(id), _mask(mask)
 {}
 
 CanID::CanID(const CanID &other) : CanID(other._id, other._mask)
@@ -20,7 +22,7 @@ CanID::CanID(const CanID &other) : CanID(other._id, other._mask)
 
 CanID::operator uint32_t() const
 {
-    return _id;
+    return getId();
 }
 
 CanID CanID::getReplyId() const
@@ -28,6 +30,11 @@ CanID CanID::getReplyId() const
     CanID reply(*this);
     reply.setTarget(getSource()).setSource(getTarget());
     return reply;
+}
+
+uint32_t CanID::getIdWithFlags() const
+{
+    return _id > CAN_SFF_MASK ? (_id | CAN_EFF_FLAG) : _id;
 }
 
 uint32_t CanID::getId() const
@@ -40,12 +47,18 @@ uint32_t CanID::getMask() const
     return _mask;
 }
 
+CanID &CanID::setMask(const uint32_t value)
+{
+    _mask = value;
+    return *this;
+}
+
 uint8_t CanID::getSource() const
 {
     return (_id & sourceMask) >> THINGSET_CAN_ID_POSITION_SOURCE;
 }
 
-CanID &CanID::setSource(uint8_t value)
+CanID &CanID::setSource(const uint8_t value)
 {
     _id = (_id & ~sourceMask) | ((value << THINGSET_CAN_ID_POSITION_SOURCE) & sourceMask);
     _mask |= sourceMask;
@@ -57,7 +70,7 @@ uint8_t CanID::getTarget() const
     return (_id & targetMask) >> THINGSET_CAN_ID_POSITION_TARGET;
 }
 
-CanID &CanID::setTarget(uint8_t value)
+CanID &CanID::setTarget(const uint8_t value)
 {
     _id = (_id & ~targetMask) | ((value << THINGSET_CAN_ID_POSITION_TARGET) & targetMask);
     _mask |= targetMask;
@@ -69,7 +82,7 @@ uint16_t CanID::getDataID() const
     return (_id & dataIdMask) >> THINGSET_CAN_ID_POSITION_DATA_ID;
 }
 
-CanID &CanID::setDataID(uint16_t value)
+CanID &CanID::setDataID(const uint16_t value)
 {
     _id = (_id & ~dataIdMask) | ((value << THINGSET_CAN_ID_POSITION_DATA_ID) & dataIdMask);
     _mask |= dataIdMask;
@@ -81,7 +94,7 @@ uint8_t CanID::getSequenceNumber() const
     return (_id & sequenceNumberMask) >> THINGSET_CAN_ID_POSITION_SEQ_NO;
 }
 
-CanID &CanID::setSequenceNumber(uint8_t value)
+CanID &CanID::setSequenceNumber(const uint8_t value)
 {
     _id = (_id & ~sequenceNumberMask) | ((value << THINGSET_CAN_ID_POSITION_SEQ_NO) & sequenceNumberMask);
     _mask |= sequenceNumberMask;
@@ -93,7 +106,7 @@ uint8_t CanID::getMessageNumber() const
     return (_id & messageNumberMask) >> THINGSET_CAN_ID_POSITION_MSG_NO;
 }
 
-CanID &CanID::setMessageNumber(uint8_t value)
+CanID &CanID::setMessageNumber(const uint8_t value)
 {
     _id = (_id & ~messageNumberMask) | ((value << THINGSET_CAN_ID_POSITION_MSG_NO) & messageNumberMask);
     _mask |= messageNumberMask;
@@ -105,7 +118,7 @@ uint8_t CanID::getBridge() const
     return (_id & bridgeMask) >> THINGSET_CAN_ID_POSITION_BRIDGE;
 }
 
-CanID &CanID::setBridge(uint8_t value)
+CanID &CanID::setBridge(const uint8_t value)
 {
     _id = (_id & ~bridgeMask) | ((value << THINGSET_CAN_ID_POSITION_BRIDGE) & bridgeMask);
     _mask |= bridgeMask;
@@ -117,7 +130,7 @@ uint8_t CanID::getRandomElement() const
     return getBridge();
 }
 
-CanID &CanID::setRandomElement(uint8_t value)
+CanID &CanID::setRandomElement(const uint8_t value)
 {
     return setBridge(value);
 }
@@ -158,9 +171,10 @@ CanID &CanID::setMessagePriority(const MessagePriority value)
     return *this;
 }
 
-CanID CanID::create(uint32_t id)
+CanID CanID::create(const uint32_t id)
 {
-    return CanID(id, CAN_FULL_MASK);
+    uint32_t mask = id <= CAN_SFF_MASK ? CAN_SFF_MASK : CAN_EFF_MASK;
+    return CanID(id & mask, mask);
 }
 
 std::ostream& operator<<(std::ostream &os, const CanID &id)

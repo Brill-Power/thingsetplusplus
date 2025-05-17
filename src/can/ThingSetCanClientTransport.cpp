@@ -11,9 +11,4 @@ ThingSetCanClientTransport::ThingSetCanClientTransport(uint8_t targetNodeAddress
     : _targetNodeAddress(targetNodeAddress)
 {}
 
-bool ThingSetCanClientTransport::connect()
-{
-    return true;
-}
-
 } // namespace ThingSet::Can

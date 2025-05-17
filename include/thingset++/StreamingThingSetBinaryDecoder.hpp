@@ -14,10 +14,10 @@ namespace ThingSet {
 template <size_t Size> class StreamingThingSetBinaryDecoder : public virtual ThingSetBinaryDecoder
 {
 private:
-    zcbor_state_t _state[BINARY_DECODER_DEFAULT_MAX_DEPTH];
-    size_t _decodedLength;
+size_t _decodedLength;
 
 protected:
+    zcbor_state_t _state[BINARY_DECODER_DEFAULT_MAX_DEPTH];
     std::array<uint8_t, Size * 2> _buffer;
 
 public:

@@ -20,7 +20,7 @@ bool ThingSetClient::connect()
     return _transport.connect();
 }
 
-bool ThingSetClient::read(uint8_t **responseBuffer, int &responseSize)
+bool ThingSetClient::read(uint8_t **responseBuffer, size_t &responseSize)
 {
     responseSize = _transport.read(_rxBuffer, _rxBufferSize);
     if (responseSize == 0) {

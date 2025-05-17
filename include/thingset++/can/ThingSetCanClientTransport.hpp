@@ -6,17 +6,17 @@
 #pragma once
 
 #include "thingset++/ThingSetClientTransport.hpp"
+#include "thingset++/can/ThingSetCanInterface.hpp"
 
 namespace ThingSet::Can {
 
 class ThingSetCanClientTransport : public ThingSetClientTransport
 {
-private:
-    uint8_t _targetNodeAddress;
+protected:
+    const uint8_t _targetNodeAddress;
 
-public:
-    ThingSetCanClientTransport(uint8_t targetNodeAddress);
-    bool connect() override;
+protected:
+    ThingSetCanClientTransport(const uint8_t targetNodeAddress);
 };
 
 } // namespace ThingSet::Can

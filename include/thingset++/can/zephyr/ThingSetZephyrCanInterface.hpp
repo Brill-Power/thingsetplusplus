@@ -23,7 +23,7 @@ protected:
     _ThingSetZephyrCanInterface(const device *const canDevice);
 
 public:
-    bool publish(CanID &id, uint8_t *buffer, size_t length) override;
+    const device *const getDevice();
 };
 
 class ThingSetZephyrCanStubInterface : public _ThingSetZephyrCanInterface
@@ -33,8 +33,6 @@ public:
 
     using ThingSetCanInterface::bind;
     bool bind(uint8_t nodeAddress) override;
-
-    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 };
 
 /// @brief Encapsulates a ThingSet CAN interface.
@@ -63,8 +61,6 @@ public:
 
     using ThingSetCanInterface::bind;
     bool bind(uint8_t nodeAddress) override;
-
-    bool listen(std::function<int(uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 
 private:
     static void onAddressDiscoverReceived(const device *dev, can_frame *frame, void *arg);

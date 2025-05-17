@@ -21,14 +21,14 @@ protected:
 
     virtual ThingSetCanInterface &getInterface() = 0;
 
+    virtual bool doPublish(Can::CanID &id, uint8_t *buffer, size_t length) = 0;
+
 public:
     uint8_t getNodeAddress();
 
     StreamingCanThingSetBinaryEncoder getPublishingEncoder() override;
 
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
-
-    bool listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 };
 
 } // namespace ThingSet::Can

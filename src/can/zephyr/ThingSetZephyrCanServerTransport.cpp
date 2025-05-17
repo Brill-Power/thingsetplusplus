@@ -16,9 +16,15 @@ ThingSetCanInterface &ThingSetZephyrCanServerTransport::getInterface()
     return _canInterface;
 }
 
-bool ThingSetZephyrCanServerTransport::bind(uint8_t nodeAddress)
+bool ThingSetZephyrCanServerTransport::doPublish(Can::CanID &id, uint8_t *buffer, size_t length)
 {
-    return _canInterface.bind(nodeAddress);
+    CanFrame frame(id);
+    memcpy(frame.getData(), buffer, length);
+    frame.setLength(length);
+    frame.setFd(true);
+    int result =
+        can_send(_canInterface.getDevice(), frame.getFrame(), K_MSEC(CONFIG_THINGSET_CAN_REPORT_SEND_TIMEOUT), nullptr, nullptr);
+    return result == 0;
 }
 
 } // namespace ThingSet::Can::Zephyr

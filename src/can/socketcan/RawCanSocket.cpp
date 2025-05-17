@@ -44,7 +44,7 @@ bool RawCanSocket::setFilter(const Can::CanID &canId)
     return result == 0;
 }
 
-bool RawCanSocket::bind(const std::string &deviceName)
+bool RawCanSocket::bind(const std::string deviceName)
 {
     int result = 0;
     _address.can_family = AF_CAN;
