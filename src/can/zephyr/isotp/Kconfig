@@ -68,4 +68,8 @@ config ISOTP_FAST_BLOCKING_RECEIVE
 	  Whether to make blocking receive functionality available
 	  to ease migration from the old API.
 
+module = ISOTP_FAST
+module-str = isotp_fast
+source "../zephyr/subsys/logging/Kconfig.template.log_config"
+
 endif

@@ -24,4 +24,5 @@ endif()
 
 if(ENABLE_ZEPHYR)
     add_subdirectory(can)
+    target_sources(thingset++ PRIVATE ZephyrLogRegistration.cpp)
 endif()

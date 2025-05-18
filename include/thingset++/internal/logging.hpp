@@ -8,6 +8,13 @@
 #ifdef __ZEPHYR__
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
+
+template <typename ... T>
+void LOG_SMART(T... args)
+{
+    // no-op for now
+}
+
 #elif defined(DEBUG_LOGGING)
 #include <iostream>
 
