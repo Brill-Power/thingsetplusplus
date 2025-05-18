@@ -18,7 +18,7 @@ namespace ThingSet::Can::SocketCan {
 static bool tryClaimAddress(uint8_t nodeAddress, RawCanSocket &socket)
 {
     LOG_DBG("Asserting claim to 0x%x", nodeAddress);
-    CanFrame frame(CanID()
+    CanFdFrame frame(CanID()
                        .setSource(nodeAddress)
                        .setTarget(CanID::broadcastAddress)
                        .setMessageType(MessageType::network)
@@ -33,7 +33,8 @@ void ThingSetSocketCanInterface::AddressClaimer::run(const std::string &deviceNa
     LOG_DBG("Starting address claimer for 0x%x", nodeAddress);
     _socket.setFilter(
         CanID().setSource(CanID::anonymousAddress).setTarget(nodeAddress).setMessageType(MessageType::network));
-    _socket.bind(deviceName);
+        _socket.bind(deviceName);
+    _socket.setIsFd(true);
     auto runner = [&, nodeAddress]() {
         while (_run) {
             CanFrame frame;
@@ -64,19 +65,20 @@ bool ThingSetSocketCanInterface::bind(uint8_t nodeAddress)
     RawCanSocket claimLookoutSocket;
     claimLookoutSocket.setFilter(CanID().setTarget(CanID::broadcastAddress).setMessageType(MessageType::network));
     claimLookoutSocket.bind(_deviceName);
+    claimLookoutSocket.setIsFd(true);
     std::random_device dice;
     std::mt19937 rng(dice());
     std::uniform_int_distribution<std::mt19937::result_type> dist(CanID::minAddress, CanID::maxAddress);
     while (true) {
         uint8_t random = (uint8_t)dist(rng);
-        CanFrame claimFrame(CanID()
+        CanFdFrame claimFrame(CanID()
                                 .setSource(CanID::anonymousAddress)
                                 .setTarget(nodeAddress)
                                 .setRandomElement(random)
                                 .setMessageType(MessageType::network)
                                 .setMessagePriority(MessagePriority::networkManagement));
         claimLookoutSocket.write(claimFrame);
-        CanFrame claimedFrame;
+        CanFdFrame claimedFrame;
         if (claimLookoutSocket.tryRead(claimedFrame, std::chrono::milliseconds(500))
             && claimedFrame.getId().getSource() == nodeAddress)
         {
