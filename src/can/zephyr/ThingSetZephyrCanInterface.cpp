@@ -153,6 +153,9 @@ void ThingSetZephyrCanInterface::onAddressDiscoverReceived(const device *dev, ca
     self->claimAddress(self->_nodeAddress);
 }
 
+static void onAddressClaimSent(const device *dev, int error, void *arg)
+{}
+
 bool ThingSetZephyrCanInterface::claimAddress(uint8_t nodeAddress)
 {
     LOG_INF("Asserting claim to 0x%.2X", nodeAddress);
@@ -164,7 +167,7 @@ bool ThingSetZephyrCanInterface::claimAddress(uint8_t nodeAddress)
     frame.setFd(true);
     memcpy(frame.getData(), Eui::getArray().data(), Eui::getArray().size());
     frame.setLength(Eui::getArray().size());
-    return can_send(_canDevice, frame.getFrame(), K_MSEC(10), nullptr, nullptr) == 0;
+    return can_send(_canDevice, frame.getFrame(), K_MSEC(10), onAddressClaimSent, nullptr) == 0;
 }
 
 int ThingSetZephyrCanInterface::addFilter(CanID &canId, void (*callback)(const device *, can_frame *, void *))
@@ -189,7 +192,7 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
         LOG_INF("Starting address claim for CAN interface %s", _canDevice->name);
         k_event_init(&_events);
 
-        can_set_mode(_canDevice, CAN_MODE_FD);
+        can_set_mode(_canDevice, can_get_mode(_canDevice) | CAN_MODE_FD);
         can_start(_canDevice);
 
         _claimFilterId = addFilter(CanID().setTarget(CanID::broadcastAddress).setBridge(0), onAddressClaimReceived);

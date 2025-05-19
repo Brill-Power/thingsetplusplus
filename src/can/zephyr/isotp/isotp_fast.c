@@ -12,7 +12,7 @@
 #include <zephyr/sys/byteorder.h>
 #include "stdbool.h"
 
-LOG_MODULE_REGISTER(isotp_fast, CONFIG_ISOTP_LOG_LEVEL);
+LOG_MODULE_REGISTER(isotp_fast, CONFIG_ISOTP_FAST_LOG_LEVEL);
 
 static void receive_work_handler(struct k_work *work);
 static void receive_timeout_handler(struct k_timer *timer);
@@ -1087,6 +1087,13 @@ int isotp_fast_recv(struct isotp_fast_ctx *ctx, struct can_filter sender, uint8_
 }
 #endif /* CONFIG_ISOTP_FAST_BLOCKING_RECEIVE */
 
+static void isotp_fast_sent_single_cb(const struct device *dev, int error, void *arg)
+{
+    struct isotp_fast_send_ctx *ctx = arg;
+    ctx->ctx->sent_callback(error, ctx->tx_addr, ctx->cb_arg);
+    free_send_ctx(ctx);
+}
+
 int isotp_fast_send(struct isotp_fast_ctx *ctx, const uint8_t *data, size_t len,
                     const struct isotp_fast_addr target_addr, void *cb_arg)
 {
@@ -1107,8 +1114,13 @@ int isotp_fast_send(struct isotp_fast_ctx *ctx, const uint8_t *data, size_t len,
 #endif
         frame.dlc = can_bytes_to_dlc(len + index);
         memcpy(&frame.data[index], data, len);
-        int ret = can_send(ctx->can_dev, &frame, K_MSEC(ISOTP_A_TIMEOUT_MS), NULL, NULL);
-        ctx->sent_callback(ret, target_addr, cb_arg);
+        struct isotp_fast_send_ctx *context;
+        int ret = get_send_ctx(ctx, target_addr, true, &context);
+        if (ret) {
+            return ISOTP_NO_NET_BUF_LEFT;
+        }
+        context->cb_arg = cb_arg;
+        ret = can_send(ctx->can_dev, &frame, K_MSEC(ISOTP_A_TIMEOUT_MS), isotp_fast_sent_single_cb, context);
         return ret;
     }
     else {
