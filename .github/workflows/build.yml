@@ -40,4 +40,4 @@ jobs:
 
       - name: Test
         run: |
-          west build -b native_sim/native/64 thingsetplusplus/tests/zephyr -t run
+          zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/ -p native_sim/native/64

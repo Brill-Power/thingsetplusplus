@@ -62,8 +62,9 @@ static k_tid_t createAndRunClient(k_thread_entry_t runner)
     return CREATE_AND_RUN(clientThread, clientStack, runner);
 }
 
-#define ZCLIENT_SERVER_TEST(Name, Body) \
-ZTEST(ZephyrClientServer, Name) \
+// name needs to be this to make stupid twister check pass
+#define ZCLIENT_SERVER_TEST(test_name, Body) \
+ZTEST(ZephyrClientServer, test_name) \
 { \
     k_sem_init(&clientCompleted, 0, 1); \
     k_sem_init(&serverCompleted, 0, 1); \
@@ -87,12 +88,12 @@ ZTEST(ZephyrClientServer, Name) \
     k_sem_take(&serverCompleted, K_FOREVER); \
 }
 
-ZCLIENT_SERVER_TEST(GetFloat,
+ZCLIENT_SERVER_TEST(test_get_float,
     float tv;
     zassert_true(client.get(0x300, tv));
 )
 
-ZCLIENT_SERVER_TEST(ExecFunction,
+ZCLIENT_SERVER_TEST(test_exec_function,
     int result;
     zassert_true(client.exec(0x1000, &result, 2, 3));
     zassert_equal(5, result);
