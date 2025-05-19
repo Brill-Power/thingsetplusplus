@@ -23,11 +23,6 @@ jobs:
         run: |
           cd tests && cmake -S . -B build && cd build && make && ./testapp --gtest_output="xml:report.xml"
 
-      - name: Test Summary
-        uses: test-summary/action@v2
-        with:
-          paths: thingsetplusplus/tests/build/report.xml
-
   zephyr-test:
     runs-on: ubuntu-latest
     container: zephyrprojectrtos/ci:main
@@ -46,8 +41,3 @@ jobs:
       - name: Test
         run: |
           zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/ -p native_sim/native/64
-
-      - name: Test Summary
-        uses: test-summary/action@v2
-        with:
-          paths: "thingsetplusplus/**/twister_report.xml"
