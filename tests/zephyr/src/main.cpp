@@ -50,7 +50,7 @@ static void runServer(void *, void *, void *)
 }
 
 #define CREATE_AND_RUN(thread, stack, function) \
-    k_thread_create(&thread, stack, K_THREAD_STACK_SIZEOF(stack), function, NULL, NULL, NULL, CONFIG_CAN_NATIVE_LINUX_RX_THREAD_PRIORITY, 0, K_NO_WAIT);
+    k_thread_create(&thread, stack, K_THREAD_STACK_SIZEOF(stack), function, NULL, NULL, NULL, 2, 0, K_NO_WAIT);
 
 static k_tid_t createAndRunServer()
 {
