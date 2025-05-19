@@ -59,7 +59,7 @@ static k_tid_t createAndRunClient(k_thread_entry_t runner)
     return k_thread_create(&clientThread, clientStack, K_THREAD_STACK_SIZEOF(clientStack), runner, NULL, NULL, NULL, CONFIG_CAN_NATIVE_LINUX_RX_THREAD_PRIORITY, 0, K_NO_WAIT);
 }
 
-ZTEST(ZephyrClientServer, Basic)
+ZTEST(ZephyrClientServer, Get)
 {
     k_sem_init(&clientCompleted, 0, 1);
     k_sem_init(&serverCompleted, 0, 1);
@@ -77,6 +77,32 @@ ZTEST(ZephyrClientServer, Basic)
 
         float tv;
         zassert_true(client.get(0x300, tv));
+
+        k_sem_give(&clientCompleted);
+    });
+
+    k_sem_take(&serverCompleted, K_FOREVER);
+}
+
+ZTEST(ZephyrClientServer, ExecFunction)
+{
+    k_sem_init(&clientCompleted, 0, 1);
+    k_sem_init(&serverCompleted, 0, 1);
+
+    createAndRunServer();
+
+    createAndRunClient([](auto, auto, auto)
+    {
+        LOG_INF("Creating client");
+        std::array<uint8_t, 1024> clientRxBuffer;
+        std::array<uint8_t, 1024> clientTxBuffer;
+        ThingSetClient client(clientTransport, clientRxBuffer, clientTxBuffer);
+        zassert_true(client.connect());
+        LOG_INF("Client connected");
+
+        int result;
+        zassert_true(client.exec(0x1000, &result, 2, 3));
+        zassert_equal(5, result);
 
         k_sem_give(&clientCompleted);
     });
