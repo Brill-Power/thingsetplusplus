@@ -1,6 +1,7 @@
 config THINGSET_PLUS_PLUS
 	bool "ThingSet C++"
 	select ZCBOR
+	select ZCBOR_CANONICAL
 
 if THINGSET_PLUS_PLUS
 

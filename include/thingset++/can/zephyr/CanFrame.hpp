@@ -16,7 +16,13 @@ class CanFrame : public AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>
 public:
     CanFrame();
     CanFrame(const CanID &id);
-    CanFrame(const CanID &id, std::array<uint8_t, CAN_MAX_DLEN> buffer);
+
+    template <size_t Size> requires (Size <= CAN_MAX_DLEN)
+    CanFrame(const CanID &id, std::array<uint8_t, Size> buffer) : CanFrame(id)
+    {
+        memcpy(_frame.data, buffer.data(), buffer.size());
+        setLength(buffer.size());
+    }
 
     CanID getId() const override;
     CanFrame &setId(const CanID &id) override;
