@@ -26,7 +26,7 @@ jobs:
       - name: Test Summary
         uses: test-summary/action@v2
         with:
-          paths: "thingsetplusplus/tests/build/report.xml
+          paths: thingsetplusplus/tests/build/report.xml
 
   zephyr-test:
     runs-on: ubuntu-latest
