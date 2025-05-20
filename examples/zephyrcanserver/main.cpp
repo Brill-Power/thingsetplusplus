@@ -48,11 +48,18 @@ K_THREAD_STACK_DEFINE(publishStack, CONFIG_ARCH_POSIX_RECOMMENDED_STACK_SIZE);
 
 bool runPublisher = true;
 
-void publisher(void * param1, void*, void *)
+void publisher(void *param1, void*, void *)
 {
     auto server = (ThingSetServer<Can::CanID, CAN_MAX_DLEN, Can::StreamingCanThingSetBinaryEncoder> *)param1;
     while (runPublisher)
     {
+        for (size_t i = 0; i < moduleRecords.size(); i++) {
+            auto increment = 0.25f * (std::rand() % 4);
+            if (std::rand() % 1 == 0) {
+                increment *= -1;
+            }
+            moduleRecords[i].voltage += increment;
+        }
         server->publish(moduleRecords, totalVoltage);
         LOG_INF("Publishing report");
         k_sleep(K_SECONDS(1));
@@ -61,6 +68,40 @@ void publisher(void * param1, void*, void *)
 
 int main()
 {
+    moduleRecords = { (ModuleRecord){
+                          .voltage = 24.0f,
+                          .current = 10.0f,
+                          .error = 0,
+                          .cellVoltages = { { 3.2f, 3.1f, 2.9f, 3.3f, 0.0f, 2.8f } },
+                          .supercells = { { (SupercellRecord){
+                                                .soc = 0.1,
+                                                .soh = 1,
+                                            },
+                                            (SupercellRecord){ .soc = 0.25, .soh = 1 },
+                                            (SupercellRecord){
+                                                .soc = 0.5,
+                                                .soh = 1,
+                                            },
+                                            (SupercellRecord){
+                                                .soc = 0.75,
+                                                .soh = 1,
+                                            },
+                                            (SupercellRecord){
+                                                .soc = 0.8,
+                                                .soh = 1,
+                                            },
+                                            (SupercellRecord){
+                                                .soc = 1,
+                                                .soh = 1,
+                                            } } },
+                      },
+                      (ModuleRecord){
+                          .voltage = 24.2f,
+                          .current = 5.0f,
+                          .error = 0,
+                          .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
+                      } };
+
     k_sem_init(&quitLock, 0, K_SEM_MAX_LIMIT);
 
     serverInterface.bind(0x01);
