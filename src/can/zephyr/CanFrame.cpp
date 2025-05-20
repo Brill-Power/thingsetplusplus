@@ -18,6 +18,11 @@ CanFrame::CanFrame(const CanID &id) : CanFrame()
     setId(id);
 }
 
+CanFrame::CanFrame(const can_frame &frame) : CanFrame()
+{
+    memcpy(&_frame, &frame, sizeof(can_frame));
+}
+
 CanID CanFrame::getId() const
 {
     return CanID::create(_frame.id);

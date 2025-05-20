@@ -16,6 +16,7 @@ class CanFrame : public AbstractCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>
 public:
     CanFrame();
     CanFrame(const CanID &id);
+    CanFrame(const can_frame &frame);
 
     template <size_t Size> requires (Size <= CAN_MAX_DLEN)
     CanFrame(const CanID &id, std::array<uint8_t, Size> buffer) : CanFrame(id)

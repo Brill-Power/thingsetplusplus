@@ -3,9 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <thingset++/can/zephyr/ThingSetZephyrCanClientTransport.hpp>
 #include <thingset++/can/zephyr/ThingSetZephyrCanServerTransport.hpp>
-#include <thingset++/ThingSetClient.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ThingSetFunction.hpp>
 #include <array>
@@ -15,10 +13,10 @@ using namespace ThingSet;
 
 static const struct device *canDevice = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
 
-std::array<uint8_t, 1024> serverRxBuffer;
-std::array<uint8_t, 1024> serverTxBuffer;
-ThingSetZephyrCanInterface serverInterface(canDevice, serverRxBuffer, serverTxBuffer);
-ThingSetZephyrCanServerTransport serverTransport(serverInterface);
+std::array<uint8_t, 1024> rxBuffer;
+std::array<uint8_t, 1024> txBuffer;
+ThingSetZephyrCanInterface interface(canDevice, rxBuffer, txBuffer);
+ThingSetZephyrCanServerTransport transport(interface);
 
 struct SupercellRecord
 {
@@ -104,9 +102,9 @@ int main()
 
     k_sem_init(&quitLock, 0, K_SEM_MAX_LIMIT);
 
-    serverInterface.bind(0x01);
+    interface.bind(0x01);
 
-    auto server = ThingSetServerBuilder::build(serverTransport);
+    auto server = ThingSetServerBuilder::build(transport);
     server.listen();
 
     k_thread_create(&publishThread, publishStack, K_THREAD_STACK_SIZEOF(publishStack), publisher, &server, nullptr, nullptr, 2, 0, K_NO_WAIT);

@@ -13,6 +13,18 @@ config THINGSET_PLUS_PLUS_CLIENT
 	bool "Enable client"
 	default false
 
+config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE
+	int "Stack size of subscription thread"
+	default 1024
+
+config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY
+	int "Priority of subscription thread"
+	default 5
+
+config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH
+	int "Number of CAN frames that can be stored in the queue"
+	default 12
+
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus
 source "../zephyr/subsys/logging/Kconfig.template.log_config"
