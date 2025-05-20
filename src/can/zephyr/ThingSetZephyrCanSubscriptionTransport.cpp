@@ -15,12 +15,6 @@ ThingSetZephyrCanSubscriptionTransport::ThingSetZephyrCanSubscriptionTransport(T
 
 ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::ZephyrCanSubscriptionListener(const device *const canDevice) : _canDevice(canDevice), _filterId(-1)
 {
-    const can_filter canFilter = {
-        .id = subscriptionFilter,
-        .mask = subscriptionFilter.getMask(),
-        .flags = CAN_FILTER_IDE,
-    };
-    _filterId = can_add_rx_filter(canDevice, onPublicationFrameReceived, this, &canFilter);
     k_msgq_init(&_frameQueue, _frameBuffer.data(), sizeof(can_frame), CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH);
 }
 
@@ -66,6 +60,12 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runL
 
 bool ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::run(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
 {
+    const can_filter canFilter = {
+        .id = subscriptionFilter,
+        .mask = subscriptionFilter.getMask(),
+        .flags = CAN_FILTER_IDE,
+    };
+    _filterId = can_add_rx_filter(_canDevice, onPublicationFrameReceived, this, &canFilter);
     _callback = callback;
     k_thread_create(&_thread, threadStack, K_THREAD_STACK_SIZEOF(threadStack), runListener, this, nullptr, nullptr, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY, 0, K_NO_WAIT);
     return true;
