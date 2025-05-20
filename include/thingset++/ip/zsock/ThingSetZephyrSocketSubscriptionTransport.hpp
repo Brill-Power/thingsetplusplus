@@ -24,7 +24,7 @@ private:
     std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> _listener_callback;
 
 public:
-    ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface);
+    ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface, const char *ip);
     ~ThingSetZephyrSocketSubscriptionTransport();
 
     bool subscribe(std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> callback) override;

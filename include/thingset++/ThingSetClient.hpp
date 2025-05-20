@@ -122,7 +122,7 @@ private:
         }
 
         if (!read(responseBuffer, responseSize)) {
-            LOG_ERR("Failed to read response");
+            //LOG_ERR("Failed to read response");
             return false;
         }
 

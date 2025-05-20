@@ -23,13 +23,6 @@ ThingSetZephyrSocketClientTransport::ThingSetZephyrSocketClientTransport(struct 
     
     _req_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     __ASSERT(_req_sock >= 0, "Failed to create TCP socket: %d", errno);
-
-    struct net_if_addr *addr = net_if_ipv4_addr_add(iface, &_req_addr.sin_addr, NET_ADDR_MANUAL, 0);
-    __ASSERT(addr != NULL, "Failed to add IP address to interface: %d", errno);
-
-    struct sockaddr_in subnet;
-    net_addr_pton(AF_INET, "255.255.255.0", &subnet.sin_addr);
-    net_if_ipv4_set_netmask_by_addr(iface, &_req_addr.sin_addr, &subnet.sin_addr);
 }
 
 ThingSetZephyrSocketClientTransport::~ThingSetZephyrSocketClientTransport()

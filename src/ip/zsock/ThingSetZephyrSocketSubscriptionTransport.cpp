@@ -22,18 +22,21 @@ namespace ThingSet::Ip::Zsock {
 
 void subscribe_thread_loop(void *p1, void *p2, void *p3);
 
-ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface) : _sub_sock(-1)
+ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface, const char *ip) : _sub_sock(-1)
 {
-    net_addr_pton(AF_INET, "0.0.0.0", &_udp_addr.sin_addr);
-
+    net_addr_pton(AF_INET, ip, &_udp_addr.sin_addr);
     _udp_addr.sin_family = AF_INET;
     _udp_addr.sin_port = htons(9003);
+
+    _sub_sock = zsock_socket(_udp_addr.sin_family, SOCK_DGRAM, IPPROTO_UDP);
+    __ASSERT(_sub_sock >= 0, "Failed to create UDP socket: %d", errno);
 
     struct net_if_addr *addr = net_if_ipv4_addr_add(iface, &_udp_addr.sin_addr, NET_ADDR_MANUAL, 0);
     __ASSERT(addr != NULL, "Failed to add any address to interface: %d", errno);
 
-    _sub_sock = zsock_socket(_udp_addr.sin_family, SOCK_DGRAM, IPPROTO_UDP);
-    __ASSERT(_sub_sock >= 0, "Failed to create UDP socket: %d", errno);
+    struct sockaddr_in subnet;
+    net_addr_pton(AF_INET, "255.255.255.0", &subnet.sin_addr);
+    net_if_ipv4_set_netmask_by_addr(iface, &_udp_addr.sin_addr, &subnet.sin_addr);
 }
 
 ThingSetZephyrSocketSubscriptionTransport::~ThingSetZephyrSocketSubscriptionTransport()
