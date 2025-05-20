@@ -45,22 +45,6 @@ ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](au
 
 k_sem quitLock;
 
-// k_thread publishThread;
-// K_THREAD_STACK_DEFINE(publishStack, CONFIG_ARCH_POSIX_RECOMMENDED_STACK_SIZE);
-
-// bool runPublisher = true;
-
-// void publisher(void * param1, void*, void *)
-// {
-//     auto server = (ThingSetServer<Can::CanID, CAN_MAX_DLEN, Can::StreamingCanThingSetBinaryEncoder> *)param1;
-//     while (runPublisher)
-//     {
-//         server->publish(moduleRecords, totalVoltage);
-//         LOG_INF("Publishing report");
-//         k_sleep(K_SECONDS(1));
-//     }
-// }
-
 int main()
 {
     k_sem_init(&quitLock, 0, K_SEM_MAX_LIMIT);
@@ -94,8 +78,6 @@ int main()
         }
     };
     listener.subscribe(callback);
-
-    //k_thread_create(&publishThread, publishStack, K_THREAD_STACK_SIZEOF(publishStack), publisher, &server, nullptr, nullptr, 2, 0, K_NO_WAIT);
 
     LOG_INF("Started up");
 
