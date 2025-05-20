@@ -2,11 +2,14 @@ target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryDecoder.cpp
     ThingSetBinaryEncoder.cpp)
 
-if(ENABLE_SERVER)
+if(ENABLE_SERVER OR ENABLE_CLIENT)
     target_sources(thingset++ PRIVATE ThingSetNode.cpp
         ThingSetParentNode.cpp
-        ThingSetRegistry.cpp
-        ThingSetRequestContext.cpp
+        ThingSetRegistry.cpp)
+endif()
+
+if(ENABLE_SERVER)
+    target_sources(thingset++ PRIVATE ThingSetRequestContext.cpp
         ThingSetServer.cpp)
 endif()
 
