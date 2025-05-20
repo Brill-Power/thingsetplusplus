@@ -36,23 +36,26 @@ ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTrans
     __ASSERT(_sub_sock >= 0, "Failed to create UDP socket: %d", errno);
 }
 
-bool ThingSetZephyrSocketSubscriptionTransport::listen()
-{
-    return zsock_bind(_sub_sock, (struct sockaddr *)&_udp_addr, sizeof(_udp_addr)) == 0;
-}
-
 ThingSetZephyrSocketSubscriptionTransport::~ThingSetZephyrSocketSubscriptionTransport()
 {
     zsock_close(_sub_sock);
     _sub_sock = -1;
 }
 
-void ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(DummyEndpoint &, uint8_t *, size_t)> callback)
+bool ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> callback)
 {
+    int ret = zsock_bind(_sub_sock, (struct sockaddr *)&_udp_addr, sizeof(_udp_addr));
+
+    if (ret) {
+        return false;
+    }
+
     _listener_callback = callback;
     _listener_tid =
         (int)k_thread_create(&subscribe_thread, subscribe_thread_stack, K_THREAD_STACK_SIZEOF(subscribe_thread_stack),
                              subscribe_thread_loop, this, NULL, NULL, SUBSCRIBE_THREAD_PRIORITY, 0, K_NO_WAIT);
+
+    return true;
 }
 
 uint8_t *ThingSetZephyrSocketSubscriptionTransport::get_buffer(void)
@@ -60,7 +63,7 @@ uint8_t *ThingSetZephyrSocketSubscriptionTransport::get_buffer(void)
     return _buffer;
 }
 
-std::function<void(DummyEndpoint &, uint8_t *, size_t)> ThingSetZephyrSocketSubscriptionTransport::get_callback(void)
+std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> ThingSetZephyrSocketSubscriptionTransport::get_callback(void)
 {
     return _listener_callback;
 }
@@ -101,7 +104,8 @@ void subscribe_thread_loop(void *p1, void *p2, void *p3)
 
             if (actual_length == (length - 3)) {
                 DummyEndpoint E;
-                transport->get_callback()(E, &buf[3], actual_length);
+                DefaultFixedDepthThingSetBinaryDecoder decoder(&buf[3], actual_length, 2);
+                transport->get_callback()(E, decoder);
             }
         }
     }
