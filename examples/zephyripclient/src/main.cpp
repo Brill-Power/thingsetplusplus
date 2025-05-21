@@ -98,27 +98,24 @@ int main()
 
     client.connect();
 
+    float voltage;
+    if (client.get(0x300, voltage)) {
+        printk("Voltage: %1.3f\n", (double)voltage);
+    }
+
     int result;
     if (client.exec(0x1000, &result, 2, 3)) {
         printk("Executed: %d\n", result);
     }
 
     listener.subscribe([&](auto sender, auto id) {
-        printk("Received report for %d from %s\n", id, sender);
-        // printk("Module %d; voltage: %1.3f\n", 0, moduleRecords[0].voltage);
-        // printk("size: %d\n", moduleRecords.size());
-
-        // for (size_t i = 0; i < moduleRecords.size(); i++) {
-        //     // printk("Module %d; voltage: %1.3f\n", i, moduleRecords[i].voltage);
-        //     printk("Module %d\n", i);
-        // }
+        printk("Received report for 0x%x from %x\n", id, sender);
+        for (size_t i = 0; i < moduleRecords.size(); i++) {
+            printk("Module %d; voltage: %1.3f\n", i, moduleRecords[i].voltage);
+        }
     });
 
     while (1) {
-        // float voltage;
-        // if (client.get(0x300, voltage)) {
-        //     printk("Voltage: %1.3f\n", (double)voltage);
-        // }
 
         k_sleep(K_SECONDS(1));
     }
