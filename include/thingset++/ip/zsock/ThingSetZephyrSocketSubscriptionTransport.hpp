@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "thingset++/ip/zsock/SocketEndpoint.hpp"
 #include "thingset++/ThingSetSubscriptionTransport.hpp"
 #include <cstdint>
 #include <cstdio>
@@ -12,20 +13,20 @@
 
 namespace ThingSet::Ip::Zsock {
 
-class ThingSetZephyrSocketSubscriptionTransport : public ThingSetSubscriptionTransport<in_addr>
+class ThingSetZephyrSocketSubscriptionTransport : public ThingSetSubscriptionTransport<SocketEndpoint>
 {
 private:
     sockaddr_in _udp_addr;
     int _sub_sock;
     k_tid_t _listener_tid;
     uint8_t _buffer[1024];
-    std::function<void(const in_addr &, ThingSetBinaryDecoder &)> _callback;
+    std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> _callback;
 
 public:
     ThingSetZephyrSocketSubscriptionTransport(net_if *iface, const char *ip);
     ~ThingSetZephyrSocketSubscriptionTransport();
 
-    bool subscribe(std::function<void(const in_addr &, ThingSetBinaryDecoder &)> callback) override;
+    bool subscribe(std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> callback) override;
 
 private:
     static void runSubscriber(void *p1, void *, void *);

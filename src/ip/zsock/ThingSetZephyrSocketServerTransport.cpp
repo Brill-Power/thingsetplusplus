@@ -12,6 +12,7 @@
 #include <zephyr/net/socket.h>
 #include <zephyr/posix/poll.h>
 #include <array>
+#include <iostream>
 
 #define ACCEPT_THREAD_STACK_SIZE  1024
 #define ACCEPT_THREAD_PRIORITY    3
@@ -76,7 +77,7 @@ ThingSetZephyrSocketServerTransport::~ThingSetZephyrSocketServerTransport()
     _req_sock = -1;
 }
 
-bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const in_addr &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     if (zsock_bind(_pub_sock, (struct sockaddr *)&_pub_addr, sizeof(_pub_addr))) {
         return false;
@@ -178,7 +179,7 @@ void ThingSetZephyrSocketServerTransport::runHandler()
             continue;
         }
 
-        sockaddr_in addr;
+        SocketEndpoint addr;
         socklen_t len = sizeof(addr);
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (sockfd_tcp[i].revents & ZSOCK_POLLIN) {
@@ -198,14 +199,15 @@ void ThingSetZephyrSocketServerTransport::runHandler()
                     zsock_getsockname(client_sock, (sockaddr *)&addr, &len);
                     zsock_inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
 
-                    printk("Closing connection from %s\n", ip);
+                    //printk("Closing connection from %s\n", ip);
+                    std::cout << "Closing connection from " << addr << std::endl;
 
                     zsock_close(client_sock);
                     sockfd_tcp[i].fd = -1;
                 }
                 else {
                     zsock_getsockname(client_sock, (sockaddr *)&addr, &len);
-                    auto tx_len = _callback(addr.sin_addr, rx_buf, rx_len, tx_buf, sizeof(tx_buf));
+                    auto tx_len = _callback(addr, rx_buf, rx_len, tx_buf, sizeof(tx_buf));
                     zsock_send(client_sock, tx_buf, tx_len, 0);
                 }
             }

@@ -48,7 +48,7 @@ ThingSetZephyrSocketSubscriptionTransport::~ThingSetZephyrSocketSubscriptionTran
     _sub_sock = -1;
 }
 
-bool ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(const in_addr &, ThingSetBinaryDecoder &)> callback)
+bool ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> callback)
 {
     int ret = zsock_bind(_sub_sock, (sockaddr *)&_udp_addr, sizeof(_udp_addr));
 
@@ -73,7 +73,7 @@ void ThingSetZephyrSocketSubscriptionTransport::runSubscriber(void *p1, void *, 
 void ThingSetZephyrSocketSubscriptionTransport::runSubscriber()
 {
     for (;;) {
-        sockaddr_in sourceAddress;
+        SocketEndpoint sourceAddress;
         socklen_t sourceAddressSize = sizeof(sourceAddress);
         size_t length = zsock_recvfrom(_sub_sock, _buffer, 1024, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
         printk("length: %d\n", length);
@@ -87,7 +87,7 @@ void ThingSetZephyrSocketSubscriptionTransport::runSubscriber()
 
             if (actual_length == (length - 3)) {
                 DefaultFixedDepthThingSetBinaryDecoder decoder(&_buffer[3], actual_length, 2);
-                _callback(sourceAddress.sin_addr, decoder);
+                _callback(sourceAddress, decoder);
             }
         }
     }

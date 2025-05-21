@@ -10,6 +10,7 @@
 #include <thingset++/ip/zsock/ThingSetZephyrSocketClientTransport.hpp>
 #include <thingset++/ip/zsock/ThingSetZephyrSocketSubscriptionTransport.hpp>
 #include <zephyr/net/net_if.h>
+#include <iostream>
 
 using namespace ThingSet;
 using namespace ThingSet::Ip::Zsock;
@@ -67,7 +68,7 @@ int main()
     }
 
     listener.subscribe([&](auto sender, auto id) {
-        printk("Received report for 0x%x from %x\n", id, sender);
+        std::cout << "Received report for 0x" << std::hex << id << " from " << sender << std::endl;
         for (size_t i = 0; i < moduleRecords.size(); i++) {
             printk("Module %d; voltage: %1.3f\n", i, moduleRecords[i].voltage);
         }
