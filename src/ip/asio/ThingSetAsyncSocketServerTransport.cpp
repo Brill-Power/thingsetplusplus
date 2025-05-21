@@ -83,7 +83,6 @@ bool ThingSetAsyncSocketServerTransport::listen(std::function<int(const asio::ip
     _publishSocket.bind(udp::endpoint(_broadcastAddress, 0));
     _publishSocket.set_option(udp::socket::reuse_address(true));
     _publishSocket.set_option(asio::socket_base::broadcast(true));
-    auto localEndpoint = _publishSocket.local_endpoint();
 
     co_spawn(_ioContext, listener(callback), detached);
 

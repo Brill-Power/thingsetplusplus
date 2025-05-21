@@ -41,10 +41,16 @@ ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> mo
 std::array<uint8_t, 1024> rxBuffer;
 std::array<uint8_t, 1024> txBuffer;
 
-int main()
+int main(int argc, char *argv[])
 {
     auto ioContext = asio::io_context(1);
-    auto endpoint = asio::ip::tcp::endpoint(asio::ip::make_address("192.0.2.1"), 9001);
+    asio::ip::tcp::endpoint endpoint;
+    if (argc > 1) {
+        endpoint = asio::ip::tcp::endpoint(asio::ip::make_address(argv[1]), 9001);
+    }
+    else {
+        endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), 9001);
+    }
     ThingSetAsyncSocketClientTransport clientTransport(ioContext, endpoint);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
     ThingSetAsyncSocketSubscriptionTransport subscriptionTransport(ioContext);
