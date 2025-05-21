@@ -42,7 +42,7 @@ void accept_thread_loop(void *p1, void *p2, void *p3);
 void handler_thread_loop(void *p1, void *p2, void *p3);
 
 ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip)
-    : _pub_sock(-1), _req_sock(-1), _accept_tid(-1), _handler_tid(-1)
+    : _pub_sock(-1), _req_sock(-1), _accept_tid(nullptr), _handler_tid(nullptr)
 {
     net_addr_pton(AF_INET, ip, &_pub_addr.sin_addr);
     _pub_addr.sin_family = AF_INET;
@@ -89,10 +89,10 @@ bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const DummySe
     }
 
     _handler_callback = callback;
-    _handler_tid = (int)k_thread_create(&handler_thread, handler_thread_stack, K_THREAD_STACK_SIZEOF(handler_thread_stack),
+    _handler_tid = k_thread_create(&handler_thread, handler_thread_stack, K_THREAD_STACK_SIZEOF(handler_thread_stack),
                                         handler_thread_loop, this, NULL, NULL, HANDLER_THREAD_PRIORITY, 0, K_NO_WAIT);
 
-    _accept_tid = (int)k_thread_create(&accept_thread, accept_thread_stack, K_THREAD_STACK_SIZEOF(accept_thread_stack),
+    _accept_tid = k_thread_create(&accept_thread, accept_thread_stack, K_THREAD_STACK_SIZEOF(accept_thread_stack),
                                        accept_thread_loop, this, NULL, NULL, ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
 
     return true;
@@ -149,7 +149,7 @@ void accept_thread_loop(void *p1, void *, void *) {
         sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
         char client_addr_str[INET_ADDRSTRLEN];
-        
+
         int client_sock = zsock_accept(server_sock, (sockaddr *)&client_addr, &client_addr_len);
         if (client_sock < 0) {
             printk("Accept failed: %d\n", errno);
@@ -195,7 +195,7 @@ void handler_thread_loop(void *p1, void *, void *)
 
                 if (rx_len < 0) {
                     printk("Receive error: %d\n", errno);
-                } 
+                }
                 else if (rx_len == 0) {
                     char ip[INET_ADDRSTRLEN];
                     struct sockaddr_in addr;

@@ -24,8 +24,8 @@ class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<Du
         struct sockaddr_in _req_addr;
         int _pub_sock;
         int _req_sock;
-        int _accept_tid;
-        int _handler_tid;
+        k_tid_t _accept_tid;
+        k_tid_t _handler_tid;
         std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _handler_callback;
 
     public:
@@ -38,7 +38,7 @@ class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<Du
         int pub_sock(void);
         int req_sock(void);
         std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback(void);
-        
+
 };
 
 } // namespace ThingSet::Ip::Zsock

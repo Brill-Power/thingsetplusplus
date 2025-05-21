@@ -19,7 +19,7 @@ class ThingSetZephyrSocketSubscriptionTransport : public ThingSetSubscriptionTra
 private:
     struct sockaddr_in _udp_addr;
     int _sub_sock;
-    int _listener_tid;
+    k_tid_t _listener_tid;
     uint8_t _buffer[1024];
     std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> _listener_callback;
 

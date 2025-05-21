@@ -60,7 +60,7 @@ bool ThingSetZephyrSocketSubscriptionTransport::subscribe(std::function<void(con
 
     _listener_callback = callback;
     _listener_tid =
-        (int)k_thread_create(&subscribe_thread, subscribe_thread_stack, K_THREAD_STACK_SIZEOF(subscribe_thread_stack),
+        k_thread_create(&subscribe_thread, subscribe_thread_stack, K_THREAD_STACK_SIZEOF(subscribe_thread_stack),
                              subscribe_thread_loop, this, NULL, NULL, SUBSCRIBE_THREAD_PRIORITY, 0, K_NO_WAIT);
 
     return true;
