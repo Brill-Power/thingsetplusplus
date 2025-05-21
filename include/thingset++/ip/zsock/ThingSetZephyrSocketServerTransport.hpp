@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "thingset++/ip/udp/ThingSetUdpServerTransport.hpp"
+#include "thingset++/ip/ThingSetIpServerTransport.hpp"
 #include <cstdint>
 #include <cstdio>
 #include <zephyr/kernel.h>
@@ -14,7 +14,6 @@
 
 namespace ThingSet::Ip::Zsock {
 
-using ThingSet::Ip::Udp::ThingSetIpServerTransport;
 struct DummyServerEndpoint {};
 
 class ThingSetZephyrSocketServerTransport : public ThingSetIpServerTransport<DummyServerEndpoint>
