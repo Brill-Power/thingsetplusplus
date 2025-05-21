@@ -99,7 +99,7 @@ int main()
     asio::steady_timer t(ioContext, asio::chrono::seconds(1));
     t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));
 
-    server.start();
+    server.listen();
     ioContext.run();
     return 0;
 }
