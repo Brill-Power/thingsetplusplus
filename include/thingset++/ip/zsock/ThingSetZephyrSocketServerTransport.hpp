@@ -14,10 +14,10 @@
 
 namespace ThingSet::Ip::Zsock {
 
-using ThingSet::Ip::Udp::ThingSetUdpServerTransport;
+using ThingSet::Ip::Udp::ThingSetIpServerTransport;
 struct DummyServerEndpoint {};
 
-class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<DummyServerEndpoint>
+class ThingSetZephyrSocketServerTransport : public ThingSetIpServerTransport<DummyServerEndpoint>
 {
     private:
         struct sockaddr_in _pub_addr;

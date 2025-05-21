@@ -10,11 +10,10 @@
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ip/asio/ThingSetAsyncSocketServerTransport.hpp>
-#include <thingset++/ip/udp/StreamingUdpThingSetBinaryEncoder.hpp>
 
 using namespace ThingSet;
+using namespace ThingSet::Ip;
 using namespace ThingSet::Ip::Async;
-using namespace ThingSet::Ip::Udp;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
