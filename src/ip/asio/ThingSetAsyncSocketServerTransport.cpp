@@ -10,6 +10,8 @@
 #include <asio/ip/udp.hpp>
 #include <asio/write.hpp>
 #include <thingset++/ip/asio/ThingSetAsyncSocketServerTransport.hpp>
+#include <thingset++/ip/asio/AsioInterfaceInfo.hpp>
+#include <iostream>
 
 #define SOCKET_TRANSPORT_MAX_CONNECTIONS 10
 
@@ -22,7 +24,20 @@ using asio::ip::udp;
 
 namespace ThingSet::Ip::Async {
 
-ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) : _ioContext(ioContext), _publishSocket(ioContext), _signals(_ioContext, SIGINT, SIGTERM)
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const asio::ip::address_v4 bindAddress, const asio::ip::address_v4 broadcastAddress) : _ioContext(ioContext), _publishSocket(ioContext), _bindAddress(bindAddress), _broadcastAddress(broadcastAddress), _signals(_ioContext, SIGINT, SIGTERM)
+{
+}
+
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const std::string &bindInterface) : ThingSetAsyncSocketServerTransport(ioContext)
+{
+    asio::ip::address_v4 address;
+    asio::ip::address_v4 broadcast;
+    AsioInterfaceInfo::get(bindInterface, address, broadcast);
+    _bindAddress = address;
+    _broadcastAddress = broadcast;
+}
+
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) : ThingSetAsyncSocketServerTransport(ioContext, asio::ip::address_v4::any(), asio::ip::address_v4::broadcast())
 {
 }
 
@@ -33,8 +48,8 @@ awaitable<void> ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket
     char response[1024];
     for (;;) {
         std::size_t n = co_await socket.async_read_some(asio::buffer(request), use_awaitable);
-        auto remoteEndpoint = socket.remote_endpoint();
-        auto responseLength = callback(remoteEndpoint, (uint8_t *)request, n, (uint8_t *)response, sizeof(response));
+        tcp::endpoint remoteEndpoint = socket.remote_endpoint();
+        int responseLength = callback(remoteEndpoint, (uint8_t *)request, n, (uint8_t *)response, sizeof(response));
         co_await async_write(socket, asio::buffer(response, responseLength), use_awaitable);
     }
 }
@@ -49,7 +64,7 @@ ThingSetAsyncSocketServerTransport::~ThingSetAsyncSocketServerTransport()
 awaitable<void> ThingSetAsyncSocketServerTransport::listener(std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     auto executor = co_await asio::this_coro::executor;
-    tcp::acceptor acceptor(executor, { tcp::v4(), 9001 });
+    tcp::acceptor acceptor(executor, { _bindAddress, 9001 });
         for (;;) {
         tcp::socket socket = co_await acceptor.async_accept(use_awaitable);
         co_spawn(executor, handle(std::move(socket), callback), detached);
@@ -65,8 +80,10 @@ bool ThingSetAsyncSocketServerTransport::listen(std::function<int(const asio::ip
     if (error) {
         throw std::system_error(error);
     }
+    _publishSocket.bind(udp::endpoint(_broadcastAddress, 0));
     _publishSocket.set_option(udp::socket::reuse_address(true));
     _publishSocket.set_option(asio::socket_base::broadcast(true));
+    auto localEndpoint = _publishSocket.local_endpoint();
 
     co_spawn(_ioContext, listener(callback), detached);
 
@@ -76,7 +93,7 @@ bool ThingSetAsyncSocketServerTransport::listen(std::function<int(const asio::ip
 bool ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size_t len)
 {
     if (_publishSocket.is_open()) {
-        udp::endpoint endpoint(asio::ip::address_v4::broadcast(), 9002);
+        udp::endpoint endpoint(_broadcastAddress, 9002);
         size_t sent = _publishSocket.send_to(asio::buffer(buffer, len), endpoint);
         return sent == len;
     }

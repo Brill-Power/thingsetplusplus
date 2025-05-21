@@ -55,7 +55,16 @@ void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, Thin
     t->async_wait(std::bind(publishCallback, asio::placeholders::error, t, server));
 }
 
-int main()
+ThingSetAsyncSocketServerTransport getTransport(asio::io_context &ioContext, int argc, char  *argv[])
+{
+    if (argc > 1) {
+        return ThingSetAsyncSocketServerTransport(ioContext, argv[1]);
+    } else {
+        return ThingSetAsyncSocketServerTransport(ioContext);
+    }
+}
+
+int main(int argc, char *argv[])
 {
     moduleRecords = { (ModuleRecord){
                           .voltage = 24.0f,
@@ -92,7 +101,8 @@ int main()
                       } };
 
     asio::io_context ioContext(1);
-    ThingSetAsyncSocketServerTransport transport(ioContext);
+
+    ThingSetAsyncSocketServerTransport transport = getTransport(ioContext, argc, argv);
     auto server = ThingSetServerBuilder::build(transport);
 
     asio::steady_timer t(ioContext, asio::chrono::seconds(1));

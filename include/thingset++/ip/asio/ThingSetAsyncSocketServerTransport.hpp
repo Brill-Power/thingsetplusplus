@@ -18,10 +18,14 @@ class ThingSetAsyncSocketServerTransport : public ThingSetIpServerTransport<asio
 private:
     asio::io_context &_ioContext;
     asio::ip::udp::socket _publishSocket;
+    asio::ip::address_v4 _bindAddress;
+    asio::ip::address_v4 _broadcastAddress;
     asio::signal_set _signals;
 
 public:
     ThingSetAsyncSocketServerTransport(asio::io_context &ioContext);
+    ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const asio::ip::address_v4 bindAddress, const asio::ip::address_v4 broadcastAddress);
+    ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const std::string &bindInterface);
     ~ThingSetAsyncSocketServerTransport();
 
     bool listen(std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
