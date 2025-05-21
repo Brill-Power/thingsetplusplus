@@ -5,9 +5,7 @@
  */
 #pragma once
 
-#include "ThingsetEncoder.hpp"
 #include "internal/bind_to_tuple.hpp"
-#include "zcbor_encode.h"
 #include <array>
 #include <list>
 #include <map>
@@ -15,17 +13,20 @@
 #include <string_view>
 #include <tuple>
 
+// todo factor all of this into a generic thingsetencoder file which can be shared with binary encoder
+
 #define TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
 #define TEXT_ENCODER_DEFAULT_MAX_DEPTH                 8 // todo delete this if encoder depth used in thingsetencoder
 
 namespace ThingSet {
 
 /// @brief Text protocol encoder for ThingSet.
-class ThingSetTextEncoder : ThingSetEncoder
+class ThingSetTextEncoder
 {
-protected:
-    virtual zcbor_state_t *getState() = 0;
-    virtual bool getIsForwardOnly() const;
+    // todo may not be needed
+    // protected:
+    //     virtual zcbor_state_t *getState() = 0;
+    //     virtual bool getIsForwardOnly() const;
 
 public:
     virtual size_t getEncodedLength() const = 0;
@@ -214,25 +215,33 @@ template <int depth = TEXT_ENCODER_DEFAULT_MAX_DEPTH>
 class FixedDepthThingSetTextEncoder : public virtual ThingSetTextEncoder
 {
 private:
-    // The start of the buffer
-    const uint8_t *_buffer;
-    zcbor_state_t _state[depth];
+    /**
+     * Pointer to the response buffer (provided by process function)
+     */
+    uint8_t *_rsp;
 
-protected:
-    zcbor_state_t *getState() override
-    {
-        return _state;
-    }
+    /**
+     * Size of response buffer (i.e. maximum length)
+     */
+    size_t _rsp_size;
+
+    /**
+     * Current position inside the response (equivalent to length of the response at end of
+     * processing)
+     */
+    size_t _rsp_pos;
 
 public:
-    FixedDepthThingSetTextEncoder(uint8_t *buffer, size_t size) : _buffer(buffer)
+    FixedDepthThingSetTextEncoder(uint8_t *rsp, size_t rsp_size)
     {
-        zcbor_new_encode_state(_state, depth, buffer, size, 1);
+        _rsp = rsp;
+        _rsp_size = rsp_size;
+        _rsp_pos = 0;
     }
 
     size_t getEncodedLength() const override
     {
-        return _state->payload - _buffer;
+        return _rsp_size - _rsp_pos;
     }
 };
 
@@ -246,126 +255,3 @@ public:
 };
 
 }; // namespace ThingSet
-
-/* todo move this---------------------------------------------------------------------------*/
-
-/**
- * ThingSet context.
- *
- * Stores and handles all data objects exposed to different communication interfaces.
- */
-struct thingset_context
-{
-    /**
-     * Array of objects database provided during initialization
-     */
-    struct thingset_data_object *data_objects;
-
-#ifdef CONFIG_THINGSET_OBJECT_LOOKUP_MAP
-    /**
-     * Array of linked lists: map for object ID lookup
-     */
-    sys_slist_t data_objects_lookup[CONFIG_THINGSET_OBJECT_LOOKUP_BUCKETS];
-#endif
-
-    /**
-     * Number of objects in the data_objects array
-     */
-    size_t num_objects;
-
-    /**
-     * Semaphore to lock this context and avoid race conditions if the context may be used by
-     * multiple threads in parallel.
-     */
-    struct k_sem lock;
-
-    /**
-     * Pointer to the incoming message buffer (request or desire, provided by process function)
-     */
-    const uint8_t *msg;
-
-    /**
-     * Length of the incoming message
-     */
-    size_t msg_len;
-
-    /**
-     * Position in the message currently being parsed
-     */
-    size_t msg_pos;
-
-    /**
-     * Pointer to the start of the payload in the message buffer
-     */
-    const uint8_t *msg_payload;
-
-    /**
-     * Pointer to the response buffer (provided by process function)
-     */
-    uint8_t *rsp;
-
-    /**
-     * Size of response buffer (i.e. maximum length)
-     */
-    size_t rsp_size;
-
-    /**
-     * Current position inside the response (equivalent to length of the response at end of
-     * processing)
-     */
-    size_t rsp_pos;
-
-    /**
-     * Function pointers to mode-specific implementation (text or binary)
-     */
-    struct thingset_api *api;
-
-    /**
-     * State information for data processing, either for text mode or binary mode depending on the
-     * assigned api.
-     */
-    union {
-        /* Text mode */
-        struct
-        {
-            /** JSON tokens in msg_payload parsed by JSMN */
-            jsmntok_t tokens[CONFIG_THINGSET_NUM_JSON_TOKENS];
-
-            /** Number of JSON tokens parsed by JSMN */
-            size_t tok_count;
-
-            /** Current position of the parsing process */
-            size_t tok_pos;
-        };
-        /* Binary mode */
-        struct
-        {
-            /** CBOR encoder states for binary mode */
-            zcbor_state_t encoder[CONFIG_THINGSET_BINARY_MAX_DEPTH];
-
-            /** CBOR decoder states for binary mode */
-            zcbor_state_t decoder[CONFIG_THINGSET_BINARY_MAX_DEPTH];
-        };
-    };
-
-    /**
-     * Stores current authentication status (authentication as "normal" user as default)
-     */
-    uint8_t auth_flags;
-
-    /**
-     * Stores current authentication status (authentication as "normal" user as default)
-     */
-    uint8_t update_subsets;
-
-    /**
-     * Callback to be called from patch function if a value belonging to update_subsets
-     * was changed
-     */
-    void (*update_cb)(void);
-
-    /**
-     * Endpoint used for the current message
-     */
-    struct thingset_endpoint endpoint;
-};
