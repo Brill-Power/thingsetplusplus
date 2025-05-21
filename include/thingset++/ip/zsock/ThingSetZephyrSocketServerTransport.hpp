@@ -26,18 +26,18 @@ class ThingSetZephyrSocketServerTransport : public ThingSetUdpServerTransport<Du
         int _req_sock;
         int _accept_tid;
         int _handler_tid;
-        std::function<int(DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _handler_callback;
+        std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _handler_callback;
 
     public:
         ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip);
         ~ThingSetZephyrSocketServerTransport();
 
-        bool start(std::function<int(DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+        bool listen(std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
         bool publish(uint8_t *buffer, size_t len) override;
 
         int pub_sock(void);
         int req_sock(void);
-        std::function<int(DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback(void);
+        std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback(void);
         
 };
 
