@@ -12,26 +12,24 @@
 
 namespace ThingSet::Ip::Zsock {
 
-struct DummyEndpoint {};
-
-class ThingSetZephyrSocketSubscriptionTransport : public ThingSetSubscriptionTransport<DummyEndpoint>
+class ThingSetZephyrSocketSubscriptionTransport : public ThingSetSubscriptionTransport<in_addr>
 {
 private:
-    struct sockaddr_in _udp_addr;
+    sockaddr_in _udp_addr;
     int _sub_sock;
     k_tid_t _listener_tid;
     uint8_t _buffer[1024];
-    std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> _listener_callback;
+    std::function<void(const in_addr &, ThingSetBinaryDecoder &)> _callback;
 
 public:
-    ThingSetZephyrSocketSubscriptionTransport(struct net_if *iface, const char *ip);
+    ThingSetZephyrSocketSubscriptionTransport(net_if *iface, const char *ip);
     ~ThingSetZephyrSocketSubscriptionTransport();
 
-    bool subscribe(std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> callback) override;
+    bool subscribe(std::function<void(const in_addr &, ThingSetBinaryDecoder &)> callback) override;
 
-    uint8_t *get_buffer();
-    std::function<void(const DummyEndpoint &, ThingSetBinaryDecoder &)> get_callback();
-    int get_sub_sock();
+private:
+    static void runSubscriber(void *p1, void *, void *);
+    void runSubscriber();
 };
 
 } // namespace ThingSet::Ip::Zsock

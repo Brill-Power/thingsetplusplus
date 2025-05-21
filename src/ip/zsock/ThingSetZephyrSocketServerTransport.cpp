@@ -38,7 +38,7 @@ static std::array<PollDescriptor, MAX_CLIENTS> sockfd_tcp;
 
 namespace ThingSet::Ip::Zsock {
 
-ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip)
+ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(net_if *iface, const char *ip)
     : _pub_sock(-1), _req_sock(-1), _accept_tid(nullptr), _handler_tid(nullptr)
 {
     net_addr_pton(AF_INET, ip, &_pub_addr.sin_addr);
@@ -59,10 +59,10 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
     _req_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     __ASSERT(_req_sock >= 0, "Failed to create TCP socket: %d", errno);
 
-    struct net_if_addr *addr = net_if_ipv4_addr_add(iface, &_req_addr.sin_addr, NET_ADDR_MANUAL, 0);
+    net_if_addr *addr = net_if_ipv4_addr_add(iface, &_req_addr.sin_addr, NET_ADDR_MANUAL, 0);
     __ASSERT(addr != NULL, "Failed to add IP address to interface: %d", errno);
 
-    struct sockaddr_in subnet;
+    sockaddr_in subnet;
     // get from config?
     net_addr_pton(AF_INET, "255.255.255.0", &subnet.sin_addr);
     net_if_ipv4_set_netmask_by_addr(iface, &_req_addr.sin_addr, &subnet.sin_addr);
@@ -76,7 +76,7 @@ ThingSetZephyrSocketServerTransport::~ThingSetZephyrSocketServerTransport()
     _req_sock = -1;
 }
 
-bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const in_addr &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     if (zsock_bind(_pub_sock, (struct sockaddr *)&_pub_addr, sizeof(_pub_addr))) {
         return false;
@@ -98,7 +98,7 @@ bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const DummySe
 
 bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
 {
-    struct sockaddr_in addr;
+    sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
 
     if (zsock_getsockname(_pub_sock, (struct sockaddr *)&addr, &addr_len) != 0) {
@@ -110,7 +110,7 @@ bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
         return false;
     }
 
-    struct sockaddr_in broadcast_addr = {
+    sockaddr_in broadcast_addr = {
         .sin_family = AF_INET,
         .sin_port = htons(9002),
     };
@@ -178,6 +178,8 @@ void ThingSetZephyrSocketServerTransport::runHandler()
             continue;
         }
 
+        sockaddr_in addr;
+        socklen_t len = sizeof(addr);
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (sockfd_tcp[i].revents & ZSOCK_POLLIN) {
                 int client_sock = sockfd_tcp[i].fd;
@@ -192,10 +194,8 @@ void ThingSetZephyrSocketServerTransport::runHandler()
                 }
                 else if (rx_len == 0) {
                     char ip[INET_ADDRSTRLEN];
-                    struct sockaddr_in addr;
-                    socklen_t len = sizeof(addr);
 
-                    zsock_getsockname(client_sock, (struct sockaddr *)&addr, &len);
+                    zsock_getsockname(client_sock, (sockaddr *)&addr, &len);
                     zsock_inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
 
                     printk("Closing connection from %s\n", ip);
@@ -204,8 +204,8 @@ void ThingSetZephyrSocketServerTransport::runHandler()
                     sockfd_tcp[i].fd = -1;
                 }
                 else {
-                    DummyServerEndpoint E;
-                    auto tx_len = _callback(E, rx_buf, rx_len, tx_buf, sizeof(tx_buf));
+                    zsock_getsockname(client_sock, (sockaddr *)&addr, &len);
+                    auto tx_len = _callback(addr.sin_addr, rx_buf, rx_len, tx_buf, sizeof(tx_buf));
                     zsock_send(client_sock, tx_buf, tx_len, 0);
                 }
             }
