@@ -13,13 +13,13 @@ using namespace ThingSet::Can;
 CanFrame::CanFrame() : SocketCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::SocketCanFrame()
 {}
 
-CanFrame::CanFrame(CanID &id) : SocketCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::SocketCanFrame(id)
+CanFrame::CanFrame(const CanID &id) : SocketCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>::SocketCanFrame(id)
 {}
 
 CanFdFrame::CanFdFrame() : SocketCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::SocketCanFrame()
 {}
 
-CanFdFrame::CanFdFrame(CanID &id) : SocketCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::SocketCanFrame(id)
+CanFdFrame::CanFdFrame(const CanID &id) : SocketCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN>::SocketCanFrame(id)
 {}
 
 } // namespace ThingSet::Can::SocketCan

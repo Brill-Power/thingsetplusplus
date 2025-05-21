@@ -21,7 +21,7 @@ protected:
 
     virtual ThingSetCanInterface &getInterface() = 0;
 
-    virtual bool doPublish(Can::CanID &id, uint8_t *buffer, size_t length) = 0;
+    virtual bool doPublish(const Can::CanID &id, uint8_t *buffer, size_t length) = 0;
 
 public:
     uint8_t getNodeAddress();

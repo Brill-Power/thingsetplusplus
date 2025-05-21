@@ -35,7 +35,7 @@ public:
     }
 
     virtual CanID getId() const = 0;
-    virtual Self &setId(CanID &id) = 0;
+    virtual Self &setId(const CanID &id) = 0;
 
     uint8_t *getData()
     {

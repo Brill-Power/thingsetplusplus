@@ -18,13 +18,13 @@ protected:
     SocketCanFrame() : AbstractCanFrame<Self, T, Size>::AbstractCanFrame()
     {}
 
-    SocketCanFrame(CanID &id) : SocketCanFrame()
+    SocketCanFrame(const CanID &id) : SocketCanFrame()
     {
         setId(id);
     }
 
     template <size_t BufferSize> requires (BufferSize <= Size)
-    SocketCanFrame(CanID &id, std::array<uint8_t, BufferSize> buffer) : SocketCanFrame(id)
+    SocketCanFrame(const CanID &id, std::array<uint8_t, BufferSize> buffer) : SocketCanFrame(id)
     {
         memcpy(this->_frame.data, buffer.data(), buffer.size());
         setLength(buffer.size());
@@ -36,7 +36,7 @@ public:
         return CanID::create(this->_frame.can_id);
     }
 
-    Self &setId(CanID &id) override
+    Self &setId(const CanID &id) override
     {
         this->_frame.can_id = id;
         if (this->_frame.can_id >= 0x800) {
@@ -61,9 +61,9 @@ class CanFrame : public SocketCanFrame<CanFrame, can_frame, CAN_MAX_DLEN>
 {
 public:
     CanFrame();
-    CanFrame(CanID &id);
+    CanFrame(const CanID &id);
     template <size_t BufferSize> requires (BufferSize <= CAN_MAX_DLEN)
-    CanFrame(CanID &id, std::array<uint8_t, BufferSize> buffer) : SocketCanFrame(id, buffer)
+    CanFrame(const CanID &id, std::array<uint8_t, BufferSize> buffer) : SocketCanFrame(id, buffer)
     {}
 };
 
@@ -71,9 +71,9 @@ class CanFdFrame : public SocketCanFrame<CanFdFrame, canfd_frame, CANFD_MAX_DLEN
 {
 public:
     CanFdFrame();
-    CanFdFrame(CanID &id);
+    CanFdFrame(const CanID &id);
     template <size_t BufferSize> requires (BufferSize <= CANFD_MAX_DLEN)
-    CanFdFrame(CanID &id, std::array<uint8_t, BufferSize> buffer) : SocketCanFrame(id, buffer)
+    CanFdFrame(const CanID &id, std::array<uint8_t, BufferSize> buffer) : SocketCanFrame(id, buffer)
     {}
 };
 

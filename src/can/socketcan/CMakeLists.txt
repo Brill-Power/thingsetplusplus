@@ -6,6 +6,5 @@ if(ENABLE_SOCKETCAN)
         ThingSetSocketCanInterface.cpp
         ThingSetSocketCanClientTransport.cpp
         ThingSetSocketCanServerTransport.cpp
-        ThingSetSocketCanSubscriptionTransport.cpp
-        StreamingCanThingSetBinaryDecoder.cpp)
+        ThingSetSocketCanSubscriptionTransport.cpp)
 endif()
