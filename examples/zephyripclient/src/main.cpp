@@ -1,0 +1,131 @@
+/*******************************************************************************
+ * File                      : main.cpp
+ *
+ * Description               :
+ *
+ * Project                   :
+ *
+ * Author                    : Adam Mitchell
+ *
+ * Created on                : 25/04/2025
+ *
+ * SPDX-License-Identifier   : Proprietary
+ *
+ * Copyright (c) 2025 Brill Power. All rights reserved.
+ ******************************************************************************/
+
+/*******************************************************************************
+INCLUDES
+*******************************************************************************/
+
+#include <thingset++/ThingSet.hpp>
+#include <thingset++/ThingSetClient.hpp>
+#include <thingset++/ThingSetListener.hpp>
+#include <thingset++/ip/zsock/ThingSetZephyrSocketClientTransport.hpp>
+#include <thingset++/ip/zsock/ThingSetZephyrSocketSubscriptionTransport.hpp>
+#include <zephyr/net/net_if.h>
+
+using namespace ThingSet;
+using namespace ThingSet::Ip::Zsock;
+
+/*******************************************************************************
+DEFINITIONS
+*******************************************************************************/
+
+/*******************************************************************************
+TYPES
+*******************************************************************************/
+
+/*******************************************************************************
+GLOBAL VARIABLES
+*******************************************************************************/
+
+/*******************************************************************************
+MODULE VARIABLES
+*******************************************************************************/
+
+/*******************************************************************************
+INTERNAL FUNCTION DECLARATIONS
+*******************************************************************************/
+
+/*******************************************************************************
+GLOBAL FUNCTION DEFINITIONS
+*******************************************************************************/
+
+/*******************************************************************************
+INTERNAL FUNCTION DEFINITIONS
+*******************************************************************************/
+
+ThingSetGroup<0x600, 0, "Modules"> modules;
+ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
+
+struct SupercellRecord
+{
+    ThingSetReadWriteProperty<0x611, 0x610, "soc", float> soc;
+    ThingSetReadWriteProperty<0x612, 0x610, "soh", float> soh;
+};
+
+struct ModuleRecord
+{
+    ThingSetReadWriteProperty<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadWriteProperty<0x602, 0x600, "current", float> current;
+    ThingSetReadWriteProperty<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadWriteProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadWriteProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>>
+        supercells;
+};
+
+ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
+
+ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
+
+std::array<uint8_t, 1024> rxBuffer;
+std::array<uint8_t, 1024> txBuffer;
+
+int main()
+{
+    struct net_if *iface = net_if_get_default();
+
+    char name_buf[16];
+    net_if_get_name(iface, name_buf, 16);
+
+    printk("Using iface: %s\n", name_buf);
+
+    ThingSetZephyrSocketClientTransport clientTransport(iface, "192.0.2.2");
+    ThingSetClient client(clientTransport, rxBuffer, txBuffer);
+    ThingSetZephyrSocketSubscriptionTransport subscriptionTransport(iface, "192.0.2.1");
+    auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
+
+    client.connect();
+
+    int result;
+    if (client.exec(0x1000, &result, 2, 3)) {
+        printk("Executed: %d\n", result);
+    }
+
+    listener.subscribe([&](auto sender, auto id) {
+        printk("Received report for %d from %s\n", id, sender);
+        // printk("Module %d; voltage: %1.3f\n", 0, moduleRecords[0].voltage);
+        // printk("size: %d\n", moduleRecords.size());
+
+        // for (size_t i = 0; i < moduleRecords.size(); i++) {
+        //     // printk("Module %d; voltage: %1.3f\n", i, moduleRecords[i].voltage);
+        //     printk("Module %d\n", i);
+        // }
+    });
+
+    while (1) {
+        // float voltage;
+        // if (client.get(0x300, voltage)) {
+        //     printk("Voltage: %1.3f\n", (double)voltage);
+        // }
+
+        k_sleep(K_SECONDS(1));
+    }
+
+    return 0;
+}
+
+/*******************************************************************************
+ * Copyright (c) 2025 Brill Power. All rights reserved.
+ ******************************************************************************/
