@@ -81,11 +81,8 @@ int ThingSetZephyrSocketSubscriptionTransport::get_sub_sock(void)
     return _sub_sock;
 }
 
-void subscribe_thread_loop(void *p1, void *p2, void *p3)
+void subscribe_thread_loop(void *p1, void *, void *)
 {
-    ARG_UNUSED(p2);
-    ARG_UNUSED(p3);
-
     ThingSetZephyrSocketSubscriptionTransport *transport = static_cast<ThingSetZephyrSocketSubscriptionTransport *>(p1);
 
     for (;;) {

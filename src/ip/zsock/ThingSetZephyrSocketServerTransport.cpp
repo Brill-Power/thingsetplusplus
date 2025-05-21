@@ -136,10 +136,7 @@ std::function<int(DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> 
     return _handler_callback;
 }
 
-void accept_thread_loop(void *p1, void *p2, void *p3) {
-    ARG_UNUSED(p2);
-    ARG_UNUSED(p3);
-
+void accept_thread_loop(void *p1, void *, void *) {
     ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
     int server_sock = transport->req_sock();
 
@@ -173,11 +170,8 @@ void accept_thread_loop(void *p1, void *p2, void *p3) {
     }
 }
 
-void handler_thread_loop(void *p1, void *p2, void *p3)
+void handler_thread_loop(void *p1, void *, void *)
 {
-    ARG_UNUSED(p2);
-    ARG_UNUSED(p3);
-
     ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
 
     while (true) {
