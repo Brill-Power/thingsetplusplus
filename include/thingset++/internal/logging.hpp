@@ -3,14 +3,18 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+#pragma once
+
 #ifdef __ZEPHYR__
 #include <zephyr/logging/log.h>
-#ifndef __THINGSET_PLUS_PLUS_LOGGING_REGISTERED
-#define __THINGSET_PLUS_PLUS_LOGGING_REGISTERED
-LOG_MODULE_REGISTER(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
-#else
 LOG_MODULE_DECLARE(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
-#endif // __THINGSET_PLUS_PLUS_LOGGING_REGISTERED
+
+template <typename ... T>
+void LOG_SMART(T... args)
+{
+    // no-op for now
+}
+
 #elif defined(DEBUG_LOGGING)
 #include <iostream>
 

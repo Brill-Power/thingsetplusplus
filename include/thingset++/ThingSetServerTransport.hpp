@@ -24,7 +24,7 @@ public:
     /// is received.
     /// @param callback The callback to be invoked when a request is received.
     /// @return True.
-    virtual bool listen(std::function<int(Identifier &, uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
+    virtual bool listen(std::function<int(const Identifier &, uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
 
     virtual Encoder getPublishingEncoder() = 0;
 };

@@ -10,17 +10,17 @@
 
 namespace ThingSet::Can::SocketCan {
 
-class ThingSetSocketCanSubscriptionTransport : public ThingSetCanSubscriptionTransport
+class ThingSetSocketCanSubscriptionTransport : public ThingSetCanSubscriptionTransport<CanFdFrame>
 {
 private:
-    class SubscriptionListener : public RawCanSocketListener
+    class SocketCanSubscriptionListener : public SubscriptionListener, public RawCanSocketListener
     {
     public:
         bool run(const std::string &deviceName, std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback);
     };
 
     ThingSetSocketCanInterface &_canInterface;
-    SubscriptionListener _listener;
+    SocketCanSubscriptionListener _listener;
 
 public:
     ThingSetSocketCanSubscriptionTransport(ThingSetSocketCanInterface &canInterface);

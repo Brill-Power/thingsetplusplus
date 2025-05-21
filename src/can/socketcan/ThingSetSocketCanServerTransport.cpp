@@ -22,7 +22,7 @@ ThingSetCanInterface &ThingSetSocketCanServerTransport::getInterface()
     return _canInterface;
 }
 
-bool ThingSetSocketCanServerTransport::doPublish(Can::CanID &id, uint8_t *buffer, size_t length)
+bool ThingSetSocketCanServerTransport::doPublish(const Can::CanID &id, uint8_t *buffer, size_t length)
 {
     CanFdFrame frame(id);
     memcpy(frame.getData(), buffer, length);
@@ -30,7 +30,7 @@ bool ThingSetSocketCanServerTransport::doPublish(Can::CanID &id, uint8_t *buffer
     return _publishSocket.write(frame) > 0;
 }
 
-bool ThingSetSocketCanServerTransport::listen(std::function<int(CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetSocketCanServerTransport::listen(std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     _listener.listen(CanID()
                          .setMessageType(MessageType::requestResponse)
