@@ -6,13 +6,12 @@
 
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
-#include <thingset++/ip/udp/StreamingUdpThingSetBinaryEncoder.hpp>
+#include <thingset++/ip/StreamingUdpThingSetBinaryEncoder.hpp>
 #include <thingset++/ip/zsock/ThingSetZephyrSocketServerTransport.hpp>
 #include <thingset++/ip/zsock/ThingSetZephyrSocketSubscriptionTransport.hpp>
 #include <zephyr/net/net_if.h>
 
 using namespace ThingSet;
-using namespace ThingSet::Ip::Udp;
 using namespace ThingSet::Ip::Zsock;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;

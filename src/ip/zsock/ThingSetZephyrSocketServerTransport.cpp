@@ -11,6 +11,7 @@
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
 #include <zephyr/posix/poll.h>
+#include <array>
 
 #define ACCEPT_THREAD_STACK_SIZE  1024
 #define ACCEPT_THREAD_PRIORITY    3
@@ -24,22 +25,18 @@ static struct k_thread accept_thread;
 K_THREAD_STACK_DEFINE(handler_thread_stack, HANDLER_THREAD_STACK_SIZE);
 static struct k_thread handler_thread;
 
-static struct pollfd sockfd_tcp[MAX_CLIENTS] = {
-    [0] = { .fd = -1, .events = ZSOCK_POLLIN, },
-    [1] = { .fd = -1, .events = ZSOCK_POLLIN, },
-    [2] = { .fd = -1, .events = ZSOCK_POLLIN, },
-    [3] = { .fd = -1, .events = ZSOCK_POLLIN, },
-    [4] = { .fd = -1, .events = ZSOCK_POLLIN, },
-    [5] = { .fd = -1, .events = ZSOCK_POLLIN, },
-    [6] = { .fd = -1, .events = ZSOCK_POLLIN, },
-    [7] = { .fd = -1, .events = ZSOCK_POLLIN, },
+struct PollDescriptor : public pollfd {
+public:
+    PollDescriptor()
+    {
+        fd = -1;
+        events = ZSOCK_POLLIN;
+    }
 };
 
+static std::array<PollDescriptor, MAX_CLIENTS> sockfd_tcp;
+
 namespace ThingSet::Ip::Zsock {
-
-void accept_thread_loop(void *p1, void *p2, void *p3);
-
-void handler_thread_loop(void *p1, void *p2, void *p3);
 
 ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip)
     : _pub_sock(-1), _req_sock(-1), _accept_tid(nullptr), _handler_tid(nullptr)
@@ -66,6 +63,7 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(struct 
     __ASSERT(addr != NULL, "Failed to add IP address to interface: %d", errno);
 
     struct sockaddr_in subnet;
+    // get from config?
     net_addr_pton(AF_INET, "255.255.255.0", &subnet.sin_addr);
     net_if_ipv4_set_netmask_by_addr(iface, &_req_addr.sin_addr, &subnet.sin_addr);
 }
@@ -88,12 +86,12 @@ bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const DummySe
         return false;
     }
 
-    _handler_callback = callback;
+    _callback = callback;
     _handler_tid = k_thread_create(&handler_thread, handler_thread_stack, K_THREAD_STACK_SIZEOF(handler_thread_stack),
-                                        handler_thread_loop, this, NULL, NULL, HANDLER_THREAD_PRIORITY, 0, K_NO_WAIT);
+                                   runHandler, this, NULL, NULL, HANDLER_THREAD_PRIORITY, 0, K_NO_WAIT);
 
     _accept_tid = k_thread_create(&accept_thread, accept_thread_stack, K_THREAD_STACK_SIZEOF(accept_thread_stack),
-                                       accept_thread_loop, this, NULL, NULL, ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
+                                  runAcceptor, this, NULL, NULL, ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
 
     return true;
 }
@@ -112,35 +110,27 @@ bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
         return false;
     }
 
-    struct sockaddr_in _broadcast_addr = {
+    struct sockaddr_in broadcast_addr = {
         .sin_family = AF_INET,
         .sin_port = htons(9002),
     };
 
-    net_addr_pton(AF_INET, "192.0.2.255", &_broadcast_addr.sin_addr);
+    // TODO: calculate or get from config
+    net_addr_pton(AF_INET, "192.0.2.255", &broadcast_addr.sin_addr);
 
-    ssize_t sent = zsock_sendto(_pub_sock, buffer, len, 0, (struct sockaddr *)&_broadcast_addr, sizeof(_broadcast_addr));
+    ssize_t sent = zsock_sendto(_pub_sock, buffer, len, 0, (struct sockaddr *)&broadcast_addr, sizeof(broadcast_addr));
     return sent == (ssize_t)len;
 }
 
-int ThingSetZephyrSocketServerTransport::pub_sock(void) {
-    return _pub_sock;
-}
-
-int ThingSetZephyrSocketServerTransport::req_sock(void) {
-    return _req_sock;
-}
-
-std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> ThingSetZephyrSocketServerTransport::callback(void)
+void ThingSetZephyrSocketServerTransport::runAcceptor(void *p1, void *, void *)
 {
-    return _handler_callback;
+    ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
+    transport->runAcceptor();
 }
 
-void accept_thread_loop(void *p1, void *, void *) {
-    ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
-    int server_sock = transport->req_sock();
-
-    if (zsock_listen(server_sock, MAX_CLIENTS) != 0) {
+void ThingSetZephyrSocketServerTransport::runAcceptor()
+{
+    if (zsock_listen(_req_sock, MAX_CLIENTS) != 0) {
         printk("Failed to begin listening: %d\n", errno);
         return;
     }
@@ -150,7 +140,7 @@ void accept_thread_loop(void *p1, void *, void *) {
         socklen_t client_addr_len = sizeof(client_addr);
         char client_addr_str[INET_ADDRSTRLEN];
 
-        int client_sock = zsock_accept(server_sock, (sockaddr *)&client_addr, &client_addr_len);
+        int client_sock = zsock_accept(_req_sock, (sockaddr *)&client_addr, &client_addr_len);
         if (client_sock < 0) {
             printk("Accept failed: %d\n", errno);
             continue;
@@ -170,12 +160,16 @@ void accept_thread_loop(void *p1, void *, void *) {
     }
 }
 
-void handler_thread_loop(void *p1, void *, void *)
+void ThingSetZephyrSocketServerTransport::runHandler(void *p1, void *, void *)
 {
     ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
+    transport->runHandler();
+}
 
+void ThingSetZephyrSocketServerTransport::runHandler()
+{
     while (true) {
-        int ret = zsock_poll(sockfd_tcp, MAX_CLIENTS, 10);
+        int ret = zsock_poll(sockfd_tcp.data(), sockfd_tcp.size(), 10);
 
         if (ret < 0) {
             printk("Polling error: %d\n", errno);
@@ -211,7 +205,7 @@ void handler_thread_loop(void *p1, void *, void *)
                 }
                 else {
                     DummyServerEndpoint E;
-                    auto tx_len = transport->callback()(E, rx_buf, rx_len, tx_buf, sizeof(tx_buf));
+                    auto tx_len = _callback(E, rx_buf, rx_len, tx_buf, sizeof(tx_buf));
                     zsock_send(client_sock, tx_buf, tx_len, 0);
                 }
             }

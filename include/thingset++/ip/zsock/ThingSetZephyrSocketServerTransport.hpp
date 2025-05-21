@@ -18,26 +18,30 @@ struct DummyServerEndpoint {};
 
 class ThingSetZephyrSocketServerTransport : public ThingSetIpServerTransport<DummyServerEndpoint>
 {
-    private:
-        struct sockaddr_in _pub_addr;
-        struct sockaddr_in _req_addr;
-        int _pub_sock;
-        int _req_sock;
-        k_tid_t _accept_tid;
-        k_tid_t _handler_tid;
-        std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _handler_callback;
+private:
+    struct sockaddr_in _pub_addr;
+    struct sockaddr_in _req_addr;
+    int _pub_sock;
+    int _req_sock;
+    k_tid_t _accept_tid;
+    k_tid_t _handler_tid;
+    std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
-    public:
-        ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip);
-        ~ThingSetZephyrSocketServerTransport();
+public:
+    ThingSetZephyrSocketServerTransport(struct net_if *iface, const char *ip);
+    ~ThingSetZephyrSocketServerTransport();
 
-        bool listen(std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
-        bool publish(uint8_t *buffer, size_t len) override;
+    bool listen(std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
+    bool publish(uint8_t *buffer, size_t len) override;
 
-        int pub_sock(void);
-        int req_sock(void);
-        std::function<int(const DummyServerEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback(void);
+private:
+    // TODO: consider https://stackoverflow.com/questions/51451843/creating-a-template-to-wrap-c-member-functions-and-expose-as-c-callbacks
 
+    static void runAcceptor(void *p1, void *, void *);
+    void runAcceptor();
+
+    static void runHandler(void *p1, void *, void *);
+    void runHandler();
 };
 
 } // namespace ThingSet::Ip::Zsock
