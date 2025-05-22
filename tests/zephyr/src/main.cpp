@@ -99,6 +99,12 @@ ZCLIENT_SERVER_TEST(test_exec_function,
     zassert_equal(5, result);
 )
 
+ZCLIENT_SERVER_TEST(test_update,
+    zassert_true(client.update("totalVoltage", 25.0f));
+    k_sleep(K_MSEC(100)); // `update` is async or something
+    zassert_equal(25.0f, totalVoltage.getValue());
+)
+
 static void *testSetup(void)
 {
     zassert_equal(0, can_set_mode(canDevice, CAN_MODE_LOOPBACK));
