@@ -39,18 +39,25 @@ namespace ThingSet {
 // }
 
 // encodes a value of a simple type using a format specifier (eg %i, %f etc), convert this to work in this application
-template <typename T> inline bool encodeSimpleValue(struct thingset_context *ts, T value, const char *format)
+template <typename T> inline bool ThingSetTextEncoder::encodeSimpleValue(T value, const char *format)
 {
+
+    // todo work out how to reuse this properly, move to getstate function? this will only encode one value at a time
+    // currently
+    // char *rsp_arg;
+    // size_t rsp_size_arg = 256;
+    // ThingSetTextEncoder *encoder = new ThingSetTextEncoder(rsp_arg, rsp_size_arg);
+
     // todo move this to a getFutureEncodedLength in header file?
     int bytes_required = snprintf(nullptr, 0, format, value); // determine the length of value as a string
 
-    if (sizeof(ts->rsp) < ts->rsp_pos + bytes_required) {
+    if (sizeof(this->_rsp) < this->_rsp_pos + bytes_required) {
         return false;
     }
 
     // todo use getEncodedLength instead of sizeof section here?
-    int bytes_written = snprintf(ts->rsp + ts->rsp_pos, sizeof(ts->rsp) - ts->rsp_pos, format, value);
-    ts->rsp_pos += bytes_written;
+    int bytes_written = snprintf(this->_rsp + this->_rsp_pos, sizeof(this->_rsp) - this->_rsp_pos, format, value);
+    this->_rsp_pos += bytes_written;
 
     return true;
 }
@@ -68,62 +75,82 @@ template <typename T> inline bool encodeSimpleValue(struct thingset_context *ts,
 
 bool ThingSetTextEncoder::encode(const std::string_view &value)
 {
-    return encodesimplevalue(ts, value, "%.*s");
+    // todo tidy this?
+    bool ret = true;
+    ret |= encodeSimpleValue("\"", "%s");
+    ret |= encodeSimpleValue(value, "%.*s");
+    ret |= encodeSimpleValue("\"", "%s");
+    return ret;
 }
 
 bool ThingSetTextEncoder::encode(std::string_view &value)
 {
-    return encodesimplevalue(ts, value, "%.*s");
+    // todo tidy this?
+    bool ret = true;
+    ret |= encodeSimpleValue("\"", "%s");
+    ret |= encodeSimpleValue(value, "%.*s");
+    ret |= encodeSimpleValue("\"", "%s");
+    return ret;
 }
 
 bool ThingSetTextEncoder::encode(const std::string &value)
 {
-    return encodesimplevalue(ts, value.c_str(), "%s");
+    // todo tidy this?
+    bool ret = true;
+    ret |= encodeSimpleValue("\"", "%s");
+    ret |= encodeSimpleValue(value.c_str(), "%s");
+    ret |= encodeSimpleValue("\"", "%s");
+    return ret;
 }
 
 bool ThingSetTextEncoder::encode(std::string &value)
 {
-    return encodesimplevalue(ts, value.c_str(), "%s");
+    // todo tidy this?
+    bool ret = true;
+    ret |= encodeSimpleValue("\"", "%s");
+    ret |= encodeSimpleValue(value.c_str(), "%s");
+    ret |= encodeSimpleValue("\"", "%s");
+    return ret;
 }
 
 bool ThingSetTextEncoder::encode(const char *value)
 {
-    return encodesimplevalue(ts, value, "%s");
+    return encodeSimpleValue(value, "%s");
 }
 
 bool ThingSetTextEncoder::encode(char *value)
 {
-    return encodesimplevalue(ts, value, "%s");
+    return encodeSimpleValue(value, "%s");
 }
 
 bool ThingSetTextEncoder::encode(const float &value)
 {
-    return encodesimplevalue(ts, value, "%f");
+    return encodeSimpleValue((const double &)value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float &value)
 {
-    return encodesimplevalue(ts, value, "%f");
+    return encodeSimpleValue((double &)value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float *value)
 {
-    return encodesimplevalue(ts, value, "%f");
+    return encodeSimpleValue((double *)value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(const double &value)
 {
-    return encodesimplevalue(ts, value, "%f");
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(double &value)
 {
-    return encodesimplevalue(ts, value, "%f");
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(double *value)
 {
-    return encodesimplevalue(ts, value, "%f");
+    return encodeSimpleValue(value, "%f");
 }
 
 // todo bool may not be needed as handled by int (1/0 instead of true/false)
@@ -139,151 +166,151 @@ bool ThingSetTextEncoder::encode(double *value)
 
 bool ThingSetTextEncoder::encode(const uint8_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu8);
+    return encodeSimpleValue(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(uint8_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu8);
+    return encodeSimpleValue(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(uint8_t *value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu8);
+    return encodeSimpleValue(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(const uint16_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu16);
+    return encodeSimpleValue(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(uint16_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu16);
+    return encodeSimpleValue(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(uint16_t *value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu16);
+    return encodeSimpleValue(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(const uint32_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu32);
+    return encodeSimpleValue(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(uint32_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu32);
+    return encodeSimpleValue(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(uint32_t *value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu32);
+    return encodeSimpleValue(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(const uint64_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu64);
+    return encodeSimpleValue(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(uint64_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu64);
+    return encodeSimpleValue(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(uint64_t *value)
 {
-    return encodesimplevalue(ts, value, "%" PRIu64);
+    return encodeSimpleValue(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(const int8_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi8);
+    return encodeSimpleValue(value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(int8_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi8);
+    return encodeSimpleValue(value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(const int16_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi16);
+    return encodeSimpleValue(value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(int16_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi16);
+    return encodeSimpleValue(value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(int16_t *value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi16);
+    return encodeSimpleValue(value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(const int32_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi32);
+    return encodeSimpleValue(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(int32_t &value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi32);
+    return encodeSimpleValue(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(int32_t *value)
 {
-    return encodesimplevalue(ts, value, "%" PRIi32);
+    return encodeSimpleValue(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(const int64_t &value)
 {
-    return encodeSimpleValue(ts, value, "%" PRIi64);
+    return encodeSimpleValue(value, "%" PRIi64);
 }
 
 bool ThingSetTextEncoder::encode(int64_t &value)
 {
-    return encodeSimpleValue(ts, value, "%" PRIi64);
+    return encodeSimpleValue(value, "%" PRIi64);
 }
 
 bool ThingSetTextEncoder::encode(int64_t *value)
 {
-    return encodeSimpleValue(ts, value, "%" PRIi64);
+    return encodeSimpleValue(value, "%" PRIi64);
 }
 
 // todo check this
 bool ThingSetTextEncoder::encodeNull()
 {
-    return encodeSimpleValue(ts, NULL, "%s");
+    return encodeSimpleValue(NULL, "%s");
 }
 
-bool ThingSetTextEncoder::encodeMapStart(struct thingset_context *ts)
+bool ThingSetTextEncoder::encodeMapStart()
 {
-    return encodeSimpleValue(ts, '{', "%c");
+    return encodeSimpleValue('{', "%c");
 }
 
-bool ThingSetTextEncoder::encodeMapEnd(struct thingset_context *ts)
+bool ThingSetTextEncoder::encodeMapEnd()
 {
-    return encodeSimpleValue(ts, '}', "%c");
+    return encodeSimpleValue('}', "%c");
 }
 
-bool ThingSetTextEncoder::encodeListStart(struct thingset_context *ts)
+bool ThingSetTextEncoder::encodeListStart()
 {
-    return encodeSimpleValue(ts, '[', "%c");
+    return encodeSimpleValue('[', "%c");
 }
 
-bool ThingSetTextEncoder::encodeListEnd(struct thingset_context *ts)
+bool ThingSetTextEncoder::encodeListEnd()
 {
-    return encodeSimpleValue(ts, ']', "%c");
+    return encodeSimpleValue(']', "%c");
 }
 
-template <typename T> void encodeThingsetValue(std::string name, T value)
-{
-    encode(name);
-    encode(":");
-    encode(value);
-    encode(",");
-}
+// template <typename T> void encodeThingsetValue(std::string name, T value)
+// {
+//     encode(name);
+//     encode(":");
+//     encode(value);
+//     encode(",");
+// }
 
 } // namespace ThingSet
