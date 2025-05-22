@@ -44,9 +44,6 @@ template <typename T> inline bool ThingSetTextEncoder::encodeSimpleValue(T value
 
     // todo work out how to reuse this properly, move to getstate function? this will only encode one value at a time
     // currently
-    // char *rsp_arg;
-    // size_t rsp_size_arg = 256;
-    // ThingSetTextEncoder *encoder = new ThingSetTextEncoder(rsp_arg, rsp_size_arg);
 
     // todo move this to a getFutureEncodedLength in header file?
     int bytes_required = snprintf(nullptr, 0, format, value); // determine the length of value as a string
@@ -125,17 +122,17 @@ bool ThingSetTextEncoder::encode(char *value)
 
 bool ThingSetTextEncoder::encode(const float &value)
 {
-    return encodeSimpleValue((const double &)value, "%f");
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float &value)
 {
-    return encodeSimpleValue((double &)value, "%f");
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float *value)
 {
-    return encodeSimpleValue((double *)value, "%f");
+    return encodeSimpleValue(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(const double &value)
@@ -290,7 +287,17 @@ bool ThingSetTextEncoder::encodeMapStart()
     return encodeSimpleValue('{', "%c");
 }
 
+bool ThingSetTextEncoder::encodeMapStart(uint32_t count)
+{
+    return encodeSimpleValue('{', "%c");
+}
+
 bool ThingSetTextEncoder::encodeMapEnd()
+{
+    return encodeSimpleValue('}', "%c");
+}
+
+bool ThingSetTextEncoder::encodeMapEnd(uint32_t count)
 {
     return encodeSimpleValue('}', "%c");
 }
@@ -300,7 +307,17 @@ bool ThingSetTextEncoder::encodeListStart()
     return encodeSimpleValue('[', "%c");
 }
 
+bool ThingSetTextEncoder::encodeListStart(uint32_t count)
+{
+    return encodeSimpleValue('[', "%c");
+}
+
 bool ThingSetTextEncoder::encodeListEnd()
+{
+    return encodeSimpleValue(']', "%c");
+}
+
+bool ThingSetTextEncoder::encodeListEnd(uint32_t count)
 {
     return encodeSimpleValue(']', "%c");
 }
