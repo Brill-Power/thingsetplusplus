@@ -1,6 +1,7 @@
 target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryDecoder.cpp
-    ThingSetBinaryEncoder.cpp)
+    ThingSetBinaryEncoder.cpp
+    ThingSetTextEncoder.cpp)
 
 if(ENABLE_SERVER OR ENABLE_CLIENT)
     target_sources(thingset++ PRIVATE ThingSetNode.cpp
@@ -26,6 +27,6 @@ if(ENABLE_SOCKETCAN)
 endif()
 
 if(ENABLE_ZEPHYR)
-    add_subdirectory(can)
+    # add_subdirectory(can)
     target_sources(thingset++ PRIVATE ZephyrLogRegistration.cpp)
 endif()

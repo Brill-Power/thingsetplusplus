@@ -23,13 +23,26 @@ namespace ThingSet {
 /// @brief Text protocol encoder for ThingSet.
 class ThingSetTextEncoder
 {
+private:
     // todo may not be needed
     // protected:
     //     virtual zcbor_state_t *getState() = 0;
     //     virtual bool getIsForwardOnly() const;
 
 public:
+    // todo move these to be private?
+    char _rsp[256]; // todo change size here? or just change to uint8_t*
+    size_t _rsp_size;
+    size_t _rsp_pos;
+
+    template <size_t Size>
+    ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
+    {}
+    ThingSetTextEncoder(uint8_t *buffer, size_t size);
+
     virtual size_t getEncodedLength() const = 0;
+
+    template <typename T> inline bool encodeSimpleValue(T value, const char *format);
 
     // todo delete all of these and inherit from base
     bool encode(const std::string_view &value);
@@ -62,6 +75,7 @@ public:
     bool encode(int8_t &value);
     bool encode(const int16_t &value);
     bool encode(int16_t &value);
+    bool encode(int16_t *value);
     bool encode(const int32_t &value);
     bool encode(int32_t &value);
     bool encode(int32_t *value);
@@ -209,49 +223,6 @@ private:
     {
         std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
     }
-};
-
-template <int depth = TEXT_ENCODER_DEFAULT_MAX_DEPTH>
-class FixedDepthThingSetTextEncoder : public virtual ThingSetTextEncoder
-{
-private:
-    /**
-     * Pointer to the response buffer (provided by process function)
-     */
-    uint8_t *_rsp;
-
-    /**
-     * Size of response buffer (i.e. maximum length)
-     */
-    size_t _rsp_size;
-
-    /**
-     * Current position inside the response (equivalent to length of the response at end of
-     * processing)
-     */
-    size_t _rsp_pos;
-
-public:
-    FixedDepthThingSetTextEncoder(uint8_t *rsp, size_t rsp_size)
-    {
-        _rsp = rsp;
-        _rsp_size = rsp_size;
-        _rsp_pos = 0;
-    }
-
-    size_t getEncodedLength() const override
-    {
-        return _rsp_size - _rsp_pos;
-    }
-};
-
-using DefaultFixedDepthThingSetTextEncoder = FixedDepthThingSetTextEncoder<TEXT_ENCODER_DEFAULT_MAX_DEPTH>;
-
-/// @brief Interface for values that can be encoded with a text encoder.
-class ThingSetTextEncodable
-{
-public:
-    virtual bool encode(ThingSetTextEncoder &encoder) = 0;
 };
 
 }; // namespace ThingSet
