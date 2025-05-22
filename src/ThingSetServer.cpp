@@ -18,7 +18,7 @@ static const uint16_t MetadataNameId = 0x1a;
 static const uint16_t MetadataTypeId = 0x1b;
 static const uint16_t MetadataAccessId = 0x1c;
 
-_ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
+_ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
 {}
 
 int _ThingSetServer::handleGet(ThingSetRequestContext &context)
