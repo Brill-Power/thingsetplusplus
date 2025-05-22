@@ -7,6 +7,7 @@
 
 #include "internal/bind_to_tuple.hpp"
 #include <array>
+#include <cstring>
 #include <list>
 #include <map>
 #include <string>
@@ -38,9 +39,14 @@ public:
     template <size_t Size>
     ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
     {}
-    ThingSetTextEncoder(uint8_t *buffer, size_t size);
+    ThingSetTextEncoder(char (&buffer)[256], size_t size)
+    {
+        memcpy(_rsp, buffer, 256);
+        _rsp_size = size;
+        _rsp_pos = 0;
+    }
 
-    virtual size_t getEncodedLength() const = 0;
+    // virtual size_t getEncodedLength() const = 0; // todo implement this in .cpp
 
     template <typename T> inline bool encodeSimpleValue(T value, const char *format);
 
