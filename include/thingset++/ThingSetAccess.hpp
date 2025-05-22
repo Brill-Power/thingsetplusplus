@@ -13,11 +13,17 @@ namespace ThingSet {
 enum ThingSetAccess
 {
     userRead = 1 << 0,
-    userWrite = 1 << 1,
-    advancedRead = 1 << 3,
-    advancedWrite = 1 << 4,
-    manufacturerRead = 1 << 6,
-    manufacturerWrite = 1 << 7,
+    expertRead = 1 << 1,
+    manufacturerRead = 1 << 2,
+    anyRead = userRead | expertRead | manufacturerRead,
+    userWrite = userRead << 4,
+    expertWrite = expertRead << 4,
+    manufacturerWrite = manufacturerRead << 4,
+    anyWrite = userWrite | expertWrite | manufacturerWrite,
+    userReadWrite = userRead | userWrite,
+    expertReadWrite = expertRead | expertWrite,
+    manufacturerReadWrite = manufacturerRead | manufacturerWrite,
+    anyReadWrite = anyRead | anyWrite,
 };
 
 constexpr inline ThingSetAccess operator|(ThingSetAccess lhs, ThingSetAccess rhs)

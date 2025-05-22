@@ -52,22 +52,22 @@ template <unsigned T> struct convertAccess
 
 template <> struct convertAccess<THINGSET_ANY_R>
 {
-    static const ThingSetAccess value = ThingSetAccess::userRead;
+    static const ThingSetAccess value = ThingSetAccess::anyRead;
 };
 
 template <> struct convertAccess<THINGSET_ANY_RW>
 {
-    static const ThingSetAccess value = ThingSetAccess::userRead | ThingSetAccess::userWrite;
+    static const ThingSetAccess value = ThingSetAccess::anyReadWrite;
 };
 
 template <> struct convertAccess<THINGSET_ANY_R | THINGSET_MFR_W>
 {
-    static const ThingSetAccess value = ThingSetAccess::userRead | ThingSetAccess::manufacturerWrite;
+    static const ThingSetAccess value = ThingSetAccess::anyRead | ThingSetAccess::manufacturerWrite;
 };
 
 template <> struct convertAccess<THINGSET_ANY_R | THINGSET_EXP_W | THINGSET_MFR_W>
 {
-    static const ThingSetAccess value = ThingSetAccess::userRead | ThingSetAccess::advancedWrite | ThingSetAccess::manufacturerWrite;
+    static const ThingSetAccess value = ThingSetAccess::anyRead | ThingSetAccess::expertWrite | ThingSetAccess::manufacturerWrite;
 };
 
 /// @brief Shim class to facilitate compatibility with two-stage array property

@@ -62,6 +62,11 @@ private:
             }
         }
 
+        ThingSetAccess getAccess() const
+        {
+            return ThingSetAccess::userRead;
+        }
+
         bool checkAccess(ThingSetAccess) const override
         {
             return true;

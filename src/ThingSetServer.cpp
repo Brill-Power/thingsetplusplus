@@ -14,6 +14,9 @@
 namespace ThingSet {
 
 static inline ThingSetProperty<0x1d, 0, "NodeID", ThingSetAccess::userRead, std::string> nodeId(Eui::getString());
+static const uint16_t MetadataNameId = 0x1a;
+static const uint16_t MetadataTypeId = 0x1b;
+static const uint16_t MetadataAccessId = 0x1c;
 
 _ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::userRead | ThingSetAccess::userWrite)
 {}
@@ -71,8 +74,9 @@ int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
                 }
                 ThingSetNode *n;
                 return ThingSetRegistry::findById(id, &n) && context.encoder.encodeMapStart()
-                       && context.encoder.encode("name") && context.encoder.encode(n->getName())
-                       && context.encoder.encode("type") && context.encoder.encode(n->getType())
+                       && context.encoder.encode(MetadataNameId) && context.encoder.encode(n->getName())
+                       && context.encoder.encode(MetadataTypeId) && context.encoder.encode(n->getType())
+                       && context.encoder.encode(MetadataAccessId) && context.encoder.encode(n->getAccess())
                        && context.encoder.encodeMapEnd();
             })
             && context.encoder.encodeListEnd())

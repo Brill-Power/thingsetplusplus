@@ -89,6 +89,11 @@ public:
         }
     }
 
+    ThingSetAccess getAccess() const override
+    {
+        return Access;
+    }
+
     bool checkAccess(ThingSetAccess access) const override
     {
         return (access & Access) == Access;
@@ -101,10 +106,10 @@ public:
 };
 
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
-using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::userWrite, Result, Args...>;
+using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Result, Args...>;
 
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
-using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::advancedWrite, Result, Args...>;
+using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Result, Args...>;
 
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetManufacturerFunction =
