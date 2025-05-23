@@ -21,7 +21,7 @@ if(ENABLE_ASIO)
     add_subdirectory(ip)
 endif()
 
-if (ENABLE_CAN)
+if (ENABLE_CAN OR ENABLE_SOCKETCAN)
     add_subdirectory(can)
 endif()
 

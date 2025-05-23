@@ -18,7 +18,4 @@ target_link_libraries(thingset++ zcbor)
 
 include_directories(include)
 
-set(ENABLE_CLIENT ON)
-set(ENABLE_SERVER ON)
-
 add_subdirectory(src)
