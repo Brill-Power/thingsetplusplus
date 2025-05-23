@@ -35,6 +35,7 @@ public:
     char _rsp[256]; // todo change size here? or just change to uint8_t*
     size_t _rsp_size;
     size_t _rsp_pos;
+    uint8_t _depth;
 
     template <size_t Size>
     ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
@@ -44,6 +45,7 @@ public:
         memcpy(_rsp, buffer, 256);
         _rsp_size = size;
         _rsp_pos = 0;
+        _depth = 0;
     }
 
     // virtual size_t getEncodedLength() const = 0; // todo implement this in .cpp
