@@ -8,6 +8,7 @@
 #include "thingset++/can/ThingSetCanSubscriptionTransport.hpp"
 #include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
 #include "thingset++/can/zephyr/CanFrame.hpp"
+#include "thingset++/zephyr/MessageQueue.hpp"
 #include <functional>
 
 namespace ThingSet::Can::Zephyr {
@@ -20,8 +21,7 @@ private:
     private:
         const device *const _canDevice;
         int _filterId;
-        k_msgq _frameQueue;
-        std::array<char, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH * sizeof(can_frame)> _frameBuffer;
+        ThingSet::Zephyr::MessageQueue<can_frame, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH> _frameQueue;
         k_thread _thread;
         std::function<void(const CanID &, ThingSetBinaryDecoder &)> _callback;
 
