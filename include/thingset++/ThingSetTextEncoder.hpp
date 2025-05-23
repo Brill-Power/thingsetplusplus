@@ -48,9 +48,24 @@ public:
         _depth = 0;
     }
 
-    // virtual size_t getEncodedLength() const = 0; // todo implement this in .cpp
+    template <typename T> inline bool addResponseValue(T value, const char *format)
+    {
 
-    template <typename T> inline bool encodeSimpleValue(T value, const char *format);
+        // todo move this to a getFutureEncodedLength in header file?
+        int bytes_required = snprintf(nullptr, 0, format, value); // determine the length of value as a string
+
+        if (sizeof(_rsp) < _rsp_pos + bytes_required) {
+            return false;
+        }
+
+        // todo use getEncodedLength instead of sizeof section here?
+        int bytes_written = snprintf(_rsp + _rsp_pos, sizeof(_rsp) - _rsp_pos, format, value);
+        _rsp_pos += bytes_written;
+
+        return true;
+    }
+
+    // virtual size_t getEncodedLength() const = 0; // todo implement this in .cpp
 
     // todo delete all of these and inherit from base
     bool encode(const std::string_view &value);
@@ -127,7 +142,7 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     template <typename K, typename V> bool encode(std::pair<K, V> &pair)
     {
-        return encode("\"") && encode(pair.first) && encode("\"") && encode(":") && encode(pair.second) && encode(",");
+        return encode(pair.first) && addResponseValue(":", "%s") && encode(pair.second) && addResponseValue(",", "%s");
     }
 
     /// @brief Encode a linked list.
