@@ -13,17 +13,18 @@
 
 namespace ThingSet::Ip::Zsock {
 
+/// @brief Subscription transport for Zephyr sockets.
 class ThingSetZephyrSocketSubscriptionTransport : public ThingSetSubscriptionTransport<SocketEndpoint>
 {
 private:
-    sockaddr_in _udp_addr;
-    int _sub_sock;
-    k_tid_t _listener_tid;
+    sockaddr_in _listenAddress;
+    int _listenSocketHandle;
+    k_tid_t _listenerThreadId;
     uint8_t _buffer[1024];
     std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> _callback;
 
 public:
-    ThingSetZephyrSocketSubscriptionTransport(net_if *iface, const char *ip);
+    ThingSetZephyrSocketSubscriptionTransport(net_if *iface);
     ~ThingSetZephyrSocketSubscriptionTransport();
 
     bool subscribe(std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> callback) override;

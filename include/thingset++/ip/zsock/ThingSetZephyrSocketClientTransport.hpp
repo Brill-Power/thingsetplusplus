@@ -14,11 +14,12 @@
 
 namespace ThingSet::Ip::Zsock {
 
+/// @brief Client transport using Zephyr sockets.
 class ThingSetZephyrSocketClientTransport : public ThingSetClientTransport
 {
     private:
-        struct sockaddr_in _req_addr;
-        int _req_sock;
+        struct sockaddr_in _serverAddress;
+        int _socketHandle;
 
     public:
         ThingSetZephyrSocketClientTransport(struct net_if *iface, const char *ip);

@@ -15,35 +15,35 @@
 namespace ThingSet::Ip::Zsock {
 
 ThingSetZephyrSocketClientTransport::ThingSetZephyrSocketClientTransport(struct net_if *iface, const char *ip)
-    : _req_sock(-1)
+    : _socketHandle(-1)
 {
-    net_addr_pton(AF_INET, ip, &_req_addr.sin_addr);
-    _req_addr.sin_family = AF_INET;
-    _req_addr.sin_port = htons(9001);
-    
-    _req_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    __ASSERT(_req_sock >= 0, "Failed to create TCP socket: %d", errno);
+    net_addr_pton(AF_INET, ip, &_serverAddress.sin_addr);
+    _serverAddress.sin_family = AF_INET;
+    _serverAddress.sin_port = htons(9001);
+
+    _socketHandle = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    __ASSERT(_socketHandle >= 0, "Failed to create TCP socket: %d", errno);
 }
 
 ThingSetZephyrSocketClientTransport::~ThingSetZephyrSocketClientTransport()
 {
-    zsock_close(_req_sock);
-    _req_sock = -1;
+    zsock_close(_socketHandle);
+    _socketHandle = -1;
 }
 
-bool ThingSetZephyrSocketClientTransport::connect() 
+bool ThingSetZephyrSocketClientTransport::connect()
 {
-    return zsock_connect(_req_sock, (struct sockaddr *)&_req_addr, sizeof(_req_addr)) == 0;
+    return zsock_connect(_socketHandle, (struct sockaddr *)&_serverAddress, sizeof(_serverAddress)) == 0;
 }
 
 int ThingSetZephyrSocketClientTransport::read(uint8_t *buffer, size_t len)
 {
-    return zsock_recv(_req_sock, buffer, len, 0);
+    return zsock_recv(_socketHandle, buffer, len, 0);
 }
 
 bool ThingSetZephyrSocketClientTransport::write(uint8_t *buffer, size_t len)
 {
-    return zsock_send(_req_sock, buffer, len, 0) == (ssize_t)len;
+    return zsock_send(_socketHandle, buffer, len, 0) == (ssize_t)len;
 }
 
 } // namespace ThingSet::Ip::Zsock

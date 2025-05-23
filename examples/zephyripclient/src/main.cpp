@@ -52,7 +52,7 @@ int main()
 
     ThingSetZephyrSocketClientTransport clientTransport(iface, CONFIG_NET_CONFIG_PEER_IPV4_ADDR);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
-    ThingSetZephyrSocketSubscriptionTransport subscriptionTransport(iface, CONFIG_NET_CONFIG_MY_IPV4_ADDR);
+    ThingSetZephyrSocketSubscriptionTransport subscriptionTransport(iface);
     auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
 
     client.connect();

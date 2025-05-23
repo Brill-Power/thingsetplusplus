@@ -18,16 +18,17 @@ namespace ThingSet::Ip::Zsock {
 class ThingSetZephyrSocketServerTransport : public ThingSetIpServerTransport<SocketEndpoint>
 {
 private:
-    sockaddr_in _pub_addr;
-    sockaddr_in _req_addr;
-    int _pub_sock;
-    int _req_sock;
-    k_tid_t _accept_tid;
-    k_tid_t _handler_tid;
+    sockaddr_in _publishAddress;
+    sockaddr_in _listenAddress;
+    sockaddr_in _broadcastAddress;
+    int _publishSocketHandle;
+    int _listenSocketHandle;
+    k_tid_t _acceptorThreadId;
+    k_tid_t _handlerThreadId;
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
 public:
-    ThingSetZephyrSocketServerTransport(net_if *iface, const char *ip);
+    ThingSetZephyrSocketServerTransport(net_if *iface);
     ~ThingSetZephyrSocketServerTransport();
 
     bool listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
