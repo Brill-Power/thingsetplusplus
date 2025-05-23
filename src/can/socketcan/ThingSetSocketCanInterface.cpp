@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/socketcan/ThingSetSocketCanInterface.hpp"
-#include "thingset++/can/socketcan/StreamingCanThingSetBinaryDecoder.hpp"
+#include "thingset++/can/StreamingCanThingSetBinaryDecoder.hpp"
 #include "thingset++/can/CanID.hpp"
 #include "thingset++/Eui.hpp"
 #include "thingset++/ThingSetStatus.hpp"
