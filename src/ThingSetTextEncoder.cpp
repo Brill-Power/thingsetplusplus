@@ -72,42 +72,22 @@ template <typename T> inline bool ThingSetTextEncoder::encodeSimpleValue(T value
 
 bool ThingSetTextEncoder::encode(const std::string_view &value)
 {
-    // todo tidy this?
-    bool ret = true;
-    ret |= encodeSimpleValue("\"", "%s");
-    ret |= encodeSimpleValue(value, "%.*s");
-    ret |= encodeSimpleValue("\"", "%s");
-    return ret;
+    return encodeSimpleValue(value, "%.*s");
 }
 
 bool ThingSetTextEncoder::encode(std::string_view &value)
 {
-    // todo tidy this?
-    bool ret = true;
-    ret |= encodeSimpleValue("\"", "%s");
-    ret |= encodeSimpleValue(value, "%.*s");
-    ret |= encodeSimpleValue("\"", "%s");
-    return ret;
+    return encodeSimpleValue(value, "%.*s");
 }
 
 bool ThingSetTextEncoder::encode(const std::string &value)
 {
-    // todo tidy this?
-    bool ret = true;
-    ret |= encodeSimpleValue("\"", "%s");
-    ret |= encodeSimpleValue(value.c_str(), "%s");
-    ret |= encodeSimpleValue("\"", "%s");
-    return ret;
+    return encodeSimpleValue(value.c_str(), "%s");
 }
 
 bool ThingSetTextEncoder::encode(std::string &value)
 {
-    // todo tidy this?
-    bool ret = true;
-    ret |= encodeSimpleValue("\"", "%s");
-    ret |= encodeSimpleValue(value.c_str(), "%s");
-    ret |= encodeSimpleValue("\"", "%s");
-    return ret;
+    return encodeSimpleValue(value.c_str(), "%s");
 }
 
 bool ThingSetTextEncoder::encode(const char *value)
@@ -289,17 +269,22 @@ bool ThingSetTextEncoder::encodeMapStart()
 
 bool ThingSetTextEncoder::encodeMapStart(uint32_t count)
 {
-    return encodeSimpleValue('{', "%c");
+    return encodeMapStart();
 }
 
 bool ThingSetTextEncoder::encodeMapEnd()
 {
-    return encodeSimpleValue('}', "%c");
+    if (this->_rsp[this->_rsp_pos--] == ',') {
+        this->_rsp_pos--;
+    }
+    bool ret = encodeSimpleValue('}', "%c");
+    ret |= encodeSimpleValue(',', "%c");
+    return ret;
 }
 
 bool ThingSetTextEncoder::encodeMapEnd(uint32_t count)
 {
-    return encodeSimpleValue('}', "%c");
+    return encodeMapEnd();
 }
 
 bool ThingSetTextEncoder::encodeListStart()
@@ -309,17 +294,22 @@ bool ThingSetTextEncoder::encodeListStart()
 
 bool ThingSetTextEncoder::encodeListStart(uint32_t count)
 {
-    return encodeSimpleValue('[', "%c");
+    return encodeListStart();
 }
 
 bool ThingSetTextEncoder::encodeListEnd()
 {
-    return encodeSimpleValue(']', "%c");
+    if (this->_rsp[this->_rsp_pos--] == ',') {
+        this->_rsp_pos--;
+    }
+    bool ret = encodeSimpleValue(']', "%c");
+    ret |= encodeSimpleValue(',', "%c");
+    return ret;
 }
 
 bool ThingSetTextEncoder::encodeListEnd(uint32_t count)
 {
-    return encodeSimpleValue(']', "%c");
+    return encodeListEnd();
 }
 
 // template <typename T> void encodeThingsetValue(std::string name, T value)

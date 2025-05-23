@@ -145,7 +145,8 @@ public:
     /// @tparam T The type to encode.
     /// @param value A reference to the value to be encoded.
     /// @return True if encoding succeeded, otherwise false.
-    template <typename T> requires std::is_class_v<T>
+    template <typename T>
+        requires std::is_class_v<T>
     bool encode(T &value)
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
@@ -224,8 +225,7 @@ protected:
 
 public:
     FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size) : FixedDepthThingSetBinaryEncoder(buffer, size, 1)
-    {
-    }
+    {}
 
     FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount) : _buffer(buffer)
     {
