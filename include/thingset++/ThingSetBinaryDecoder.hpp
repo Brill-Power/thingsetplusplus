@@ -254,8 +254,10 @@ public:
         zcbor_new_decode_state(_state, depth, buffer, size, elementCount);
 #else
         zcbor_new_decode_state(_state, depth, buffer, size, elementCount, NULL, 0);
+#ifdef ZCBOR_ENFORCE_CANONICAL
         _state->constant_state->enforce_canonical = false;
-#endif
+#endif // ZCBOR_ENFORCE_CANONICAL
+#endif // zcbor_tstr_expect_term
     }
 
     size_t getDecodedLength() override

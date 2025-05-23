@@ -117,12 +117,12 @@ private:
         }
 
         if (!_transport.write(_txBuffer, 1 + encoder.getEncodedLength())) {
-            LOG_ERR("Failed to send request");
+            //LOG_ERR("Failed to send request");
             return false;
         }
 
         if (!read(responseBuffer, responseSize)) {
-            LOG_ERR("Failed to read response");
+            //LOG_ERR("Failed to read response");
             return false;
         }
 

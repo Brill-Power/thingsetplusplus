@@ -15,7 +15,6 @@ ThingSetZephyrCanSubscriptionTransport::ThingSetZephyrCanSubscriptionTransport(T
 
 ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::ZephyrCanSubscriptionListener(const device *const canDevice) : _canDevice(canDevice), _filterId(-1)
 {
-    k_msgq_init(&_frameQueue, _frameBuffer.data(), sizeof(can_frame), CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH);
 }
 
 ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::~ZephyrCanSubscriptionListener()
@@ -27,7 +26,7 @@ ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::~ZephyrCa
 
 void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::onPublicationFrameReceived(can_frame *frame)
 {
-    if (k_msgq_put(&_frameQueue, frame, K_NO_WAIT) != 0)
+    if (!_frameQueue.push(*frame))
     {
         // now what?
     }
@@ -44,11 +43,9 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runL
     std::map<uint8_t, StreamingCanThingSetBinaryDecoder<CanFrame>> decodersByNodeAddress;
     while (true)
     {
-        can_frame rawFrame;
-        if (k_msgq_get(&_frameQueue, &rawFrame, K_FOREVER) == 0) {
-            CanFrame frame(rawFrame);
-            handle(frame, decodersByNodeAddress, _callback);
-        }
+        can_frame rawFrame = _frameQueue.pop();
+        CanFrame frame(rawFrame);
+        handle(frame, decodersByNodeAddress, _callback);
     }
 }
 

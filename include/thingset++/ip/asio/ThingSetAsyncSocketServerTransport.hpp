@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "thingset++/ip/udp/ThingSetUdpServerTransport.hpp"
+#include "thingset++/ip/ThingSetIpServerTransport.hpp"
 #include <asio/awaitable.hpp>
 #include <asio/signal_set.hpp>
 #include <asio/ip/tcp.hpp>
@@ -13,17 +13,19 @@
 
 namespace ThingSet::Ip::Async {
 
-using ThingSet::Ip::Udp::ThingSetUdpServerTransport;
-
-class ThingSetAsyncSocketServerTransport : public ThingSetUdpServerTransport<asio::ip::tcp::endpoint>
+class ThingSetAsyncSocketServerTransport : public ThingSetIpServerTransport<asio::ip::tcp::endpoint>
 {
 private:
     asio::io_context &_ioContext;
     asio::ip::udp::socket _publishSocket;
+    asio::ip::address_v4 _bindAddress;
+    asio::ip::address_v4 _broadcastAddress;
     asio::signal_set _signals;
 
 public:
     ThingSetAsyncSocketServerTransport(asio::io_context &ioContext);
+    ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const asio::ip::address_v4 bindAddress, const asio::ip::address_v4 broadcastAddress);
+    ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const std::string &bindInterface);
     ~ThingSetAsyncSocketServerTransport();
 
     bool listen(std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;

@@ -44,6 +44,11 @@ public:
         return true;
     }
 
+    ThingSetAccess getAccess() const override
+    {
+        return ThingSetAccess::anyRead;
+    }
+
     bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const override
     {
         return _callback(node, reason);

@@ -52,6 +52,11 @@ public:
         }
     }
 
+    ThingSetAccess getAccess() const override
+    {
+        return Access;
+    }
+
     bool checkAccess(ThingSetAccess access) const override
     {
         return (Access & access) == Access;
@@ -218,7 +223,7 @@ static_cast<uint32_t>(
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
-using ThingSetReadOnlyProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead, T>;
+using ThingSetReadOnlyProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead, T>;
 
 /// @brief A ThingSet property that can be read and written by anyone.
 /// @tparam T The type of the value stored by this property.
@@ -227,7 +232,7 @@ using ThingSetReadOnlyProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAc
 /// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
 using ThingSetReadWriteProperty =
-    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead | ThingSetAccess::userWrite, T>;
+    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyReadWrite, T>;
 
 /// @brief A ThingSet property that can be read by anyone but only written by advanced users.
 /// @tparam T The type of the value stored by this property.
@@ -236,7 +241,7 @@ using ThingSetReadWriteProperty =
 /// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
 using ThingSetReadAdvancedWriteProperty =
-    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead | ThingSetAccess::advancedWrite, T>;
+    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T>;
 
 /// @brief A ThingSet property that can be read by anyone but only written by the manufacturer.
 /// @tparam T The type of the value stored by this property.
@@ -245,6 +250,6 @@ using ThingSetReadAdvancedWriteProperty =
 /// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
 using ThingSetReadManufacturerWriteProperty =
-    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::userRead | ThingSetAccess::manufacturerWrite, T>;
+    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T>;
 
 } // namespace ThingSet

@@ -10,10 +10,10 @@
 
 #define THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE 4096
 
-namespace ThingSet::Ip::Udp {
+namespace ThingSet::Ip {
 
 template <typename Identifier>
-class ThingSetUdpServerTransport;
+class ThingSetIpServerTransport;
 
 /// @brief Encodes data to successive UDP frames in a multi-frame report.
 /// @tparam Identifier Type of client identifier
@@ -21,10 +21,10 @@ template <typename Identifier>
 class StreamingUdpThingSetBinaryEncoder : public StreamingThingSetBinaryEncoder<THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE>
 {
 private:
-    ThingSetUdpServerTransport<Identifier> &_transport;
+    ThingSetIpServerTransport<Identifier> &_transport;
 
 public:
-    StreamingUdpThingSetBinaryEncoder(ThingSetUdpServerTransport<Identifier> &transport) : _transport(transport)
+    StreamingUdpThingSetBinaryEncoder(ThingSetIpServerTransport<Identifier> &transport) : _transport(transport)
     {
         _buffer[0] = ThingSetRequestType::report;
         zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[3], _buffer.size() - 3, 2);

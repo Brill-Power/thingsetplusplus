@@ -1,12 +1,9 @@
 target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryDecoder.cpp
-    ThingSetBinaryEncoder.cpp)
-
-if(ENABLE_SERVER OR ENABLE_CLIENT)
-    target_sources(thingset++ PRIVATE ThingSetNode.cpp
-        ThingSetParentNode.cpp
-        ThingSetRegistry.cpp)
-endif()
+    ThingSetBinaryEncoder.cpp
+    ThingSetNode.cpp
+    ThingSetParentNode.cpp
+    ThingSetRegistry.cpp)
 
 if(ENABLE_SERVER)
     target_sources(thingset++ PRIVATE ThingSetRequestContext.cpp
@@ -21,11 +18,14 @@ if(ENABLE_ASIO)
     add_subdirectory(ip)
 endif()
 
-if(ENABLE_SOCKETCAN)
+if (ENABLE_CAN OR ENABLE_SOCKETCAN)
     add_subdirectory(can)
 endif()
 
+if (ENABLE_ZSOCK)
+    add_subdirectory(ip)
+endif()
+
 if(ENABLE_ZEPHYR)
-    add_subdirectory(can)
     target_sources(thingset++ PRIVATE ZephyrLogRegistration.cpp)
 endif()

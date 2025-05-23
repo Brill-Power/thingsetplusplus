@@ -25,6 +25,14 @@ config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH
 	int "Number of CAN frames that can be stored in the queue"
 	default 12
 
+config THINGSET_PLUS_PLUS_BACKEND_CAN
+	bool "Enable CAN backend"
+	default false
+
+config THINGSET_PLUS_PLUS_BACKEND_SOCKET
+	bool "Enable socket backend"
+	default false
+
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus
 source "../zephyr/subsys/logging/Kconfig.template.log_config"

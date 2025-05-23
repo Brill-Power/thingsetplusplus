@@ -6,17 +6,17 @@
 #pragma once
 
 #include "thingset++/ThingSetServerTransport.hpp"
-#include "thingset++/ip/udp/StreamingUdpThingSetBinaryEncoder.hpp"
+#include "thingset++/ip/StreamingUdpThingSetBinaryEncoder.hpp"
 
-namespace ThingSet::Ip::Udp {
+namespace ThingSet::Ip {
 
 /// @brief Server transport for UDP protocol.
 /// @tparam Identifier Type of client identifier
 template <typename Identifier>
-class ThingSetUdpServerTransport : public ThingSetServerTransport<Identifier, THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<Identifier>>
+class ThingSetIpServerTransport : public ThingSetServerTransport<Identifier, THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<Identifier>>
 {
 protected:
-    ThingSetUdpServerTransport()
+    ThingSetIpServerTransport()
     {}
 
 public:

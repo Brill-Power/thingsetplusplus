@@ -42,6 +42,8 @@ public:
 
     virtual bool tryCastTo(ThingSetNodeType type, void **target);
 
+    virtual ThingSetAccess getAccess() const = 0;
+
     virtual bool checkAccess(ThingSetAccess access) const = 0;
 };
 
