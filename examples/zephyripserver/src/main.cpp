@@ -84,7 +84,7 @@ int main()
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
 
-    ThingSetZephyrSocketServerTransport transport(iface, "192.0.2.1");
+    ThingSetZephyrSocketServerTransport transport(iface, CONFIG_NET_CONFIG_MY_IPV4_ADDR);
     auto server = ThingSetServerBuilder::build(transport);
 
     server.listen();

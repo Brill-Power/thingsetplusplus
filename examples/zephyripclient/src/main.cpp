@@ -50,9 +50,9 @@ int main()
 
     printk("Using iface: %s\n", name_buf);
 
-    ThingSetZephyrSocketClientTransport clientTransport(iface, "192.0.2.2");
+    ThingSetZephyrSocketClientTransport clientTransport(iface, CONFIG_NET_CONFIG_PEER_IPV4_ADDR);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
-    ThingSetZephyrSocketSubscriptionTransport subscriptionTransport(iface, "192.0.2.1");
+    ThingSetZephyrSocketSubscriptionTransport subscriptionTransport(iface, CONFIG_NET_CONFIG_MY_IPV4_ADDR);
     auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
 
     client.connect();

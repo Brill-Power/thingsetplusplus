@@ -33,6 +33,10 @@ config THINGSET_PLUS_PLUS_BACKEND_SOCKET
 	bool "Enable socket backend"
 	default false
 
+config THINGSET_PLUS_PLUS_SOCKET_DHCP
+	bool "Use DHCP to automatically assign device IP address"
+	default false
+
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus
 source "../zephyr/subsys/logging/Kconfig.template.log_config"

@@ -22,6 +22,14 @@ namespace ThingSet::Ip::Zsock {
 
 ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTransport(net_if *iface, const char *ip) : _sub_sock(-1)
 {
+    net_addr_pton(AF_INET, "0.0.0.0", &_udp_addr.sin_addr);
+    _udp_addr.sin_family = AF_INET;
+    _udp_addr.sin_port = htons(9002);
+
+    _sub_sock = zsock_socket(_udp_addr.sin_family, SOCK_DGRAM, IPPROTO_UDP);
+    __ASSERT(_sub_sock >= 0, "Failed to create UDP socket: %d", errno);
+
+#if !THINGSET_PLUS_PLUS_SOCKET_DHCP
     sockaddr_in _subnet_addr = {
         .sin_family = AF_INET,
     };
@@ -30,16 +38,10 @@ ThingSetZephyrSocketSubscriptionTransport::ThingSetZephyrSocketSubscriptionTrans
     net_if_addr *addr = net_if_ipv4_addr_add(iface, &_subnet_addr.sin_addr, NET_ADDR_MANUAL, 0);
     __ASSERT(addr != NULL, "Failed to add address to interface: %d", errno);
 
-    net_addr_pton(AF_INET, "0.0.0.0", &_udp_addr.sin_addr);
-    _udp_addr.sin_family = AF_INET;
-    _udp_addr.sin_port = htons(9002);
-
-    _sub_sock = zsock_socket(_udp_addr.sin_family, SOCK_DGRAM, IPPROTO_UDP);
-    __ASSERT(_sub_sock >= 0, "Failed to create UDP socket: %d", errno);
-
     sockaddr_in mask;
     net_addr_pton(AF_INET, "255.255.255.0", &mask.sin_addr);
     net_if_ipv4_set_netmask_by_addr(iface, &_udp_addr.sin_addr, &mask.sin_addr);
+#endif // #if !THINGSET_PLUS_PLUS_SOCKET_DHCP
 }
 
 ThingSetZephyrSocketSubscriptionTransport::~ThingSetZephyrSocketSubscriptionTransport()
@@ -76,7 +78,6 @@ void ThingSetZephyrSocketSubscriptionTransport::runSubscriber()
         SocketEndpoint sourceAddress;
         socklen_t sourceAddressSize = sizeof(sourceAddress);
         size_t length = zsock_recvfrom(_sub_sock, _buffer, 1024, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
-        printk("length: %d\n", length);
 
         if (length > 4) {
             if (_buffer[0] != ThingSetRequestType::report) {
