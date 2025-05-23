@@ -125,7 +125,7 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     template <typename K, typename V> bool encode(std::pair<K, V> &pair)
     {
-        return encode(pair.first) && encode(pair.second);
+        return encode("\"") && encode(pair.first) && encode("\"") && encode(":") && encode(pair.second) && encode(",");
     }
 
     /// @brief Encode a linked list.
