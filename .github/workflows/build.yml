@@ -16,7 +16,7 @@ jobs:
       - name: Build Examples
         working-directory: thingsetplusplus
         run: |
-          apt-get update && apt-get install -y cmake; cd examples; for i in `find . -maxdepth 1 -type d -not -iname "zephyr*"`; do (cd $i && cmake -S . -B build && cd build && make && cd .. && cd ..) || exit 1; done; cd ..
+          apt-get update && apt-get install -y cmake; cd examples; for i in `find . -maxdepth 1 -type d -not -iname "zephyr*"`; do cd $i && cmake -S . -B build && cd build && make && cd .. && cd .. || exit 1; done; cd ..
 
       - name: Run Tests
         working-directory: thingsetplusplus
