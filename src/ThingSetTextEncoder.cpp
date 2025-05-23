@@ -48,13 +48,13 @@ template <typename T> inline bool ThingSetTextEncoder::encodeSimpleValue(T value
     // todo move this to a getFutureEncodedLength in header file?
     int bytes_required = snprintf(nullptr, 0, format, value); // determine the length of value as a string
 
-    if (sizeof(this->_rsp) < this->_rsp_pos + bytes_required) {
+    if (sizeof(_rsp) < _rsp_pos + bytes_required) {
         return false;
     }
 
     // todo use getEncodedLength instead of sizeof section here?
-    int bytes_written = snprintf(this->_rsp + this->_rsp_pos, sizeof(this->_rsp) - this->_rsp_pos, format, value);
-    this->_rsp_pos += bytes_written;
+    int bytes_written = snprintf(_rsp + _rsp_pos, sizeof(_rsp) - _rsp_pos, format, value);
+    _rsp_pos += bytes_written;
 
     return true;
 }
@@ -133,12 +133,12 @@ bool ThingSetTextEncoder::encode(double *value)
 // todo bool may not be needed as handled by int (1/0 instead of true/false)
 // bool ThingSetTextEncoder::encode(const bool &value)
 // {
-//     return zcbor_bool_put(this->getState(), value);
+//     return zcbor_bool_put(getState(), value);
 // }
 
 // bool ThingSetTextEncoder::encode(bool &value)
 // {
-//     return zcbor_bool_put(this->getState(), value);
+//     return zcbor_bool_put(getState(), value);
 // }
 
 bool ThingSetTextEncoder::encode(const uint8_t &value)
@@ -264,6 +264,7 @@ bool ThingSetTextEncoder::encodeNull()
 
 bool ThingSetTextEncoder::encodeMapStart()
 {
+    _depth++;
     return encodeSimpleValue('{', "%c");
 }
 
@@ -274,11 +275,12 @@ bool ThingSetTextEncoder::encodeMapStart(uint32_t count)
 
 bool ThingSetTextEncoder::encodeMapEnd()
 {
-    if (this->_rsp[this->_rsp_pos--] == ',') {
-        this->_rsp_pos--;
-    }
+    _depth--;
+    _rsp_pos--;
     bool ret = encodeSimpleValue('}', "%c");
-    ret |= encodeSimpleValue(',', "%c");
+    if (_depth != 0) {
+        ret |= encodeSimpleValue(',', "%c");
+    }
     return ret;
 }
 
@@ -289,6 +291,7 @@ bool ThingSetTextEncoder::encodeMapEnd(uint32_t count)
 
 bool ThingSetTextEncoder::encodeListStart()
 {
+    _depth++;
     return encodeSimpleValue('[', "%c");
 }
 
@@ -299,11 +302,13 @@ bool ThingSetTextEncoder::encodeListStart(uint32_t count)
 
 bool ThingSetTextEncoder::encodeListEnd()
 {
-    if (this->_rsp[this->_rsp_pos--] == ',') {
-        this->_rsp_pos--;
-    }
+    // todo tidy this
+    _depth--;
+    _rsp_pos--;
     bool ret = encodeSimpleValue(']', "%c");
-    ret |= encodeSimpleValue(',', "%c");
+    if (_depth != 0) {
+        ret |= encodeSimpleValue(',', "%c");
+    }
     return ret;
 }
 
