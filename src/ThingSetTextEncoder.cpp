@@ -268,7 +268,7 @@ bool ThingSetTextEncoder::encodeNull()
 bool ThingSetTextEncoder::encodeMapStart()
 {
     _depth++;
-    return addResponseValue('{', "%c");
+    return addResponseValue("{", "%s");
 }
 
 bool ThingSetTextEncoder::encodeMapStart(uint32_t count)
@@ -280,9 +280,9 @@ bool ThingSetTextEncoder::encodeMapEnd()
 {
     _depth--;
     _rsp_pos--;
-    bool ret = addResponseValue('}', "%c");
+    bool ret = addResponseValue("}", "%s");
     if (_depth != 0) {
-        ret |= addResponseValue(',', "%c");
+        ret |= addResponseValue(",", "%s");
     }
     return ret;
 }
@@ -295,7 +295,7 @@ bool ThingSetTextEncoder::encodeMapEnd(uint32_t count)
 bool ThingSetTextEncoder::encodeListStart()
 {
     _depth++;
-    return addResponseValue('[', "%c");
+    return addResponseValue("[", "%s");
 }
 
 bool ThingSetTextEncoder::encodeListStart(uint32_t count)
@@ -307,9 +307,9 @@ bool ThingSetTextEncoder::encodeListEnd()
 {
     _depth--;
     _rsp_pos--;
-    bool ret = addResponseValue(']', "%c");
+    bool ret = addResponseValue("]", "%s");
     if (_depth != 0) {
-        ret |= addResponseValue(',', "%c");
+        ret |= addResponseValue(",", "%s");
     }
     return ret;
 }

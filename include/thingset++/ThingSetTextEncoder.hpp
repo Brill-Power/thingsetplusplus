@@ -48,6 +48,11 @@ public:
         _depth = 0;
     }
 
+    size_t getEncodedLength()
+    {
+        return _rsp_pos;
+    }
+
     template <typename T> inline bool addResponseValue(T value, const char *format)
     {
 
