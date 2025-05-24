@@ -8,13 +8,19 @@
 #include "thingset++/ThingSetClientTransport.hpp"
 #include <cstdint>
 #include <cstdio>
+#include <string>
+#ifdef __ZEPHYR__
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
+#else
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
 
-/// @brief Client transport using Zephyr sockets.
+/// @brief Client transport using POSIX sockets.
 class ThingSetSocketClientTransport : public ThingSetClientTransport
 {
     private:
@@ -22,7 +28,7 @@ class ThingSetSocketClientTransport : public ThingSetClientTransport
         int _socketHandle;
 
     public:
-        ThingSetSocketClientTransport(struct net_if *iface, const char *ip);
+        ThingSetSocketClientTransport(const std::string &ip);
         ~ThingSetSocketClientTransport();
 
         bool connect() override;

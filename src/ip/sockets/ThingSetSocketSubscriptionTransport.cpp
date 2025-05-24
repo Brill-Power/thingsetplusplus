@@ -5,8 +5,9 @@
  */
 
 #include "thingset++/ip/sockets/ThingSetSocketSubscriptionTransport.hpp"
-#include "thingset++/ip/sockets/ZephyrSocketStubs.h"
+#include "thingset++/ip/sockets/ZephyrStubs.h"
 #include "thingset++/ThingSetStatus.hpp"
+#ifdef __ZEPHYR__
 #include <assert.h>
 #include <zephyr/kernel.h>
 
@@ -15,10 +16,15 @@
 
 K_THREAD_STACK_DEFINE(subscribe_thread_stack, SUBSCRIBE_THREAD_STACK_SIZE);
 static struct k_thread subscribe_thread;
+#else
+#include <sys/socket.h>
+#include <unistd.h>
+#define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
+#endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
 
-ThingSetSocketSubscriptionTransport::ThingSetSocketSubscriptionTransport(net_if *iface) : _listenSocketHandle(-1)
+_ThingSetSocketSubscriptionTransport::_ThingSetSocketSubscriptionTransport() : _listenSocketHandle(-1)
 {
     _listenAddress.sin_addr.s_addr = 0x0;
     _listenAddress.sin_family = AF_INET;
@@ -28,13 +34,13 @@ ThingSetSocketSubscriptionTransport::ThingSetSocketSubscriptionTransport(net_if 
     __ASSERT(_listenSocketHandle >= 0, "Failed to create UDP socket: %d", errno);
 }
 
-ThingSetSocketSubscriptionTransport::~ThingSetSocketSubscriptionTransport()
+_ThingSetSocketSubscriptionTransport::~_ThingSetSocketSubscriptionTransport()
 {
     close(_listenSocketHandle);
     _listenSocketHandle = -1;
 }
 
-bool ThingSetSocketSubscriptionTransport::subscribe(std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> callback)
+bool _ThingSetSocketSubscriptionTransport::subscribe(std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> callback)
 {
     int ret = bind(_listenSocketHandle, (sockaddr *)&_listenAddress, sizeof(_listenAddress));
 
@@ -43,20 +49,12 @@ bool ThingSetSocketSubscriptionTransport::subscribe(std::function<void(const Soc
     }
 
     _callback = callback;
-    _listenerThreadId =
-        k_thread_create(&subscribe_thread, subscribe_thread_stack, K_THREAD_STACK_SIZEOF(subscribe_thread_stack),
-                        runSubscriber, this, NULL, NULL, SUBSCRIBE_THREAD_PRIORITY, 0, K_NO_WAIT);
+    startThread();
 
     return true;
 }
 
-void ThingSetSocketSubscriptionTransport::runSubscriber(void *p1, void *, void *)
-{
-    ThingSetSocketSubscriptionTransport *transport = static_cast<ThingSetSocketSubscriptionTransport *>(p1);
-    transport->runSubscriber();
-}
-
-void ThingSetSocketSubscriptionTransport::runSubscriber()
+void _ThingSetSocketSubscriptionTransport::runListener()
 {
     for (;;) {
         SocketEndpoint sourceAddress;
@@ -77,5 +75,29 @@ void ThingSetSocketSubscriptionTransport::runSubscriber()
         }
     }
 }
+
+#ifdef __ZEPHYR__
+void ThingSetSocketSubscriptionTransport::runListener(void *p1, void *, void *)
+{
+    ThingSetSocketSubscriptionTransport *transport = static_cast<ThingSetSocketSubscriptionTransport *>(p1);
+    transport->runListener();
+}
+
+void ThingSetSocketSubscriptionTransport::startThread()
+{
+    _listenerThreadId =
+        k_thread_create(&subscribe_thread, subscribe_thread_stack, K_THREAD_STACK_SIZEOF(subscribe_thread_stack),
+                        runListener, this, NULL, NULL, SUBSCRIBE_THREAD_PRIORITY, 0, K_NO_WAIT);
+
+}
+#else
+void ThingSetSocketSubscriptionTransport::startThread()
+{
+    _listenerThread = std::thread([&]()
+    {
+        runListener();
+    });
+}
+#endif // __ZEPHYR__
 
 } // namespace ThingSet::Ip::Sockets

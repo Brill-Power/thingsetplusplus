@@ -47,9 +47,9 @@ protected:
     void runHandler();
 };
 
-#ifdef __ZEPHYR__
 class ThingSetSocketServerTransport : public _ThingSetSocketServerTransport
 {
+#ifdef __ZEPHYR__
 private:
     k_tid_t _acceptorThreadId;
     k_tid_t _handlerThreadId;
@@ -66,10 +66,7 @@ private:
     using _ThingSetSocketServerTransport::runHandler;
     static void runAcceptor(void *p1, void *, void *);
     static void runHandler(void *p1, void *, void *);
-};
 #else
-class ThingSetSocketServerTransport : public _ThingSetSocketServerTransport
-{
 private:
     std::thread _acceptorThread;
     std::thread _handlerThread;
@@ -80,7 +77,7 @@ public:
 
 protected:
     void startThreads() override;
+    #endif // __ZEPHYR__
 };
-#endif // __ZEPHYR__
 
 } // namespace ThingSet::Ip::Sockets

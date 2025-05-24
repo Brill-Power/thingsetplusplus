@@ -5,20 +5,26 @@
  */
 
 #include "thingset++/ip/sockets/ThingSetSocketClientTransport.hpp"
-#include "thingset++/ip/sockets/ZephyrSocketStubs.h"
 #include "thingset++/ThingSetStatus.hpp"
 #include <assert.h>
+#ifdef __ZEPHYR__
+#include "thingset++/ip/sockets/ZephyrStubs.h"
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_ip.h>
 #include <zephyr/net/socket.h>
+#else
+#include <unistd.h>
+#define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
+#endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
 
-ThingSetSocketClientTransport::ThingSetSocketClientTransport(struct net_if *iface, const char *ip)
+ThingSetSocketClientTransport::ThingSetSocketClientTransport(const std::string &ip)
     : _socketHandle(-1)
 {
-    net_addr_pton(AF_INET, ip, &_serverAddress.sin_addr);
+    int ret = inet_pton(AF_INET, ip.c_str(), &_serverAddress.sin_addr);
+    __ASSERT(ret == 1, "Failed to parse supplied IP address %s: %d", ip, ret);
     _serverAddress.sin_family = AF_INET;
     _serverAddress.sin_port = htons(9001);
 

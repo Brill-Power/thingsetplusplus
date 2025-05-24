@@ -11,6 +11,7 @@
 #include <thingset++/ip/sockets/ThingSetSocketClientTransport.hpp>
 #include <thingset++/ip/sockets/ThingSetSocketSubscriptionTransport.hpp>
 #include <iostream>
+#include <unistd.h>
 
 using namespace ThingSet;
 using namespace ThingSet::Ip::Sockets;
@@ -42,21 +43,17 @@ std::array<uint8_t, 1024> txBuffer;
 
 int main(int argc, char *argv[])
 {
-    auto ioContext = asio::io_context(1);
-    asio::ip::tcp::endpoint endpoint;
+    std::string endpoint;
     if (argc > 1) {
-        endpoint = asio::ip::tcp::endpoint(asio::ip::make_address(argv[1]), 9001);
+        endpoint = argv[1];
     }
     else {
-        endpoint = asio::ip::tcp::endpoint(asio::ip::address_v4::loopback(), 9001);
+        endpoint = "127.0.0.1";
     }
-    ThingSetSocketClientTransport clientTransport(ioContext, endpoint);
+    ThingSetSocketClientTransport clientTransport(endpoint);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
-    ThingSetAsyncSocketSubscriptionTransport subscriptionTransport(ioContext);
+    ThingSetSocketSubscriptionTransport subscriptionTransport;
     auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
-
-    asio::signal_set signals(ioContext, SIGINT, SIGTERM);
-    signals.async_wait([&](auto, auto) { ioContext.stop(); });
 
     client.connect();
 
@@ -80,6 +77,10 @@ int main(int argc, char *argv[])
         }
     });
 
-    ioContext.run();
+     while (true) {
+
+        sleep(1);
+    }
+
     return 0;
 }
