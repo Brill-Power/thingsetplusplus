@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "thingset++/ip/asio/AsioInterfaceInfo.hpp"
-#include <sys/types.h>
+#include "thingset++/ip/InterfaceInfo.hpp"
+#include <net/if.h>
 #include <ifaddrs.h>
 #include <iostream>
 
-namespace ThingSet::Ip::Async {
+namespace ThingSet::Ip {
 
-bool AsioInterfaceInfo::get(const std::string &interfaceName, asio::ip::address_v4 &address, asio::ip::address_v4 &broadcast)
+bool InterfaceInfo::get(const std::string &interfaceName, in_addr &address, in_addr &subnet)
 {
     ifaddrs *interfaces;
     if (getifaddrs(&interfaces)) {
@@ -23,10 +23,9 @@ bool AsioInterfaceInfo::get(const std::string &interfaceName, asio::ip::address_
         if (interface->ifa_addr && interface->ifa_netmask && interface->ifa_addr->sa_family == AF_INET && (interface->ifa_flags & IFF_UP)) {
             if (interfaceName == interface->ifa_name) {
                 socketAddressInterface = reinterpret_cast<sockaddr_in *>(interface->ifa_addr);
-                address = asio::ip::make_address_v4(ntohl(socketAddressInterface->sin_addr.s_addr));
+                address = socketAddressInterface->sin_addr;
                 socketAddressInterface = reinterpret_cast<sockaddr_in *>(interface->ifa_netmask);
-                auto netmask = asio::ip::make_address_v4(ntohl(socketAddressInterface->sin_addr.s_addr));
-                broadcast = asio::ip::make_address_v4(address.to_uint() | ( ~ netmask.to_uint()));
+                subnet = socketAddressInterface->sin_addr;
                 freeifaddrs(interfaces);
                 return true;
             }

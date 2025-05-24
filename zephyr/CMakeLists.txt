@@ -25,7 +25,7 @@ endif()
 
 if (DEFINED CONFIG_THINGSET_PLUS_PLUS_BACKEND_SOCKET)
     message("ThingSet++ IP socket backend enabled")
-    set(ENABLE_ZSOCK ON)
+    set(ENABLE_SOCKETS ON)
 endif()
 
 add_subdirectory_ifdef(CONFIG_THINGSET_PLUS_PLUS ${THINGSET_BASE}/src build)

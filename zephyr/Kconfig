@@ -32,6 +32,10 @@ config THINGSET_PLUS_PLUS_BACKEND_CAN
 config THINGSET_PLUS_PLUS_BACKEND_SOCKET
 	bool "Enable socket backend"
 	default false
+	select NETWORKING
+	select NET_IPV4
+	select NET_TCP
+	select NET_SOCKETS
 
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus

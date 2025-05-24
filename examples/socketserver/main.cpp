@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2025 Brill Power.
+ * Copyright (c) 2024-2025 Brill Power.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <functional>
+#include <iostream>
+#include <unistd.h>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
-#include <thingset++/ip/StreamingUdpThingSetBinaryEncoder.hpp>
 #include <thingset++/ip/sockets/ThingSetSocketServerTransport.hpp>
-#include <thingset++/ip/sockets/ThingSetSocketSubscriptionTransport.hpp>
-#include <zephyr/net/net_if.h>
 
 using namespace ThingSet;
+using namespace ThingSet::Ip;
 using namespace ThingSet::Ip::Sockets;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
@@ -29,27 +30,26 @@ struct ModuleRecord
     ThingSetReadWriteProperty<0x602, 0x600, "current", float> current;
     ThingSetReadWriteProperty<0x603, 0x600, "error", uint64_t> error;
     ThingSetReadWriteProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadWriteProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>>
-        supercells;
+    ThingSetReadWriteProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
 ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
 ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
 
-ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) {
-    return x + y;
-});
+ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
-int main()
+ThingSetSocketServerTransport getTransport(int argc, char  *argv[])
 {
-    struct net_if *iface = net_if_get_default();
+    if (argc > 1) {
+        return ThingSetSocketServerTransport(argv[1]);
+    } else {
+        return ThingSetSocketServerTransport();
+    }
+}
 
-    char name_buf[16];
-    net_if_get_name(iface, name_buf, 16);
-
-    printk("Using iface: %s\n", name_buf);
-
+int main(int argc, char *argv[])
+{
     moduleRecords = { (ModuleRecord){
                           .voltage = 24.0f,
                           .current = 10.0f,
@@ -84,26 +84,22 @@ int main()
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
 
-    ThingSetSocketServerTransport transport(iface);
+    ThingSetSocketServerTransport transport = getTransport(argc, argv);
     auto server = ThingSetServerBuilder::build(transport);
 
     server.listen();
 
-    while (1) {
-        for (size_t i = 0; i < moduleRecords.size(); i++) {
-            float increment = 0.25 * (std::rand() % 4);
-
+    while (true) {
+        std::cout << "Publishing report" << std::endl;
+        for (int i = 0; i < moduleRecords.size(); i++) {
+            auto increment = 0.25 * (std::rand() % 4);
             if (std::rand() % 1 == 0) {
                 increment *= -1;
             }
-
             moduleRecords[i].voltage += increment;
         }
-
-        // printk("Publishing report\n");
         server.publish(moduleRecords, totalVoltage);
-
-        k_sleep(K_SECONDS(1));
+        sleep(1);
     }
 
     return 0;

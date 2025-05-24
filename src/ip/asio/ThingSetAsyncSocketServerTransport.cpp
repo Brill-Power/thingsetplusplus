@@ -10,7 +10,7 @@
 #include <asio/ip/udp.hpp>
 #include <asio/write.hpp>
 #include <thingset++/ip/asio/ThingSetAsyncSocketServerTransport.hpp>
-#include <thingset++/ip/asio/AsioInterfaceInfo.hpp>
+#include <thingset++/ip/InterfaceInfo.hpp>
 #include <iostream>
 
 #define SOCKET_TRANSPORT_MAX_CONNECTIONS 10
@@ -30,11 +30,11 @@ ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_
 
 ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const std::string &bindInterface) : ThingSetAsyncSocketServerTransport(ioContext)
 {
-    asio::ip::address_v4 address;
-    asio::ip::address_v4 broadcast;
-    AsioInterfaceInfo::get(bindInterface, address, broadcast);
-    _bindAddress = address;
-    _broadcastAddress = broadcast;
+    in_addr address;
+    in_addr subnet;
+    InterfaceInfo::get(bindInterface, address, subnet);
+    _bindAddress = asio::ip::make_address_v4(ntohl(address.s_addr));
+    _broadcastAddress = asio::ip::make_address_v4(ntohl(address.s_addr | (~subnet.s_addr)));
 }
 
 ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) : ThingSetAsyncSocketServerTransport(ioContext, asio::ip::address_v4::any(), asio::ip::address_v4::broadcast())

@@ -3,7 +3,11 @@ if(ENABLE_ASIO)
     add_subdirectory(asio)
 endif()
 
-if (ENABLE_ZSOCK)
+if (ENABLE_SOCKETS)
     message("Zephyr Socket IP support enabled")
-    add_subdirectory(zsock)
+    add_subdirectory(sockets)
+endif()
+
+if (NOT ENABLE_ZEPHYR)
+    target_sources(thingset++ PRIVATE InterfaceInfo.cpp)
 endif()

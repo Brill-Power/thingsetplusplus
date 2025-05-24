@@ -87,7 +87,7 @@ public:
     }
 
 private:
-    int requestCallback(Identifier &identifier, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+    int requestCallback(Identifier &, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
     {
         ThingSetRequestContext context(request, requestLen, response, responseLen);
 
