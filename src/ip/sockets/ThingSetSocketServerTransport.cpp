@@ -108,8 +108,6 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::pair<in_
     int opt_val = 1;
     int ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
     __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
-    ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_BROADCAST, &opt_val, sizeof(opt_val));
-    __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
 
     // local address of listener
     _listenAddress.sin_addr = ipAddressAndSubnet.first;
