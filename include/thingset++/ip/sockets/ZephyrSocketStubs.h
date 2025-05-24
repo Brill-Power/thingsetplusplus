@@ -7,8 +7,8 @@
 
 // Zephyr provides a config flag (CONFIG_POSIX_API) to provide POSIX-compatible
 // method signatures for sockets, but this also imports other APIs (e.g. pthreads)
-// which conflict with other definitions. For now, we create our own limited set
-// of stubs here.
+// which conflict with other definitions (at least when building for native_sim).
+// For now, we create our own limited set of stubs here.
 
 #if defined(__ZEPHYR__)
 
