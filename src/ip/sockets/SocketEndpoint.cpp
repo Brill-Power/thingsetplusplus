@@ -6,6 +6,7 @@
 
 #include "thingset++/ip/sockets/SocketEndpoint.hpp"
 #include "thingset++/ip/sockets/ZephyrStubs.h"
+#include <sys/socket.h>
 
 namespace ThingSet::Ip::Sockets {
 

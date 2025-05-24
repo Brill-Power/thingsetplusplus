@@ -6,6 +6,7 @@
 
 #include "thingset++/ip/InterfaceInfo.hpp"
 #include <net/if.h>
+#include <netinet/in.h>
 #include <ifaddrs.h>
 #include <iostream>
 

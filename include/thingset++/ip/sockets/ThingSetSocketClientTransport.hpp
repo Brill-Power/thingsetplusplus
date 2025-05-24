@@ -16,6 +16,7 @@
 #else
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
