@@ -184,10 +184,7 @@ void _ThingSetSocketServerTransport::runHandler()
                     printf("Receive error: %d\n", errno);
                 }
                 else if (rx_len == 0) {
-                    char ip[INET_ADDRSTRLEN];
-
                     getsockname(client_sock, (sockaddr *)&addr, &len);
-                    inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
 
                     //printf("Closing connection from %s\n", ip);
                     std::cout << "Closing connection from " << addr << std::endl;
