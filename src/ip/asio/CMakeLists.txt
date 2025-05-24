@@ -1,4 +1,4 @@
-target_sources(thingset++ PRIVATE AsioInterfaceInfo.cpp
+target_sources(thingset++ PRIVATE
     ThingSetAsyncSocketServerTransport.cpp
     ThingSetAsyncSocketSubscriptionTransport.cpp
     ThingSetAsyncSocketClientTransport.cpp)

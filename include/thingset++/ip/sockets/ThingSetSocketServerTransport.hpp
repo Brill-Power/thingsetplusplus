@@ -15,8 +15,8 @@
 #include <zephyr/net/socket.h>
 #else
 #include <thread>
-#include <net/socket.h>
-#include <net/net_if.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 #endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
@@ -46,6 +46,7 @@ public:
     ThingSetSocketServerTransport(net_if *iface);
 #else
     ThingSetSocketServerTransport();
+    ThingSetSocketServerTransport(const std::string &interface);
 #endif // __ZEPHYR__
     ~ThingSetSocketServerTransport();
 
@@ -58,9 +59,6 @@ private:
 #ifdef __ZEPHYR__
     static void runAcceptor(void *p1, void *, void *);
     static void runHandler(void *p1, void *, void *);
-#else
-    // static void runAcceptor(void *p1);
-    // static void runHandler(void *p1);
 #endif // __ZEPHYR__
     void runAcceptor();
     void runHandler();

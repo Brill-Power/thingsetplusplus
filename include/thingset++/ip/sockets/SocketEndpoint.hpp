@@ -5,8 +5,12 @@
  */
 #pragma once
 
+#ifdef __ZEPHYR__
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
+#else
+#include <arpa/inet.h>
+#endif // __ZEPHYR__
 #include <ostream>
 
 namespace ThingSet::Ip::Sockets {

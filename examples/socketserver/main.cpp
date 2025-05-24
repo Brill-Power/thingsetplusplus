@@ -38,28 +38,12 @@ ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> mo
 
 ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
-void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer<asio::ip::tcp::endpoint, THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<asio::ip::tcp::endpoint>> *server)
-{
-    std::cout << "Publishing report" << std::endl;
-    for (int i = 0; i < moduleRecords.size(); i++) {
-        auto increment = 0.25 * (std::rand() % 4);
-        if (std::rand() % 1 == 0) {
-            increment *= -1;
-        }
-        moduleRecords[i].voltage += increment;
-    }
-    server->publish(moduleRecords, totalVoltage);
-
-    t->expires_at(t->expiry() + asio::chrono::seconds(1));
-    t->async_wait(std::bind(publishCallback, asio::placeholders::error, t, server));
-}
-
-ThingSetAsyncSocketServerTransport getTransport(asio::io_context &ioContext, int argc, char  *argv[])
+ThingSetSocketServerTransport getTransport(int argc, char  *argv[])
 {
     if (argc > 1) {
-        return ThingSetAsyncSocketServerTransport(ioContext, argv[1]);
+        return ThingSetSocketServerTransport(argv[1]);
     } else {
-        return ThingSetAsyncSocketServerTransport(ioContext);
+        return ThingSetSocketServerTransport();
     }
 }
 
@@ -99,15 +83,23 @@ int main(int argc, char *argv[])
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
 
-    asio::io_context ioContext(1);
-
-    ThingSetAsyncSocketServerTransport transport = getTransport(ioContext, argc, argv);
+    ThingSetSocketServerTransport transport = getTransport(argc, argv);
     auto server = ThingSetServerBuilder::build(transport);
 
-    asio::steady_timer t(ioContext, asio::chrono::seconds(1));
-    t.async_wait(std::bind(publishCallback, asio::placeholders::error, &t, &server));
-
     server.listen();
-    ioContext.run();
+
+    while (true) {
+        std::cout << "Publishing report" << std::endl;
+        for (int i = 0; i < moduleRecords.size(); i++) {
+            auto increment = 0.25 * (std::rand() % 4);
+            if (std::rand() % 1 == 0) {
+                increment *= -1;
+            }
+            moduleRecords[i].voltage += increment;
+        }
+        server.publish(moduleRecords, totalVoltage);
+        sleep(1);
+    }
+
     return 0;
 }

@@ -5,7 +5,6 @@
  */
 
 #include "thingset++/ip/sockets/ThingSetSocketServerTransport.hpp"
-#include "thingset++/ip/sockets/ZephyrSocketStubs.h"
 #include <assert.h>
 #include <array>
 #include <iostream>
@@ -17,6 +16,7 @@
 #define MAX_CLIENTS               8
 
 #ifdef __ZEPHYR__
+#include "thingset++/ip/sockets/ZephyrStubs.h"
 #include <zephyr/kernel.h>
 
 K_THREAD_STACK_DEFINE(accept_thread_stack, ACCEPT_THREAD_STACK_SIZE);
@@ -24,6 +24,10 @@ static struct k_thread accept_thread;
 
 K_THREAD_STACK_DEFINE(handler_thread_stack, HANDLER_THREAD_STACK_SIZE);
 static struct k_thread handler_thread;
+#else
+#include "thingset++/ip/InterfaceInfo.hpp"
+#include <poll.h>
+#define __ASSERT(test, fmt, ...) { }
 #endif // __ZEPHYR__
 
 struct PollDescriptor : public pollfd {
@@ -52,18 +56,29 @@ static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
 ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : ThingSetSocketServerTransport(getIpAndSubnetForInterface(iface))
 {}
 #else
-static std::pair<in_addr, in_addr> getIpAndSubnet()
+static std::pair<in_addr, in_addr> getDefaultIpAndSubnet()
 {
     in_addr ipAddress = {
         .s_addr = 0x0,
     };
     in_addr subnet = {
-        .s_addr = 0x00ffffff,
+        .s_addr = 0x00000000,
     };
     return std::make_pair(ipAddress, subnet);
 }
 
-ThingSetSocketServerTransport::ThingSetSocketServerTransport() : ThingSetSocketServerTransport(getIpAndSubnet())
+static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(const std::string &interface)
+{
+    in_addr address;
+    in_addr subnet;
+    InterfaceInfo::get(interface, address, subnet);
+    return std::make_pair(address, subnet);
+}
+
+ThingSetSocketServerTransport::ThingSetSocketServerTransport() : ThingSetSocketServerTransport(getDefaultIpAndSubnet())
+{}
+
+ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::string &interface) : ThingSetSocketServerTransport(getIpAndSubnetForInterface(interface))
 {}
 #endif // __ZEPHYR__
 
@@ -77,6 +92,9 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::pair<in_
         .sin_addr = {
             .s_addr = ipAddressAndSubnet.first.s_addr | (~ipAddressAndSubnet.second.s_addr)
         },
+#ifndef __ZEPHYR__
+        .sin_zero = 0,
+#endif
     };
 
     // local address of publish socket
@@ -89,6 +107,8 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::pair<in_
 
     int opt_val = 1;
     int ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
+    __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
+    ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_BROADCAST, &opt_val, sizeof(opt_val));
     __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
 
     // local address of listener
@@ -126,8 +146,14 @@ bool ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoin
     _acceptorThreadId = k_thread_create(&accept_thread, accept_thread_stack, K_THREAD_STACK_SIZEOF(accept_thread_stack),
                                   runAcceptor, this, NULL, NULL, ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
 #else
-    _handlerThread = std::thread(runHandler, this);
-    _acceptorThread = std::thread(runAcceptor, this);
+    _handlerThread = std::thread([&]()
+    {
+        runHandler();
+    });
+    _acceptorThread = std::thread([&]()
+    {
+        runAcceptor();
+    });
 #endif // __ZEPHYR__
 
     return true;
@@ -161,7 +187,7 @@ void ThingSetSocketServerTransport::runAcceptor(void *p1, void *, void *)
 void ThingSetSocketServerTransport::runAcceptor()
 {
     if (::listen(_listenSocketHandle, MAX_CLIENTS) != 0) {
-        printk("Failed to begin listening: %d\n", errno);
+        printf("Failed to begin listening: %d\n", errno);
         return;
     }
 
@@ -172,18 +198,18 @@ void ThingSetSocketServerTransport::runAcceptor()
 
         int client_sock = accept(_listenSocketHandle, (sockaddr *)&client_addr, &client_addr_len);
         if (client_sock < 0) {
-            printk("Accept failed: %d\n", errno);
+            printf("Accept failed: %d\n", errno);
             continue;
         }
 
         inet_ntop(client_addr.sin_family, &client_addr.sin_addr, client_addr_str,
                         sizeof(client_addr_str));
-        printk("Connection from %s\n", client_addr_str);
+        printf("Connection from %s\n", client_addr_str);
 
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (sockfd_tcp[i].fd == -1) {
                 sockfd_tcp[i].fd = client_sock;
-                printk("Assigned slot %d\n", i);
+                printf("Assigned slot %d\n", i);
                 break;
             }
         }
@@ -204,7 +230,7 @@ void ThingSetSocketServerTransport::runHandler()
         int ret = poll(sockfd_tcp.data(), sockfd_tcp.size(), 10);
 
         if (ret < 0) {
-            printk("Polling error: %d\n", errno);
+            printf("Polling error: %d\n", errno);
         }
         else if (ret == 0) {
             continue;
@@ -213,7 +239,7 @@ void ThingSetSocketServerTransport::runHandler()
         SocketEndpoint addr;
         socklen_t len = sizeof(addr);
         for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (sockfd_tcp[i].revents & ZSOCK_POLLIN) {
+            if (sockfd_tcp[i].revents & POLLIN) {
                 int client_sock = sockfd_tcp[i].fd;
                 int rx_len = 0;
                 uint8_t rx_buf[1024];
@@ -222,7 +248,7 @@ void ThingSetSocketServerTransport::runHandler()
                 rx_len = recv(client_sock, rx_buf, sizeof(rx_buf), 0);
 
                 if (rx_len < 0) {
-                    printk("Receive error: %d\n", errno);
+                    printf("Receive error: %d\n", errno);
                 }
                 else if (rx_len == 0) {
                     char ip[INET_ADDRSTRLEN];
@@ -230,7 +256,7 @@ void ThingSetSocketServerTransport::runHandler()
                     getsockname(client_sock, (sockaddr *)&addr, &len);
                     inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
 
-                    //printk("Closing connection from %s\n", ip);
+                    //printf("Closing connection from %s\n", ip);
                     std::cout << "Closing connection from " << addr << std::endl;
 
                     close(client_sock);

@@ -5,7 +5,7 @@
  */
 
 #include "thingset++/ip/sockets/SocketEndpoint.hpp"
-#include "thingset++/ip/sockets/ZephyrSocketStubs.h"
+#include "thingset++/ip/sockets/ZephyrStubs.h"
 
 namespace ThingSet::Ip::Sockets {
 
