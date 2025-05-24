@@ -62,7 +62,7 @@ private:
             }
         }
 
-        ThingSetAccess getAccess() const
+        ThingSetAccess getAccess() const override
         {
             return ThingSetAccess::userRead;
         }

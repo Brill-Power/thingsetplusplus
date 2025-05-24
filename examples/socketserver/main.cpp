@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <iostream>
+#include <unistd.h>
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ip/sockets/ThingSetSocketServerTransport.hpp>

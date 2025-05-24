@@ -27,6 +27,8 @@ static struct k_thread handler_thread;
 #else
 #include "thingset++/ip/InterfaceInfo.hpp"
 #include <poll.h>
+#include <netinet/in.h>
+#include <unistd.h>
 #define __ASSERT(test, fmt, ...) { }
 #endif // __ZEPHYR__
 
@@ -86,15 +88,10 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::pair<in_
     : _publishSocketHandle(-1), _listenSocketHandle(-1)
 {
     // calculate broadcast address
-    _broadcastAddress = {
-        .sin_family = AF_INET,
-        .sin_port = htons(9002),
-        .sin_addr = {
-            .s_addr = ipAddressAndSubnet.first.s_addr | (~ipAddressAndSubnet.second.s_addr)
-        },
-#ifndef __ZEPHYR__
-        .sin_zero = 0,
-#endif
+    _broadcastAddress.sin_family = AF_INET;
+    _broadcastAddress.sin_port = htons(9002);
+    _broadcastAddress.sin_addr = {
+        .s_addr = ipAddressAndSubnet.first.s_addr | (~ipAddressAndSubnet.second.s_addr)
     };
 
     // local address of publish socket
