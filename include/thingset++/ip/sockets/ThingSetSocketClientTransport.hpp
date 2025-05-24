@@ -12,22 +12,22 @@
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
 
-namespace ThingSet::Ip::Zsock {
+namespace ThingSet::Ip::Sockets {
 
 /// @brief Client transport using Zephyr sockets.
-class ThingSetZephyrSocketClientTransport : public ThingSetClientTransport
+class ThingSetSocketClientTransport : public ThingSetClientTransport
 {
     private:
         struct sockaddr_in _serverAddress;
         int _socketHandle;
 
     public:
-        ThingSetZephyrSocketClientTransport(struct net_if *iface, const char *ip);
-        ~ThingSetZephyrSocketClientTransport();
+        ThingSetSocketClientTransport(struct net_if *iface, const char *ip);
+        ~ThingSetSocketClientTransport();
 
         bool connect() override;
         int read(uint8_t *buffer, size_t len) override;
         bool write(uint8_t *buffer, size_t len) override;
 };
 
-} // namespace ThingSet::Ip::Zsock
+} // namespace ThingSet::Ip::Sockets

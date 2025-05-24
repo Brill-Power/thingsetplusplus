@@ -7,12 +7,12 @@
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ip/StreamingUdpThingSetBinaryEncoder.hpp>
-#include <thingset++/ip/zsock/ThingSetZephyrSocketServerTransport.hpp>
-#include <thingset++/ip/zsock/ThingSetZephyrSocketSubscriptionTransport.hpp>
+#include <thingset++/ip/sockets/ThingSetSocketServerTransport.hpp>
+#include <thingset++/ip/sockets/ThingSetSocketSubscriptionTransport.hpp>
 #include <zephyr/net/net_if.h>
 
 using namespace ThingSet;
-using namespace ThingSet::Ip::Zsock;
+using namespace ThingSet::Ip::Sockets;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
@@ -84,7 +84,7 @@ int main()
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
 
-    ThingSetZephyrSocketServerTransport transport(iface);
+    ThingSetSocketServerTransport transport(iface);
     auto server = ThingSetServerBuilder::build(transport);
 
     server.listen();

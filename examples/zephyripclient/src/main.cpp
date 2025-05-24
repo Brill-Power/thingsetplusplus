@@ -7,13 +7,13 @@
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetClient.hpp>
 #include <thingset++/ThingSetListener.hpp>
-#include <thingset++/ip/zsock/ThingSetZephyrSocketClientTransport.hpp>
-#include <thingset++/ip/zsock/ThingSetZephyrSocketSubscriptionTransport.hpp>
+#include <thingset++/ip/sockets/ThingSetSocketClientTransport.hpp>
+#include <thingset++/ip/sockets/ThingSetSocketSubscriptionTransport.hpp>
 #include <zephyr/net/net_if.h>
 #include <iostream>
 
 using namespace ThingSet;
-using namespace ThingSet::Ip::Zsock;
+using namespace ThingSet::Ip::Sockets;
 
 ThingSetGroup<0x600, 0, "Modules"> modules;
 ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
@@ -50,9 +50,9 @@ int main()
 
     printk("Using iface: %s\n", name_buf);
 
-    ThingSetZephyrSocketClientTransport clientTransport(iface, CONFIG_NET_CONFIG_PEER_IPV4_ADDR);
+    ThingSetSocketClientTransport clientTransport(iface, CONFIG_NET_CONFIG_PEER_IPV4_ADDR);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
-    ThingSetZephyrSocketSubscriptionTransport subscriptionTransport(iface);
+    ThingSetSocketSubscriptionTransport subscriptionTransport(iface);
     auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
 
     client.connect();

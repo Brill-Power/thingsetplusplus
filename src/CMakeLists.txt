@@ -22,7 +22,7 @@ if (ENABLE_CAN OR ENABLE_SOCKETCAN)
     add_subdirectory(can)
 endif()
 
-if (ENABLE_ZSOCK)
+if (ENABLE_SOCKETS)
     add_subdirectory(ip)
 endif()
 

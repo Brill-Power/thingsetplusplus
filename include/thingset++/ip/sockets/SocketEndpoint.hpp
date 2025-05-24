@@ -9,11 +9,11 @@
 #include <zephyr/net/socket.h>
 #include <ostream>
 
-namespace ThingSet::Ip::Zsock {
+namespace ThingSet::Ip::Sockets {
 
 class SocketEndpoint : public sockaddr_in {
 };
 
 std::ostream &operator<<(std::ostream &os, SocketEndpoint &ep);
 
-} // namespace ThingSet::Ip::Zsock
+} // namespace ThingSet::Ip::Sockets

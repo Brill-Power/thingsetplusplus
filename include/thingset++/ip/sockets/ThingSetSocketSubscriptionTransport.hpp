@@ -5,16 +5,16 @@
  */
 #pragma once
 
-#include "thingset++/ip/zsock/SocketEndpoint.hpp"
+#include "thingset++/ip/sockets/SocketEndpoint.hpp"
 #include "thingset++/ThingSetSubscriptionTransport.hpp"
 #include <cstdint>
 #include <cstdio>
 #include <zephyr/net/net_if.h>
 
-namespace ThingSet::Ip::Zsock {
+namespace ThingSet::Ip::Sockets {
 
 /// @brief Subscription transport for Zephyr sockets.
-class ThingSetZephyrSocketSubscriptionTransport : public ThingSetSubscriptionTransport<SocketEndpoint>
+class ThingSetSocketSubscriptionTransport : public ThingSetSubscriptionTransport<SocketEndpoint>
 {
 private:
     sockaddr_in _listenAddress;
@@ -24,8 +24,8 @@ private:
     std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> _callback;
 
 public:
-    ThingSetZephyrSocketSubscriptionTransport(net_if *iface);
-    ~ThingSetZephyrSocketSubscriptionTransport();
+    ThingSetSocketSubscriptionTransport(net_if *iface);
+    ~ThingSetSocketSubscriptionTransport();
 
     bool subscribe(std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> callback) override;
 
@@ -34,4 +34,4 @@ private:
     void runSubscriber();
 };
 
-} // namespace ThingSet::Ip::Zsock
+} // namespace ThingSet::Ip::Sockets

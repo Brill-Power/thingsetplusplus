@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "thingset++/ip/zsock/ThingSetZephyrSocketServerTransport.hpp"
+#include "thingset++/ip/sockets/ThingSetSocketServerTransport.hpp"
+#include "thingset++/ip/sockets/ZephyrSocketStubs.h"
 #include <assert.h>
 #include <zephyr/kernel.h>
-#include <zephyr/posix/poll.h>
 #include <array>
 #include <iostream>
 
@@ -34,9 +34,9 @@ public:
 
 static std::array<PollDescriptor, MAX_CLIENTS> sockfd_tcp;
 
-namespace ThingSet::Ip::Zsock {
+namespace ThingSet::Ip::Sockets {
 
-ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(net_if *iface)
+ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface)
     : _publishSocketHandle(-1), _listenSocketHandle(-1), _acceptorThreadId(nullptr), _handlerThreadId(nullptr)
 {
     // find IP address associated with interface
@@ -58,11 +58,11 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(net_if 
     _publishAddress.sin_family = AF_INET;
     _publishAddress.sin_port = 0;
 
-    _publishSocketHandle = zsock_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    _publishSocketHandle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     __ASSERT(_publishSocketHandle >= 0, "Failed to create UDP socket: %d", errno);
 
     int opt_val = 1;
-    ret = zsock_setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
+    ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
     __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
 
     // local address of listener
@@ -70,25 +70,25 @@ ThingSetZephyrSocketServerTransport::ThingSetZephyrSocketServerTransport(net_if 
     _listenAddress.sin_family = AF_INET;
     _listenAddress.sin_port = htons(9001);
 
-    _listenSocketHandle = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    _listenSocketHandle = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     __ASSERT(_listenSocketHandle >= 0, "Failed to create TCP socket: %d", errno);
 }
 
-ThingSetZephyrSocketServerTransport::~ThingSetZephyrSocketServerTransport()
+ThingSetSocketServerTransport::~ThingSetSocketServerTransport()
 {
-    zsock_close(_publishSocketHandle);
-    zsock_close(_listenSocketHandle);
+    close(_publishSocketHandle);
+    close(_listenSocketHandle);
     _publishSocketHandle = -1;
     _listenSocketHandle = -1;
 }
 
-bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
-    if (zsock_bind(_publishSocketHandle, (struct sockaddr *)&_publishAddress, sizeof(_publishAddress))) {
+    if (bind(_publishSocketHandle, (struct sockaddr *)&_publishAddress, sizeof(_publishAddress))) {
         return false;
     }
 
-    if (zsock_bind(_listenSocketHandle, (struct sockaddr *)&_listenAddress, sizeof(_listenAddress))) {
+    if (bind(_listenSocketHandle, (struct sockaddr *)&_listenAddress, sizeof(_listenAddress))) {
         return false;
     }
 
@@ -102,11 +102,11 @@ bool ThingSetZephyrSocketServerTransport::listen(std::function<int(const SocketE
     return true;
 }
 
-bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
+bool ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 {
     sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
-    if (zsock_getsockname(_publishSocketHandle, (struct sockaddr *)&addr, &addr_len) != 0) {
+    if (getsockname(_publishSocketHandle, (struct sockaddr *)&addr, &addr_len) != 0) {
         return false;
     }
 
@@ -115,19 +115,19 @@ bool ThingSetZephyrSocketServerTransport::publish(uint8_t *buffer, size_t len)
         return false;
     }
 
-    ssize_t sent = zsock_sendto(_publishSocketHandle, buffer, len, 0, (struct sockaddr *)&_broadcastAddress, sizeof(_broadcastAddress));
+    ssize_t sent = sendto(_publishSocketHandle, buffer, len, 0, (struct sockaddr *)&_broadcastAddress, sizeof(_broadcastAddress));
     return sent == (ssize_t)len;
 }
 
-void ThingSetZephyrSocketServerTransport::runAcceptor(void *p1, void *, void *)
+void ThingSetSocketServerTransport::runAcceptor(void *p1, void *, void *)
 {
-    ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
+    ThingSetSocketServerTransport *transport = static_cast<ThingSetSocketServerTransport *>(p1);
     transport->runAcceptor();
 }
 
-void ThingSetZephyrSocketServerTransport::runAcceptor()
+void ThingSetSocketServerTransport::runAcceptor()
 {
-    if (zsock_listen(_listenSocketHandle, MAX_CLIENTS) != 0) {
+    if (::listen(_listenSocketHandle, MAX_CLIENTS) != 0) {
         printk("Failed to begin listening: %d\n", errno);
         return;
     }
@@ -137,13 +137,13 @@ void ThingSetZephyrSocketServerTransport::runAcceptor()
         socklen_t client_addr_len = sizeof(client_addr);
         char client_addr_str[INET_ADDRSTRLEN];
 
-        int client_sock = zsock_accept(_listenSocketHandle, (sockaddr *)&client_addr, &client_addr_len);
+        int client_sock = accept(_listenSocketHandle, (sockaddr *)&client_addr, &client_addr_len);
         if (client_sock < 0) {
             printk("Accept failed: %d\n", errno);
             continue;
         }
 
-        zsock_inet_ntop(client_addr.sin_family, &client_addr.sin_addr, client_addr_str,
+        inet_ntop(client_addr.sin_family, &client_addr.sin_addr, client_addr_str,
                         sizeof(client_addr_str));
         printk("Connection from %s\n", client_addr_str);
 
@@ -157,16 +157,16 @@ void ThingSetZephyrSocketServerTransport::runAcceptor()
     }
 }
 
-void ThingSetZephyrSocketServerTransport::runHandler(void *p1, void *, void *)
+void ThingSetSocketServerTransport::runHandler(void *p1, void *, void *)
 {
-    ThingSetZephyrSocketServerTransport *transport = static_cast<ThingSetZephyrSocketServerTransport *>(p1);
+    ThingSetSocketServerTransport *transport = static_cast<ThingSetSocketServerTransport *>(p1);
     transport->runHandler();
 }
 
-void ThingSetZephyrSocketServerTransport::runHandler()
+void ThingSetSocketServerTransport::runHandler()
 {
     while (true) {
-        int ret = zsock_poll(sockfd_tcp.data(), sockfd_tcp.size(), 10);
+        int ret = poll(sockfd_tcp.data(), sockfd_tcp.size(), 10);
 
         if (ret < 0) {
             printk("Polling error: %d\n", errno);
@@ -184,7 +184,7 @@ void ThingSetZephyrSocketServerTransport::runHandler()
                 uint8_t rx_buf[1024];
                 uint8_t tx_buf[1024];
 
-                rx_len = zsock_recv(client_sock, rx_buf, sizeof(rx_buf), 0);
+                rx_len = recv(client_sock, rx_buf, sizeof(rx_buf), 0);
 
                 if (rx_len < 0) {
                     printk("Receive error: %d\n", errno);
@@ -192,23 +192,23 @@ void ThingSetZephyrSocketServerTransport::runHandler()
                 else if (rx_len == 0) {
                     char ip[INET_ADDRSTRLEN];
 
-                    zsock_getsockname(client_sock, (sockaddr *)&addr, &len);
-                    zsock_inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
+                    getsockname(client_sock, (sockaddr *)&addr, &len);
+                    inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
 
                     //printk("Closing connection from %s\n", ip);
                     std::cout << "Closing connection from " << addr << std::endl;
 
-                    zsock_close(client_sock);
+                    close(client_sock);
                     sockfd_tcp[i].fd = -1;
                 }
                 else {
-                    zsock_getsockname(client_sock, (sockaddr *)&addr, &len);
+                    getsockname(client_sock, (sockaddr *)&addr, &len);
                     auto tx_len = _callback(addr, rx_buf, rx_len, tx_buf, sizeof(tx_buf));
-                    zsock_send(client_sock, tx_buf, tx_len, 0);
+                    send(client_sock, tx_buf, tx_len, 0);
                 }
             }
         }
     }
 }
 
-} // namespace ThingSet::Ip::Zsock
+} // namespace ThingSet::Ip::Sockets

@@ -6,16 +6,16 @@
 #pragma once
 
 #include "thingset++/ip/ThingSetIpServerTransport.hpp"
-#include "thingset++/ip/zsock/SocketEndpoint.hpp"
+#include "thingset++/ip/sockets/SocketEndpoint.hpp"
 #include <cstdint>
 #include <cstdio>
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
 
-namespace ThingSet::Ip::Zsock {
+namespace ThingSet::Ip::Sockets {
 
-class ThingSetZephyrSocketServerTransport : public ThingSetIpServerTransport<SocketEndpoint>
+class ThingSetSocketServerTransport : public ThingSetIpServerTransport<SocketEndpoint>
 {
 private:
     sockaddr_in _publishAddress;
@@ -28,8 +28,8 @@ private:
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
 public:
-    ThingSetZephyrSocketServerTransport(net_if *iface);
-    ~ThingSetZephyrSocketServerTransport();
+    ThingSetSocketServerTransport(net_if *iface);
+    ~ThingSetSocketServerTransport();
 
     bool listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
     bool publish(uint8_t *buffer, size_t len) override;
@@ -44,4 +44,4 @@ private:
     void runHandler();
 };
 
-} // namespace ThingSet::Ip::Zsock
+} // namespace ThingSet::Ip::Sockets
