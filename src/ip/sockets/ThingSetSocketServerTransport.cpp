@@ -9,15 +9,16 @@
 #include <array>
 #include <iostream>
 
-#define ACCEPT_THREAD_STACK_SIZE  1024
-#define ACCEPT_THREAD_PRIORITY    3
-#define HANDLER_THREAD_STACK_SIZE 4096
-#define HANDLER_THREAD_PRIORITY   2
 #define MAX_CLIENTS               8
 
 #ifdef __ZEPHYR__
 #include "thingset++/ip/sockets/ZephyrStubs.h"
 #include <zephyr/kernel.h>
+
+#define ACCEPT_THREAD_STACK_SIZE  1024
+#define ACCEPT_THREAD_PRIORITY    3
+#define HANDLER_THREAD_STACK_SIZE 4096
+#define HANDLER_THREAD_PRIORITY   2
 
 K_THREAD_STACK_DEFINE(accept_thread_stack, ACCEPT_THREAD_STACK_SIZE);
 static struct k_thread accept_thread;
@@ -29,7 +30,7 @@ static struct k_thread handler_thread;
 #include <poll.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#define __ASSERT(test, fmt, ...) { }
+#define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
 #endif // __ZEPHYR__
 
 struct PollDescriptor : public pollfd {
@@ -45,46 +46,7 @@ static std::array<PollDescriptor, MAX_CLIENTS> sockfd_tcp;
 
 namespace ThingSet::Ip::Sockets {
 
-#ifdef __ZEPHYR__
-static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
-{
-    // find IP address associated with interface
-    net_if_ipv4 *ipConfig;
-    int ret = net_if_config_ipv4_get(iface, &ipConfig);
-    __ASSERT(ret == 0, "Failed to get interface IP information: %d", ret);
-    return std::make_pair(ipConfig->unicast->ipv4.address.in_addr, ipConfig->unicast->netmask);
-}
-
-ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : ThingSetSocketServerTransport(getIpAndSubnetForInterface(iface))
-{}
-#else
-static std::pair<in_addr, in_addr> getDefaultIpAndSubnet()
-{
-    in_addr ipAddress = {
-        .s_addr = 0x0,
-    };
-    in_addr subnet = {
-        .s_addr = 0x00000000,
-    };
-    return std::make_pair(ipAddress, subnet);
-}
-
-static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(const std::string &interface)
-{
-    in_addr address;
-    in_addr subnet;
-    InterfaceInfo::get(interface, address, subnet);
-    return std::make_pair(address, subnet);
-}
-
-ThingSetSocketServerTransport::ThingSetSocketServerTransport() : ThingSetSocketServerTransport(getDefaultIpAndSubnet())
-{}
-
-ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::string &interface) : ThingSetSocketServerTransport(getIpAndSubnetForInterface(interface))
-{}
-#endif // __ZEPHYR__
-
-ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
+_ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
     : _publishSocketHandle(-1), _listenSocketHandle(-1)
 {
     // calculate broadcast address
@@ -102,9 +64,13 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::pair<in_
     _publishSocketHandle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     __ASSERT(_publishSocketHandle >= 0, "Failed to create UDP socket: %d", errno);
 
-    int opt_val = 1;
-    int ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
+    int optionValue = 1;
+    int ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue));
     __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
+#ifndef __ZEPHYR__
+    ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_BROADCAST, &optionValue, sizeof(optionValue));
+    __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
+#endif
 
     // local address of listener
     _listenAddress.sin_addr = ipAddressAndSubnet.first;
@@ -115,7 +81,7 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::pair<in_
     __ASSERT(_listenSocketHandle >= 0, "Failed to create TCP socket: %d", errno);
 }
 
-ThingSetSocketServerTransport::~ThingSetSocketServerTransport()
+_ThingSetSocketServerTransport::~_ThingSetSocketServerTransport()
 {
     close(_publishSocketHandle);
     close(_listenSocketHandle);
@@ -123,7 +89,7 @@ ThingSetSocketServerTransport::~ThingSetSocketServerTransport()
     _listenSocketHandle = -1;
 }
 
-bool ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool _ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     if (bind(_publishSocketHandle, (struct sockaddr *)&_publishAddress, sizeof(_publishAddress))) {
         return false;
@@ -134,27 +100,11 @@ bool ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoin
     }
 
     _callback = callback;
-#ifdef __ZEPHYR__
-    _handlerThreadId = k_thread_create(&handler_thread, handler_thread_stack, K_THREAD_STACK_SIZEOF(handler_thread_stack),
-                                   runHandler, this, NULL, NULL, HANDLER_THREAD_PRIORITY, 0, K_NO_WAIT);
-
-    _acceptorThreadId = k_thread_create(&accept_thread, accept_thread_stack, K_THREAD_STACK_SIZEOF(accept_thread_stack),
-                                  runAcceptor, this, NULL, NULL, ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
-#else
-    _handlerThread = std::thread([&]()
-    {
-        runHandler();
-    });
-    _acceptorThread = std::thread([&]()
-    {
-        runAcceptor();
-    });
-#endif // __ZEPHYR__
-
+    startThreads();
     return true;
 }
 
-bool ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
+bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 {
     sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
@@ -168,18 +118,14 @@ bool ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
     }
 
     ssize_t sent = sendto(_publishSocketHandle, buffer, len, 0, (struct sockaddr *)&_broadcastAddress, sizeof(_broadcastAddress));
+    if (sent < 0) {
+        printf("Failed to send report: %zd %d\n", sent, errno);
+    }
     return sent == (ssize_t)len;
 }
 
-#ifdef __ZEPHYR__
-void ThingSetSocketServerTransport::runAcceptor(void *p1, void *, void *)
-{
-    ThingSetSocketServerTransport *transport = static_cast<ThingSetSocketServerTransport *>(p1);
-    transport->runAcceptor();
-}
-#endif // __ZEPHYR__
 
-void ThingSetSocketServerTransport::runAcceptor()
+void _ThingSetSocketServerTransport::runAcceptor()
 {
     if (::listen(_listenSocketHandle, MAX_CLIENTS) != 0) {
         printf("Failed to begin listening: %d\n", errno);
@@ -211,15 +157,7 @@ void ThingSetSocketServerTransport::runAcceptor()
     }
 }
 
-#ifdef __ZEPHYR__
-void ThingSetSocketServerTransport::runHandler(void *p1, void *, void *)
-{
-    ThingSetSocketServerTransport *transport = static_cast<ThingSetSocketServerTransport *>(p1);
-    transport->runHandler();
-}
-#endif // __ZEPHYR__
-
-void ThingSetSocketServerTransport::runHandler()
+void _ThingSetSocketServerTransport::runHandler()
 {
     while (true) {
         int ret = poll(sockfd_tcp.data(), sockfd_tcp.size(), 10);
@@ -266,5 +204,77 @@ void ThingSetSocketServerTransport::runHandler()
         }
     }
 }
+
+#ifdef __ZEPHYR__
+static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
+{
+    // find IP address associated with interface
+    net_if_ipv4 *ipConfig;
+    int ret = net_if_config_ipv4_get(iface, &ipConfig);
+    __ASSERT(ret == 0, "Failed to get interface IP information: %d", ret);
+    return std::make_pair(ipConfig->unicast->ipv4.address.in_addr, ipConfig->unicast->netmask);
+}
+
+ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(iface))
+{}
+
+void ThingSetSocketServerTransport::startThreads()
+{
+    _handlerThreadId = k_thread_create(&handler_thread, handler_thread_stack, K_THREAD_STACK_SIZEOF(handler_thread_stack),
+                                       runHandler, this, NULL, NULL, HANDLER_THREAD_PRIORITY, 0, K_NO_WAIT);
+
+    _acceptorThreadId = k_thread_create(&accept_thread, accept_thread_stack, K_THREAD_STACK_SIZEOF(accept_thread_stack),
+                                        runAcceptor, this, NULL, NULL, ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
+}
+
+void ThingSetSocketServerTransport::runAcceptor(void *p1, void *, void *)
+{
+    ThingSetSocketServerTransport *transport = static_cast<ThingSetSocketServerTransport *>(p1);
+    transport->runAcceptor();
+}
+
+void ThingSetSocketServerTransport::runHandler(void *p1, void *, void *)
+{
+    ThingSetSocketServerTransport *transport = static_cast<ThingSetSocketServerTransport *>(p1);
+    transport->runHandler();
+}
+#else
+static std::pair<in_addr, in_addr> getDefaultIpAndSubnet()
+{
+    in_addr ipAddress = {
+        .s_addr = 0x0,
+    };
+    in_addr subnet = {
+        .s_addr = 0x00000000,
+    };
+    return std::make_pair(ipAddress, subnet);
+}
+
+static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(const std::string &interface)
+{
+    in_addr address;
+    in_addr subnet;
+    InterfaceInfo::get(interface, address, subnet);
+    return std::make_pair(address, subnet);
+}
+
+ThingSetSocketServerTransport::ThingSetSocketServerTransport() : _ThingSetSocketServerTransport(getDefaultIpAndSubnet())
+{}
+
+ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::string &interface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(interface))
+{}
+
+void ThingSetSocketServerTransport::startThreads()
+{
+    _handlerThread = std::thread([&]()
+    {
+        runHandler();
+    });
+    _acceptorThread = std::thread([&]()
+    {
+        runAcceptor();
+    });
+}
+#endif // __ZEPHYR__
 
 } // namespace ThingSet::Ip::Sockets

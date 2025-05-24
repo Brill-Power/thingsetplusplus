@@ -21,7 +21,8 @@
 
 namespace ThingSet::Ip::Sockets {
 
-class ThingSetSocketServerTransport : public ThingSetIpServerTransport<SocketEndpoint>
+/// @brief Server transport using POSIX sockets.
+class _ThingSetSocketServerTransport : public ThingSetIpServerTransport<SocketEndpoint>
 {
 private:
     sockaddr_in _publishAddress;
@@ -29,39 +30,55 @@ private:
     sockaddr_in _broadcastAddress;
     int _publishSocketHandle;
     int _listenSocketHandle;
-#ifdef __ZEPHYR__
-    k_tid_t _acceptorThreadId;
-    k_tid_t _handlerThreadId;
-#else
-    std::thread _acceptorThread;
-    std::thread _handlerThread;
-#endif // __ZEPHYR__
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
-private:
-    ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet);
+protected:
+    _ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet);
 
 public:
-#ifdef __ZEPHYR__
-    ThingSetSocketServerTransport(net_if *iface);
-#else
-    ThingSetSocketServerTransport();
-    ThingSetSocketServerTransport(const std::string &interface);
-#endif // __ZEPHYR__
-    ~ThingSetSocketServerTransport();
+    ~_ThingSetSocketServerTransport();
 
     bool listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
     bool publish(uint8_t *buffer, size_t len) override;
 
-private:
-    // TODO: consider https://stackoverflow.com/questions/51451843/creating-a-template-to-wrap-c-member-functions-and-expose-as-c-callbacks
-
-#ifdef __ZEPHYR__
-    static void runAcceptor(void *p1, void *, void *);
-    static void runHandler(void *p1, void *, void *);
-#endif // __ZEPHYR__
+protected:
+    virtual void startThreads() = 0;
     void runAcceptor();
     void runHandler();
 };
+
+#ifdef __ZEPHYR__
+class ThingSetSocketServerTransport : public _ThingSetSocketServerTransport
+{
+private:
+    k_tid_t _acceptorThreadId;
+    k_tid_t _handlerThreadId;
+
+public:
+    ThingSetSocketServerTransport(net_if *iface);
+
+protected:
+    void startThreads() override;
+
+private:
+    // TODO: consider https://stackoverflow.com/questions/51451843/creating-a-template-to-wrap-c-member-functions-and-expose-as-c-callbacks
+    static void runAcceptor(void *p1, void *, void *);
+    static void runHandler(void *p1, void *, void *);
+};
+#else
+class ThingSetSocketServerTransport : public _ThingSetSocketServerTransport
+{
+private:
+    std::thread _acceptorThread;
+    std::thread _handlerThread;
+
+public:
+    ThingSetSocketServerTransport();
+    ThingSetSocketServerTransport(const std::string &interface);
+
+protected:
+    void startThreads() override;
+};
+#endif // __ZEPHYR__
 
 } // namespace ThingSet::Ip::Sockets
