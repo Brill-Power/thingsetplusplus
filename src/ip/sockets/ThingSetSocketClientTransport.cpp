@@ -15,6 +15,7 @@
 #include <zephyr/net/socket.h>
 #else
 #include <unistd.h>
+#include <stdexcept>
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
 #endif // __ZEPHYR__
 
