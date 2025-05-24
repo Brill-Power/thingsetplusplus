@@ -62,6 +62,8 @@ protected:
 
 private:
     // TODO: consider https://stackoverflow.com/questions/51451843/creating-a-template-to-wrap-c-member-functions-and-expose-as-c-callbacks
+    using _ThingSetSocketServerTransport::runAcceptor;
+    using _ThingSetSocketServerTransport::runHandler;
     static void runAcceptor(void *p1, void *, void *);
     static void runHandler(void *p1, void *, void *);
 };
