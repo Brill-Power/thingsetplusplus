@@ -9,9 +9,15 @@
 #include "thingset++/ip/sockets/SocketEndpoint.hpp"
 #include <cstdint>
 #include <cstdio>
+#ifdef __ZEPHYR__
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
+#else
+#include <thread>
+#include <net/socket.h>
+#include <net/net_if.h>
+#endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
 
@@ -23,12 +29,24 @@ private:
     sockaddr_in _broadcastAddress;
     int _publishSocketHandle;
     int _listenSocketHandle;
+#ifdef __ZEPHYR__
     k_tid_t _acceptorThreadId;
     k_tid_t _handlerThreadId;
+#else
+    std::thread _acceptorThread;
+    std::thread _handlerThread;
+#endif // __ZEPHYR__
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
+private:
+    ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet);
+
 public:
+#ifdef __ZEPHYR__
     ThingSetSocketServerTransport(net_if *iface);
+#else
+    ThingSetSocketServerTransport();
+#endif // __ZEPHYR__
     ~ThingSetSocketServerTransport();
 
     bool listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
@@ -37,10 +55,14 @@ public:
 private:
     // TODO: consider https://stackoverflow.com/questions/51451843/creating-a-template-to-wrap-c-member-functions-and-expose-as-c-callbacks
 
+#ifdef __ZEPHYR__
     static void runAcceptor(void *p1, void *, void *);
-    void runAcceptor();
-
     static void runHandler(void *p1, void *, void *);
+#else
+    // static void runAcceptor(void *p1);
+    // static void runHandler(void *p1);
+#endif // __ZEPHYR__
+    void runAcceptor();
     void runHandler();
 };
 
