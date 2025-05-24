@@ -50,9 +50,9 @@ int main()
 
     printk("Using iface: %s\n", name_buf);
 
-    ThingSetSocketClientTransport clientTransport(iface, CONFIG_NET_CONFIG_PEER_IPV4_ADDR);
+    ThingSetSocketClientTransport clientTransport(CONFIG_NET_CONFIG_PEER_IPV4_ADDR);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
-    ThingSetSocketSubscriptionTransport subscriptionTransport(iface);
+    ThingSetSocketSubscriptionTransport subscriptionTransport;
     auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
 
     client.connect();
