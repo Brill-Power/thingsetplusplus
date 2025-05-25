@@ -19,12 +19,22 @@
 #include <arpa/inet.h>
 #endif // __ZEPHYR__
 
+#define THINGSET_SERVER_MAX_CLIENTS               8
+
 namespace ThingSet::Ip::Sockets {
 
 /// @brief Server transport using POSIX sockets.
 class _ThingSetSocketServerTransport : public ThingSetIpServerTransport<SocketEndpoint>
 {
 private:
+    struct PollDescriptor : public pollfd
+    {
+    public:
+        PollDescriptor();
+    };
+
+    std::array<PollDescriptor, THINGSET_SERVER_MAX_CLIENTS> sockfd_tcp;
+
     sockaddr_in _publishAddress;
     sockaddr_in _listenAddress;
     sockaddr_in _broadcastAddress;
