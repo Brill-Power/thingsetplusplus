@@ -2,3 +2,4 @@
 **/CMakeCache.txt
 **/build
 .vscode
+.DS_Store
