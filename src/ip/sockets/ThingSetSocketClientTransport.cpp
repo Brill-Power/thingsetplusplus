@@ -30,7 +30,7 @@ ThingSetSocketClientTransport::ThingSetSocketClientTransport(const std::string &
     _serverAddress.sin_port = htons(9001);
 
     _socketHandle = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    __ASSERT(_socketHandle >= 0, "Failed to create TCP socket: %d", errno);
+    __ASSERT(_socketHandle >= 0, "Failed to create client socket: %d", errno);
 }
 
 ThingSetSocketClientTransport::~ThingSetSocketClientTransport()

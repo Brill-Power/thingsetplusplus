@@ -6,6 +6,9 @@
 
 #include "thingset++/ip/sockets/SocketEndpoint.hpp"
 #include "thingset++/ip/sockets/ZephyrStubs.h"
+#ifdef __FreeBSD__
+#include <sys/socket.h>
+#endif // __FreeBSD__
 
 namespace ThingSet::Ip::Sockets {
 

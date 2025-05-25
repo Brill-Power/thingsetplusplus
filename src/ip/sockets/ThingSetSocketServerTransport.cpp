@@ -9,8 +9,6 @@
 #include <array>
 #include <iostream>
 
-#define MAX_CLIENTS               8
-
 #ifdef __ZEPHYR__
 #include "thingset++/ip/sockets/ZephyrStubs.h"
 #include <zephyr/kernel.h>
@@ -27,24 +25,18 @@ K_THREAD_STACK_DEFINE(handler_thread_stack, HANDLER_THREAD_STACK_SIZE);
 static struct k_thread handler_thread;
 #else
 #include "thingset++/ip/InterfaceInfo.hpp"
-#include <poll.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
 #endif // __ZEPHYR__
 
-struct PollDescriptor : public pollfd {
-public:
-    PollDescriptor()
-    {
-        fd = -1;
-        events = POLLIN;
-    }
-};
-
-static std::array<PollDescriptor, MAX_CLIENTS> sockfd_tcp;
-
 namespace ThingSet::Ip::Sockets {
+
+_ThingSetSocketServerTransport::PollDescriptor::PollDescriptor()
+{
+    fd = -1;
+    events = POLLIN;
+}
 
 _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
     : _publishSocketHandle(-1), _listenSocketHandle(-1)
@@ -62,14 +54,14 @@ _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<i
     _publishAddress.sin_port = 0;
 
     _publishSocketHandle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    __ASSERT(_publishSocketHandle >= 0, "Failed to create UDP socket: %d", errno);
+    __ASSERT(_publishSocketHandle >= 0, "Failed to create publish socket: %d", errno);
 
     int optionValue = 1;
     int ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue));
-    __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
+    __ASSERT(ret == 0, "Failed to configure publish socket: %d", errno);
 #ifndef __ZEPHYR__
     ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_BROADCAST, &optionValue, sizeof(optionValue));
-    __ASSERT(ret == 0, "Failed to configure UDP socket: %d", errno);
+    __ASSERT(ret == 0, "Failed to configure publish socket: %d", errno);
 #endif
 
     // local address of listener
@@ -78,7 +70,7 @@ _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<i
     _listenAddress.sin_port = htons(9001);
 
     _listenSocketHandle = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    __ASSERT(_listenSocketHandle >= 0, "Failed to create TCP socket: %d", errno);
+    __ASSERT(_listenSocketHandle >= 0, "Failed to create listen socket: %d", errno);
 }
 
 _ThingSetSocketServerTransport::~_ThingSetSocketServerTransport()
@@ -127,7 +119,7 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
 void _ThingSetSocketServerTransport::runAcceptor()
 {
-    if (::listen(_listenSocketHandle, MAX_CLIENTS) != 0) {
+    if (::listen(_listenSocketHandle, THINGSET_SERVER_MAX_CLIENTS) != 0) {
         printf("Failed to begin listening: %d\n", errno);
         return;
     }
@@ -147,7 +139,7 @@ void _ThingSetSocketServerTransport::runAcceptor()
                         sizeof(client_addr_str));
         printf("Connection from %s\n", client_addr_str);
 
-        for (int i = 0; i < MAX_CLIENTS; i++) {
+        for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (sockfd_tcp[i].fd == -1) {
                 sockfd_tcp[i].fd = client_sock;
                 printf("Assigned slot %d\n", i);
@@ -171,7 +163,7 @@ void _ThingSetSocketServerTransport::runHandler()
 
         SocketEndpoint addr;
         socklen_t len = sizeof(addr);
-        for (int i = 0; i < MAX_CLIENTS; i++) {
+        for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (sockfd_tcp[i].revents & POLLIN) {
                 int client_sock = sockfd_tcp[i].fd;
                 int rx_len = 0;

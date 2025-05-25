@@ -10,6 +10,7 @@
 #include <zephyr/net/socket.h>
 #else
 #include <arpa/inet.h>
+#include <netinet/in.h>
 #endif // __ZEPHYR__
 #include <ostream>
 

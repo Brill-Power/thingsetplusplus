@@ -32,6 +32,10 @@ _ThingSetSocketSubscriptionTransport::_ThingSetSocketSubscriptionTransport() : _
 
     _listenSocketHandle = socket(_listenAddress.sin_family, SOCK_DGRAM, IPPROTO_UDP);
     __ASSERT(_listenSocketHandle >= 0, "Failed to create UDP socket: %d", errno);
+
+    int optionValue = 1;
+    int ret = setsockopt(_listenSocketHandle, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue));
+    __ASSERT(ret == 0, "Failed to configure listen socket: %d", errno);
 }
 
 _ThingSetSocketSubscriptionTransport::~_ThingSetSocketSubscriptionTransport()

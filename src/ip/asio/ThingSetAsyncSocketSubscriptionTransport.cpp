@@ -50,6 +50,7 @@ bool ThingSetAsyncSocketSubscriptionTransport::subscribe(std::function<void(cons
 {
     asio::error_code error;
     _subscribeSocket.open(asio::ip::udp::v4(), error);
+    _subscribeSocket.set_option(asio::ip::udp::socket::reuse_address(true));
     if (error) {
         throw std::system_error(error);
     }
