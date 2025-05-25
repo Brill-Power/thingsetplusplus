@@ -12,6 +12,8 @@
 #include <zephyr/net/net_if.h>
 #include <iostream>
 
+#define PEER_IPV4_ADDR "192.0.2.2"
+
 using namespace ThingSet;
 using namespace ThingSet::Ip::Sockets;
 
@@ -50,7 +52,7 @@ int main()
 
     printk("Using iface: %s\n", name_buf);
 
-    ThingSetSocketClientTransport clientTransport(CONFIG_NET_CONFIG_PEER_IPV4_ADDR);
+    ThingSetSocketClientTransport clientTransport(PEER_IPV4_ADDR);
     ThingSetClient client(clientTransport, rxBuffer, txBuffer);
     ThingSetSocketSubscriptionTransport subscriptionTransport;
     auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
