@@ -13,6 +13,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
+#include <zephyr/posix/poll.h>
 #else
 #include <poll.h>
 #include <thread>
