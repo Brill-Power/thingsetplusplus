@@ -25,7 +25,6 @@ K_THREAD_STACK_DEFINE(handler_thread_stack, HANDLER_THREAD_STACK_SIZE);
 static struct k_thread handler_thread;
 #else
 #include "thingset++/ip/InterfaceInfo.hpp"
-#include <poll.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }

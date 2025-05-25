@@ -14,6 +14,7 @@
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
 #else
+#include <poll.h>
 #include <thread>
 #include <sys/socket.h>
 #include <arpa/inet.h>
