@@ -29,7 +29,9 @@ TEST(SocketIpClientServer, Name) \
     server.listen(); \
     std::thread serverThread([&]() \
     { \
+        printf("Server waiting\n"); \
         std::this_thread::sleep_for(std::chrono::seconds(5)); \
+        printf("Server shutdown\n"); \
     }); \
 \
     auto endpoint = "127.0.0.1"; \
@@ -39,7 +41,9 @@ TEST(SocketIpClientServer, Name) \
     std::thread clientThread([&]() \
     { \
         std::this_thread::sleep_for(std::chrono::milliseconds(125)); \
+        printf("Connecting..."); \
         ASSERT_TRUE(client.connect()); \
+        printf("done\n"); \
         Body \
         clientRanSuccessfully = true; \
     }); \
@@ -52,13 +56,17 @@ TEST(SocketIpClientServer, Name) \
 
 SOCKET_TEST(GetFloat,
     float tv;
+    printf("Getting...");
     ASSERT_TRUE(client.get(0x300, tv));
+    printf("done\n");
     ASSERT_EQ(24.0f, tv);
 )
 
 SOCKET_TEST(ExecFunction,
     int result;
+    printf("Execing...");
     ASSERT_TRUE(client.exec(0x1000, &result, 2, 3));
+    printf("done\n");
     ASSERT_EQ(5, result);
 )
 
