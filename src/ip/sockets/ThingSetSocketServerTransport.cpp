@@ -5,6 +5,7 @@
  */
 
 #include "thingset++/ip/sockets/ThingSetSocketServerTransport.hpp"
+#include "thingset++/internal/logging.hpp"
 #include <assert.h>
 #include <array>
 #include <iostream>
@@ -12,6 +13,7 @@
 #ifdef __ZEPHYR__
 #include "thingset++/ip/sockets/ZephyrStubs.h"
 #include <zephyr/kernel.h>
+#include <zephyr/posix/fcntl.h>
 
 #define ACCEPT_THREAD_STACK_SIZE  1024
 #define ACCEPT_THREAD_PRIORITY    3
@@ -27,6 +29,7 @@ static struct k_thread handlerThread;
 #include "thingset++/ip/InterfaceInfo.hpp"
 #include <netinet/in.h>
 #include <unistd.h>
+#include <fcntl.h>
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
 #endif // __ZEPHYR__
 
@@ -39,7 +42,7 @@ _ThingSetSocketServerTransport::PollDescriptor::PollDescriptor()
 }
 
 _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
-    : _publishSocketHandle(-1), _listenSocketHandle(-1)
+    : _publishSocketHandle(-1), _listenSocketHandle(-1), _runHandler(true), _runAcceptor(true)
 {
     // calculate broadcast address
     _broadcastAddress.sin_family = AF_INET;
@@ -111,7 +114,7 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
     ssize_t sent = sendto(_publishSocketHandle, buffer, len, 0, (struct sockaddr *)&_broadcastAddress, sizeof(_broadcastAddress));
     if (sent < 0) {
-        printf("Failed to send report: %zd %d\n", sent, errno);
+        LOG_ERR("Failed to send report: %zd %d", sent, errno);
     }
     return sent == (ssize_t)len;
 }
@@ -119,18 +122,24 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
 void _ThingSetSocketServerTransport::runAcceptor()
 {
+    if (fcntl(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
+        LOG_ERR("Failed to configure socket: %d", errno);
+    }
+
     if (::listen(_listenSocketHandle, THINGSET_SERVER_MAX_CLIENTS) != 0) {
-        printf("Failed to begin listening: %d\n", errno);
+        LOG_ERR("Failed to begin listening: %d", errno);
         return;
     }
 
-    while (true) {
+    while (_runAcceptor) {
         SocketEndpoint clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
 
         int client_sock = accept(_listenSocketHandle, (sockaddr *)&clientAddr, &clientAddrLen);
         if (client_sock < 0) {
-            printf("Accept failed: %d\n", errno);
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                LOG_ERR("Accept failed: %d", errno);
+            }
             continue;
         }
 
@@ -139,20 +148,22 @@ void _ThingSetSocketServerTransport::runAcceptor()
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (_socketDescriptors[i].fd == -1) {
                 _socketDescriptors[i].fd = client_sock;
-                printf("Assigned slot %d to socket %d\n", i, _socketDescriptors[i].fd);
+                LOG_DBG("Assigned slot %d to socket %d", i, _socketDescriptors[i].fd);
                 break;
             }
         }
     }
+
+    LOG_INF("Shut down acceptor thread");
 }
 
 void _ThingSetSocketServerTransport::runHandler()
 {
-    while (true) {
+    while (_runHandler) {
         int ret = poll(_socketDescriptors.data(), _socketDescriptors.size(), 10);
 
         if (ret < 0) {
-            printf("Polling error: %d\n", errno);
+            LOG_ERR("Polling error: %d", errno);
         }
         else if (ret == 0) {
             continue;
@@ -169,7 +180,7 @@ void _ThingSetSocketServerTransport::runHandler()
                 int rxLen = recv(clientSocketHandle, rxBuf, sizeof(rxBuf), 0);
 
                 if (rxLen < 0) {
-                    printf("Receive error: %d\n", errno);
+                    LOG_ERR("Receive error: %d", errno);
                 }
                 else if (rxLen == 0) {
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
@@ -182,13 +193,14 @@ void _ThingSetSocketServerTransport::runHandler()
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
                     int txLen = _callback(addr, rxBuf, rxLen, txBuf, sizeof(txBuf));
                     if (txLen > 0) {
-                        std::cout << "Sending response to " << addr << " of size " << txLen << std::endl;
                         send(clientSocketHandle, txBuf, txLen, 0);
                     }
                 }
             }
         }
     }
+
+    LOG_INF("Shut down handler thread");
 }
 
 #ifdef __ZEPHYR__
@@ -249,6 +261,14 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport() : _ThingSetSocket
 
 ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::string &interface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(interface))
 {}
+
+ThingSetSocketServerTransport::~ThingSetSocketServerTransport()
+{
+    _runHandler = false;
+    _runAcceptor = false;
+    _handlerThread.join();
+    _acceptorThread.join();
+}
 
 void ThingSetSocketServerTransport::startThreads()
 {

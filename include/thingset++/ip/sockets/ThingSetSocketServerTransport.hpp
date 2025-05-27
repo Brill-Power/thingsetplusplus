@@ -45,6 +45,9 @@ private:
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
 protected:
+    bool _runHandler;
+    bool _runAcceptor;
+
     _ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet);
 
 public:
@@ -86,6 +89,7 @@ private:
 public:
     ThingSetSocketServerTransport();
     ThingSetSocketServerTransport(const std::string &interface);
+    ~ThingSetSocketServerTransport();
 
 protected:
     void startThreads() override;

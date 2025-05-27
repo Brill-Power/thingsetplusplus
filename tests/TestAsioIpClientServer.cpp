@@ -19,13 +19,12 @@ using namespace asio;
 static std::array<uint8_t, 1024> rxBuffer;
 static std::array<uint8_t, 1024> txBuffer;
 
-static ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
-
-static ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; });
-
 #define ASIO_TEST(Name, Body) \
 TEST(AsioIpClientServer, Name) \
 { \
+    ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24; \
+    ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; }); \
+\
     io_context serverContext(1); \
     ThingSetAsyncSocketServerTransport serverTransport(serverContext); \
     auto server = ThingSetServerBuilder::build(serverTransport); \
