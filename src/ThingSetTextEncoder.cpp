@@ -273,6 +273,7 @@ bool ThingSetTextEncoder::encodeMapStart()
 
 bool ThingSetTextEncoder::encodeMapStart(uint32_t count)
 {
+    (void)count;
     return encodeMapStart();
 }
 
@@ -289,6 +290,7 @@ bool ThingSetTextEncoder::encodeMapEnd()
 
 bool ThingSetTextEncoder::encodeMapEnd(uint32_t count)
 {
+    (void)count;
     return encodeMapEnd();
 }
 
@@ -300,6 +302,7 @@ bool ThingSetTextEncoder::encodeListStart()
 
 bool ThingSetTextEncoder::encodeListStart(uint32_t count)
 {
+    (void)count;
     return encodeListStart();
 }
 
@@ -316,6 +319,7 @@ bool ThingSetTextEncoder::encodeListEnd()
 
 bool ThingSetTextEncoder::encodeListEnd(uint32_t count)
 {
+    (void)count;
     return encodeListEnd();
 }
 
