@@ -140,9 +140,9 @@ void _ThingSetSocketServerTransport::runAcceptor()
         printf("Connection from %s\n", client_addr_str);
 
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
-            if (sockfd_tcp[i].fd == -1) {
-                sockfd_tcp[i].fd = client_sock;
-                printf("Assigned slot %d\n", i);
+            if (_socketDescriptors[i].fd == -1) {
+                _socketDescriptors[i].fd = client_sock;
+                printf("Assigned slot %d to socket %d\n", i, _socketDescriptors[i].fd);
                 break;
             }
         }
@@ -152,7 +152,7 @@ void _ThingSetSocketServerTransport::runAcceptor()
 void _ThingSetSocketServerTransport::runHandler()
 {
     while (true) {
-        int ret = poll(sockfd_tcp.data(), sockfd_tcp.size(), 10);
+        int ret = poll(_socketDescriptors.data(), _socketDescriptors.size(), 10);
 
         if (ret < 0) {
             printf("Polling error: %d\n", errno);
@@ -164,8 +164,8 @@ void _ThingSetSocketServerTransport::runHandler()
         SocketEndpoint addr;
         socklen_t len = sizeof(addr);
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
-            if (sockfd_tcp[i].revents & POLLIN) {
-                int client_sock = sockfd_tcp[i].fd;
+            if (_socketDescriptors[i].revents & POLLIN) {
+                int client_sock = _socketDescriptors[i].fd;
                 int rx_len = 0;
                 uint8_t rx_buf[1024];
                 uint8_t tx_buf[1024];
@@ -182,7 +182,7 @@ void _ThingSetSocketServerTransport::runHandler()
                     std::cout << "Closing connection from " << addr << std::endl;
 
                     close(client_sock);
-                    sockfd_tcp[i].fd = -1;
+                    _socketDescriptors[i].fd = -1;
                 }
                 else {
                     getsockname(client_sock, (sockaddr *)&addr, &len);
@@ -228,13 +228,13 @@ void ThingSetSocketServerTransport::runHandler(void *p1, void *, void *)
     transport->runHandler();
 }
 #else
-static std::pair<in_addr, in_addr> getDefaultIpAndSubnet()
+static std::pair<in_addr, in_addr> getLocalIpAndSubnet()
 {
     in_addr ipAddress = {
-        .s_addr = 0x0,
+        .s_addr = 0x0100007f,
     };
     in_addr subnet = {
-        .s_addr = 0x00000000,
+        .s_addr = 0x000000ff,
     };
     return std::make_pair(ipAddress, subnet);
 }
@@ -247,7 +247,7 @@ static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(const std::string 
     return std::make_pair(address, subnet);
 }
 
-ThingSetSocketServerTransport::ThingSetSocketServerTransport() : _ThingSetSocketServerTransport(getDefaultIpAndSubnet())
+ThingSetSocketServerTransport::ThingSetSocketServerTransport() : _ThingSetSocketServerTransport(getLocalIpAndSubnet())
 {}
 
 ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::string &interface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(interface))

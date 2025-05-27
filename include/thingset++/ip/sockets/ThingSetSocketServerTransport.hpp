@@ -35,7 +35,7 @@ private:
         PollDescriptor();
     };
 
-    std::array<PollDescriptor, THINGSET_SERVER_MAX_CLIENTS> sockfd_tcp;
+    std::array<PollDescriptor, THINGSET_SERVER_MAX_CLIENTS> _socketDescriptors;
 
     sockaddr_in _publishAddress;
     sockaddr_in _listenAddress;

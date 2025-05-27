@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_FLAGS -O3)
 set(ENABLE_ASIO ON)
+set(ENABLE_SOCKETS ON)
 set(ENABLE_SERVER ON)
 set(ENABLE_CLIENT ON)
 set(DEBUG_LOGGING ON)
@@ -21,6 +22,7 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestCompatibility.cpp
     TestProperties.cpp
     TestFunctions.cpp
+    TestSocketIpClientServer.cpp
     TestAsioIpClientServer.cpp)
 # figure out how to get this to compile with Clang
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
