@@ -12,7 +12,7 @@ There are three transports in various stages of completeness and maturity:
 - SocketCAN - client and server (Linux)
 - Zephyr CAN - client and server (Zephyr RTOS)
 - TCP/UDP Sockets - client and server (Linux, macOS, FreeBSD, Zephyr RTOS)
-- TCP/UDP asio Sockets - client and server (Linux, macOS)
+- TCP/UDP asio Sockets - client and server (Linux, macOS, FreeBSD)
 
 The client components have had more real-world testing than the server.
 
