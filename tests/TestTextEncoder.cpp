@@ -13,18 +13,19 @@ using namespace ThingSet;
     ThingSetTextEncoder encoder(buffer, size);
 
 #define ASSERT_BUFFER_EQ(expected, actual, actual_len)                                                                 \
-    ASSERT_EQ(sizeof(expected), actual_len);                                                                           \
+    ASSERT_EQ(strlen(expected), actual_len);                                                                           \
     for (size_t i = 0; i < sizeof(expected); i++) {                                                                    \
+        printf("value: %c", actual[i]);                                                                                \
         ASSERT_EQ(expected[i], actual[i]);                                                                             \
     }
 
 TEST(TextEncoder, EncodeFloat)
 {
     SETUP(256)
-    float f = 1.23;
+    float f = 1.23F;
     encoder.encode(f);
-    const char *expected = "1.23000";
-    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+    const char *expected = "1.230000";
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
 }
 
 // todo reimplement this
@@ -43,8 +44,8 @@ TEST(TextEncoder, EncodeString)
     SETUP(256)
     const char *hello = "world";
     encoder.encode(hello);
-    const char *expected = "\"world\",";
-    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+    const char *expected = "\"world\"";
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeStdString)
@@ -52,8 +53,8 @@ TEST(TextEncoder, EncodeStdString)
     SETUP(256)
     const std::string bonjour = "monde";
     encoder.encode(bonjour);
-    const char *expected = "\"monde\",";
-    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+    const char *expected = "\"monde\"";
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
 }
 
 // todo reimplement this
