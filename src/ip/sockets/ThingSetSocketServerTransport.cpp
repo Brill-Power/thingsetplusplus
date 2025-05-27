@@ -124,6 +124,9 @@ void _ThingSetSocketServerTransport::runAcceptor()
 {
     if (fcntl(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
         LOG_ERR("Failed to configure socket: %d", errno);
+        // this isn't technically a fatal error; it just means we
+        // won't get a clean shutdown, because we'll never be able
+        // to break out of the acceptor loop
     }
 
     if (::listen(_listenSocketHandle, THINGSET_SERVER_MAX_CLIENTS) != 0) {
@@ -131,7 +134,18 @@ void _ThingSetSocketServerTransport::runAcceptor()
         return;
     }
 
+    PollDescriptor listenPoll[1];
+    listenPoll->fd = _listenSocketHandle;
+
     while (_runAcceptor) {
+        int ret = poll(listenPoll, 1, 10);
+        if (ret < 0) {
+            LOG_ERR("Polling error: %d", errno);
+        }
+        else if (ret == 0) {
+            continue;
+        }
+
         SocketEndpoint clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
 
