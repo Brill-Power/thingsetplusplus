@@ -140,6 +140,8 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     bool encodeMapEnd(uint32_t count);
 
+    // todo override this from base class instead of duplicating
+
     /// @brief Encode a pair. This is probably most useful inside a map.
     /// @tparam K The type of the first value in the pair.
     /// @tparam V The type of the second value in the pair.
@@ -178,7 +180,9 @@ public:
             return false;
         }
         for (auto const &[key, value] : map) {
-            if (!encode(key) || !encode(value)) {
+            // todo override this from base class instead of duplicating and call std::pair encode here instead of
+            // duplicating?
+            if (!encode(key) || !addResponseValue(":", "%s") || !encode(value) || !addResponseValue(",", "%s")) {
                 return false;
             }
         }
@@ -227,11 +231,13 @@ public:
         return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
     }
 
+    // todo override this from base class instead of duplicating
     template <typename T> bool encode(T *value, size_t size)
     {
         bool result = encodeListStart(size);
         for (size_t i = 0; i < size; i++) {
             result &= this->encode(value[i]);
+            addResponseValue(",", "%s");
         }
         return result && encodeListEnd(size);
     }
@@ -242,9 +248,10 @@ private:
         return true;
     }
 
+    // todo override this from base class instead of duplicating
     template <typename T, typename... TArgs> bool encodeAndShift(T arg, TArgs... rest)
     {
-        return encode(arg) && encodeAndShift(rest...);
+        return encode(arg) && addResponseValue(",", "%s") && encodeAndShift(rest...);
     }
 
     template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)

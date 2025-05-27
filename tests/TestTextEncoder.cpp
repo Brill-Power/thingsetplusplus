@@ -15,7 +15,6 @@ using namespace ThingSet;
 #define ASSERT_BUFFER_EQ(expected, actual, actual_len)                                                                 \
     ASSERT_EQ(strlen(expected), actual_len);                                                                           \
     for (size_t i = 0; i < sizeof(expected); i++) {                                                                    \
-        printf("value: %c", actual[i]);                                                                                \
         ASSERT_EQ(expected[i], actual[i]);                                                                             \
     }
 
@@ -28,16 +27,14 @@ TEST(TextEncoder, EncodeFloat)
     ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
 }
 
-// todo reimplement this
-// TEST(TextEncoder, EncodeArrayOfFloats)
-// {
-//     SETUP(256)
-//     std::array f = { 1.23f, 4.56f, 7.89f };
-//     encoder.encode(f);
-//     uint8_t expected[] = { 0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40,
-//                            0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1 };
-//     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
-// }
+TEST(TextEncoder, EncodeArrayOfFloats)
+{
+    SETUP(256)
+    std::array f = { 1.23F, 4.56F, 7.89F };
+    encoder.encode(f);
+    const char *expected = "[1.230000,4.560000,7.890000]";
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+}
 
 TEST(TextEncoder, EncodeString)
 {
@@ -57,26 +54,21 @@ TEST(TextEncoder, EncodeStdString)
     ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
 }
 
-// todo reimplement this
-// TEST(TextEncoder, EncodeMap)
-// {
-//     SETUP(256)
-//     ASSERT_TRUE(encoder.encodeMapStart(2));
-//     ASSERT_TRUE(encoder.encode(0x01));
-//     ASSERT_TRUE(encoder.encode("hello"));
-//     ASSERT_TRUE(encoder.encode(0x02));
-//     std::array<uint32_t, 3> i32 = { { 1, 2, 3 } };
-//     ASSERT_TRUE(encoder.encode(i32));
-//     ASSERT_TRUE(encoder.encodeMapEnd(2));
-//     uint8_t expected[] = { 0xA2, 0x01, 0x65, 0x68, 0x65, 0x6C, 0x6C, 0x6F, 0x02, 0x83, 0x01, 0x02, 0x03 };
-//     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
-// }
+TEST(TextEncoder, EncodeMap)
+{
+    SETUP(256)
+    auto map = std::map<std::string, int>();
+    map.insert_or_assign("hello", 1);
+    map.insert_or_assign("world", 2);
+    encoder.encode(map);
+    const char *expected = "{\"hello\":1,\"world\":2}";
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+}
 
-// todo reimplement this
-// TEST(TextEncoder, EncodeBag)
-// {
-//     SETUP(256)
-//     encoder.encodeList(1.23f, 123, "123");
-//     uint8_t expected[] = { 0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0x18, 0x7B, 0x63, 0x31, 0x32, 0x33 };
-//     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
-// }
+TEST(TextEncoder, EncodeList)
+{
+    SETUP(256)
+    encoder.encodeList(1.23f, 123, "123");
+    const char *expected = "[1.230000,123,\"123\"]";
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+}
