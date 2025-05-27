@@ -27,6 +27,17 @@ TEST(TextEncoder, EncodeFloat)
     ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
 }
 
+TEST(TextEncoder, EncodeFloatPtr)
+{
+    SETUP(256)
+    float f = 1.23F;
+    float *ptr = &f;
+    encoder.encode(ptr);
+    const char *expected = "1.230000";
+    printf("%s", encoder._rsp); // todo delete
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+}
+
 TEST(TextEncoder, EncodeArrayOfFloats)
 {
     SETUP(256)

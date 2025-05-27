@@ -105,17 +105,17 @@ bool ThingSetTextEncoder::encode(char *value)
 
 bool ThingSetTextEncoder::encode(const float &value)
 {
-    return addResponseValue(value, "%f");
+    return addResponseValue((double)value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float &value)
 {
-    return addResponseValue(value, "%f");
+    return addResponseValue((double)value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float *value)
 {
-    return addResponseValue(value, "%f");
+    return addResponseValue(*value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(const double &value)
@@ -130,7 +130,7 @@ bool ThingSetTextEncoder::encode(double &value)
 
 bool ThingSetTextEncoder::encode(double *value)
 {
-    return addResponseValue(value, "%f");
+    return addResponseValue(*value, "%f");
 }
 
 // todo bool may not be needed as handled by int (1/0 instead of true/false)
@@ -156,7 +156,7 @@ bool ThingSetTextEncoder::encode(uint8_t &value)
 
 bool ThingSetTextEncoder::encode(uint8_t *value)
 {
-    return addResponseValue(value, "%" PRIu8);
+    return addResponseValue(*value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(const uint16_t &value)
@@ -171,7 +171,7 @@ bool ThingSetTextEncoder::encode(uint16_t &value)
 
 bool ThingSetTextEncoder::encode(uint16_t *value)
 {
-    return addResponseValue(value, "%" PRIu16);
+    return addResponseValue(*value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(const uint32_t &value)
@@ -186,7 +186,7 @@ bool ThingSetTextEncoder::encode(uint32_t &value)
 
 bool ThingSetTextEncoder::encode(uint32_t *value)
 {
-    return addResponseValue(value, "%" PRIu32);
+    return addResponseValue(*value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(const uint64_t &value)
@@ -201,7 +201,7 @@ bool ThingSetTextEncoder::encode(uint64_t &value)
 
 bool ThingSetTextEncoder::encode(uint64_t *value)
 {
-    return addResponseValue(value, "%" PRIu64);
+    return addResponseValue(*value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(const int8_t &value)
@@ -226,7 +226,7 @@ bool ThingSetTextEncoder::encode(int16_t &value)
 
 bool ThingSetTextEncoder::encode(int16_t *value)
 {
-    return addResponseValue(value, "%" PRIi16);
+    return addResponseValue(*value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(const int32_t &value)
@@ -241,7 +241,7 @@ bool ThingSetTextEncoder::encode(int32_t &value)
 
 bool ThingSetTextEncoder::encode(int32_t *value)
 {
-    return addResponseValue(value, "%" PRIi32);
+    return addResponseValue(*value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(const int64_t &value)
@@ -256,7 +256,7 @@ bool ThingSetTextEncoder::encode(int64_t &value)
 
 bool ThingSetTextEncoder::encode(int64_t *value)
 {
-    return addResponseValue(value, "%" PRIi64);
+    return addResponseValue(*value, "%" PRIi64);
 }
 
 // todo check this
