@@ -8,14 +8,14 @@
 #include <bit>
 #include <string.h>
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 
 #include <ifaddrs.h>
 #if defined(__linux__)
 #include <linux/if_packet.h>
-#elif defined(__APPLE__) || defined(__FreeBSD__)
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <net/if_dl.h>
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <sys/socket.h>
 #endif
 #endif
@@ -55,7 +55,7 @@ const std::string Eui::getString()
     return std::string(str);
 }
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 
 #define COPY_MAC_ADDRESS(source, length, target, array)                                                                \
     if constexpr (std::endian::native == std::endian::big) {                                                           \
@@ -92,7 +92,7 @@ static bool getEthernetMacAddress(uint64_t &target, std::array<uint8_t, 8> &arra
 
                 return true;
             }
-#elif defined(__APPLE__) || defined(__FreeBSD__)
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
         // https://stackoverflow.com/questions/6762766/mac-address-with-getifaddrs#26038501
         if (ptr_entry->ifa_addr && ptr_entry->ifa_addr->sa_family == AF_LINK) {
             sockaddr_dl *s = (sockaddr_dl *)ptr_entry->ifa_addr;

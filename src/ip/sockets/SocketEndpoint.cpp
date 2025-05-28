@@ -6,7 +6,7 @@
 
 #include "thingset++/ip/sockets/SocketEndpoint.hpp"
 #include "thingset++/ip/sockets/ZephyrStubs.h"
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <sys/socket.h>
 #endif // __FreeBSD__
 
