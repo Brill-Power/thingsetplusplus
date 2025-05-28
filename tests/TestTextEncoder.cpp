@@ -381,6 +381,14 @@ TEST(TextEncoder, EncodeStdStringView)
     ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
 }
 
+TEST(TextEncoder, EncodePreamble)
+{
+    SETUP(256)
+    encoder.encodePreamble();
+    const char *expected = "";
+    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+}
+
 TEST(TextEncoder, EncodeMap)
 {
     SETUP(256)

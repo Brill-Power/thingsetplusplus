@@ -36,7 +36,7 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &
                    ThingSetBinaryEncoder &encoder)
 {
     std::apply(function, arguments);
-    return encoder.encodeNull();
+    return encoder.encodePreamble();
 }
 
 /// @brief Represents an executable function.

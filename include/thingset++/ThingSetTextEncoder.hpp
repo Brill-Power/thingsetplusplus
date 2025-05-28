@@ -112,7 +112,7 @@ public:
     bool encode(const int64_t &value);
     bool encode(int64_t &value);
     bool encode(int64_t *value);
-    bool encodeNull();
+    bool encodePreamble();
     /// @brief Encode the start of a list. In forward-only encoding scenarios, you should
     /// use the overload which allows the number of elements in the list to be specified in
     /// advance.

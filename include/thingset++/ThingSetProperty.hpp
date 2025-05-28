@@ -79,7 +79,7 @@ public:
     {}
     ThingSetProperty(const T &value)
         : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T>(
-            value)
+              value)
     {}
 
     auto &operator=(const T &value)
@@ -194,17 +194,17 @@ public:
     {
         if (context.requestType == ThingSetRequestType::get) {
             context.response[0] = ThingSetStatusCode::content;
-            context.encoder.encodeNull();
+            context.encoder.encodePreamble();
             if (context.index == SIZE_MAX) {
                 context.encoder.encode(
 #if defined(__APPLE__)
-// working round ambiguity on macOS
-// https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
-static_cast<uint32_t>(
+                    // working round ambiguity on macOS
+                    // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
+                    static_cast<uint32_t>(
 #endif
-                    this->_value.size()
+                        this->_value.size()
 #if defined(__APPLE__)
-)
+                            )
 #endif
                 );
             }
@@ -231,8 +231,7 @@ using ThingSetReadOnlyProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAc
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
-using ThingSetReadWriteProperty =
-    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyReadWrite, T>;
+using ThingSetReadWriteProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyReadWrite, T>;
 
 /// @brief A ThingSet property that can be read by anyone but only written by advanced users.
 /// @tparam T The type of the value stored by this property.

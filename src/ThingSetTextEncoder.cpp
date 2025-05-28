@@ -229,10 +229,9 @@ bool ThingSetTextEncoder::encode(int64_t *value)
     return addResponseValue(*value, "%" PRIi64);
 }
 
-// todo check this
-bool ThingSetTextEncoder::encodeNull()
+bool ThingSetTextEncoder::encodePreamble()
 {
-    return addResponseValue(NULL, "%s");
+    return true;
 }
 
 bool ThingSetTextEncoder::encodeMapStart()
