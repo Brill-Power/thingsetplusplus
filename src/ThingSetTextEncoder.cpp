@@ -271,9 +271,8 @@ bool ThingSetTextEncoder::encodeMapStart()
     return addResponseValue("{", "%s");
 }
 
-bool ThingSetTextEncoder::encodeMapStart(uint32_t count)
+bool ThingSetTextEncoder::encodeMapStart(uint32_t)
 {
-    (void)count;
     return encodeMapStart();
 }
 
@@ -288,9 +287,8 @@ bool ThingSetTextEncoder::encodeMapEnd()
     return ret;
 }
 
-bool ThingSetTextEncoder::encodeMapEnd(uint32_t count)
+bool ThingSetTextEncoder::encodeMapEnd(uint32_t)
 {
-    (void)count;
     return encodeMapEnd();
 }
 
@@ -300,9 +298,8 @@ bool ThingSetTextEncoder::encodeListStart()
     return addResponseValue("[", "%s");
 }
 
-bool ThingSetTextEncoder::encodeListStart(uint32_t count)
+bool ThingSetTextEncoder::encodeListStart(uint32_t)
 {
-    (void)count;
     return encodeListStart();
 }
 
@@ -317,9 +314,8 @@ bool ThingSetTextEncoder::encodeListEnd()
     return ret;
 }
 
-bool ThingSetTextEncoder::encodeListEnd(uint32_t count)
+bool ThingSetTextEncoder::encodeListEnd(uint32_t)
 {
-    (void)count;
     return encodeListEnd();
 }
 
