@@ -198,7 +198,7 @@ public:
             if (context.index == SIZE_MAX) {
                 context.encoder.encode(
 #if defined(__APPLE__) || defined(__OpenBSD__)
-// working round ambiguity on macOS
+// working round ambiguity on macOS and OpenBSD
 // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
 static_cast<uint32_t>(
 #endif
