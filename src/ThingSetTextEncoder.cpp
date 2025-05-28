@@ -9,46 +9,6 @@
 
 namespace ThingSet {
 
-// todo may not be needed?
-// inline bool encodeStart(struct thingset_context *ts, char c)
-// {
-//     if (ts->rsp_size > ts->rsp_pos + 2) {
-//         ts->rsp[ts->rsp_pos++] = c;
-//         return true;
-//     }
-//     else {
-//         ts->rsp_pos = 0;
-//         return false;
-//     }
-// }
-
-// inline bool encodeEnd(struct thingset_context *ts, char c)
-// {
-//     if (ts->rsp_size > ts->rsp_pos + 3) {
-//         if (ts->rsp[ts->rsp_pos - 1] == ',') {
-//             ts->rsp_pos--;
-//         }
-//         ts->rsp[ts->rsp_pos++] = c;
-//         ts->rsp[ts->rsp_pos++] = ',';
-//         return true;
-//     }
-//     else {
-//         ts->rsp_pos = 0;
-//         return false;
-//     }
-// }
-
-// todo may not be needed?
-// char *ThingSetTextEncoder::getState()
-// {
-//     return _buffer;
-// }
-
-// bool ThingSetTextEncoder::getIsForwardOnly() const
-// {
-//     return false;
-// }
-
 bool ThingSetTextEncoder::encode(const std::string_view &value)
 {
     bool ret = true;
@@ -133,16 +93,21 @@ bool ThingSetTextEncoder::encode(double *value)
     return addResponseValue(*value, "%f");
 }
 
-// todo bool may not be needed as handled by int (1/0 instead of true/false)
-// bool ThingSetTextEncoder::encode(const bool &value)
-// {
-//     return zcbor_bool_put(getState(), value);
-// }
+// todo bool can reuse uint8 stuff?
+bool ThingSetTextEncoder::encode(const bool &value)
+{
+    return addResponseValue(value, "%i");
+}
 
-// bool ThingSetTextEncoder::encode(bool &value)
-// {
-//     return zcbor_bool_put(getState(), value);
-// }
+bool ThingSetTextEncoder::encode(bool &value)
+{
+    return addResponseValue(value, "%i");
+}
+
+bool ThingSetTextEncoder::encode(bool *value)
+{
+    return addResponseValue(*value, "%i");
+}
 
 bool ThingSetTextEncoder::encode(const uint8_t &value)
 {
@@ -212,6 +177,11 @@ bool ThingSetTextEncoder::encode(const int8_t &value)
 bool ThingSetTextEncoder::encode(int8_t &value)
 {
     return addResponseValue(value, "%" PRIi8);
+}
+
+bool ThingSetTextEncoder::encode(int8_t *value)
+{
+    return addResponseValue(*value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(const int16_t &value)
@@ -318,13 +288,5 @@ bool ThingSetTextEncoder::encodeListEnd(uint32_t)
 {
     return encodeListEnd();
 }
-
-// template <typename T> void encodeThingsetValue(std::string name, T value)
-// {
-//     encode(name);
-//     encode(":");
-//     encode(value);
-//     encode(",");
-// }
 
 } // namespace ThingSet

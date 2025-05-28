@@ -87,6 +87,7 @@ public:
     bool encode(double *value);
     bool encode(const bool &value);
     bool encode(bool &value);
+    bool encode(bool *value);
     bool encode(const uint8_t &value);
     bool encode(uint8_t &value);
     bool encode(uint8_t *value);
@@ -101,6 +102,7 @@ public:
     bool encode(uint64_t *value);
     bool encode(const int8_t &value);
     bool encode(int8_t &value);
+    bool encode(int8_t *value);
     bool encode(const int16_t &value);
     bool encode(int16_t &value);
     bool encode(int16_t *value);
