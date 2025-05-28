@@ -80,7 +80,7 @@ bool ThingSetAsyncSocketServerTransport::listen(std::function<int(const asio::ip
     if (error) {
         throw std::system_error(error);
     }
-    _publishSocket.bind(udp::endpoint(_broadcastAddress, 0));
+    _publishSocket.bind(udp::endpoint(_bindAddress, 0));
     _publishSocket.set_option(udp::socket::reuse_address(true));
     _publishSocket.set_option(asio::socket_base::broadcast(true));
 

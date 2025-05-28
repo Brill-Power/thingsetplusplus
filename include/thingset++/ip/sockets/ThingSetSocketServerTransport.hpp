@@ -35,7 +35,7 @@ private:
         PollDescriptor();
     };
 
-    std::array<PollDescriptor, THINGSET_SERVER_MAX_CLIENTS> sockfd_tcp;
+    std::array<PollDescriptor, THINGSET_SERVER_MAX_CLIENTS> _socketDescriptors;
 
     sockaddr_in _publishAddress;
     sockaddr_in _listenAddress;
@@ -45,6 +45,9 @@ private:
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
 protected:
+    bool _runHandler;
+    bool _runAcceptor;
+
     _ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet);
 
 public:
@@ -86,6 +89,7 @@ private:
 public:
     ThingSetSocketServerTransport();
     ThingSetSocketServerTransport(const std::string &interface);
+    ~ThingSetSocketServerTransport();
 
 protected:
     void startThreads() override;

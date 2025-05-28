@@ -14,16 +14,12 @@ if(ENABLE_CLIENT)
     target_sources(thingset++ PRIVATE ThingSetClient.cpp)
 endif()
 
-if(ENABLE_ASIO)
+if(ENABLE_ASIO OR ENABLE_SOCKETS)
     add_subdirectory(ip)
 endif()
 
 if (ENABLE_CAN OR ENABLE_SOCKETCAN)
     add_subdirectory(can)
-endif()
-
-if (ENABLE_SOCKETS)
-    add_subdirectory(ip)
 endif()
 
 if(ENABLE_ZEPHYR)

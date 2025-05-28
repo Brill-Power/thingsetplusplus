@@ -34,6 +34,10 @@ inline int getsockname(int sock, struct sockaddr *addr, socklen_t *addrlen) {
     return zsock_getsockname(sock, addr, addrlen);
 }
 
+inline int getpeername(int sock, struct sockaddr *addr, socklen_t *addrlen) {
+    return zsock_getpeername(sock, addr, addrlen);
+}
+
 inline int getsockopt(int sock, int level, int optname, void *optval, socklen_t *optlen) {
     return zsock_getsockopt(sock, level, optname, optval, optlen);
 }
