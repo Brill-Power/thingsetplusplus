@@ -19,6 +19,30 @@ private:
     size_t _rsp_pos;
     uint8_t _depth;
 
+    /// @brief Determine the length of the value as a string
+    /// @return Number of characters in the string.
+    template <typename T> inline int getFutureEncodedLength(T value, const char *format)
+    {
+        return snprintf(nullptr, 0, format, value);
+    }
+
+    /// @brief Add a value to the response buffer as a string
+    /// @return True if successful, false otherwise
+    template <typename T> inline bool addResponseValue(T value, const char *format)
+    {
+
+        int bytes_required = getFutureEncodedLength(value, format);
+
+        if (_rsp_size < _rsp_pos + bytes_required) {
+            return false;
+        }
+
+        int bytes_written = snprintf(_rsp + getEncodedLength(), _rsp_size - getEncodedLength(), format, value);
+        _rsp_pos += bytes_written;
+
+        return true;
+    }
+
 public:
     template <size_t Size>
     ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
@@ -30,23 +54,6 @@ public:
     size_t getEncodedLength() const override
     {
         return _rsp_pos;
-    }
-
-    template <typename T> inline bool addResponseValue(T value, const char *format)
-    { // todo make this private?
-
-        // todo move this to a getFutureEncodedLength in header file? make this private too?
-        int bytes_required = snprintf(nullptr, 0, format, value); // determine the length of value as a string
-
-        if (_rsp_size < _rsp_pos + bytes_required) {
-            return false;
-        }
-
-        // todo use getEncodedLength instead of sizeof section here?
-        int bytes_written = snprintf(_rsp + _rsp_pos, _rsp_size - _rsp_pos, format, value);
-        _rsp_pos += bytes_written;
-
-        return true;
     }
 
     bool encode(const std::string_view &value) override;
@@ -118,8 +125,6 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     bool encodeMapEnd(uint32_t count) override;
 
-    // todo override this from base class instead of duplicating
-
     /// @brief Encode a pair. This is probably most useful inside a map.
     /// @tparam K The type of the first value in the pair.
     /// @tparam V The type of the second value in the pair.
@@ -158,8 +163,6 @@ public:
             return false;
         }
         for (auto const &[key, value] : map) {
-            // todo override this from base class instead of duplicating and call std::pair encode here instead of
-            // duplicating?
             if (!encode(key) || !addResponseValue(":", "%s") || !encode(value) || !addResponseValue(",", "%s")) {
                 return false;
             }
@@ -211,7 +214,6 @@ public:
         return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
     }
 
-    // todo override this from base class instead of duplicating
     template <typename T> bool encode(T *value, size_t size)
     {
         bool result = encodeListStart(size);

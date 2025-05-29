@@ -24,7 +24,6 @@ class ThingSetEncoder
 public:
     virtual size_t getEncodedLength() const = 0;
 
-    // todo delete all of these and inherit from base
     virtual bool encode(const std::string_view &value) = 0;
     virtual bool encode(std::string_view &value) = 0;
     virtual bool encode(const std::string &value) = 0;

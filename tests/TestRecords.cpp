@@ -128,8 +128,6 @@ TEST(Records, InitialiseRecordArrayInlineBin)
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
 }
 
-// todo change everything below here
-
 ThingSetReadOnlyProperty<0x610, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecordsText = {
     { (ModuleRecord){
           .voltage = 24.0f,

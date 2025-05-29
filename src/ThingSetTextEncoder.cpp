@@ -93,7 +93,6 @@ bool ThingSetTextEncoder::encode(double *value)
     return addResponseValue(*value, "%f");
 }
 
-// todo bool can reuse uint8 stuff?
 bool ThingSetTextEncoder::encode(const bool &value)
 {
     return addResponseValue(value, "%i");
