@@ -177,7 +177,7 @@ TEST(Records, TextEncodeSimpleRecord)
     ASSERT_EQ(27.0f, moduleRecordsText[0].voltage.getValue());
     moduleRecordsText[0].voltage = 25.0f;
 
-    char buffer[TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH];
+    char buffer[ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH];
     size_t size = sizeof(buffer);
     ThingSetTextEncoder encoder(buffer, size);
     encoder.encode(moduleRecordsText.getValue());
@@ -198,7 +198,7 @@ TEST(Records, InitialiseRecordArrayCopyText)
 {
     ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecordsText.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
-    char buffer[TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH];
+    char buffer[ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH];
     size_t size = sizeof(buffer);
     ThingSetTextEncoder encoder(buffer, size);
     ASSERT_TRUE(records.encode(encoder));
@@ -222,7 +222,7 @@ TEST(Records, InitialiseRecordArrayInlineText)
     } } };
 
     ASSERT_EQ(24.0f, records[0].voltage.getValue());
-    char buffer[TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH];
+    char buffer[ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH];
     size_t size = sizeof(buffer);
     ThingSetTextEncoder encoder(buffer, size);
     ASSERT_TRUE(records.encode(encoder));

@@ -5,22 +5,13 @@
  */
 #pragma once
 
-#include "internal/bind_to_tuple.hpp"
+#include "ThingSetEncoder.hpp"
 #include "zcbor_encode.h"
-#include <array>
-#include <list>
-#include <map>
-#include <string>
-#include <string_view>
-#include <tuple>
-
-#define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
-#define BINARY_ENCODER_DEFAULT_MAX_DEPTH                 8
 
 namespace ThingSet {
 
 /// @brief Binary protocol encoder for ThingSet.
-class ThingSetBinaryEncoder
+class ThingSetBinaryEncoder : public ThingSetEncoder
 {
 protected:
     virtual bool ensureState();
@@ -30,71 +21,74 @@ protected:
 public:
     virtual size_t getEncodedLength() const = 0;
 
-    bool encode(const std::string_view &value);
-    bool encode(std::string_view &value);
-    bool encode(const std::string &value);
-    bool encode(std::string &value);
-    bool encode(const char *value);
-    bool encode(char *value);
-    bool encode(const float &value);
-    bool encode(float &value);
-    bool encode(float *value);
-    bool encode(const double &value);
-    bool encode(double &value);
-    bool encode(double *value);
-    bool encode(const bool &value);
-    bool encode(bool &value);
-    bool encode(const uint8_t &value);
-    bool encode(uint8_t &value);
-    bool encode(uint8_t *value);
-    bool encode(const uint16_t &value);
-    bool encode(uint16_t &value);
-    bool encode(uint16_t *value);
-    bool encode(const uint32_t &value);
-    bool encode(uint32_t &value);
-    bool encode(uint32_t *value);
-    bool encode(const uint64_t &value);
-    bool encode(uint64_t &value);
-    bool encode(uint64_t *value);
-    bool encode(const int8_t &value);
-    bool encode(int8_t &value);
-    bool encode(const int16_t &value);
-    bool encode(int16_t &value);
-    bool encode(const int32_t &value);
-    bool encode(int32_t &value);
-    bool encode(int32_t *value);
-    bool encode(const int64_t &value);
-    bool encode(int64_t &value);
-    bool encode(int64_t *value);
-    bool encodePreamble();
+    bool encode(const std::string_view &value) override;
+    bool encode(std::string_view &value) override;
+    bool encode(const std::string &value) override;
+    bool encode(std::string &value) override;
+    bool encode(const char *value) override;
+    bool encode(char *value) override;
+    bool encode(const float &value) override;
+    bool encode(float &value) override;
+    bool encode(float *value) override;
+    bool encode(const double &value) override;
+    bool encode(double &value) override;
+    bool encode(double *value) override;
+    bool encode(const bool &value) override;
+    bool encode(bool &value) override;
+    bool encode(bool *value) override;
+    bool encode(const uint8_t &value) override;
+    bool encode(uint8_t &value) override;
+    bool encode(uint8_t *value) override;
+    bool encode(const uint16_t &value) override;
+    bool encode(uint16_t &value) override;
+    bool encode(uint16_t *value) override;
+    bool encode(const uint32_t &value) override;
+    bool encode(uint32_t &value) override;
+    bool encode(uint32_t *value) override;
+    bool encode(const uint64_t &value) override;
+    bool encode(uint64_t &value) override;
+    bool encode(uint64_t *value) override;
+    bool encode(const int8_t &value) override;
+    bool encode(int8_t &value) override;
+    bool encode(int8_t *value) override;
+    bool encode(const int16_t &value) override;
+    bool encode(int16_t &value) override;
+    bool encode(int16_t *value) override;
+    bool encode(const int32_t &value) override;
+    bool encode(int32_t &value) override;
+    bool encode(int32_t *value) override;
+    bool encode(const int64_t &value) override;
+    bool encode(int64_t &value) override;
+    bool encode(int64_t *value) override;
+    bool encodePreamble() override;
     /// @brief Encode the start of a list. In forward-only encoding scenarios, you should
     /// use the overload which allows the number of elements in the list to be specified in
     /// advance.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeListStart();
+    bool encodeListStart() override;
     /// @brief Encode the start of a list, specifying the number of elements the list
     /// will contain.
     /// @param count The number of elements in the list.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeListStart(uint32_t count);
-    bool encodeListEnd();
+    bool encodeListStart(uint32_t count) override;
+    bool encodeListEnd() override;
     /// @brief Encode the end of a list, specifying the number of elements the list
     /// contained. It should match the number passed to @ref encodeListStart.
     /// @param count The number of elements in the list.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeListEnd(uint32_t count);
-    bool encodeMapStart();
+    bool encodeListEnd(uint32_t count) override;
+    bool encodeMapStart() override;
     /// @brief Encode the start of a map, specifying the number of key-value pairs the map
     /// will contain.
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeMapStart(uint32_t count);
-    bool encodeMapEnd();
+    bool encodeMapStart(uint32_t count) override;
+    bool encodeMapEnd() override;
     /// @brief Encode the end of a map, specifying the number of key-value pairs the map
     /// contained. It should match the number passed to @ref encodeMapStart.
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeMapEnd(uint32_t count);
+    bool encodeMapEnd(uint32_t count) override;
 
     /// @brief Encode a pair. This is probably most useful inside a map.
     /// @tparam K The type of the first value in the pair.
@@ -209,7 +203,7 @@ private:
     }
 };
 
-template <int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
+template <int depth = ENCODER_DEFAULT_MAX_DEPTH>
 class FixedDepthThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
 {
 private:
@@ -238,7 +232,7 @@ public:
     }
 };
 
-using DefaultFixedDepthThingSetBinaryEncoder = FixedDepthThingSetBinaryEncoder<BINARY_ENCODER_DEFAULT_MAX_DEPTH>;
+using DefaultFixedDepthThingSetBinaryEncoder = FixedDepthThingSetBinaryEncoder<ENCODER_DEFAULT_MAX_DEPTH>;
 
 /// @brief Interface for values that can be encoded with a binary encoder.
 class ThingSetBinaryEncodable

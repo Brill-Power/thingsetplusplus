@@ -14,7 +14,7 @@ namespace ThingSet {
 template <size_t Size> class StreamingThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
 {
 protected:
-    zcbor_state_t _state[BINARY_ENCODER_DEFAULT_MAX_DEPTH];
+    zcbor_state_t _state[ENCODER_DEFAULT_MAX_DEPTH];
     std::array<uint8_t, Size * 2> _buffer;
     size_t _exportedLength;
 

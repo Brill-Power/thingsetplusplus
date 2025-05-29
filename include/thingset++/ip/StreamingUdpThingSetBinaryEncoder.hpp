@@ -12,8 +12,7 @@
 
 namespace ThingSet::Ip {
 
-template <typename Identifier>
-class ThingSetIpServerTransport;
+template <typename Identifier> class ThingSetIpServerTransport;
 
 /// @brief Encodes data to successive UDP frames in a multi-frame report.
 /// @tparam Identifier Type of client identifier
@@ -27,7 +26,7 @@ public:
     StreamingUdpThingSetBinaryEncoder(ThingSetIpServerTransport<Identifier> &transport) : _transport(transport)
     {
         _buffer[0] = ThingSetRequestType::report;
-        zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[3], _buffer.size() - 3, 2);
+        zcbor_new_encode_state(_state, ENCODER_DEFAULT_MAX_DEPTH, &_buffer[3], _buffer.size() - 3, 2);
     }
 
 protected:
@@ -39,4 +38,4 @@ protected:
     }
 };
 
-} // namespace ThingSet::Ip::Udp
+} // namespace ThingSet::Ip

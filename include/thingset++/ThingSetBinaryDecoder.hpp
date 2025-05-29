@@ -14,7 +14,7 @@
 #include <string>
 #include <tuple>
 
-#define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
+#define BINARY_DECODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
 #define BINARY_DECODER_DEFAULT_MAX_DEPTH                 8
 
 namespace ThingSet {
@@ -146,7 +146,9 @@ public:
     /// @tparam T The type of the class or structure to be decoded.
     /// @param value A pointer to the class or structure.
     /// @return True if decoding succeeded, otherwise false.
-    template <typename T> requires std::is_class_v<T> bool decode(T *value)
+    template <typename T>
+        requires std::is_class_v<T>
+    bool decode(T *value)
     {
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
         if (!zcbor_map_start_decode(getState())) {

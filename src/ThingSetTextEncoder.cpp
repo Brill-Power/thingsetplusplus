@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2025 Brill Power. All rights reserved.
+ * Copyright (c) 2025 Brill Power.
  *
- * SPDX-License-Identifier: Proprietary
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include "thingset++/ThingSetTextEncoder.hpp"
