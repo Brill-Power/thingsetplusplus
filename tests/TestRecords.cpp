@@ -189,7 +189,7 @@ TEST(Records, TextEncodeSimpleRecord)
         "\"cellVoltages\":[3.100000,3.300000,3.000000,3.100000,3.200000,2.950000],\"supercells\":[{\"soc\":0.000000,"
         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,"
         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 
     // todo add text decoding once decoder exists
 }
@@ -210,7 +210,7 @@ TEST(Records, InitialiseRecordArrayCopyText)
         "\"cellVoltages\":[3.100000,3.300000,3.000000,3.100000,3.200000,2.950000],\"supercells\":[{\"soc\":0.000000,"
         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,"
         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(Records, InitialiseRecordArrayInlineText)
@@ -231,5 +231,5 @@ TEST(Records, InitialiseRecordArrayInlineText)
         "000000,0.000000,0.000000],\"supercells\":[{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0."
         "000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0."
         "000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }

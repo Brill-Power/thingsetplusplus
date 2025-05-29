@@ -13,23 +13,19 @@ namespace ThingSet {
 /// @brief Text protocol encoder for ThingSet.
 class ThingSetTextEncoder : public ThingSetEncoder
 {
-public:
-    // todo move these to be private?
-    char _rsp[ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH]; // todo change size here? or just change to uint8_t*
+private:
+    char *_rsp;
     size_t _rsp_size;
     size_t _rsp_pos;
     uint8_t _depth;
 
+public:
     template <size_t Size>
     ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
     {}
     ThingSetTextEncoder(char (&buffer)[ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH], size_t size)
-    {
-        memcpy(_rsp, buffer, ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
-        _rsp_size = size;
-        _rsp_pos = 0;
-        _depth = 0;
-    }
+        : _rsp(buffer), _rsp_size(size), _rsp_pos(0), _depth(0)
+    {}
 
     size_t getEncodedLength() const override
     {
@@ -42,12 +38,12 @@ public:
         // todo move this to a getFutureEncodedLength in header file? make this private too?
         int bytes_required = snprintf(nullptr, 0, format, value); // determine the length of value as a string
 
-        if (sizeof(_rsp) < _rsp_pos + bytes_required) {
+        if (_rsp_size < _rsp_pos + bytes_required) {
             return false;
         }
 
         // todo use getEncodedLength instead of sizeof section here?
-        int bytes_written = snprintf(_rsp + _rsp_pos, sizeof(_rsp) - _rsp_pos, format, value);
+        int bytes_written = snprintf(_rsp + _rsp_pos, _rsp_size - _rsp_pos, format, value);
         _rsp_pos += bytes_written;
 
         return true;

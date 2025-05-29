@@ -24,7 +24,7 @@ TEST(TextEncoder, EncodeFloat)
     float f = 1.23F;
     encoder.encode(f);
     const char *expected = "1.230000";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeFloatPtr)
@@ -34,7 +34,7 @@ TEST(TextEncoder, EncodeFloatPtr)
     float *ptr = &f;
     encoder.encode(ptr);
     const char *expected = "1.230000";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfFloats)
@@ -43,7 +43,7 @@ TEST(TextEncoder, EncodeArrayOfFloats)
     std::array f = { 1.23F, 4.56F, 7.89F };
     encoder.encode(f);
     const char *expected = "[1.230000,4.560000,7.890000]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeDouble)
@@ -52,7 +52,7 @@ TEST(TextEncoder, EncodeDouble)
     double d = 1.23;
     encoder.encode(d);
     const char *expected = "1.230000";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeDoublePtr)
@@ -62,7 +62,7 @@ TEST(TextEncoder, EncodeDoublePtr)
     double *ptr = &d;
     encoder.encode(ptr);
     const char *expected = "1.230000";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfDoubles)
@@ -71,7 +71,7 @@ TEST(TextEncoder, EncodeArrayOfDoubles)
     std::array<double, 3> d = { 1.23, 4.56, 7.89 };
     encoder.encode(d);
     const char *expected = "[1.230000,4.560000,7.890000]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt)
@@ -80,7 +80,7 @@ TEST(TextEncoder, EncodeInt)
     int i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeIntPtr)
@@ -90,7 +90,7 @@ TEST(TextEncoder, EncodeIntPtr)
     int *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfInts)
@@ -99,7 +99,7 @@ TEST(TextEncoder, EncodeArrayOfInts)
     std::array<int, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt8)
@@ -108,7 +108,7 @@ TEST(TextEncoder, EncodeInt8)
     int8_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt8Ptr)
@@ -118,7 +118,7 @@ TEST(TextEncoder, EncodeInt8Ptr)
     int8_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfInt8s)
@@ -127,7 +127,7 @@ TEST(TextEncoder, EncodeArrayOfInt8s)
     std::array<int8_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt16)
@@ -136,7 +136,7 @@ TEST(TextEncoder, EncodeInt16)
     int16_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt16Ptr)
@@ -146,7 +146,7 @@ TEST(TextEncoder, EncodeInt16Ptr)
     int16_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfInt16s)
@@ -155,7 +155,7 @@ TEST(TextEncoder, EncodeArrayOfInt16s)
     std::array<int16_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt32)
@@ -164,7 +164,7 @@ TEST(TextEncoder, EncodeInt32)
     int32_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt32Ptr)
@@ -174,7 +174,7 @@ TEST(TextEncoder, EncodeInt32Ptr)
     int32_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfInt32s)
@@ -183,7 +183,7 @@ TEST(TextEncoder, EncodeArrayOfInt32s)
     std::array<int32_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt64)
@@ -192,7 +192,7 @@ TEST(TextEncoder, EncodeInt64)
     int64_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeInt64Ptr)
@@ -202,7 +202,7 @@ TEST(TextEncoder, EncodeInt64Ptr)
     int64_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfInt64s)
@@ -211,7 +211,7 @@ TEST(TextEncoder, EncodeArrayOfInt64s)
     std::array<int64_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt8)
@@ -220,7 +220,7 @@ TEST(TextEncoder, EncodeUInt8)
     uint8_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt8Ptr)
@@ -230,7 +230,7 @@ TEST(TextEncoder, EncodeUInt8Ptr)
     uint8_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfUInt8s)
@@ -239,7 +239,7 @@ TEST(TextEncoder, EncodeArrayOfUInt8s)
     std::array<uint8_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt16)
@@ -248,7 +248,7 @@ TEST(TextEncoder, EncodeUInt16)
     uint16_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt16Ptr)
@@ -258,7 +258,7 @@ TEST(TextEncoder, EncodeUInt16Ptr)
     uint16_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfUInt16s)
@@ -267,7 +267,7 @@ TEST(TextEncoder, EncodeArrayOfUInt16s)
     std::array<uint16_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt32)
@@ -276,7 +276,7 @@ TEST(TextEncoder, EncodeUInt32)
     uint32_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt32Ptr)
@@ -286,7 +286,7 @@ TEST(TextEncoder, EncodeUInt32Ptr)
     uint32_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfUInt32s)
@@ -295,7 +295,7 @@ TEST(TextEncoder, EncodeArrayOfUInt32s)
     std::array<uint32_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt64)
@@ -304,7 +304,7 @@ TEST(TextEncoder, EncodeUInt64)
     uint64_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeUInt64Ptr)
@@ -314,7 +314,7 @@ TEST(TextEncoder, EncodeUInt64Ptr)
     uint64_t *ptr = &i;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfUInt64s)
@@ -323,7 +323,7 @@ TEST(TextEncoder, EncodeArrayOfUInt64s)
     std::array<uint64_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeBool)
@@ -332,7 +332,7 @@ TEST(TextEncoder, EncodeBool)
     bool b = true;
     encoder.encode(b);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeBoolPtr)
@@ -342,7 +342,7 @@ TEST(TextEncoder, EncodeBoolPtr)
     bool *ptr = &b;
     encoder.encode(ptr);
     const char *expected = "1";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeArrayOfBools)
@@ -351,7 +351,7 @@ TEST(TextEncoder, EncodeArrayOfBools)
     std::array<bool, 3> i = { true, false, true };
     encoder.encode(i);
     const char *expected = "[1,0,1]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeString)
@@ -360,7 +360,7 @@ TEST(TextEncoder, EncodeString)
     const char *hello = "world";
     encoder.encode(hello);
     const char *expected = "\"world\"";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeStdString)
@@ -369,7 +369,7 @@ TEST(TextEncoder, EncodeStdString)
     const std::string bonjour = "monde";
     encoder.encode(bonjour);
     const char *expected = "\"monde\"";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeStdStringView)
@@ -378,7 +378,7 @@ TEST(TextEncoder, EncodeStdStringView)
     const std::string_view hello = "hello";
     encoder.encode(hello);
     const char *expected = "\"hello\"";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodePreamble)
@@ -386,7 +386,7 @@ TEST(TextEncoder, EncodePreamble)
     SETUP(ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     encoder.encodePreamble();
     const char *expected = "";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeMap)
@@ -397,7 +397,7 @@ TEST(TextEncoder, EncodeMap)
     map.insert_or_assign("world", 2);
     encoder.encode(map);
     const char *expected = "{\"hello\":1,\"world\":2}";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
 TEST(TextEncoder, EncodeList)
@@ -405,5 +405,5 @@ TEST(TextEncoder, EncodeList)
     SETUP(ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     encoder.encodeList(1.23f, 123, "123");
     const char *expected = "[1.230000,123,\"123\"]";
-    ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
