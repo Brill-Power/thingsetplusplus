@@ -7,6 +7,7 @@
 
 #include "internal/bind_to_tuple.hpp"
 #include <array>
+#include <cstdint>
 #include <list>
 #include <map>
 #include <string>
