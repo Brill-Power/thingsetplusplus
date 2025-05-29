@@ -381,6 +381,14 @@ TEST(TextEncoder, EncodeStdStringView)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
+TEST(TextEncoder, EncodeNull)
+{
+    SETUP(ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
+    encoder.encodeNull();
+    const char *expected = "null";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
 TEST(TextEncoder, EncodePreamble)
 {
     SETUP(ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
@@ -407,3 +415,11 @@ TEST(TextEncoder, EncodeList)
     const char *expected = "[1.230000,123,\"123\"]";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
+
+// TEST(TextEncoder, TestBoundaryEncode) // todo readd this after size is fixed
+// {
+//     SETUP(1)
+//     encoder.encode(1.23f);
+//     const char *expected = "";
+//     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+// }

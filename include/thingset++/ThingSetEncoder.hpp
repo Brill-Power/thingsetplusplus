@@ -15,7 +15,6 @@
 #include <tuple>
 
 #define ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 1024
-#define ENCODER_DEFAULT_MAX_DEPTH                 8
 
 namespace ThingSet {
 
@@ -64,6 +63,7 @@ public:
     virtual bool encode(const int64_t &value) = 0;
     virtual bool encode(int64_t &value) = 0;
     virtual bool encode(int64_t *value) = 0;
+    virtual bool encodeNull() = 0;
     virtual bool encodePreamble() = 0;
     /// @brief Encode the start of a list. In forward-only encoding scenarios, you should
     /// use the overload which allows the number of elements in the list to be specified in

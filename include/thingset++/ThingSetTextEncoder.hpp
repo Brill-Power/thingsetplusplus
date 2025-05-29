@@ -14,31 +14,34 @@ namespace ThingSet {
 class ThingSetTextEncoder : public ThingSetEncoder
 {
 private:
-    char *_rsp;
-    size_t _rsp_size;
-    size_t _rsp_pos;
+    char *_responseBuffer;
+    size_t _responseSize;
+    size_t _responsePosition;
     uint8_t _depth;
 
     /// @brief Determine the length of the value as a string
     /// @return Number of characters in the string.
-    template <typename T> inline int getFutureEncodedLength(T value, const char *format)
+    template <typename T> inline int ensureBufferCapacity(T value, const char *format)
     {
-        return snprintf(nullptr, 0, format, value);
+        int bytesRequired = snprintf(nullptr, 0, format, value); // get size of value as a string
+
+        if (_responseSize < _responsePosition + bytesRequired) {
+            return false;
+        }
+        return true;
     }
 
     /// @brief Add a value to the response buffer as a string
     /// @return True if successful, false otherwise
-    template <typename T> inline bool addResponseValue(T value, const char *format)
+    template <typename T> bool addResponseValue(T value, const char *format = "%s")
     {
-
-        int bytes_required = getFutureEncodedLength(value, format);
-
-        if (_rsp_size < _rsp_pos + bytes_required) {
+        if (!ensureBufferCapacity(value, format)) {
             return false;
         }
 
-        int bytes_written = snprintf(_rsp + getEncodedLength(), _rsp_size - getEncodedLength(), format, value);
-        _rsp_pos += bytes_written;
+        int bytesWritten =
+            snprintf(_responseBuffer + getEncodedLength(), _responseSize - getEncodedLength(), format, value);
+        _responsePosition += bytesWritten;
 
         return true;
     }
@@ -48,12 +51,12 @@ public:
     ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
     {}
     ThingSetTextEncoder(char (&buffer)[ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH], size_t size)
-        : _rsp(buffer), _rsp_size(size), _rsp_pos(0), _depth(0)
+        : _responseBuffer(buffer), _responseSize(size), _responsePosition(0), _depth(0)
     {}
 
     size_t getEncodedLength() const override
     {
-        return _rsp_pos;
+        return _responsePosition;
     }
 
     bool encode(const std::string_view &value) override;
@@ -95,6 +98,7 @@ public:
     bool encode(const int64_t &value) override;
     bool encode(int64_t &value) override;
     bool encode(int64_t *value) override;
+    bool encodeNull() override;
     bool encodePreamble() override;
     /// @brief Encode the start of a list. In forward-only encoding scenarios, you should
     /// use the overload which allows the number of elements in the list to be specified in
@@ -132,7 +136,7 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     template <typename K, typename V> bool encode(std::pair<K, V> &pair)
     {
-        return encode(pair.first) && addResponseValue(":", "%s") && encode(pair.second) && addResponseValue(",", "%s");
+        return encode(pair.first) && addResponseValue(":") && encode(pair.second) && addResponseValue(",");
     }
 
     /// @brief Encode a linked list.
@@ -163,7 +167,8 @@ public:
             return false;
         }
         for (auto const &[key, value] : map) {
-            if (!encode(key) || !addResponseValue(":", "%s") || !encode(value) || !addResponseValue(",", "%s")) {
+            std::pair<K, V> valuePair(key, value);
+            if (!encode(valuePair)) {
                 return false;
             }
         }
@@ -186,9 +191,9 @@ public:
         for_each_element(bound, [this](auto &prop) {
             auto id = prop->getName();
             encode(id);
-            addResponseValue(":", "%s");
+            addResponseValue(":");
             prop->encode(*this);
-            addResponseValue(",", "%s");
+            addResponseValue(",");
         });
         return encodeMapEnd(count);
     }
@@ -219,7 +224,7 @@ public:
         bool result = encodeListStart(size);
         for (size_t i = 0; i < size; i++) {
             result &= this->encode(value[i]);
-            addResponseValue(",", "%s");
+            addResponseValue(",");
         }
         return result && encodeListEnd(size);
     }
@@ -232,7 +237,7 @@ private:
 
     template <typename T, typename... TArgs> bool encodeAndShift(T arg, TArgs... rest)
     {
-        return encode(arg) && addResponseValue(",", "%s") && encodeAndShift(rest...);
+        return encode(arg) && addResponseValue(",") && encodeAndShift(rest...);
     }
 
     template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)

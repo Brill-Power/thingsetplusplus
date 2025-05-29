@@ -26,7 +26,7 @@ public:
     StreamingUdpThingSetBinaryEncoder(ThingSetIpServerTransport<Identifier> &transport) : _transport(transport)
     {
         _buffer[0] = ThingSetRequestType::report;
-        zcbor_new_encode_state(_state, ENCODER_DEFAULT_MAX_DEPTH, &_buffer[3], _buffer.size() - 3, 2);
+        zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[3], _buffer.size() - 3, 2);
     }
 
 protected:

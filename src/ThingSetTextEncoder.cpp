@@ -12,54 +12,54 @@ namespace ThingSet {
 bool ThingSetTextEncoder::encode(const std::string_view &value)
 {
     bool ret = true;
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     ret |= addResponseValue(value, "%.*s");
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     return ret;
 }
 
 bool ThingSetTextEncoder::encode(std::string_view &value)
 {
     bool ret = true;
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     ret |= addResponseValue(value, "%.*s");
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     return ret;
 }
 
 bool ThingSetTextEncoder::encode(const std::string &value)
 {
     bool ret = true;
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     ret |= addResponseValue(value.c_str(), "%s");
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     return ret;
 }
 
 bool ThingSetTextEncoder::encode(std::string &value)
 {
     bool ret = true;
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     ret |= addResponseValue(value.c_str(), "%s");
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     return ret;
 }
 
 bool ThingSetTextEncoder::encode(const char *value)
 {
     bool ret = true;
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     ret |= addResponseValue(value, "%s");
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     return ret;
 }
 
 bool ThingSetTextEncoder::encode(char *value)
 {
     bool ret = true;
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     ret |= addResponseValue(value, "%s");
-    ret |= addResponseValue("\"", "%s");
+    ret |= addResponseValue("\"");
     return ret;
 }
 
@@ -228,6 +228,11 @@ bool ThingSetTextEncoder::encode(int64_t *value)
     return addResponseValue(*value, "%" PRIi64);
 }
 
+bool ThingSetTextEncoder::encodeNull()
+{
+    return addResponseValue("null");
+}
+
 bool ThingSetTextEncoder::encodePreamble()
 {
     return true;
@@ -236,7 +241,7 @@ bool ThingSetTextEncoder::encodePreamble()
 bool ThingSetTextEncoder::encodeMapStart()
 {
     _depth++;
-    return addResponseValue("{", "%s");
+    return addResponseValue("{");
 }
 
 bool ThingSetTextEncoder::encodeMapStart(uint32_t)
@@ -247,8 +252,8 @@ bool ThingSetTextEncoder::encodeMapStart(uint32_t)
 bool ThingSetTextEncoder::encodeMapEnd()
 {
     _depth--;
-    _rsp_pos--;
-    return addResponseValue("}", "%s");
+    _responsePosition--;
+    return addResponseValue("}");
 }
 
 bool ThingSetTextEncoder::encodeMapEnd(uint32_t)
@@ -259,7 +264,7 @@ bool ThingSetTextEncoder::encodeMapEnd(uint32_t)
 bool ThingSetTextEncoder::encodeListStart()
 {
     _depth++;
-    return addResponseValue("[", "%s");
+    return addResponseValue("[");
 }
 
 bool ThingSetTextEncoder::encodeListStart(uint32_t)
@@ -270,8 +275,8 @@ bool ThingSetTextEncoder::encodeListStart(uint32_t)
 bool ThingSetTextEncoder::encodeListEnd()
 {
     _depth--;
-    _rsp_pos--;
-    return addResponseValue("]", "%s");
+    _responsePosition--;
+    return addResponseValue("]");
 }
 
 bool ThingSetTextEncoder::encodeListEnd(uint32_t)

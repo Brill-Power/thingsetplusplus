@@ -13,7 +13,7 @@ StreamingCanThingSetBinaryEncoder::StreamingCanThingSetBinaryEncoder(Can::ThingS
     : StreamingThingSetBinaryEncoder::StreamingThingSetBinaryEncoder(), _transport(transport), _sequenceNumber(0)
 {
     _buffer[0] = ThingSetRequestType::report;
-    zcbor_new_encode_state(_state, ENCODER_DEFAULT_MAX_DEPTH, &_buffer[1], _buffer.size() - 1, 2);
+    zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[1], _buffer.size() - 1, 2);
 }
 
 bool StreamingCanThingSetBinaryEncoder::send(Can::MultiFrameMessageType frameType, size_t length)

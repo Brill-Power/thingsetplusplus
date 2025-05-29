@@ -8,6 +8,8 @@
 #include "ThingSetEncoder.hpp"
 #include "zcbor_encode.h"
 
+#define BINARY_ENCODER_DEFAULT_MAX_DEPTH 8
+
 namespace ThingSet {
 
 /// @brief Binary protocol encoder for ThingSet.
@@ -60,6 +62,7 @@ public:
     bool encode(const int64_t &value) override;
     bool encode(int64_t &value) override;
     bool encode(int64_t *value) override;
+    bool encodeNull() override;
     bool encodePreamble() override;
     /// @brief Encode the start of a list. In forward-only encoding scenarios, you should
     /// use the overload which allows the number of elements in the list to be specified in
@@ -203,7 +206,7 @@ private:
     }
 };
 
-template <int depth = ENCODER_DEFAULT_MAX_DEPTH>
+template <int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
 class FixedDepthThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
 {
 private:
@@ -232,7 +235,7 @@ public:
     }
 };
 
-using DefaultFixedDepthThingSetBinaryEncoder = FixedDepthThingSetBinaryEncoder<ENCODER_DEFAULT_MAX_DEPTH>;
+using DefaultFixedDepthThingSetBinaryEncoder = FixedDepthThingSetBinaryEncoder<BINARY_ENCODER_DEFAULT_MAX_DEPTH>;
 
 /// @brief Interface for values that can be encoded with a binary encoder.
 class ThingSetBinaryEncodable
