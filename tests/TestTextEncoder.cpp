@@ -20,7 +20,7 @@ using namespace ThingSet;
 
 TEST(TextEncoder, EncodeFloat)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     float f = 1.23F;
     encoder.encode(f);
     const char *expected = "1.230000";
@@ -29,7 +29,7 @@ TEST(TextEncoder, EncodeFloat)
 
 TEST(TextEncoder, EncodeFloatPtr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     float f = 1.23F;
     float *ptr = &f;
     encoder.encode(ptr);
@@ -39,7 +39,7 @@ TEST(TextEncoder, EncodeFloatPtr)
 
 TEST(TextEncoder, EncodeArrayOfFloats)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array f = { 1.23F, 4.56F, 7.89F };
     encoder.encode(f);
     const char *expected = "[1.230000,4.560000,7.890000]";
@@ -48,7 +48,7 @@ TEST(TextEncoder, EncodeArrayOfFloats)
 
 TEST(TextEncoder, EncodeDouble)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     double d = 1.23;
     encoder.encode(d);
     const char *expected = "1.230000";
@@ -57,7 +57,7 @@ TEST(TextEncoder, EncodeDouble)
 
 TEST(TextEncoder, EncodeDoublePtr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     double d = 1.23;
     double *ptr = &d;
     encoder.encode(ptr);
@@ -67,7 +67,7 @@ TEST(TextEncoder, EncodeDoublePtr)
 
 TEST(TextEncoder, EncodeArrayOfDoubles)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<double, 3> d = { 1.23, 4.56, 7.89 };
     encoder.encode(d);
     const char *expected = "[1.230000,4.560000,7.890000]";
@@ -76,7 +76,7 @@ TEST(TextEncoder, EncodeArrayOfDoubles)
 
 TEST(TextEncoder, EncodeInt)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -85,7 +85,7 @@ TEST(TextEncoder, EncodeInt)
 
 TEST(TextEncoder, EncodeIntPtr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int i = 1;
     int *ptr = &i;
     encoder.encode(ptr);
@@ -95,7 +95,7 @@ TEST(TextEncoder, EncodeIntPtr)
 
 TEST(TextEncoder, EncodeArrayOfInts)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<int, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -104,7 +104,7 @@ TEST(TextEncoder, EncodeArrayOfInts)
 
 TEST(TextEncoder, EncodeInt8)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int8_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -113,7 +113,7 @@ TEST(TextEncoder, EncodeInt8)
 
 TEST(TextEncoder, EncodeInt8Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int8_t i = 1;
     int8_t *ptr = &i;
     encoder.encode(ptr);
@@ -123,7 +123,7 @@ TEST(TextEncoder, EncodeInt8Ptr)
 
 TEST(TextEncoder, EncodeArrayOfInt8s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<int8_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -132,7 +132,7 @@ TEST(TextEncoder, EncodeArrayOfInt8s)
 
 TEST(TextEncoder, EncodeInt16)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int16_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -141,7 +141,7 @@ TEST(TextEncoder, EncodeInt16)
 
 TEST(TextEncoder, EncodeInt16Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int16_t i = 1;
     int16_t *ptr = &i;
     encoder.encode(ptr);
@@ -151,7 +151,7 @@ TEST(TextEncoder, EncodeInt16Ptr)
 
 TEST(TextEncoder, EncodeArrayOfInt16s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<int16_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -160,7 +160,7 @@ TEST(TextEncoder, EncodeArrayOfInt16s)
 
 TEST(TextEncoder, EncodeInt32)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int32_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -169,7 +169,7 @@ TEST(TextEncoder, EncodeInt32)
 
 TEST(TextEncoder, EncodeInt32Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int32_t i = 1;
     int32_t *ptr = &i;
     encoder.encode(ptr);
@@ -179,7 +179,7 @@ TEST(TextEncoder, EncodeInt32Ptr)
 
 TEST(TextEncoder, EncodeArrayOfInt32s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<int32_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -188,7 +188,7 @@ TEST(TextEncoder, EncodeArrayOfInt32s)
 
 TEST(TextEncoder, EncodeInt64)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int64_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -197,7 +197,7 @@ TEST(TextEncoder, EncodeInt64)
 
 TEST(TextEncoder, EncodeInt64Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     int64_t i = 1;
     int64_t *ptr = &i;
     encoder.encode(ptr);
@@ -207,7 +207,7 @@ TEST(TextEncoder, EncodeInt64Ptr)
 
 TEST(TextEncoder, EncodeArrayOfInt64s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<int64_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -216,7 +216,7 @@ TEST(TextEncoder, EncodeArrayOfInt64s)
 
 TEST(TextEncoder, EncodeUInt8)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint8_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -225,7 +225,7 @@ TEST(TextEncoder, EncodeUInt8)
 
 TEST(TextEncoder, EncodeUInt8Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint8_t i = 1;
     uint8_t *ptr = &i;
     encoder.encode(ptr);
@@ -235,7 +235,7 @@ TEST(TextEncoder, EncodeUInt8Ptr)
 
 TEST(TextEncoder, EncodeArrayOfUInt8s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<uint8_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -244,7 +244,7 @@ TEST(TextEncoder, EncodeArrayOfUInt8s)
 
 TEST(TextEncoder, EncodeUInt16)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint16_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -253,7 +253,7 @@ TEST(TextEncoder, EncodeUInt16)
 
 TEST(TextEncoder, EncodeUInt16Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint16_t i = 1;
     uint16_t *ptr = &i;
     encoder.encode(ptr);
@@ -263,7 +263,7 @@ TEST(TextEncoder, EncodeUInt16Ptr)
 
 TEST(TextEncoder, EncodeArrayOfUInt16s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<uint16_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -272,7 +272,7 @@ TEST(TextEncoder, EncodeArrayOfUInt16s)
 
 TEST(TextEncoder, EncodeUInt32)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint32_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -281,7 +281,7 @@ TEST(TextEncoder, EncodeUInt32)
 
 TEST(TextEncoder, EncodeUInt32Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint32_t i = 1;
     uint32_t *ptr = &i;
     encoder.encode(ptr);
@@ -291,7 +291,7 @@ TEST(TextEncoder, EncodeUInt32Ptr)
 
 TEST(TextEncoder, EncodeArrayOfUInt32s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<uint32_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -300,7 +300,7 @@ TEST(TextEncoder, EncodeArrayOfUInt32s)
 
 TEST(TextEncoder, EncodeUInt64)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint64_t i = 1;
     encoder.encode(i);
     const char *expected = "1";
@@ -309,7 +309,7 @@ TEST(TextEncoder, EncodeUInt64)
 
 TEST(TextEncoder, EncodeUInt64Ptr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     uint64_t i = 1;
     uint64_t *ptr = &i;
     encoder.encode(ptr);
@@ -319,7 +319,7 @@ TEST(TextEncoder, EncodeUInt64Ptr)
 
 TEST(TextEncoder, EncodeArrayOfUInt64s)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<uint64_t, 3> i = { 1, 2, 3 };
     encoder.encode(i);
     const char *expected = "[1,2,3]";
@@ -328,7 +328,7 @@ TEST(TextEncoder, EncodeArrayOfUInt64s)
 
 TEST(TextEncoder, EncodeBool)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     bool b = true;
     encoder.encode(b);
     const char *expected = "1";
@@ -337,7 +337,7 @@ TEST(TextEncoder, EncodeBool)
 
 TEST(TextEncoder, EncodeBoolPtr)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     bool b = true;
     bool *ptr = &b;
     encoder.encode(ptr);
@@ -347,7 +347,7 @@ TEST(TextEncoder, EncodeBoolPtr)
 
 TEST(TextEncoder, EncodeArrayOfBools)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     std::array<bool, 3> i = { true, false, true };
     encoder.encode(i);
     const char *expected = "[1,0,1]";
@@ -356,7 +356,7 @@ TEST(TextEncoder, EncodeArrayOfBools)
 
 TEST(TextEncoder, EncodeString)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     const char *hello = "world";
     encoder.encode(hello);
     const char *expected = "\"world\"";
@@ -365,7 +365,7 @@ TEST(TextEncoder, EncodeString)
 
 TEST(TextEncoder, EncodeStdString)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     const std::string bonjour = "monde";
     encoder.encode(bonjour);
     const char *expected = "\"monde\"";
@@ -374,7 +374,7 @@ TEST(TextEncoder, EncodeStdString)
 
 TEST(TextEncoder, EncodeStdStringView)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     const std::string_view hello = "hello";
     encoder.encode(hello);
     const char *expected = "\"hello\"";
@@ -383,7 +383,7 @@ TEST(TextEncoder, EncodeStdStringView)
 
 TEST(TextEncoder, EncodePreamble)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     encoder.encodePreamble();
     const char *expected = "";
     ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());
@@ -391,7 +391,7 @@ TEST(TextEncoder, EncodePreamble)
 
 TEST(TextEncoder, EncodeMap)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     auto map = std::map<std::string, int>();
     map.insert_or_assign("hello", 1);
     map.insert_or_assign("world", 2);
@@ -402,7 +402,7 @@ TEST(TextEncoder, EncodeMap)
 
 TEST(TextEncoder, EncodeList)
 {
-    SETUP(256)
+    SETUP(TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH)
     encoder.encodeList(1.23f, 123, "123");
     const char *expected = "[1.230000,123,\"123\"]";
     ASSERT_BUFFER_EQ(expected, encoder._rsp, encoder.getEncodedLength());

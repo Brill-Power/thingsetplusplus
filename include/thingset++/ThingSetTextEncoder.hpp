@@ -16,7 +16,7 @@
 
 // todo factor all of this into a generic thingsetencoder file which can be shared with binary encoder
 
-#define TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 255
+#define TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 1024
 #define TEXT_ENCODER_DEFAULT_MAX_DEPTH                 8 // todo delete this if encoder depth used in thingsetencoder
 
 namespace ThingSet {
@@ -32,7 +32,7 @@ private:
 
 public:
     // todo move these to be private?
-    char _rsp[256]; // todo change size here? or just change to uint8_t*
+    char _rsp[TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH]; // todo change size here? or just change to uint8_t*
     size_t _rsp_size;
     size_t _rsp_pos;
     uint8_t _depth;
@@ -40,9 +40,9 @@ public:
     template <size_t Size>
     ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
     {}
-    ThingSetTextEncoder(char (&buffer)[256], size_t size)
+    ThingSetTextEncoder(char (&buffer)[TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH], size_t size)
     {
-        memcpy(_rsp, buffer, 256);
+        memcpy(_rsp, buffer, TEXT_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
         _rsp_size = size;
         _rsp_pos = 0;
         _depth = 0;
@@ -205,9 +205,11 @@ public:
             return false;
         }
         for_each_element(bound, [this](auto &prop) {
-            auto id = prop->getId();
+            auto id = prop->getName();
             encode(id);
+            addResponseValue(":", "%s");
             prop->encode(*this);
+            addResponseValue(",", "%s");
         });
         return encodeMapEnd(count);
     }
@@ -260,6 +262,13 @@ private:
     {
         std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
     }
+};
+
+/// @brief Interface for values that can be encoded with a text encoder.
+class ThingSetTextEncodable
+{
+public:
+    virtual bool encode(ThingSetTextEncoder &encoder) = 0;
 };
 
 }; // namespace ThingSet

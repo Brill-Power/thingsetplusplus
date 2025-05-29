@@ -249,11 +249,7 @@ bool ThingSetTextEncoder::encodeMapEnd()
 {
     _depth--;
     _rsp_pos--;
-    bool ret = addResponseValue("}", "%s");
-    if (_depth != 0) {
-        ret |= addResponseValue(",", "%s");
-    }
-    return ret;
+    return addResponseValue("}", "%s");
 }
 
 bool ThingSetTextEncoder::encodeMapEnd(uint32_t)
@@ -276,11 +272,7 @@ bool ThingSetTextEncoder::encodeListEnd()
 {
     _depth--;
     _rsp_pos--;
-    bool ret = addResponseValue("]", "%s");
-    if (_depth != 0) {
-        ret |= addResponseValue(",", "%s");
-    }
-    return ret;
+    return addResponseValue("]", "%s");
 }
 
 bool ThingSetTextEncoder::encodeListEnd(uint32_t)
