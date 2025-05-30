@@ -60,7 +60,7 @@ TEST(BinaryEncoder, EncodeStdStringView)
     SETUP(128)
     const std::string_view nihao = "世界";
     encoder.encode(nihao);
-    uint8_t expected[] = { 0x65, 0x6D, 0x6F, 0x6E, 0x64, 0x65 };
+    uint8_t expected[] = { 0x66, 0xE4, 0xB8, 0x96, 0xE7, 0x95, 0x8C };
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
