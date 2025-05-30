@@ -31,11 +31,7 @@ bool ThingSetTextEncoder::encode(std::string &value)
 
 bool ThingSetTextEncoder::encode(const char *value)
 {
-    bool ret = true;
-    ret |= addResponseValue("\"");
-    ret |= addResponseValue(value, "%s");
-    ret |= addResponseValue("\"");
-    return ret;
+    return append('"') && appendFormat(value, "%s") && append('"');
 }
 
 bool ThingSetTextEncoder::encode(char *value)
@@ -45,172 +41,172 @@ bool ThingSetTextEncoder::encode(char *value)
 
 bool ThingSetTextEncoder::encode(const float &value)
 {
-    return addResponseValue((double)value, "%f");
+    return appendFormat((double)value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float &value)
 {
-    return addResponseValue((double)value, "%f");
+    return appendFormat((double)value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(float *value)
 {
-    return addResponseValue(*value, "%f");
+    return appendFormat(*value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(const double &value)
 {
-    return addResponseValue(value, "%f");
+    return appendFormat(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(double &value)
 {
-    return addResponseValue(value, "%f");
+    return appendFormat(value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(double *value)
 {
-    return addResponseValue(*value, "%f");
+    return appendFormat(*value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(const bool &value)
 {
-    return addResponseValue(value, "%i");
+    return appendFormat(value, "%i");
 }
 
 bool ThingSetTextEncoder::encode(bool &value)
 {
-    return addResponseValue(value, "%i");
+    return appendFormat(value, "%i");
 }
 
 bool ThingSetTextEncoder::encode(bool *value)
 {
-    return addResponseValue(*value, "%i");
+    return appendFormat(*value, "%i");
 }
 
 bool ThingSetTextEncoder::encode(const uint8_t &value)
 {
-    return addResponseValue(value, "%" PRIu8);
+    return appendFormat(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(uint8_t &value)
 {
-    return addResponseValue(value, "%" PRIu8);
+    return appendFormat(value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(uint8_t *value)
 {
-    return addResponseValue(*value, "%" PRIu8);
+    return appendFormat(*value, "%" PRIu8);
 }
 
 bool ThingSetTextEncoder::encode(const uint16_t &value)
 {
-    return addResponseValue(value, "%" PRIu16);
+    return appendFormat(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(uint16_t &value)
 {
-    return addResponseValue(value, "%" PRIu16);
+    return appendFormat(value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(uint16_t *value)
 {
-    return addResponseValue(*value, "%" PRIu16);
+    return appendFormat(*value, "%" PRIu16);
 }
 
 bool ThingSetTextEncoder::encode(const uint32_t &value)
 {
-    return addResponseValue(value, "%" PRIu32);
+    return appendFormat(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(uint32_t &value)
 {
-    return addResponseValue(value, "%" PRIu32);
+    return appendFormat(value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(uint32_t *value)
 {
-    return addResponseValue(*value, "%" PRIu32);
+    return appendFormat(*value, "%" PRIu32);
 }
 
 bool ThingSetTextEncoder::encode(const uint64_t &value)
 {
-    return addResponseValue(value, "%" PRIu64);
+    return appendFormat(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(uint64_t &value)
 {
-    return addResponseValue(value, "%" PRIu64);
+    return appendFormat(value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(uint64_t *value)
 {
-    return addResponseValue(*value, "%" PRIu64);
+    return appendFormat(*value, "%" PRIu64);
 }
 
 bool ThingSetTextEncoder::encode(const int8_t &value)
 {
-    return addResponseValue(value, "%" PRIi8);
+    return appendFormat(value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(int8_t &value)
 {
-    return addResponseValue(value, "%" PRIi8);
+    return appendFormat(value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(int8_t *value)
 {
-    return addResponseValue(*value, "%" PRIi8);
+    return appendFormat(*value, "%" PRIi8);
 }
 
 bool ThingSetTextEncoder::encode(const int16_t &value)
 {
-    return addResponseValue(value, "%" PRIi16);
+    return appendFormat(value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(int16_t &value)
 {
-    return addResponseValue(value, "%" PRIi16);
+    return appendFormat(value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(int16_t *value)
 {
-    return addResponseValue(*value, "%" PRIi16);
+    return appendFormat(*value, "%" PRIi16);
 }
 
 bool ThingSetTextEncoder::encode(const int32_t &value)
 {
-    return addResponseValue(value, "%" PRIi32);
+    return appendFormat(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(int32_t &value)
 {
-    return addResponseValue(value, "%" PRIi32);
+    return appendFormat(value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(int32_t *value)
 {
-    return addResponseValue(*value, "%" PRIi32);
+    return appendFormat(*value, "%" PRIi32);
 }
 
 bool ThingSetTextEncoder::encode(const int64_t &value)
 {
-    return addResponseValue(value, "%" PRIi64);
+    return appendFormat(value, "%" PRIi64);
 }
 
 bool ThingSetTextEncoder::encode(int64_t &value)
 {
-    return addResponseValue(value, "%" PRIi64);
+    return appendFormat(value, "%" PRIi64);
 }
 
 bool ThingSetTextEncoder::encode(int64_t *value)
 {
-    return addResponseValue(*value, "%" PRIi64);
+    return appendFormat(*value, "%" PRIi64);
 }
 
 bool ThingSetTextEncoder::encodeNull()
 {
-    return addResponseValue("null");
+    return appendFormat("null", "%s");
 }
 
 bool ThingSetTextEncoder::encodePreamble()
@@ -221,7 +217,7 @@ bool ThingSetTextEncoder::encodePreamble()
 bool ThingSetTextEncoder::encodeMapStart()
 {
     _depth++;
-    return addResponseValue("{");
+    return append('{');
 }
 
 bool ThingSetTextEncoder::encodeMapStart(uint32_t)
@@ -233,7 +229,7 @@ bool ThingSetTextEncoder::encodeMapEnd()
 {
     _depth--;
     _responsePosition--;
-    return addResponseValue("}");
+    return append('}');
 }
 
 bool ThingSetTextEncoder::encodeMapEnd(uint32_t)
@@ -244,7 +240,7 @@ bool ThingSetTextEncoder::encodeMapEnd(uint32_t)
 bool ThingSetTextEncoder::encodeListStart()
 {
     _depth++;
-    return addResponseValue("[");
+    return append('[');
 }
 
 bool ThingSetTextEncoder::encodeListStart(uint32_t)
@@ -256,7 +252,7 @@ bool ThingSetTextEncoder::encodeListEnd()
 {
     _depth--;
     _responsePosition--;
-    return addResponseValue("]");
+    return append(']');
 }
 
 bool ThingSetTextEncoder::encodeListEnd(uint32_t)
@@ -266,14 +262,12 @@ bool ThingSetTextEncoder::encodeListEnd(uint32_t)
 
 bool ThingSetTextEncoder::encodeListSeparator()
 {
-    _responseBuffer[_responsePosition++] = ',';
-    return true;
+    return append(',');
 }
 
 bool ThingSetTextEncoder::encodeKeyValuePairSeparator()
 {
-    _responseBuffer[_responsePosition++] = ':';
-    return true;
+    return append(':');
 }
 
 } // namespace ThingSet

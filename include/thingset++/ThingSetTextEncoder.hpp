@@ -21,33 +21,6 @@ private:
     size_t _responsePosition;
     uint8_t _depth;
 
-    /// @brief Determine the length of the value as a string
-    /// @return Number of characters in the string.
-    template <typename T> inline int ensureBufferCapacity(T value, const char *format)
-    {
-        int bytesRequired = snprintf(nullptr, 0, format, value); // get size of value as a string
-
-        if (_responseSize < _responsePosition + bytesRequired) {
-            return false;
-        }
-        return true;
-    }
-
-    /// @brief Add a value to the response buffer as a string
-    /// @return True if successful, false otherwise
-    template <typename T> bool addResponseValue(T value, const char *format = "%s")
-    {
-        if (!ensureBufferCapacity(value, format)) {
-            return false;
-        }
-
-        int bytesWritten =
-            snprintf(_responseBuffer + getEncodedLength(), _responseSize - getEncodedLength(), format, value);
-        _responsePosition += bytesWritten;
-
-        return true;
-    }
-
 public:
     template <size_t Size>
     ThingSetTextEncoder(std::array<char, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
@@ -135,6 +108,43 @@ public:
 protected:
     bool encodeListSeparator() override;
     bool encodeKeyValuePairSeparator() override;
+
+private:
+    /// @brief Determine the length of the value as a string
+    /// @return Number of characters in the string.
+    template <typename T> inline int ensureBufferCapacity(T value, const char *format)
+    {
+        int bytesRequired = snprintf(nullptr, 0, format, value); // get size of value as a string
+
+        if (_responseSize < _responsePosition + bytesRequired) {
+            return false;
+        }
+        return true;
+    }
+
+    inline bool append(const char value)
+    {
+        if (_responsePosition >= _responseSize) {
+            return false;
+        }
+        _responseBuffer[_responsePosition++] = value;
+        return true;
+    }
+
+    /// @brief Add a value to the response buffer as a string
+    /// @return True if successful, false otherwise
+    template <typename T> bool appendFormat(T value, const char *format)
+    {
+        if (!ensureBufferCapacity(value, format)) {
+            return false;
+        }
+
+        int bytesWritten =
+            snprintf(_responseBuffer + getEncodedLength(), _responseSize - getEncodedLength(), format, value);
+        _responsePosition += bytesWritten;
+
+        return true;
+    }
 };
 
 /// @brief Interface for values that can be encoded with a text encoder.

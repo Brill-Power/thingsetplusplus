@@ -90,31 +90,6 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     bool encodeMapEnd(uint32_t count) override;
 
-    /// @brief Encode a pair. This is probably most useful inside a map.
-    /// @tparam K The type of the first value in the pair.
-    /// @tparam V The type of the second value in the pair.
-    /// @param pair A reference to the pair to be encoded.
-    /// @return True if encoding succeeded, otherwise false.
-    template <typename K, typename V> bool encode(const std::pair<K, V> &pair)
-    {
-        return encode(pair.first) && encode(pair.second);
-    }
-
-    template <typename T> bool encode(T *value, size_t size)
-    {
-        bool result = encodeListStart(size);
-        for (size_t i = 0; i < size; i++) {
-            result &= this->encode(value[i]);
-        }
-        return result && encodeListEnd(size);
-    }
-
-    template <typename... TArgs> bool encodeList(TArgs... args)
-    {
-        const size_t count = sizeof...(TArgs);
-        return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
-    }
-
 protected:
     bool encodeListSeparator() override;
     bool encodeKeyValuePairSeparator() override;
