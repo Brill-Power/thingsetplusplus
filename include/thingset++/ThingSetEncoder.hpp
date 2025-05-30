@@ -138,8 +138,10 @@ public:
             return false;
         }
         for_each_element(bound, [this](auto &prop) {
-            auto pair = std::make_pair(prop->getId(), prop->getValue());
-            this->encode(pair);
+            this->encode(prop->getId());
+            this->encodeKeyValuePairSeparator();
+            prop->encode(this);
+            this->encodeListSeparator();
         });
         return encodeMapEnd(count);
     }
