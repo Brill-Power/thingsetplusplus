@@ -11,20 +11,12 @@ namespace ThingSet {
 
 bool ThingSetTextEncoder::encode(const std::string_view &value)
 {
-    bool ret = true;
-    ret |= addResponseValue("\"");
-    ret |= addResponseValue(value, "%.*s");
-    ret |= addResponseValue("\"");
-    return ret;
+    return encode(value.data());
 }
 
 bool ThingSetTextEncoder::encode(std::string_view &value)
 {
-    bool ret = true;
-    ret |= addResponseValue("\"");
-    ret |= addResponseValue(value, "%.*s");
-    ret |= addResponseValue("\"");
-    return ret;
+    return encode(value.data());
 }
 
 bool ThingSetTextEncoder::encode(const std::string &value)
