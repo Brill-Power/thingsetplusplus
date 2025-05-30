@@ -45,7 +45,7 @@ bool ThingSetBinaryEncoder::encode(const char *value)
     return this->ensureState() && zcbor_tstr_put_term(this->getState(), value);
 #else
     return this->ensureState()
-           && zcbor_tstr_put_term(this->getState(), value, ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+           && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif
 }
 
@@ -55,7 +55,7 @@ bool ThingSetBinaryEncoder::encode(char *value)
     return this->ensureState() && zcbor_tstr_put_term(this->getState(), value);
 #else
     return this->ensureState()
-           && zcbor_tstr_put_term(this->getState(), value, ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
+           && zcbor_tstr_put_term(this->getState(), value, BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH);
 #endif
 }
 

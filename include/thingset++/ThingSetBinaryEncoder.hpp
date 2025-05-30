@@ -8,7 +8,8 @@
 #include "ThingSetEncoder.hpp"
 #include "zcbor_encode.h"
 
-#define BINARY_ENCODER_DEFAULT_MAX_DEPTH 8
+#define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 256
+#define BINARY_ENCODER_DEFAULT_MAX_DEPTH                 8
 
 namespace ThingSet {
 

@@ -8,6 +8,8 @@
 #include "ThingSetEncoder.hpp"
 #include <cstring>
 
+#define TEXT_ENCODER_BUFFER_SIZE 1024
+
 namespace ThingSet {
 
 /// @brief Text protocol encoder for ThingSet.
@@ -50,7 +52,7 @@ public:
     template <size_t Size>
     ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
     {}
-    ThingSetTextEncoder(char (&buffer)[ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH], size_t size)
+    ThingSetTextEncoder(char (&buffer)[TEXT_ENCODER_BUFFER_SIZE], size_t size)
         : _responseBuffer(buffer), _responseSize(size), _responsePosition(0), _depth(0)
     {}
 

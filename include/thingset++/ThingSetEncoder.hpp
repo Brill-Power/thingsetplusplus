@@ -14,8 +14,6 @@
 #include <string_view>
 #include <tuple>
 
-#define ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 1024
-
 namespace ThingSet {
 
 /// @brief Encoder base class for ThingSet.
