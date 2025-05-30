@@ -5,22 +5,22 @@
  */
 #pragma once
 
+#include "thingset++/StringLiteral.hpp"
 #include "thingset++/ThingSetProperty.hpp"
 #include "thingset++/ThingSetRequestContext.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
 #include "thingset++/ThingSetStatus.hpp"
-#include "thingset++/StringLiteral.hpp"
 #include "thingset++/internal/logging.hpp"
 
 namespace ThingSet {
 
 /// Specifies a type which is probably a ThingSet property.
 template <typename T>
-concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> &&
-    std::is_base_of_v<ThingSetBinaryEncodable, T> &&
-    std::is_base_of_v<ThingSetBinaryDecodable, T>;
+concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_base_of_v<ThingSetEncodable, T>
+                                 && std::is_base_of_v<ThingSetBinaryDecodable, T>;
 
-class _ThingSetServer {
+class _ThingSetServer
+{
 private:
     ThingSetAccess _access;
 
@@ -36,14 +36,16 @@ protected:
     int handleUpdate(ThingSetRequestContext &context);
     int handleExec(ThingSetRequestContext &context);
 
-    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, EncodableDecodableNode ... Property>
-    bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property, Property &... properties)
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T,
+              EncodableDecodableNode... Property>
+    bool encode(ThingSetEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property,
+                Property &...properties)
     {
         return encode(encoder, property) && encode(encoder, properties...);
     }
 
     template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
-    bool encode(ThingSetBinaryEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
+    bool encode(ThingSetEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T> &property)
     {
         return encoder.encode(property.getId()) && encoder.encode(property.getValue());
     }
@@ -61,26 +63,27 @@ private:
 
 public:
     ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
-    : _ThingSetServer(), _transport(transport)
+        : _ThingSetServer(), _transport(transport)
     {}
 
     bool listen() override
     {
-        return _transport.listen(
-            [this](auto sender, auto req, auto reql, auto res, auto resl) { return requestCallback(sender, req, reql, res, resl); });
+        return _transport.listen([this](auto sender, auto req, auto reql, auto res, auto resl) {
+            return requestCallback(sender, req, reql, res, resl);
+        });
     }
 
     /// @brief Broadcasts one or more properties as a report.
     /// @tparam ...Property The types of the properties.
     /// @param ...properties The properties to publish.
     /// @return True if publishing succeeded.
-    template <EncodableDecodableNode ... Property> bool publish(Property &...properties)
+    template <EncodableDecodableNode... Property> bool publish(Property &...properties)
     {
         Encoder encoder = _transport.getPublishingEncoder();
         if (!encoder.encode(0) || // fake subset ID
-            !encoder.encodeMapStart(sizeof...(properties)) ||
-            !encode(encoder, properties...) ||
-            !encoder.encodeMapEnd()) {
+            !encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
+            || !encoder.encodeMapEnd())
+        {
             return false;
         }
         return encoder.flush();
@@ -120,16 +123,16 @@ private:
         }
         switch (request[0]) {
             case ThingSetRequestType::get:
-               // LOG_SMART("Handling get for node ", context.node->getName(), " from ", identifier);
+                // LOG_SMART("Handling get for node ", context.node->getName(), " from ", identifier);
                 return handleGet(context);
             case ThingSetRequestType::fetch:
-               // LOG_SMART("Handling fetch for node ", context.node->getName(), " from ", identifier);
+                // LOG_SMART("Handling fetch for node ", context.node->getName(), " from ", identifier);
                 return handleFetch(context);
             case ThingSetRequestType::update:
-               // LOG_SMART("Handling update for node ", context.node->getName(), " from ", identifier);
+                // LOG_SMART("Handling update for node ", context.node->getName(), " from ", identifier);
                 return handleUpdate(context);
             case ThingSetRequestType::exec:
-               // LOG_SMART("Handling exec for node ", context.node->getName(), " from ", identifier);
+                // LOG_SMART("Handling exec for node ", context.node->getName(), " from ", identifier);
                 return handleExec(context);
             default:
                 break;
@@ -139,10 +142,13 @@ private:
     }
 };
 
-class ThingSetServerBuilder {
+class ThingSetServerBuilder
+{
 public:
     template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
-    static ThingSetServer<Identifier, Size, Encoder> build(ThingSetServerTransport<Identifier, Size, Encoder> &transport) {
+    static ThingSetServer<Identifier, Size, Encoder>
+    build(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
+    {
         return ThingSetServer<Identifier, Size, Encoder>(transport);
     }
 };

@@ -13,8 +13,7 @@ namespace ThingSet {
 
 /// @brief Represents a ThingSet value of a given type.
 /// @tparam T The type of the value.
-template <typename T>
-class ThingSetValue : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable, public ThingSetTextEncodable
+template <typename T> class ThingSetValue : public ThingSetEncodable, public ThingSetBinaryDecodable
 {
 protected:
     T _value;
@@ -30,12 +29,7 @@ public:
     ThingSetValue(const U &value) : _value(value)
     {}
 
-    bool encode(ThingSetTextEncoder &encoder) override
-    {
-        return encoder.encode(_value);
-    }
-
-    bool encode(ThingSetBinaryEncoder &encoder) override
+    bool encode(ThingSetEncoder &encoder) override
     {
         return encoder.encode(_value);
     }
@@ -91,8 +85,7 @@ public:
 };
 
 template <typename Element, std::size_t Size>
-class ThingSetValue<std::array<Element, Size>>
-    : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable, public ThingSetTextEncodable
+class ThingSetValue<std::array<Element, Size>> : public ThingSetEncodable, public ThingSetBinaryDecodable
 {
 protected:
     std::array<Element, Size> _value;
@@ -105,12 +98,7 @@ public:
     ThingSetValue(std::array<Element, Size> &&value) : _value(std::move(value))
     {}
 
-    bool encode(ThingSetTextEncoder &encoder) override
-    {
-        return encoder.encode(_value);
-    }
-
-    bool encode(ThingSetBinaryEncoder &encoder) override
+    bool encode(ThingSetEncoder &encoder) override
     {
         return encoder.encode(_value);
     }
@@ -136,8 +124,7 @@ public:
     }
 };
 
-template <typename T>
-class ThingSetValue<T *> : public ThingSetBinaryEncodable, public ThingSetBinaryDecodable, public ThingSetTextEncodable
+template <typename T> class ThingSetValue<T *> : public ThingSetEncodable, public ThingSetBinaryDecodable
 {
 protected:
     T *_value;
@@ -146,12 +133,7 @@ public:
     ThingSetValue(T *value) : _value(value)
     {}
 
-    bool encode(ThingSetTextEncoder &encoder) override
-    {
-        return encoder.encode(_value);
-    }
-
-    bool encode(ThingSetBinaryEncoder &encoder) override
+    bool encode(ThingSetEncoder &encoder) override
     {
         return encoder.encode(_value);
     }

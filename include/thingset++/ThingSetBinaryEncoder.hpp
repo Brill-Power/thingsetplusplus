@@ -126,11 +126,4 @@ public:
 
 using DefaultFixedDepthThingSetBinaryEncoder = FixedDepthThingSetBinaryEncoder<BINARY_ENCODER_DEFAULT_MAX_DEPTH>;
 
-/// @brief Interface for values that can be encoded with a binary encoder.
-class ThingSetBinaryEncodable
-{
-public:
-    virtual bool encode(ThingSetBinaryEncoder &encoder) = 0;
-};
-
 }; // namespace ThingSet

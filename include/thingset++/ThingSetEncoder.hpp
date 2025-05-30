@@ -140,7 +140,7 @@ public:
         for_each_element(bound, [this](auto &prop) {
             this->encode(prop->getId());
             this->encodeKeyValuePairSeparator();
-            prop->encode(this);
+            prop->encode(*this);
             this->encodeListSeparator();
         });
         return encodeMapEnd(count);
@@ -205,6 +205,13 @@ private:
     {
         std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
     }
+};
+
+/// @brief Interface for values that can be encoded with a text encoder.
+class ThingSetEncodable
+{
+public:
+    virtual bool encode(ThingSetEncoder &encoder) = 0;
 };
 
 }; // namespace ThingSet

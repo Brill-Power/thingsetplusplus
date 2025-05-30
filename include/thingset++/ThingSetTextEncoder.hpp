@@ -147,11 +147,4 @@ private:
     }
 };
 
-/// @brief Interface for values that can be encoded with a text encoder.
-class ThingSetTextEncodable
-{
-public:
-    virtual bool encode(ThingSetTextEncoder &encoder) = 0;
-};
-
 }; // namespace ThingSet

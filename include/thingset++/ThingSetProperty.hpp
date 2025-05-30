@@ -42,7 +42,7 @@ public:
     {
         switch (type) {
             case ThingSetNodeType::encodable:
-                *target = static_cast<ThingSetBinaryEncodable *>(this);
+                *target = static_cast<ThingSetEncodable *>(this);
                 return true;
             case ThingSetNodeType::decodable:
                 *target = static_cast<ThingSetBinaryDecodable *>(this);
@@ -198,13 +198,13 @@ public:
             if (context.index == SIZE_MAX) {
                 context.encoder.encode(
 #if defined(__APPLE__) || defined(__OpenBSD__)
-// working round ambiguity on macOS and OpenBSD
-// https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
-static_cast<uint32_t>(
+                    // working round ambiguity on macOS and OpenBSD
+                    // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
+                    static_cast<uint32_t>(
 #endif
-                    this->_value.size()
+                        this->_value.size()
 #if defined(__APPLE__) || defined(__OpenBSD__)
-)
+                            )
 #endif
                 );
             }

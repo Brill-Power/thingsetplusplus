@@ -27,7 +27,7 @@ int _ThingSetServer::handleGet(ThingSetRequestContext &context)
     context.encoder.encodePreamble();
     void *target;
     if (context.node->tryCastTo(ThingSetNodeType::encodable, &target)) {
-        ThingSetBinaryEncodable *encodable = reinterpret_cast<ThingSetBinaryEncodable *>(target);
+        ThingSetEncodable *encodable = reinterpret_cast<ThingSetEncodable *>(target);
         if (encodable->encode(context.encoder)) {
             return context.encoder.getEncodedLength() + 1;
         }
