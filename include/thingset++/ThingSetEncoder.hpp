@@ -138,9 +138,14 @@ public:
             return false;
         }
         for_each_element(bound, [this](auto &prop) {
-            this->encode(prop->getId());
+            if (this->encodeKeysAsIds()) {
+                this->encode(prop->getId());
+            } else {
+                this->encode(prop->getName());
+            }
             this->encodeKeyValuePairSeparator();
-            prop->encode(*this);
+            auto value = prop->getValue();
+            this->encode(value);
             this->encodeListSeparator();
         });
         return encodeMapEnd(count);
@@ -189,6 +194,7 @@ public:
 protected:
     virtual bool encodeListSeparator() = 0;
     virtual bool encodeKeyValuePairSeparator() = 0;
+    virtual bool encodeKeysAsIds() const = 0;
 
 private:
     inline bool encodeAndShift()

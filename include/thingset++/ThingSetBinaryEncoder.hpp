@@ -95,6 +95,13 @@ protected:
     bool encodeKeyValuePairSeparator() override;
 };
 
+/// @brief Options to control the behaviour of the encoder.
+enum ThingSetBinaryEncoderOptions
+{
+    /// @brief If set, encodes keys as integer IDs. If unset, keys are encoded as string names.
+    encodeKeysAsIds = 1 << 0,
+};
+
 template <int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
 class FixedDepthThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
 {
@@ -102,6 +109,7 @@ private:
     // The start of the buffer
     const uint8_t *_buffer;
     zcbor_state_t _state[depth];
+    ThingSetBinaryEncoderOptions _options;
 
 protected:
     zcbor_state_t *getState() override
@@ -109,11 +117,19 @@ protected:
         return _state;
     }
 
+    bool encodeKeysAsIds() const override
+    {
+        return (_options & ThingSetBinaryEncoderOptions::encodeKeysAsIds);
+    }
+
 public:
     FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size) : FixedDepthThingSetBinaryEncoder(buffer, size, 1)
     {}
 
-    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount) : _buffer(buffer)
+    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount) : FixedDepthThingSetBinaryEncoder(buffer, size, elementCount, ThingSetBinaryEncoderOptions::encodeKeysAsIds)
+    {}
+
+    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount, ThingSetBinaryEncoderOptions options) : _buffer(buffer), _options(options)
     {
         zcbor_new_encode_state(_state, depth, buffer, size, elementCount);
     }

@@ -270,4 +270,9 @@ bool ThingSetTextEncoder::encodeKeyValuePairSeparator()
     return append(':');
 }
 
+bool ThingSetTextEncoder::encodeKeysAsIds() const
+{
+    return false;
+}
+
 } // namespace ThingSet

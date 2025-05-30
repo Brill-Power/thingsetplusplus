@@ -108,6 +108,7 @@ public:
 protected:
     bool encodeListSeparator() override;
     bool encodeKeyValuePairSeparator() override;
+    bool encodeKeysAsIds() const override;
 
 private:
     /// @brief Determine the length of the value as a string
