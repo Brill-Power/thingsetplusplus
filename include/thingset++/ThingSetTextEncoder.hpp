@@ -134,7 +134,7 @@ private:
 
     /// @brief Add a value to the response buffer as a string
     /// @return True if successful, false otherwise
-    template <typename T> bool appendFormat(T value, const char *format)
+    template <typename T> bool appendFormat(const T& value, const char *format)
     {
         if (!ensureBufferCapacity(value, format)) {
             return false;

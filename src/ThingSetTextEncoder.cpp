@@ -51,7 +51,7 @@ bool ThingSetTextEncoder::encode(float &value)
 
 bool ThingSetTextEncoder::encode(float *value)
 {
-    return appendFormat(*value, "%f");
+    return appendFormat((double)*value, "%f");
 }
 
 bool ThingSetTextEncoder::encode(const double &value)
