@@ -99,11 +99,6 @@ bool ThingSetBinaryEncoder::encode(bool &value)
     return this->ensureState() && zcbor_bool_put(this->getState(), value);
 }
 
-bool ThingSetBinaryEncoder::encode(bool *)
-{
-    return true; // todo deal with this properly
-}
-
 bool ThingSetBinaryEncoder::encode(const uint8_t &value)
 {
     return this->ensureState() && zcbor_uint32_put(this->getState(), value);
@@ -174,11 +169,6 @@ bool ThingSetBinaryEncoder::encode(int8_t &value)
     return this->ensureState() && zcbor_int32_put(this->getState(), value);
 }
 
-bool ThingSetBinaryEncoder::encode(int8_t *)
-{
-    return true; // todo deal with this properly
-}
-
 bool ThingSetBinaryEncoder::encode(const int16_t &value)
 {
     return this->ensureState() && zcbor_int32_put(this->getState(), value);
@@ -187,11 +177,6 @@ bool ThingSetBinaryEncoder::encode(const int16_t &value)
 bool ThingSetBinaryEncoder::encode(int16_t &value)
 {
     return this->ensureState() && zcbor_int32_put(this->getState(), value);
-}
-
-bool ThingSetBinaryEncoder::encode(int16_t *)
-{
-    return true; // todo deal with this properly
 }
 
 bool ThingSetBinaryEncoder::encode(const int32_t &value)

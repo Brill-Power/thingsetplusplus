@@ -36,7 +36,6 @@ public:
     virtual bool encode(double *value) = 0;
     virtual bool encode(const bool &value) = 0;
     virtual bool encode(bool &value) = 0;
-    virtual bool encode(bool *value) = 0;
     virtual bool encode(const uint8_t &value) = 0;
     virtual bool encode(uint8_t &value) = 0;
     virtual bool encode(uint8_t *value) = 0;
@@ -51,10 +50,8 @@ public:
     virtual bool encode(uint64_t *value) = 0;
     virtual bool encode(const int8_t &value) = 0;
     virtual bool encode(int8_t &value) = 0;
-    virtual bool encode(int8_t *value) = 0;
     virtual bool encode(const int16_t &value) = 0;
     virtual bool encode(int16_t &value) = 0;
-    virtual bool encode(int16_t *value) = 0;
     virtual bool encode(const int32_t &value) = 0;
     virtual bool encode(int32_t &value) = 0;
     virtual bool encode(int32_t *value) = 0;
@@ -91,6 +88,12 @@ public:
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
     virtual bool encodeMapEnd(uint32_t count) = 0;
+
+protected:
+    template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)
+    {
+        std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
+    }
 };
 
 }; // namespace ThingSet

@@ -38,7 +38,6 @@ public:
     bool encode(double *value) override;
     bool encode(const bool &value) override;
     bool encode(bool &value) override;
-    bool encode(bool *value) override;
     bool encode(const uint8_t &value) override;
     bool encode(uint8_t &value) override;
     bool encode(uint8_t *value) override;
@@ -53,10 +52,8 @@ public:
     bool encode(uint64_t *value) override;
     bool encode(const int8_t &value) override;
     bool encode(int8_t &value) override;
-    bool encode(int8_t *value) override;
     bool encode(const int16_t &value) override;
     bool encode(int16_t &value) override;
-    bool encode(int16_t *value) override;
     bool encode(const int32_t &value) override;
     bool encode(int32_t &value) override;
     bool encode(int32_t *value) override;
@@ -199,11 +196,6 @@ private:
     template <typename T, typename... TArgs> bool encodeAndShift(T arg, TArgs... rest)
     {
         return encode(arg) && encodeAndShift(rest...);
-    }
-
-    template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)
-    {
-        std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
     }
 };
 

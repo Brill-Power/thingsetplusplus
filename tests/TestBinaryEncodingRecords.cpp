@@ -66,7 +66,7 @@ struct ModuleRecord
           } }                                                                                                          \
     };
 
-TEST(Records, BinaryEncodeSimpleRecord)
+TEST(BinaryRecords, EncodeSimpleRecord)
 {
     SETUP()
     ASSERT_EQ(24.0f, moduleRecords[0].voltage.getValue());
@@ -95,7 +95,7 @@ TEST(Records, BinaryEncodeSimpleRecord)
               newModuleRecords[0].supercells.getValue()[0].soc.getValue());
 }
 
-TEST(Records, InitialiseRecordArrayCopyBin)
+TEST(BinaryRecords, InitialiseRecordArrayCopy)
 {
     SETUP()
     ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
@@ -107,7 +107,7 @@ TEST(Records, InitialiseRecordArrayCopyBin)
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
 }
 
-TEST(Records, RecordArrayIndexingBin)
+TEST(BinaryRecords, RecordArrayIndexing)
 {
     SETUP()
     ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
@@ -116,7 +116,7 @@ TEST(Records, RecordArrayIndexingBin)
     ASSERT_EQ(24.2f, mod->voltage.getValue());
 }
 
-TEST(Records, InitialiseRecordArrayInlineBin)
+TEST(BinaryRecords, InitialiseRecordArrayInline)
 {
     SETUP()
     ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 1>> records = { { (ModuleRecord){
@@ -131,75 +131,4 @@ TEST(Records, InitialiseRecordArrayInlineBin)
     ASSERT_TRUE(records.encode(encoder));
     ASSERT_EQ(0x81, buffer[0]); // array with 2 elements
     ASSERT_EQ(0xA5, buffer[1]); // map with 5 elements
-}
-
-TEST(Records, TextEncodeSimpleRecord)
-{
-    SETUP()
-    ASSERT_EQ(24.0f, moduleRecords[0].voltage.getValue());
-    float &v1 = moduleRecords[0].voltage;
-    v1 = 26.0f;
-    ASSERT_EQ(26.0f, moduleRecords[0].voltage.getValue());
-    float *vp1 = &moduleRecords[0].voltage;
-    *vp1 = 27.0f;
-    ASSERT_EQ(27.0f, moduleRecords[0].voltage.getValue());
-    moduleRecords[0].voltage = 25.0f;
-
-    char buffer[TEXT_ENCODER_BUFFER_SIZE];
-    size_t size = sizeof(buffer);
-    ThingSetTextEncoder encoder(buffer, size);
-    encoder.encode(moduleRecords.getValue());
-    const char *expected =
-        "[{\"voltage\":25.000000,\"current\":10.000000,\"error\":0,\"cellVoltages\":[3.200000,3.100000,2.900000,3."
-        "300000,0.000000,2.800000],\"supercells\":[{\"soc\":0.100000,\"soh\":1.000000},{\"soc\":0.250000,\"soh\":1."
-        "000000},{\"soc\":0.500000,\"soh\":1.000000},{\"soc\":0.750000,\"soh\":1.000000},{\"soc\":0.800000,\"soh\":1."
-        "000000},{\"soc\":1.000000,\"soh\":1.000000}]},{\"voltage\":24.200001,\"current\":5.000000,\"error\":0,"
-        "\"cellVoltages\":[3.100000,3.300000,3.000000,3.100000,3.200000,2.950000],\"supercells\":[{\"soc\":0.000000,"
-        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,"
-        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
-    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
-
-    // todo add text decoding once decoder exists
-}
-
-TEST(Records, InitialiseRecordArrayCopyText)
-{
-    SETUP()
-    ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
-    ASSERT_EQ(24.2f, records[1].voltage.getValue());
-    char buffer[TEXT_ENCODER_BUFFER_SIZE];
-    size_t size = sizeof(buffer);
-    ThingSetTextEncoder encoder(buffer, size);
-    ASSERT_TRUE(records.encode(encoder));
-    const char *expected =
-        "[{\"voltage\":24.000000,\"current\":10.000000,\"error\":0,\"cellVoltages\":[3.200000,3.100000,2.900000,3."
-        "300000,0.000000,2.800000],\"supercells\":[{\"soc\":0.100000,\"soh\":1.000000},{\"soc\":0.250000,\"soh\":1."
-        "000000},{\"soc\":0.500000,\"soh\":1.000000},{\"soc\":0.750000,\"soh\":1.000000},{\"soc\":0.800000,\"soh\":1."
-        "000000},{\"soc\":1.000000,\"soh\":1.000000}]},{\"voltage\":24.200001,\"current\":5.000000,\"error\":0,"
-        "\"cellVoltages\":[3.100000,3.300000,3.000000,3.100000,3.200000,2.950000],\"supercells\":[{\"soc\":0.000000,"
-        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,"
-        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
-    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
-}
-
-TEST(Records, InitialiseRecordArrayInlineText)
-{
-    SETUP()
-    ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 1>> records = { { (ModuleRecord){
-        .voltage = 24.0f,
-        .current = 10.0f,
-        .error = 0,
-    } } };
-
-    ASSERT_EQ(24.0f, records[0].voltage.getValue());
-    char buffer[TEXT_ENCODER_BUFFER_SIZE];
-    size_t size = sizeof(buffer);
-    ThingSetTextEncoder encoder(buffer, size);
-    ASSERT_TRUE(records.encode(encoder));
-    const char *expected =
-        "[{\"voltage\":24.000000,\"current\":10.000000,\"error\":0,\"cellVoltages\":[0.000000,0.000000,0.000000,0."
-        "000000,0.000000,0.000000],\"supercells\":[{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0."
-        "000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0."
-        "000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
-    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
