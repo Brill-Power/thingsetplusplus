@@ -55,6 +55,15 @@ TEST(BinaryEncoder, EncodeStdString)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
+TEST(BinaryEncoder, EncodeStdStringView)
+{
+    SETUP(128)
+    const std::string_view nihao = "世界";
+    encoder.encode(nihao);
+    uint8_t expected[] = { 0x65, 0x6D, 0x6F, 0x6E, 0x64, 0x65 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
 TEST(BinaryEncoder, EncodeMap)
 {
     SETUP(128)
