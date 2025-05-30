@@ -14,7 +14,7 @@
 namespace ThingSet {
 
 /// @brief Binary protocol encoder for ThingSet.
-class ThingSetBinaryEncoder : public ThingSetEncoderExtensions<ThingSetBinaryEncoder>
+class ThingSetBinaryEncoder : public ThingSetEncoder
 {
 protected:
     virtual bool ensureState();
@@ -23,7 +23,6 @@ protected:
 
 public:
     using ThingSetEncoder::encode;
-    using ThingSetEncoderExtensions<ThingSetBinaryEncoder>::encode;
     bool encode(const std::string_view &value) override;
     bool encode(std::string_view &value) override;
     bool encode(const std::string &value) override;
@@ -96,7 +95,7 @@ public:
     /// @tparam V The type of the second value in the pair.
     /// @param pair A reference to the pair to be encoded.
     /// @return True if encoding succeeded, otherwise false.
-    template <typename K, typename V> bool encode(std::pair<K, V> &pair)
+    template <typename K, typename V> bool encode(const std::pair<K, V> &pair)
     {
         return encode(pair.first) && encode(pair.second);
     }
@@ -116,16 +115,9 @@ public:
         return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
     }
 
-private:
-    inline bool encodeAndShift()
-    {
-        return true;
-    }
-
-    template <typename T, typename... TArgs> bool encodeAndShift(T arg, TArgs... rest)
-    {
-        return encode(arg) && encodeAndShift(rest...);
-    }
+protected:
+    bool encodeListSeparator() override;
+    bool encodeKeyValuePairSeparator() override;
 };
 
 template <int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>

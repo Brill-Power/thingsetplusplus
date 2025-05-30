@@ -89,18 +89,6 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     virtual bool encodeMapEnd(uint32_t count) = 0;
 
-protected:
-    template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)
-    {
-        std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));
-    }
-};
-
-template <typename Derived>
-class ThingSetEncoderExtensions : public ThingSetEncoder
-{
-public:
-    using ThingSetEncoder::encode;
     /// @brief Encode a linked list.
     /// @tparam T The type of items in the list.
     /// @param value A reference to the list to be encoded.
@@ -129,8 +117,7 @@ public:
             return false;
         }
         for (auto const &[key, value] : map) {
-            std::pair<K, V> valuePair(key, value);
-            if (!static_cast<Derived *>(this)->encode(valuePair)) {
+            if (!encode(std::make_pair(key, value))) {
                 return false;
             }
         }
@@ -152,7 +139,7 @@ public:
         }
         for_each_element(bound, [this](auto &prop) {
             auto pair = std::make_pair(prop->getId(), prop->getValue());
-            static_cast<Derived *>(this)->encode(pair);
+            this->encode(pair);
         });
         return encodeMapEnd(count);
     }
@@ -164,15 +151,54 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     template <typename T, size_t size> bool encode(std::array<T, size> &value)
     {
-        return static_cast<Derived *>(this)->encode(value.data(), value.size());
+        return this->encode(value.data(), value.size());
     }
 
     template <typename T, size_t size> bool encode(T value[size])
     {
-        return static_cast<Derived *>(this)->encode(value, size);
+        return this->encode(value, size);
+    }
+
+    /// @brief Encode a pair. This is probably most useful inside a map.
+    /// @tparam K The type of the first value in the pair.
+    /// @tparam V The type of the second value in the pair.
+    /// @param pair A reference to the pair to be encoded.
+    /// @return True if encoding succeeded, otherwise false.
+    template <typename K, typename V> bool encode(const std::pair<K, V> &pair)
+    {
+        return encode(pair.first) && encodeKeyValuePairSeparator() && encode(pair.second) && encodeListSeparator();
+    }
+
+    template <typename T> bool encode(T *value, size_t size)
+    {
+        bool result = encodeListStart(size);
+        for (size_t i = 0; i < size; i++) {
+            result &= this->encode(value[i]) && this->encodeListSeparator();
+        }
+        return result && encodeListEnd(size);
+    }
+
+    template <typename... TArgs> bool encodeList(TArgs... args)
+    {
+        const size_t count = sizeof...(TArgs);
+        return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
     }
 
 protected:
+    virtual bool encodeListSeparator() = 0;
+    virtual bool encodeKeyValuePairSeparator() = 0;
+
+private:
+    inline bool encodeAndShift()
+    {
+        return true;
+    }
+
+    template <typename T, typename... TArgs> bool encodeAndShift(T arg, TArgs... rest)
+    {
+        return encode(arg) && encodeListSeparator() && encodeAndShift(rest...);
+    }
+
     template <typename TupleT, typename Fn> constexpr void for_each_element(TupleT &&tp, Fn &&fn)
     {
         std::apply([&fn]<typename... T>(T &&...args) { (fn(std::forward<T>(args)), ...); }, std::forward<TupleT>(tp));

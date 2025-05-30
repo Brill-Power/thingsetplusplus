@@ -269,6 +269,16 @@ bool ThingSetBinaryEncoder::encodeMapEnd(uint32_t count)
     }
 }
 
+bool ThingSetBinaryEncoder::encodeListSeparator()
+{
+    return true;
+}
+
+bool ThingSetBinaryEncoder::encodeKeyValuePairSeparator()
+{
+    return true;
+}
+
 /// @brief End a list or map without going back and rewriting the header. Useful in forward-only encoding scenarios.
 /// @param state The encoder state array.
 /// @return True.

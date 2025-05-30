@@ -272,4 +272,16 @@ bool ThingSetTextEncoder::encodeListEnd(uint32_t)
     return encodeListEnd();
 }
 
+bool ThingSetTextEncoder::encodeListSeparator()
+{
+    _responseBuffer[_responsePosition++] = ',';
+    return true;
+}
+
+bool ThingSetTextEncoder::encodeKeyValuePairSeparator()
+{
+    _responseBuffer[_responsePosition++] = ':';
+    return true;
+}
+
 } // namespace ThingSet
