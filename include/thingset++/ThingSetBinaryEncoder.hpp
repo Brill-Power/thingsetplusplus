@@ -14,7 +14,7 @@
 namespace ThingSet {
 
 /// @brief Binary protocol encoder for ThingSet.
-class ThingSetBinaryEncoder : public ThingSetEncoder
+class ThingSetBinaryEncoder : public ThingSetEncoderExtensions<ThingSetBinaryEncoder>
 {
 protected:
     virtual bool ensureState();
@@ -22,8 +22,8 @@ protected:
     virtual bool getIsForwardOnly() const;
 
 public:
-    virtual size_t getEncodedLength() const = 0;
-
+    using ThingSetEncoder::encode;
+    using ThingSetEncoderExtensions<ThingSetBinaryEncoder>::encode;
     bool encode(const std::string_view &value) override;
     bool encode(std::string_view &value) override;
     bool encode(const std::string &value) override;
@@ -101,83 +101,6 @@ public:
         return encode(pair.first) && encode(pair.second);
     }
 
-    /// @brief Encode a linked list.
-    /// @tparam T The type of items in the list.
-    /// @param value A reference to the list to be encoded.
-    /// @return True if encoding succeeded, otherwise false.
-    template <typename T> bool encode(std::list<T> &value)
-    {
-        if (!encodeListStart(value.size())) {
-            return false;
-        }
-        for (T &item : value) {
-            if (!encode(item)) {
-                return false;
-            }
-        }
-        return encodeListEnd(value.size());
-    }
-
-    /// @brief Encode a map.
-    /// @tparam K The type of the keys in the map.
-    /// @tparam V The type of the values in the map.
-    /// @param map A reference to the map to be encoded.
-    /// @return True if encoding succeeded, otherwise false.
-    template <typename K, typename V> bool encode(std::map<K, V> &map)
-    {
-        if (!encodeMapStart(map.size())) {
-            return false;
-        }
-        for (auto const &[key, value] : map) {
-            if (!encode(key) || !encode(value)) {
-                return false;
-            }
-        }
-        return encodeMapEnd(map.size());
-    }
-
-    /// @brief Encode an object (structure or class) as a map.
-    /// @tparam T The type to encode.
-    /// @param value A reference to the value to be encoded.
-    /// @return True if encoding succeeded, otherwise false.
-    template <typename T>
-        requires std::is_class_v<T>
-    bool encode(T &value)
-    {
-        auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
-        auto count = std::tuple_size_v<decltype(bound)>;
-        if (!encodeMapStart(count)) {
-            return false;
-        }
-        for_each_element(bound, [this](auto &prop) {
-            auto id = prop->getId();
-            encode(id);
-            prop->encode(*this);
-        });
-        return encodeMapEnd(count);
-    }
-
-    /// @brief Encode an array as a list.
-    /// @tparam T The type of elements in the array.
-    /// @tparam size The size of the array.
-    /// @param value A reference to the array to be encoded.
-    /// @return True if encoding succeeded, otherwise false.
-    template <typename T, size_t size> bool encode(std::array<T, size> &value)
-    {
-        return this->encode(value.data(), value.size());
-    }
-
-    template <typename T, size_t size> bool encode(T value[size])
-    {
-        return this->encode(value, size);
-    }
-
-    template <typename... TArgs> bool encodeList(TArgs... args)
-    {
-        const size_t count = sizeof...(TArgs);
-        return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
-    }
-
     template <typename T> bool encode(T *value, size_t size)
     {
         bool result = encodeListStart(size);
@@ -185,6 +108,12 @@ public:
             result &= this->encode(value[i]);
         }
         return result && encodeListEnd(size);
+    }
+
+    template <typename... TArgs> bool encodeList(TArgs... args)
+    {
+        const size_t count = sizeof...(TArgs);
+        return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
     }
 
 private:
