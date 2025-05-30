@@ -85,3 +85,19 @@ TEST(BinaryEncoder, EncodeBag)
     uint8_t expected[] = { 0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0x18, 0x7B, 0x63, 0x31, 0x32, 0x33 };
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
+
+TEST(BinaryEncoder, EncodeNull)
+{
+    SETUP(128)
+    encoder.encodeNull();
+    uint8_t expected[] = { 0xF6 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(BinaryEncoder, EncodePreamble)
+{
+    SETUP(128)
+    encoder.encodePreamble();
+    uint8_t expected[] = { 0xF6 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}

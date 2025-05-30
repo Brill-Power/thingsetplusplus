@@ -29,20 +29,12 @@ bool ThingSetTextEncoder::encode(std::string_view &value)
 
 bool ThingSetTextEncoder::encode(const std::string &value)
 {
-    bool ret = true;
-    ret |= addResponseValue("\"");
-    ret |= addResponseValue(value.c_str(), "%s");
-    ret |= addResponseValue("\"");
-    return ret;
+    return encode(value.c_str());
 }
 
 bool ThingSetTextEncoder::encode(std::string &value)
 {
-    bool ret = true;
-    ret |= addResponseValue("\"");
-    ret |= addResponseValue(value.c_str(), "%s");
-    ret |= addResponseValue("\"");
-    return ret;
+    return encode(value.c_str());
 }
 
 bool ThingSetTextEncoder::encode(const char *value)
@@ -56,11 +48,7 @@ bool ThingSetTextEncoder::encode(const char *value)
 
 bool ThingSetTextEncoder::encode(char *value)
 {
-    bool ret = true;
-    ret |= addResponseValue("\"");
-    ret |= addResponseValue(value, "%s");
-    ret |= addResponseValue("\"");
-    return ret;
+    return encode(static_cast<const char *>(value));
 }
 
 bool ThingSetTextEncoder::encode(const float &value)

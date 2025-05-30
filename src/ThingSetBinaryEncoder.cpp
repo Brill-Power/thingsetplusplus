@@ -209,14 +209,14 @@ bool ThingSetBinaryEncoder::encode(int64_t *value)
     return this->ensureState() && zcbor_int64_encode(this->getState(), value);
 }
 
-bool ThingSetBinaryEncoder::encodeNull() // todo check this
+bool ThingSetBinaryEncoder::encodeNull()
 {
     return this->ensureState() && zcbor_nil_put(this->getState(), NULL);
 }
 
 bool ThingSetBinaryEncoder::encodePreamble()
 {
-    return this->ensureState() && zcbor_nil_put(this->getState(), NULL);
+    return encodeNull();
 }
 
 bool ThingSetBinaryEncoder::encodeListStart()
