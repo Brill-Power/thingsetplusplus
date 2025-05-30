@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
-#include "thingset++/can/ThingSetCanServerTransport.hpp"
 #include "thingset++/ThingSetStatus.hpp"
+#include "thingset++/can/ThingSetCanServerTransport.hpp"
 
 namespace ThingSet::Can {
 

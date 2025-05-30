@@ -1,27 +1,39 @@
 /*
- * Copyright (c) 2024 Brill Power.
+ * Copyright (c) 2025 Brill Power.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
 
 #include "ThingSetEncoder.hpp"
-#include "zcbor_encode.h"
+#include <cstring>
 
-#define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 256
-#define BINARY_ENCODER_DEFAULT_MAX_DEPTH                 8
+#define TEXT_ENCODER_BUFFER_SIZE 1024
 
 namespace ThingSet {
 
-/// @brief Binary protocol encoder for ThingSet.
-class ThingSetBinaryEncoder : public ThingSetEncoder
+/// @brief Text protocol encoder for ThingSet.
+class ThingSetTextEncoder : public ThingSetEncoder
 {
-protected:
-    virtual bool ensureState();
-    virtual zcbor_state_t *getState() = 0;
-    virtual bool getIsForwardOnly() const;
+private:
+    char *_responseBuffer;
+    size_t _responseSize;
+    size_t _responsePosition;
+    uint8_t _depth;
 
 public:
+    template <size_t Size>
+    ThingSetTextEncoder(std::array<char, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
+    {}
+    ThingSetTextEncoder(char *buffer, size_t size)
+        : _responseBuffer(buffer), _responseSize(size), _responsePosition(0), _depth(0)
+    {}
+
+    size_t getEncodedLength() const override
+    {
+        return _responsePosition;
+    }
+
     using ThingSetEncoder::encode;
     bool encode(const std::string_view &value) override;
     bool encode(std::string_view &value) override;
@@ -37,6 +49,7 @@ public:
     bool encode(double *value) override;
     bool encode(const bool &value) override;
     bool encode(bool &value) override;
+    bool encode(bool *value);
     bool encode(const uint8_t &value) override;
     bool encode(uint8_t &value) override;
     bool encode(uint8_t *value) override;
@@ -51,8 +64,10 @@ public:
     bool encode(uint64_t *value) override;
     bool encode(const int8_t &value) override;
     bool encode(int8_t &value) override;
+    bool encode(int8_t *value);
     bool encode(const int16_t &value) override;
     bool encode(int16_t &value) override;
+    bool encode(int16_t *value);
     bool encode(const int32_t &value) override;
     bool encode(int32_t &value) override;
     bool encode(int32_t *value) override;
@@ -93,53 +108,44 @@ public:
 protected:
     bool encodeListSeparator() override;
     bool encodeKeyValuePairSeparator() override;
-};
+    bool encodeKeysAsIds() const override;
 
-/// @brief Options to control the behaviour of the encoder.
-enum ThingSetBinaryEncoderOptions
-{
-    /// @brief If set, encodes keys as integer IDs. If unset, keys are encoded as string names.
-    encodeKeysAsIds = 1 << 0,
-};
-
-template <int depth = BINARY_ENCODER_DEFAULT_MAX_DEPTH>
-class FixedDepthThingSetBinaryEncoder : public virtual ThingSetBinaryEncoder
-{
 private:
-    // The start of the buffer
-    const uint8_t *_buffer;
-    zcbor_state_t _state[depth];
-    ThingSetBinaryEncoderOptions _options;
-
-protected:
-    zcbor_state_t *getState() override
+    /// @brief Determine the length of the value as a string
+    /// @return Number of characters in the string.
+    template <typename T> inline int ensureBufferCapacity(T value, const char *format)
     {
-        return _state;
+        int bytesRequired = snprintf(nullptr, 0, format, value); // get size of value as a string
+
+        if (_responseSize < _responsePosition + bytesRequired) {
+            return false;
+        }
+        return true;
     }
 
-    bool encodeKeysAsIds() const override
+    inline bool append(const char value)
     {
-        return (_options & ThingSetBinaryEncoderOptions::encodeKeysAsIds);
+        if (_responsePosition >= _responseSize) {
+            return false;
+        }
+        _responseBuffer[_responsePosition++] = value;
+        return true;
     }
 
-public:
-    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size) : FixedDepthThingSetBinaryEncoder(buffer, size, 1)
-    {}
-
-    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount) : FixedDepthThingSetBinaryEncoder(buffer, size, elementCount, ThingSetBinaryEncoderOptions::encodeKeysAsIds)
-    {}
-
-    FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount, ThingSetBinaryEncoderOptions options) : _buffer(buffer), _options(options)
+    /// @brief Add a value to the response buffer as a string
+    /// @return True if successful, false otherwise
+    template <typename T> bool appendFormat(const T& value, const char *format)
     {
-        zcbor_new_encode_state(_state, depth, buffer, size, elementCount);
-    }
+        if (!ensureBufferCapacity(value, format)) {
+            return false;
+        }
 
-    size_t getEncodedLength() const override
-    {
-        return _state->payload - _buffer;
+        int bytesWritten =
+            snprintf(_responseBuffer + getEncodedLength(), _responseSize - getEncodedLength(), format, value);
+        _responsePosition += bytesWritten;
+
+        return true;
     }
 };
-
-using DefaultFixedDepthThingSetBinaryEncoder = FixedDepthThingSetBinaryEncoder<BINARY_ENCODER_DEFAULT_MAX_DEPTH>;
 
 }; // namespace ThingSet

@@ -55,6 +55,15 @@ TEST(BinaryEncoder, EncodeStdString)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
+TEST(BinaryEncoder, EncodeStdStringView)
+{
+    SETUP(128)
+    const std::string_view nihao = "世界";
+    encoder.encode(nihao);
+    uint8_t expected[] = { 0x66, 0xE4, 0xB8, 0x96, 0xE7, 0x95, 0x8C };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
 TEST(BinaryEncoder, EncodeMap)
 {
     SETUP(128)
@@ -74,5 +83,21 @@ TEST(BinaryEncoder, EncodeBag)
     SETUP(128)
     encoder.encodeList(1.23f, 123, "123");
     uint8_t expected[] = { 0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0x18, 0x7B, 0x63, 0x31, 0x32, 0x33 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(BinaryEncoder, EncodeNull)
+{
+    SETUP(128)
+    encoder.encodeNull();
+    uint8_t expected[] = { 0xF6 };
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(BinaryEncoder, EncodePreamble)
+{
+    SETUP(128)
+    encoder.encodePreamble();
+    uint8_t expected[] = { 0xF6 };
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }

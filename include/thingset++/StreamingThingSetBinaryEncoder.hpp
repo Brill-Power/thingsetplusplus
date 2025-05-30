@@ -27,6 +27,11 @@ public:
         return _exportedLength;
     }
 
+    bool encodeKeysAsIds() const override
+    {
+        return true;
+    }
+
     bool getIsForwardOnly() const override
     {
         return true;

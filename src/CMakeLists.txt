@@ -3,7 +3,8 @@ target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryEncoder.cpp
     ThingSetNode.cpp
     ThingSetParentNode.cpp
-    ThingSetRegistry.cpp)
+    ThingSetRegistry.cpp
+    ThingSetTextEncoder.cpp)
 
 if(ENABLE_SERVER)
     target_sources(thingset++ PRIVATE ThingSetRequestContext.cpp

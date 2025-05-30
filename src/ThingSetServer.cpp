@@ -24,10 +24,10 @@ _ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
 int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
-    context.encoder.encodeNull();
+    context.encoder.encodePreamble();
     void *target;
     if (context.node->tryCastTo(ThingSetNodeType::encodable, &target)) {
-        ThingSetBinaryEncodable *encodable = reinterpret_cast<ThingSetBinaryEncodable *>(target);
+        ThingSetEncodable *encodable = reinterpret_cast<ThingSetEncodable *>(target);
         if (encodable->encode(context.encoder)) {
             return context.encoder.getEncodedLength() + 1;
         }
@@ -39,7 +39,7 @@ int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
-    context.encoder.encodeNull();
+    context.encoder.encodePreamble();
     if (context.decoder.decodeNull()) {
         // expect that this is a group
         void *target;
@@ -103,7 +103,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     }
     ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
     context.response[0] = ThingSetStatusCode::changed;
-    context.encoder.encodeNull();
+    context.encoder.encodePreamble();
     if (context.decoder.decodeMap<std::string>([&](auto &key) {
             // concoct full path to node
             std::string fullPath = std::string(context.path) + (context.path.length() > 1 ? "/" : "") + key;
@@ -135,7 +135,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
             return true;
         }))
     {
-        context.encoder.encodeNull();
+        context.encoder.encodePreamble();
         return context.encoder.getEncodedLength() + 1;
     }
     // just the error code
@@ -151,7 +151,7 @@ int _ThingSetServer::handleExec(ThingSetRequestContext &context)
     void *target;
     if (context.node->tryCastTo(ThingSetNodeType::function, &target)) {
         ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
-        context.encoder.encodeNull();
+        context.encoder.encodePreamble();
         if (invocable->invoke(context.decoder, context.encoder)) {
             context.response[0] = ThingSetStatusCode::changed;
             return context.encoder.getEncodedLength() + 1;

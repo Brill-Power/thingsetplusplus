@@ -12,8 +12,7 @@
 
 namespace ThingSet::Ip {
 
-template <typename Identifier>
-class ThingSetIpServerTransport;
+template <typename Identifier> class ThingSetIpServerTransport;
 
 /// @brief Encodes data to successive UDP frames in a multi-frame report.
 /// @tparam Identifier Type of client identifier
@@ -39,4 +38,4 @@ protected:
     }
 };
 
-} // namespace ThingSet::Ip::Udp
+} // namespace ThingSet::Ip

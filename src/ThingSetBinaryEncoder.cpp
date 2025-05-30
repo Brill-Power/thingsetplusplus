@@ -214,6 +214,11 @@ bool ThingSetBinaryEncoder::encodeNull()
     return this->ensureState() && zcbor_nil_put(this->getState(), NULL);
 }
 
+bool ThingSetBinaryEncoder::encodePreamble()
+{
+    return encodeNull();
+}
+
 bool ThingSetBinaryEncoder::encodeListStart()
 {
     return encodeListStart(UINT8_MAX);
@@ -262,6 +267,16 @@ bool ThingSetBinaryEncoder::encodeMapEnd(uint32_t count)
     else {
         return this->ensureState() && zcbor_map_end_encode(this->getState(), count);
     }
+}
+
+bool ThingSetBinaryEncoder::encodeListSeparator()
+{
+    return true;
+}
+
+bool ThingSetBinaryEncoder::encodeKeyValuePairSeparator()
+{
+    return true;
 }
 
 /// @brief End a list or map without going back and rewriting the header. Useful in forward-only encoding scenarios.
