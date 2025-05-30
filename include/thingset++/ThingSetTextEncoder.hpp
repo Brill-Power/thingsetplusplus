@@ -50,9 +50,9 @@ private:
 
 public:
     template <size_t Size>
-    ThingSetTextEncoder(std::array<uint8_t, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
+    ThingSetTextEncoder(std::array<char, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
     {}
-    ThingSetTextEncoder(char (&buffer)[TEXT_ENCODER_BUFFER_SIZE], size_t size)
+    ThingSetTextEncoder(char *buffer, size_t size)
         : _responseBuffer(buffer), _responseSize(size), _responsePosition(0), _depth(0)
     {}
 

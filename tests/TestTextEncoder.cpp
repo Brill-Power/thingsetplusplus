@@ -416,10 +416,10 @@ TEST(TextEncoder, EncodeList)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
-// TEST(TextEncoder, TestBoundaryEncode) // todo readd this after size is fixed
-// {
-//     SETUP(1)
-//     encoder.encode(1.23f);
-//     const char *expected = "";
-//     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
-// }
+TEST(TextEncoder, TestBoundaryEncode)
+{
+    SETUP(1) // make buffer of size 1 to ensure value cannot fit
+    encoder.encode(1.23f);
+    const char *expected = "";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
