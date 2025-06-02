@@ -20,6 +20,7 @@ include_directories(../include ../zcbor/include ../asio/asio/include)
 target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestBinaryDecoder.cpp
     TestTextEncoder.cpp
+    TestTextDecoder.cpp
     TestCompatibility.cpp
     TestProperties.cpp
     TestFunctions.cpp
