@@ -80,21 +80,19 @@ public:
     bool decodeListStart();
     bool decodeListEnd();
 
-    zcbor_major_type_t peekType();
-    virtual bool skip();
-    bool skipUntil(zcbor_major_type_t sought);
-
     /// @brief Decode a list into a tuple.
     /// @tparam ...Args The types of the elements in the list.
     /// @param tuple The tuple into which the list elements should be decoded.
     /// @return True if decoding succeeded, otherwise false.
     template <typename... Args> bool decodeList(std::tuple<Args...> &tuple)
     {
-        bool result = decodeListStart();
-        if (result) {
-            std::apply([&](auto &&...args) { ((result &= decode(&args)), ...); }, tuple);
-        }
-        return result & decodeListEnd();
+        // todo implement this
+        // bool result = decodeListStart();
+        // if (result) {
+        //     std::apply([&](auto &&...args) { ((result &= decode(&args)), ...); }, tuple);
+        // }
+        // return result & decodeListEnd();
+        return true;
     }
 
     /// @brief Decodes a map by iterating over its keys and invoking a callback for each key.
@@ -104,21 +102,23 @@ public:
     /// @return True if decoding succeeded, otherwise false.
     template <typename K> bool decodeMap(std::function<bool(K &)> callback)
     {
-        if (!zcbor_map_start_decode(getState())) {
-            return false;
-        }
+        // todo implement this
+        // if (!zcbor_map_start_decode(getState())) {
+        //     return false;
+        // }
 
-        while (getState()->elem_count != 0) {
-            K key;
-            if (!decode(&key)) {
-                return false;
-            }
-            if (!callback(key)) {
-                return false;
-            }
-        }
+        // while (getState()->elem_count != 0) {
+        //     K key;
+        //     if (!decode(&key)) {
+        //         return false;
+        //     }
+        //     if (!callback(key)) {
+        //         return false;
+        //     }
+        // }
 
-        return zcbor_map_end_decode(getState());
+        // return zcbor_map_end_decode(getState());
+        return true;
     }
 
     /// @brief Decode a list into an array.
@@ -150,52 +150,56 @@ public:
         requires std::is_class_v<T>
     bool decode(T *value)
     {
-        auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
-        if (!zcbor_map_start_decode(getState())) {
-            return false;
-        }
-        uint32_t id;
-        while (decode(&id) && id < UINT16_MAX) {
-            std::function<bool(ThingSetTextDecoder &, decltype(bound) &)> func = compile_switch(id, bound);
-            if (!func(*this, bound)) {
-                return false;
-            }
-        }
-        return zcbor_map_end_decode(getState());
+        // todo implement this
+        // auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
+        // if (!zcbor_map_start_decode(getState())) {
+        //     return false;
+        // }
+        // uint32_t id;
+        // while (decode(&id) && id < UINT16_MAX) {
+        //     std::function<bool(ThingSetTextDecoder &, decltype(bound) &)> func = compile_switch(id, bound);
+        //     if (!func(*this, bound)) {
+        //         return false;
+        //     }
+        // }
+        // return zcbor_map_end_decode(getState());
+        return true;
     }
 
 protected: // todo repeated label, same in binary decoder
     template <typename T> bool decode(T *value, size_t size, size_t &elementCount)
     {
-        if (!zcbor_list_start_decode(getState())) {
-            return false;
-        }
+        // todo implement this
+        // if (!zcbor_list_start_decode(getState())) {
+        //     return false;
+        // }
 
-        // check if number of elements in stream matches array size
-        elementCount = getState()->elem_count;
-        if (size > elementCount && (_options & ThingSetTextDecoderOptions::allowUndersizedArrays) == 0) {
-            if (!getIsForwardOnly()) {
-                // wind the state back to before we started parsing the list, so that a
-                // call to `skip()` will skip the whole array
-                zcbor_process_backup(getState(), ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME, ZCBOR_MAX_ELEM_COUNT);
-                // because the backup is taken *after* it has consumed the byte(s) containing the number
-                // of elements in the array, this restore doesn't really work
-                // so we overwrite the payload pointer with the backup it takes
-                getState()->payload = getState()->payload_bak;
-                // we also need to increment this, because, yes, it has consumed this as well
-                getState()->elem_count++;
-            }
-            return false;
-        }
+        // // check if number of elements in stream matches array size
+        // elementCount = getState()->elem_count;
+        // if (size > elementCount && (_options & ThingSetTextDecoderOptions::allowUndersizedArrays) == 0) {
+        //     if (!getIsForwardOnly()) {
+        //         // wind the state back to before we started parsing the list, so that a
+        //         // call to `skip()` will skip the whole array
+        //         zcbor_process_backup(getState(), ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME, ZCBOR_MAX_ELEM_COUNT);
+        //         // because the backup is taken *after* it has consumed the byte(s) containing the number
+        //         // of elements in the array, this restore doesn't really work
+        //         // so we overwrite the payload pointer with the backup it takes
+        //         getState()->payload = getState()->payload_bak;
+        //         // we also need to increment this, because, yes, it has consumed this as well
+        //         getState()->elem_count++;
+        //     }
+        //     return false;
+        // }
 
-        for (size_t i = 0; i < elementCount; i++) {
-            T *element = &value[i];
-            if (!decode(element)) {
-                return false;
-            }
-        }
+        // for (size_t i = 0; i < elementCount; i++) {
+        //     T *element = &value[i];
+        //     if (!decode(element)) {
+        //         return false;
+        //     }
+        // }
 
-        return zcbor_list_end_decode(getState());
+        // return zcbor_list_end_decode(getState());
+        return true;
     }
 
 private: // todo repeated label, same in binarydecoder

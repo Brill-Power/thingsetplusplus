@@ -7,12 +7,6 @@
 
 namespace ThingSet {
 
-ThingSetTextDecoder::ThingSetTextDecoder() : ThingSetTextDecoder(ThingSetTextDecoderOptions{})
-{}
-
-ThingSetTextDecoder::ThingSetTextDecoder(ThingSetTextDecoderOptions options) : _options(options)
-{}
-
 bool ThingSetTextDecoder::getIsForwardOnly() const
 {
     return false;
@@ -20,23 +14,14 @@ bool ThingSetTextDecoder::getIsForwardOnly() const
 
 bool ThingSetTextDecoder::decode(std::string *value)
 {
-    zcbor_string zstring;
-    if (zcbor_tstr_decode(this->getState(), &zstring)) {
-        *value = std::string((char *)zstring.value, zstring.len);
-        return true;
-    }
-    return false;
+    *value = _inputBuffer;
+    return true;
 }
 
 bool ThingSetTextDecoder::decode(char *value)
 {
-    zcbor_string zstring;
-    if (zcbor_tstr_decode(this->getState(), &zstring)) {
-        strncpy(value, (char *)zstring.value, zstring.len);
-        value[zstring.len] = '\0';
-        return true;
-    }
-    return false;
+    *value = _inputBuffer[0];
+    return true;
 }
 
 bool ThingSetTextDecoder::decode(float *value)
@@ -56,7 +41,7 @@ bool ThingSetTextDecoder::decode(bool *value)
 {
     uint8_t retVal = std::strtoul(_inputBuffer, NULL, 10);
 
-    if (retVal > 1 || retVal < 0) {
+    if (retVal > 1) {
         return false;
     }
 
@@ -113,35 +98,41 @@ bool ThingSetTextDecoder::decode(int64_t *value)
     return true;
 }
 
+// todo check this
 bool ThingSetTextDecoder::decodeNull()
 {
-    return zcbor_nil_expect(this->getState(), NULL);
+    return true;
 }
 
+// todo implement this
 bool ThingSetTextDecoder::decodeListStart()
 {
-    return zcbor_list_start_decode(getState());
+    return true;
 }
 
+// todo implement this
 bool ThingSetTextDecoder::decodeListEnd()
 {
-    return zcbor_list_end_decode(getState());
+    return true;
 }
 
+// todo implement this
 bool ThingSetTextDecoder::decodeList(std::function<bool(size_t)> callback)
 {
-    if (!decodeListStart()) {
-        return false;
-    }
+    // if (!decodeListStart()) {
+    //     return false;
+    // }
 
-    size_t index = 0;
-    while (getState()->elem_count != 0) {
-        if (!callback(index++)) {
-            return false;
-        }
-    }
+    // size_t index = 0;
+    // while (getState()->elem_count != 0) {
+    //     if (!callback(index++)) {
+    //         return false;
+    //     }
+    // }
 
-    return decodeListEnd();
+    // return decodeListEnd();
+    (void)callback;
+    return true;
 }
 
 } // namespace ThingSet
