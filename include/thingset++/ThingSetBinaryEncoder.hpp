@@ -123,7 +123,15 @@ protected:
     }
 
 public:
+    template <size_t Size>
+    FixedDepthThingSetBinaryEncoder(std::array<uint8_t, Size> &buffer) : FixedDepthThingSetBinaryEncoder(buffer.data(), Size)
+    {}
+
     FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size) : FixedDepthThingSetBinaryEncoder(buffer, size, 1)
+    {}
+
+    template <size_t Size>
+    FixedDepthThingSetBinaryEncoder(std::array<uint8_t, Size> &buffer, size_t elementCount) : FixedDepthThingSetBinaryEncoder(buffer.data(), Size, elementCount)
     {}
 
     FixedDepthThingSetBinaryEncoder(uint8_t *buffer, size_t size, size_t elementCount) : FixedDepthThingSetBinaryEncoder(buffer, size, elementCount, ThingSetBinaryEncoderOptions::encodeKeysAsIds)

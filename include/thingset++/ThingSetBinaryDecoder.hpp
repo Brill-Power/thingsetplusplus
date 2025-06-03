@@ -156,9 +156,10 @@ public:
         }
         uint32_t id;
         while (decode(&id) && id < UINT16_MAX) {
-            std::function<bool(ThingSetBinaryDecoder &, decltype(bound) &)> func = compile_switch(id, bound);
-            if (!func(*this, bound)) {
-                return false;
+            if (!switchDecode(id, bound)) {
+                if (!skip()) {
+                    return false;
+                }
             }
         }
         return zcbor_map_end_decode(getState());
@@ -199,25 +200,26 @@ protected:
     }
 
 private:
-    // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
+    // thanks to https://stackoverflow.com/questions/75163129/convert-variadic-template-ints-to-switch-statement?rq=3
     template <class Fields, std::size_t... Is>
-    static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id,
-                                                                                 std::index_sequence<Is...>)
+    bool switchDecode(const uint32_t &id, Fields &f, std::index_sequence<Is...>)
     {
-        // TODO: does not handle missing case properly
-        std::function<bool(ThingSetBinaryDecoder &, Fields &)> ret;
-        std::initializer_list<std::function<bool(ThingSetBinaryDecoder &, Fields &)>>(
-            { ((id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id)
-               ? ret = [](ThingSetBinaryDecoder &dec, Fields &f) -> bool { return std::get<Is>(f)->decode(dec); },
-               [](ThingSetBinaryDecoder &, Fields &) { return false; }
-               : [](ThingSetBinaryDecoder &, Fields &) { return false; })... });
-        return ret;
+        return (
+            [&]{
+                if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
+                    std::get<Is>(f)->decode(*this);
+                    return true;
+                } else {
+                    return false;
+                }
+            }()|| ...
+        );
     }
 
     template <class Fields>
-    static std::function<bool(ThingSetBinaryDecoder &, Fields &)> compile_switch(uint32_t id, Fields)
+    bool switchDecode(const uint32_t &id, Fields &f)
     {
-        return compile_switch<Fields>(id, std::make_index_sequence<std::tuple_size_v<Fields>>());
+        return switchDecode<Fields>(id, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
 };
 
@@ -240,8 +242,16 @@ public:
         : FixedDepthThingSetBinaryDecoder(buffer, size, 1, options)
     {}
 
+    template <size_t Size>
+    FixedDepthThingSetBinaryDecoder(std::array<uint8_t, Size> &buffer) : FixedDepthThingSetBinaryDecoder(buffer.data(), Size)
+    {}
+
     FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size)
         : FixedDepthThingSetBinaryDecoder(buffer, size, ThingSetBinaryDecoderOptions{})
+    {}
+
+    template <size_t Size>
+    FixedDepthThingSetBinaryDecoder(std::array<uint8_t, Size> &buffer, int elementCount) : FixedDepthThingSetBinaryDecoder(buffer.data(), Size, elementCount)
     {}
 
     FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount)
