@@ -8,14 +8,136 @@
 
 using namespace ThingSet;
 
+TEST(TextDecoder, DecodeStdString)
+{
+    char buffer[] = "Hello World";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::string value;
+    std::string *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, "Hello World");
+}
+
+TEST(TextDecoder, DecodeChar)
+{
+    char buffer[] = "F";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    char value;
+    char *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, 'F');
+}
+
+TEST(TextDecoder, DecodeDouble)
+{
+    char buffer[] = "12.4";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    double value;
+    double *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_NEAR(*valuePtr, 12.4F, 1e-6);
+}
+
+TEST(TextDecoder, DecodeFloat)
+{
+    char buffer[] = "12.4";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    float value;
+    float *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_NEAR(*valuePtr, 12.4F, 1e-6);
+}
+
 TEST(TextDecoder, DecodeUint8)
 {
-    char buffer[] = "12";
-    ThingSetTextDecoder decoder(buffer, sizeof(buffer));
-    uint8_t *valuePtr;
-    bool ret = decoder->decode(ret);
+    char buffer[] = "255";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    uint8_t value;
+    uint8_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
     ASSERT_TRUE(ret);
-    ASSERT_EQ(*valuePtr, 12);
+    ASSERT_EQ(value, UINT8_MAX);
+}
+
+TEST(TextDecoder, DecodeUint16)
+{
+    char buffer[] = "65535";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    uint16_t value;
+    uint16_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, UINT16_MAX);
+}
+
+TEST(TextDecoder, DecodeUint32)
+{
+    char buffer[] = "4294967295";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    uint32_t value;
+    uint32_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, UINT32_MAX);
+}
+
+TEST(TextDecoder, DecodeUint64)
+{
+    char buffer[] = "18446744073709551615";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    uint64_t value;
+    uint64_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, UINT64_MAX);
+}
+
+TEST(TextDecoder, DecodeInt8)
+{
+    char buffer[] = "-128";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    int8_t value;
+    int8_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, INT8_MIN);
+}
+
+TEST(TextDecoder, DecodeInt16)
+{
+    char buffer[] = "-32768";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    int16_t value;
+    int16_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, INT16_MIN);
+}
+
+TEST(TextDecoder, DecodeInt32)
+{
+    char buffer[] = "-2147483648";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    int32_t value;
+    int32_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, INT32_MIN);
+}
+
+TEST(TextDecoder, DecodeInt64)
+{
+    char buffer[] = "-9223372036854775808";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    uint64_t value;
+    uint64_t *valuePtr = &value;
+    bool ret = decoder.decode(valuePtr);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(value, INT64_MIN);
 }
 
 // todo implement more tests

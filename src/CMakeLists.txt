@@ -4,6 +4,7 @@ target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetNode.cpp
     ThingSetParentNode.cpp
     ThingSetRegistry.cpp
+    ThingSetTextDecoder.cpp
     ThingSetTextEncoder.cpp)
 
 if(ENABLE_SERVER)
