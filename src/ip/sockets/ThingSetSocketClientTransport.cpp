@@ -25,7 +25,7 @@ ThingSetSocketClientTransport::ThingSetSocketClientTransport(const std::string &
     : _socketHandle(-1)
 {
     int ret = inet_pton(AF_INET, ip.c_str(), &_serverAddress.sin_addr);
-    __ASSERT(ret == 1, "Failed to parse supplied IP address %s: %d", ip, ret);
+    __ASSERT(ret == 1, "Failed to parse supplied IP address %s: %d", ip.c_str(), ret);
     _serverAddress.sin_family = AF_INET;
     _serverAddress.sin_port = htons(9001);
 
