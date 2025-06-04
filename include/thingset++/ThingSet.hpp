@@ -10,7 +10,7 @@
 
 #ifdef __ZEPHYR__
 #ifdef CONFIG_THINGSET_PLUS_PLUS_SERVER
-// #include "thingset++/ThingSetServer.hpp"
+#include "thingset++/ThingSetServer.hpp"
 #endif
 
 #ifdef CONFIG_THINGSET_PLUS_PLUS_BACKEND_CAN

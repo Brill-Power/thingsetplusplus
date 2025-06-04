@@ -7,7 +7,30 @@
 
 #ifdef __ZEPHYR__
 #include <zephyr/logging/log.h>
+namespace ThingSet::Logging {
 LOG_MODULE_DECLARE(thingsetplusplus, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
+}
+
+#define LOG_DEBUG(...) \
+    { \
+        using namespace ThingSet::Logging; \
+        LOG_DBG(__VA_ARGS__); \
+    }
+#define LOG_INFO(...) \
+    { \
+        using namespace ThingSet::Logging; \
+        LOG_INF(__VA_ARGS__); \
+    }
+#define LOG_WARN(...) \
+    { \
+        using namespace ThingSet::Logging; \
+        LOG_WRN(__VA_ARGS__); \
+    }
+#define LOG_ERROR(...) \
+    { \
+        using namespace ThingSet::Logging; \
+        LOG_ERR(__VA_ARGS__); \
+    }
 
 template <typename ... T>
 void LOG_SMART(T... args)
@@ -20,22 +43,22 @@ void LOG_SMART(T... args)
 
 #define LOCAL_DEBUG_LEVEL 3
 
-#define LOG_DBG(...)                                                                                                   \
+#define LOG_DEBUG(...)                                                                                                   \
     if (LOCAL_DEBUG_LEVEL > 0) {                                                                                       \
         printf(__VA_ARGS__);                                                                                           \
         printf("\n");                                                                                                  \
     }
-#define LOG_INF(...)                                                                                                   \
+#define LOG_INFO(...)                                                                                                   \
     if (LOCAL_DEBUG_LEVEL > 1) {                                                                                       \
         printf(__VA_ARGS__);                                                                                           \
         printf("\n");                                                                                                  \
     }
-#define LOG_WRN(...)                                                                                                   \
+#define LOG_WARN(...)                                                                                                   \
     if (LOCAL_DEBUG_LEVEL > 0) {                                                                                       \
         printf(__VA_ARGS__);                                                                                           \
         printf("\n");                                                                                                  \
     }
-#define LOG_ERR(...)                                                                                                   \
+#define LOG_ERROR(...)                                                                                                   \
     printf(__VA_ARGS__);                                                                                               \
     printf("\n");
 
@@ -46,12 +69,12 @@ void LOG_SMART(T... args)
 }
 #else
 
-#ifndef LOG_DBG
+#ifndef LOG_DEBUG
 
-#define LOG_DBG(...)
-#define LOG_INF(...)
-#define LOG_WRN(...)
-#define LOG_ERR(...)
+#define LOG_DEBUG(...)
+#define LOG_INFO(...)
+#define LOG_WARN(...)
+#define LOG_ERROR(...)
 
 template <typename ... T>
 void LOG_SMART(T...)

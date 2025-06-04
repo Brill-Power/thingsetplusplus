@@ -115,7 +115,7 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
     ssize_t sent = sendto(_publishSocketHandle, buffer, len, 0, (struct sockaddr *)&_broadcastAddress, sizeof(_broadcastAddress));
     if (sent < 0) {
-        LOG_ERR("Failed to send report: %zd %d", sent, errno);
+        LOG_ERROR("Failed to send report: %zd %d", sent, errno);
     }
     return sent == (ssize_t)len;
 }
@@ -124,14 +124,14 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 void _ThingSetSocketServerTransport::runAcceptor()
 {
     if (fcntl(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
-        LOG_ERR("Failed to configure socket: %d", errno);
+        LOG_ERROR("Failed to configure socket: %d", errno);
         // this isn't technically a fatal error; it just means we
         // won't get a clean shutdown, because we'll never be able
         // to break out of the acceptor loop
     }
 
     if (::listen(_listenSocketHandle, THINGSET_SERVER_MAX_CLIENTS) != 0) {
-        LOG_ERR("Failed to begin listening: %d", errno);
+        LOG_ERROR("Failed to begin listening: %d", errno);
         return;
     }
 
@@ -141,7 +141,7 @@ void _ThingSetSocketServerTransport::runAcceptor()
     while (_runAcceptor) {
         int ret = poll(listenPoll, 1, 10);
         if (ret < 0) {
-            LOG_ERR("Polling error: %d", errno);
+            LOG_ERROR("Polling error: %d", errno);
         }
         else if (ret == 0) {
             continue;
@@ -153,7 +153,7 @@ void _ThingSetSocketServerTransport::runAcceptor()
         int client_sock = accept(_listenSocketHandle, (sockaddr *)&clientAddr, &clientAddrLen);
         if (client_sock < 0) {
             if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                LOG_ERR("Accept failed: %d", errno);
+                LOG_ERROR("Accept failed: %d", errno);
             }
             continue;
         }
@@ -163,13 +163,13 @@ void _ThingSetSocketServerTransport::runAcceptor()
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (_socketDescriptors[i].fd == -1) {
                 _socketDescriptors[i].fd = client_sock;
-                LOG_DBG("Assigned slot %d to socket %d", i, _socketDescriptors[i].fd);
+                LOG_DEBUG("Assigned slot %d to socket %d", i, _socketDescriptors[i].fd);
                 break;
             }
         }
     }
 
-    LOG_INF("Shut down acceptor thread");
+    LOG_INFO("Shut down acceptor thread");
 }
 
 void _ThingSetSocketServerTransport::runHandler()
@@ -178,7 +178,7 @@ void _ThingSetSocketServerTransport::runHandler()
         int ret = poll(_socketDescriptors.data(), _socketDescriptors.size(), 10);
 
         if (ret < 0) {
-            LOG_ERR("Polling error: %d", errno);
+            LOG_ERROR("Polling error: %d", errno);
         }
         else if (ret == 0) {
             continue;
@@ -195,7 +195,7 @@ void _ThingSetSocketServerTransport::runHandler()
                 int rxLen = recv(clientSocketHandle, rxBuf, sizeof(rxBuf), 0);
 
                 if (rxLen < 0) {
-                    LOG_ERR("Receive error: %d", errno);
+                    LOG_ERROR("Receive error: %d", errno);
                 }
                 else if (rxLen == 0) {
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
@@ -215,7 +215,7 @@ void _ThingSetSocketServerTransport::runHandler()
         }
     }
 
-    LOG_INF("Shut down handler thread");
+    LOG_INFO("Shut down handler thread");
 }
 
 #ifdef __ZEPHYR__

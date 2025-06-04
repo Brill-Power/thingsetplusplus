@@ -159,7 +159,7 @@ static void onAddressClaimSent(const device *dev, int error, void *arg)
 
 bool ThingSetZephyrCanInterface::claimAddress(uint8_t nodeAddress)
 {
-    LOG_INF("Asserting claim to 0x%.2X", nodeAddress);
+    LOG_INFO("Asserting claim to 0x%.2X", nodeAddress);
     CanFrame frame(CanID()
                        .setSource(nodeAddress)
                        .setTarget(CanID::broadcastAddress)
@@ -190,7 +190,7 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
 {
     if (_nodeAddress == CanID::broadcastAddress) {
         _nodeAddress = nodeAddress;
-        LOG_INF("Starting address claim for CAN interface %s", _canDevice->name);
+        LOG_INFO("Starting address claim for CAN interface %s", _canDevice->name);
         k_event_init(&_events);
 
         can_set_mode(_canDevice, can_get_mode(_canDevice) | CAN_MODE_FD);
@@ -223,7 +223,7 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
                 /* try again with new random node_addr between 0x01 and 0xFD */
                 uint8_t oldNodeAddress = _nodeAddress;
                 _nodeAddress = CanID::minAddress + sys_rand32_get() % (CanID::maxAddress - CanID::minAddress);
-                LOG_WRN("Node addr 0x%.2X already in use, trying 0x%.2X", oldNodeAddress, _nodeAddress);
+                LOG_WARN("Node addr 0x%.2X already in use, trying 0x%.2X", oldNodeAddress, _nodeAddress);
             }
             else {
                 can_bus_err_cnt err_cnt_before;
@@ -252,11 +252,11 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
         _discoverFilterId =
             addFilter(CanID().setSource(CanID::anonymousAddress).setTarget(_nodeAddress), onAddressDiscoverReceived);
         if (_discoverFilterId < 0) {
-            LOG_ERR("Failed to add address discovery filter: %d", _discoverFilterId);
+            LOG_ERROR("Failed to add address discovery filter: %d", _discoverFilterId);
             return false;
         }
 
-        LOG_INF("CAN device %s bound to address 0x%x", _canDevice->name, _nodeAddress);
+        LOG_INFO("CAN device %s bound to address 0x%x", _canDevice->name, _nodeAddress);
     }
     return true;
 }
@@ -302,7 +302,7 @@ void _ThingSetZephyrCanInterface::onRequestResponseReceived(net_buf *buffer, int
                                 IsoTpFastAddress(CanID::create(address.ext_id).getReplyId()), nullptr);
     }
     if (result != 0) {
-        LOG_ERR("Error %d sending reply to message from 0x%d", result, address.ext_id);
+        LOG_ERROR("Error %d sending reply to message from 0x%d", result, address.ext_id);
     }
     if (taken) {
         k_sem_give(&self->_lock);
