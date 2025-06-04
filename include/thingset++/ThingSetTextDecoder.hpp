@@ -205,22 +205,26 @@ protected: // todo repeated label, same in binary decoder
 private: // todo repeated label, same in binarydecoder
     // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
     template <class Fields, std::size_t... Is>
-    static std::function<bool(ThingSetTextDecoder &, Fields &)> compile_switch(uint32_t id, std::index_sequence<Is...>)
+    bool switchDecode(const uint32_t &id, Fields &f, std::index_sequence<Is...>)
     {
-        // TODO: does not handle missing case properly
-        std::function<bool(ThingSetTextDecoder &, Fields &)> ret;
-        std::initializer_list<std::function<bool(ThingSetTextDecoder &, Fields &)>>(
-            { ((id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id)
-               ? ret = [](ThingSetTextDecoder &dec, Fields &f) -> bool { return std::get<Is>(f)->decode(dec); },
-               [](ThingSetTextDecoder &, Fields &) { return false; }
-               : [](ThingSetTextDecoder &, Fields &) { return false; })... });
+        bool ret = false;
+        return ([&] {
+            if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
+                std::get<Is>(f)->decode(*this);
+                ret = std::get<Is>(f)->decode(*this);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }() || ...);
         return ret;
     }
 
     template <class Fields>
-    static std::function<bool(ThingSetTextDecoder &, Fields &)> compile_switch(uint32_t id, Fields)
+    static std::function<bool(ThingSetTextDecoder &, Fields &)> switchDecode(uint32_t id, Fields)
     {
-        return compile_switch<Fields>(id, std::make_index_sequence<std::tuple_size_v<Fields>>());
+        return switchDecode<Fields>(id, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
 };
 
