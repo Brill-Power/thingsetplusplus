@@ -14,25 +14,37 @@ bool ThingSetTextDecoder::getIsForwardOnly() const
 
 bool ThingSetTextDecoder::decode(std::string *value)
 {
+    // todo make this work with _bufferElemPtr
     *value = _inputBuffer;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(char *value)
 {
-    *value = _inputBuffer[0];
+    *value = _inputBuffer[_bufferElemPtr];
+    _bufferElemPtr++;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(float *value)
 {
-    *value = std::strtof(_inputBuffer, NULL);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtod(startPtr, &endPtr);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(double *value)
 {
-    *value = std::strtod(_inputBuffer, NULL);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtod(startPtr, &endPtr);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
@@ -52,49 +64,90 @@ bool ThingSetTextDecoder::decode(bool *value)
 
 bool ThingSetTextDecoder::decode(uint8_t *value)
 {
-    *value = std::strtoul(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtoul(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(uint16_t *value)
 {
-    *value = std::strtoul(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtoul(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(uint32_t *value)
 {
-    *value = std::strtoul(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtoul(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
+// todo check this
 bool ThingSetTextDecoder::decode(uint64_t *value)
 {
-    *value = std::strtoull(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtoull(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(int8_t *value)
 {
-    *value = std::strtol(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtol(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(int16_t *value)
 {
-    *value = std::strtol(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtol(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(int32_t *value)
 {
-    *value = std::strtol(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtol(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
 bool ThingSetTextDecoder::decode(int64_t *value)
 {
-    *value = std::strtoll(_inputBuffer, NULL, 10);
+    // todo template this
+    const char *startPtr = &_inputBuffer[_bufferElemPtr];
+    char *endPtr;
+    *value = std::strtoll(startPtr, &endPtr, 10);
+    size_t consumed = endPtr - startPtr;
+    _bufferElemPtr += consumed;
     return true;
 }
 
@@ -104,16 +157,36 @@ bool ThingSetTextDecoder::decodeNull()
     return true;
 }
 
-// todo implement this
+// todo check this
 bool ThingSetTextDecoder::decodeListStart()
 {
-    return true;
+    if (_inputBuffer[_bufferElemPtr] == '[') {
+        _bufferElemPtr++;
+        return true;
+    }
+    return false;
 }
 
-// todo implement this
+// todo check this
 bool ThingSetTextDecoder::decodeListEnd()
 {
-    return true;
+    if (_inputBuffer[_bufferElemPtr] == ']') {
+        _bufferElemPtr++;
+        return true;
+    }
+    return false;
+}
+
+bool ThingSetTextDecoder::decodeListSeparator()
+{
+    if (_inputBuffer[_bufferElemPtr] == ',') {
+        _bufferElemPtr++;
+        return true;
+    }
+    else if (_inputBuffer[_bufferElemPtr] == ']') { // end of list
+        return true;
+    }
+    return false;
 }
 
 // todo implement this

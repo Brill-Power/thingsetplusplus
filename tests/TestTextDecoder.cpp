@@ -140,6 +140,17 @@ TEST(TextDecoder, DecodeInt64)
     ASSERT_EQ(value, INT64_MIN);
 }
 
+TEST(TextDecoder, DecodeList)
+{
+    char buffer[] = "[1234567890,9876543210]";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::tuple<uint64_t, uint64_t> values;
+    bool ret = decoder.decodeList(values);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(std::get<0>(values), 1234567890);
+    ASSERT_EQ(std::get<1>(values), 9876543210);
+}
+
 // todo implement more tests
 
 // todo reimplement or delete everything below
