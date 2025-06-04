@@ -41,6 +41,7 @@ class ThingSetTextDecoder
 private:
     char *_inputBuffer;
     size_t _bufferSize;
+    size_t _bufferElemPtr;
     ThingSetTextDecoderOptions _options;
 
 protected:
@@ -50,10 +51,10 @@ protected:
     virtual bool getIsForwardOnly() const;
 
 public:
-    ThingSetTextDecoder(char *buffer, size_t size) : _inputBuffer(buffer), _bufferSize(size)
+    ThingSetTextDecoder(char *buffer, size_t size) : _inputBuffer(buffer), _bufferSize(size), _bufferElemPtr(0)
     {}
     ThingSetTextDecoder(char *buffer, size_t size, ThingSetTextDecoderOptions options)
-        : _inputBuffer(buffer), _bufferSize(size), _options(options)
+        : _inputBuffer(buffer), _bufferSize(size), _bufferElemPtr(0), _options(options)
     {}
 
     bool decode(std::string *value);
@@ -79,6 +80,7 @@ public:
     bool decodeList(std::function<bool(size_t)> callback);
     bool decodeListStart();
     bool decodeListEnd();
+    bool decodeListSeparator(); // todo make this private?
 
     /// @brief Decode a list into a tuple.
     /// @tparam ...Args The types of the elements in the list.
@@ -86,13 +88,11 @@ public:
     /// @return True if decoding succeeded, otherwise false.
     template <typename... Args> bool decodeList(std::tuple<Args...> &tuple)
     {
-        // todo implement this
-        // bool result = decodeListStart();
-        // if (result) {
-        //     std::apply([&](auto &&...args) { ((result &= decode(&args)), ...); }, tuple);
-        // }
-        // return result & decodeListEnd();
-        return true;
+        bool result = decodeListStart();
+        if (result) {
+            std::apply([&](auto &&...args) { ((result &= decode(&args), decodeListSeparator()), ...); }, tuple);
+        }
+        return result & decodeListEnd();
     }
 
     /// @brief Decodes a map by iterating over its keys and invoking a callback for each key.
@@ -100,26 +100,26 @@ public:
     /// @param callback The callback to be invoked each time a key is decoded. This callback should decode the value and
     /// return true, or fail and return false.
     /// @return True if decoding succeeded, otherwise false.
-    template <typename K> bool decodeMap(std::function<bool(K &)> callback)
-    {
-        // todo implement this
-        // if (!zcbor_map_start_decode(getState())) {
-        //     return false;
-        // }
+    // template <typename K> bool decodeMap(std::function<bool(K &)> callback)
+    // {
+    //     todo implement this if (!zcbor_map_start_decode(getState()))
+    //     {
+    //         return false;
+    //     }
 
-        // while (getState()->elem_count != 0) {
-        //     K key;
-        //     if (!decode(&key)) {
-        //         return false;
-        //     }
-        //     if (!callback(key)) {
-        //         return false;
-        //     }
-        // }
+    //     while (_bufferElemPtr < _bufferSize) {
+    //         K key;
+    //         if (!decode(&key)) {
+    //             return false;
+    //         }
+    //         if (!callback(key)) {
+    //             return false;
+    //         }
+    //     }
 
-        // return zcbor_map_end_decode(getState());
-        return true;
-    }
+    //     return zcbor_map_end_decode(getState());
+    //     return true;
+    // }
 
     /// @brief Decode a list into an array.
     /// @tparam T The type of items in the array.
