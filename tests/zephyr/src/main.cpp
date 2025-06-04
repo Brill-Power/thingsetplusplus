@@ -12,6 +12,8 @@
 #include <thingset++/ThingSetFunction.hpp>
 #include <array>
 
+LOG_MODULE_REGISTER(thingsetplusplustest, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
+
 using namespace ThingSet::Can::Zephyr;
 using namespace ThingSet;
 
