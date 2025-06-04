@@ -38,7 +38,7 @@ public:
         if (messageType == MultiFrameMessageType::single || messageType == MultiFrameMessageType::last) {
             // fill buffer
             read(0, -1 + THINGSET_STREAMING_DECODER_CAN_MSG_SIZE * 2);
-            zcbor_new_decode_state(_state, BINARY_DECODER_DEFAULT_MAX_DEPTH, &_buffer[1], _buffer.size() - 1, 2, NULL, 0);
+            initialiseState(_state, BINARY_DECODER_DEFAULT_MAX_DEPTH, &_buffer[1], _buffer.size() - 1, 2);
             return true;
         }
         return false;

@@ -46,6 +46,8 @@ protected:
     ThingSetBinaryDecoder();
     ThingSetBinaryDecoder(ThingSetBinaryDecoderOptions options);
 
+    static void initialiseState(zcbor_state_t *state, size_t depth, uint8_t *buffer, size_t size, int elementCount);
+
     virtual zcbor_state_t *getState() = 0;
 
     /// @brief Gets whether the stream that this decoder is decoding
@@ -264,14 +266,7 @@ public:
                                     ThingSetBinaryDecoderOptions options)
         : ThingSetBinaryDecoder(options), _buffer(buffer)
     {
-#ifdef zcbor_tstr_expect_term
-        zcbor_new_decode_state(_state, depth, buffer, size, elementCount);
-#else
-        zcbor_new_decode_state(_state, depth, buffer, size, elementCount, NULL, 0);
-#ifdef ZCBOR_ENFORCE_CANONICAL
-        _state->constant_state->enforce_canonical = false;
-#endif // ZCBOR_ENFORCE_CANONICAL
-#endif // zcbor_tstr_expect_term
+        initialiseState(_state, depth, buffer, size, elementCount);
     }
 
     size_t getDecodedLength() override
