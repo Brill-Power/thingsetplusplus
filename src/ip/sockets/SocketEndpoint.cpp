@@ -12,11 +12,13 @@
 
 namespace ThingSet::Ip::Sockets {
 
+#ifndef __ZEPHYR__
 std::ostream &operator<<(std::ostream &os, SocketEndpoint &ep)
 {
     char ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &ep.sin_addr, ip, sizeof(ip));
     return os << ip << ":" << std::dec << ep.sin_port;
 }
+#endif // __ZEPHYR__
 
 } // namespace ThingSet::Ip::Sockets

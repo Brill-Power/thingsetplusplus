@@ -8,7 +8,6 @@
 #include "thingset++/internal/logging.hpp"
 #include <assert.h>
 #include <array>
-#include <iostream>
 
 #ifdef __ZEPHYR__
 #include "thingset++/ip/sockets/ZephyrStubs.h"
@@ -30,6 +29,8 @@ static struct k_thread handlerThread;
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <iostream>
+
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
 #endif // __ZEPHYR__
 
@@ -157,7 +158,7 @@ void _ThingSetSocketServerTransport::runAcceptor()
             continue;
         }
 
-        std::cout << "Connection from " << clientAddr << std::endl;
+        //std::cout << "Connection from " << clientAddr << std::endl;
 
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (_socketDescriptors[i].fd == -1) {
@@ -198,7 +199,7 @@ void _ThingSetSocketServerTransport::runHandler()
                 }
                 else if (rxLen == 0) {
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
-                    std::cout << "Closing connection from " << addr << std::endl;
+                    //std::cout << "Closing connection from " << addr << std::endl;
 
                     close(clientSocketHandle);
                     _socketDescriptors[i].fd = -1;
@@ -226,6 +227,9 @@ static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
     __ASSERT(ret == 0, "Failed to get interface IP information: %d", ret);
     return std::make_pair(ipConfig->unicast->ipv4.address.in_addr, ipConfig->unicast->netmask);
 }
+
+ThingSetSocketServerTransport::ThingSetSocketServerTransport() : ThingSetSocketServerTransport(net_if_get_default())
+{}
 
 ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(iface))
 {}

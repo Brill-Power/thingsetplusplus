@@ -6,7 +6,9 @@
 #pragma once
 
 #include <cstdint>
+#ifndef __ZEPHYR__
 #include <iostream>
+#endif // __ZEPHYR__
 
 #define THINGSET_CAN_ID_POSITION_SOURCE   0
 #define THINGSET_CAN_ID_POSITION_TARGET   8
@@ -140,6 +142,8 @@ public:
     static CanID create(const uint32_t id);
 };
 
+#ifndef __ZEPHYR__
 std::ostream& operator<<(std::ostream &os, const CanID &id);
+#endif // __ZEPHYR__
 
 } // namespace ThingSet::Can

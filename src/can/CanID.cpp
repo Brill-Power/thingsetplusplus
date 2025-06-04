@@ -177,10 +177,12 @@ CanID CanID::create(const uint32_t id)
     return CanID(id & mask, mask);
 }
 
+#ifndef __ZEPHYR__
 std::ostream& operator<<(std::ostream &os, const CanID &id)
 {
     os << "0x" << std::hex << id.getId();
     return os;
 }
+#endif // __ZEPHYR__
 
 } // namespace ThingSet::Can

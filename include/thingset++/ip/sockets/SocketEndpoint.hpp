@@ -11,14 +11,16 @@
 #else
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#endif // __ZEPHYR__
 #include <ostream>
+#endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
 
 class SocketEndpoint : public sockaddr_in {
 };
 
+#ifndef __ZEPHYR__
 std::ostream &operator<<(std::ostream &os, SocketEndpoint &ep);
+#endif // __ZEPHYR__
 
 } // namespace ThingSet::Ip::Sockets
