@@ -204,16 +204,18 @@ private:
     template <class Fields, std::size_t... Is>
     bool switchDecode(const uint32_t &id, Fields &f, std::index_sequence<Is...>)
     {
+        bool ret = false;
         return (
             [&]{
                 if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
-                    std::get<Is>(f)->decode(*this);
+                    ret = std::get<Is>(f)->decode(*this);
                     return true;
                 } else {
                     return false;
                 }
             }()|| ...
         );
+        return ret;
     }
 
     template <class Fields>
