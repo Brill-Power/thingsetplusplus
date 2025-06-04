@@ -12,6 +12,10 @@
 #ifdef CONFIG_THINGSET_PLUS_PLUS_SERVER
 #include "thingset++/ThingSetServer.hpp"
 #endif
+#ifdef CONFIG_THINGSET_PLUS_PLUS_CLIENT
+#include "thingset++/ThingSetClient.hpp"
+#include "thingset++/ThingSetListener.hpp"
+#endif
 
 #ifdef CONFIG_THINGSET_PLUS_PLUS_BACKEND_CAN
 #ifdef CONFIG_THINGSET_PLUS_PLUS_SERVER
