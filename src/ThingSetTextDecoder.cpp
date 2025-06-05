@@ -46,14 +46,10 @@ bool ThingSetTextDecoder::decode(char *value)
 
 bool ThingSetTextDecoder::decode(float *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtod(startPtr, &endPtr);
-    // todo change lines below to _bufferElemPtr = (size_t)endPtr;
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> float {
+        return static_cast<float>(std::strtod(start, end));
+    };
+    return decodeValue<float>(value, decodeFunction);
 }
 
 bool ThingSetTextDecoder::decode(double *value)
