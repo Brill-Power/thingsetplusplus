@@ -10,7 +10,7 @@ using namespace ThingSet;
 
 TEST(TextDecoder, DecodeStdString)
 {
-    char buffer[] = "Hello World";
+    char buffer[] = "\"Hello World\"";
     ThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::string value;
     std::string *valuePtr = &value;

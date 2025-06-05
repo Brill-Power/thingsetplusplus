@@ -14,8 +14,26 @@ bool ThingSetTextDecoder::getIsForwardOnly() const
 
 bool ThingSetTextDecoder::decode(std::string *value)
 {
-    // todo make this work with _bufferElemPtr
-    *value = _inputBuffer;
+    int endIndex = _bufferElemPtr;
+
+    if (_inputBuffer[_bufferElemPtr] != '\"') {
+        return false;
+    }
+
+    // make sure \" is ignored
+    _bufferElemPtr++;
+    endIndex++;
+
+    while ((_bufferElemPtr < _bufferSize) && (_inputBuffer[endIndex] != '\"')) {
+        endIndex++;
+    }
+
+    if (_inputBuffer[endIndex] != '\"') {
+        return false;
+    }
+
+    *value = std::string(&_inputBuffer[_bufferElemPtr], endIndex - _bufferElemPtr);
+    _bufferElemPtr = endIndex + 1; // + 1 to ignore closing \"
     return true;
 }
 
@@ -32,6 +50,7 @@ bool ThingSetTextDecoder::decode(float *value)
     const char *startPtr = &_inputBuffer[_bufferElemPtr];
     char *endPtr;
     *value = std::strtod(startPtr, &endPtr);
+    // todo change lines below to _bufferElemPtr = (size_t)endPtr;
     size_t consumed = endPtr - startPtr;
     _bufferElemPtr += consumed;
     return true;
