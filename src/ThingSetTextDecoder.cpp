@@ -58,16 +58,10 @@ bool ThingSetTextDecoder::decode(float *value)
 
 bool ThingSetTextDecoder::decode(double *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtod(startPtr, &endPtr);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    return decodeValue(value, std::strtod);
 }
 
-// todo simplify this?
+// todo simplify this? make this work with indices too
 bool ThingSetTextDecoder::decode(bool *value)
 {
     uint8_t retVal = std::strtoul(_inputBuffer, NULL, 10);
@@ -83,91 +77,66 @@ bool ThingSetTextDecoder::decode(bool *value)
 
 bool ThingSetTextDecoder::decode(uint8_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtoul(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> uint8_t {
+        return static_cast<uint8_t>(std::strtoul(start, end, 10));
+    };
+    return decodeValue<uint8_t>(value, decodeFunction);
 }
 
 bool ThingSetTextDecoder::decode(uint16_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtoul(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> uint16_t {
+        return static_cast<uint16_t>(std::strtoul(start, end, 10));
+    };
+    return decodeValue<uint16_t>(value, decodeFunction);
 }
 
 bool ThingSetTextDecoder::decode(uint32_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtoul(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> uint32_t {
+        return static_cast<uint32_t>(std::strtoul(start, end, 10));
+    };
+    return decodeValue<uint32_t>(value, decodeFunction);
 }
 
-// todo check this
 bool ThingSetTextDecoder::decode(uint64_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtoull(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> uint64_t {
+        return static_cast<uint64_t>(std::strtoull(start, end, 10));
+    };
+    return decodeValue<uint64_t>(value, decodeFunction);
 }
 
 bool ThingSetTextDecoder::decode(int8_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtol(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> int8_t {
+        return static_cast<int8_t>(std::strtol(start, end, 10));
+    };
+    return decodeValue<int8_t>(value, decodeFunction);
 }
 
 bool ThingSetTextDecoder::decode(int16_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtol(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> int16_t {
+        return static_cast<int16_t>(std::strtol(start, end, 10));
+    };
+    return decodeValue<int16_t>(value, decodeFunction);
 }
 
 bool ThingSetTextDecoder::decode(int32_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtol(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> int32_t {
+        return static_cast<int32_t>(std::strtol(start, end, 10));
+    };
+    return decodeValue<int32_t>(value, decodeFunction);
 }
 
 bool ThingSetTextDecoder::decode(int64_t *value)
 {
-    // todo template this
-    const char *startPtr = &_inputBuffer[_bufferElemPtr];
-    char *endPtr;
-    *value = std::strtoll(startPtr, &endPtr, 10);
-    size_t consumed = endPtr - startPtr;
-    _bufferElemPtr += consumed;
-    return true;
+    auto decodeFunction = [](const char *start, char **end) -> int64_t {
+        return static_cast<int64_t>(std::strtol(start, end, 10));
+    };
+    return decodeValue<int64_t>(value, decodeFunction);
 }
 
 // todo check this
