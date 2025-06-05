@@ -57,16 +57,19 @@ bool ThingSetTextDecoder::decode(double *value)
     return decodeValue(value, std::strtod);
 }
 
-// todo simplify this? make this work with indices too
 bool ThingSetTextDecoder::decode(bool *value)
 {
-    uint8_t retVal = std::strtoul(_inputBuffer, NULL, 10);
+    uint8_t retVal;
+
+    if (!decode(&retVal)) {
+        return false;
+    }
 
     if (retVal > 1) {
         return false;
     }
 
-    *value = retVal;
+    *value = static_cast<bool>(retVal);
 
     return true;
 }
