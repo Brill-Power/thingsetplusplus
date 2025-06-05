@@ -164,6 +164,26 @@ bool ThingSetTextDecoder::decodeListEnd()
     return false;
 }
 
+// todo check this
+bool ThingSetTextDecoder::decodeMapStart()
+{
+    if (_inputBuffer[_bufferElemPtr] == '{') {
+        _bufferElemPtr++;
+        return true;
+    }
+    return false;
+}
+
+// todo check this
+bool ThingSetTextDecoder::decodeMapEnd()
+{
+    if (_inputBuffer[_bufferElemPtr] == '}') {
+        _bufferElemPtr++;
+        return true;
+    }
+    return false;
+}
+
 bool ThingSetTextDecoder::decodeListSeparator()
 {
     if (_inputBuffer[_bufferElemPtr] == ',') {
@@ -171,6 +191,18 @@ bool ThingSetTextDecoder::decodeListSeparator()
         return true;
     }
     else if (_inputBuffer[_bufferElemPtr] == ']') { // end of list
+        return true;
+    }
+    return false;
+}
+
+bool ThingSetTextDecoder::decodeMapSeparator()
+{
+    if (_inputBuffer[_bufferElemPtr] == ',') {
+        _bufferElemPtr++;
+        return true;
+    }
+    else if (_inputBuffer[_bufferElemPtr] == '}') { // end of map
         return true;
     }
     return false;

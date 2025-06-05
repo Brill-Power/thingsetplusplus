@@ -80,7 +80,10 @@ public:
     bool decodeList(std::function<bool(size_t)> callback);
     bool decodeListStart();
     bool decodeListEnd();
+    bool decodeMapStart();
+    bool decodeMapEnd();
     bool decodeListSeparator(); // todo make this private?
+    bool decodeMapSeparator();  // todo make this private?
 
     /// @brief Decode a list into a tuple.
     /// @tparam ...Args The types of the elements in the list.
@@ -100,26 +103,25 @@ public:
     /// @param callback The callback to be invoked each time a key is decoded. This callback should decode the value and
     /// return true, or fail and return false.
     /// @return True if decoding succeeded, otherwise false.
-    // template <typename K> bool decodeMap(std::function<bool(K &)> callback)
-    // {
-    //     todo implement this if (!zcbor_map_start_decode(getState()))
-    //     {
-    //         return false;
-    //     }
+    template <typename K> bool decodeMap(std::function<bool(K &)> callback)
+    {
+        if (!decodeMapStart()) {
+            return false;
+        }
 
-    //     while (_bufferElemPtr < _bufferSize) {
-    //         K key;
-    //         if (!decode(&key)) {
-    //             return false;
-    //         }
-    //         if (!callback(key)) {
-    //             return false;
-    //         }
-    //     }
-
-    //     return zcbor_map_end_decode(getState());
-    //     return true;
-    // }
+        while ((_bufferElemPtr < _bufferSize) && (_inputBuffer[_bufferElemPtr] != '}')) {
+            K key;
+            if (!decode(&key)) {
+                return false;
+            }
+            _bufferElemPtr++; // skip :
+            if (!callback(key)) {
+                return false;
+            }
+            decodeMapSeparator();
+        }
+        return decodeMapEnd();
+    }
 
     /// @brief Decode a list into an array.
     /// @tparam T The type of items in the array.
@@ -138,8 +140,36 @@ public:
     /// @return True if decoding succeeded, otherwise false.
     template <typename T> bool decode(T *value, size_t size)
     {
-        size_t elementCount;
-        return decode(value, size, elementCount);
+        if (!decodeListStart()) {
+            return false;
+        }
+
+        // check if number of elements in stream matches array size
+        // elementCount = getState()->elem_count;
+        // if (size > elementCount && (_options & ThingSetTextDecoderOptions::allowUndersizedArrays) == 0) {
+        //     if (!getIsForwardOnly()) {
+        //         // wind the state back to before we started parsing the list, so that a
+        //         // call to `skip()` will skip the whole array
+        //         zcbor_process_backup(getState(), ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME, ZCBOR_MAX_ELEM_COUNT);
+        //         // because the backup is taken *after* it has consumed the byte(s) containing the number
+        //         // of elements in the array, this restore doesn't really work
+        //         // so we overwrite the payload pointer with the backup it takes
+        //         getState()->payload = getState()->payload_bak;
+        //         // we also need to increment this, because, yes, it has consumed this as well
+        //         getState()->elem_count++;
+        //     }
+        //     return false;
+        // }
+
+        for (size_t i = 0; i < size; i++) {
+            T *element = &value[i];
+            if (!decode(element)) {
+                return false;
+            }
+            decodeListSeparator();
+        }
+
+        return decodeListEnd();
     }
 
     /// @brief Decode a map into a pointer to a class or structure.
@@ -163,42 +193,6 @@ public:
         //     }
         // }
         // return zcbor_map_end_decode(getState());
-        return true;
-    }
-
-protected: // todo repeated label, same in binary decoder
-    template <typename T> bool decode(T *value, size_t size, size_t &elementCount)
-    {
-        // todo implement this
-        // if (!zcbor_list_start_decode(getState())) {
-        //     return false;
-        // }
-
-        // // check if number of elements in stream matches array size
-        // elementCount = getState()->elem_count;
-        // if (size > elementCount && (_options & ThingSetTextDecoderOptions::allowUndersizedArrays) == 0) {
-        //     if (!getIsForwardOnly()) {
-        //         // wind the state back to before we started parsing the list, so that a
-        //         // call to `skip()` will skip the whole array
-        //         zcbor_process_backup(getState(), ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME, ZCBOR_MAX_ELEM_COUNT);
-        //         // because the backup is taken *after* it has consumed the byte(s) containing the number
-        //         // of elements in the array, this restore doesn't really work
-        //         // so we overwrite the payload pointer with the backup it takes
-        //         getState()->payload = getState()->payload_bak;
-        //         // we also need to increment this, because, yes, it has consumed this as well
-        //         getState()->elem_count++;
-        //     }
-        //     return false;
-        // }
-
-        // for (size_t i = 0; i < elementCount; i++) {
-        //     T *element = &value[i];
-        //     if (!decode(element)) {
-        //         return false;
-        //     }
-        // }
-
-        // return zcbor_list_end_decode(getState());
         return true;
     }
 
