@@ -151,6 +151,46 @@ TEST(TextDecoder, DecodeList)
     ASSERT_EQ(std::get<1>(values), 9876543210);
 }
 
+TEST(TextDecoder, DecodeArray)
+{
+    char buffer[] = "[1.23,13.4,14.5]";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::array<float, 3> values;
+    bool ret = decoder.decode(&values);
+    ASSERT_TRUE(ret);
+    ASSERT_NEAR(values[0], 1.23F, 1e-6);
+    ASSERT_NEAR(values[1], 13.4F, 1e-6);
+    ASSERT_NEAR(values[2], 14.5F, 1e-6);
+}
+
+TEST(TextDecoder, DecodeMap)
+{
+    char buffer[] = "{\"nodeId\":\"E93A142B282C4AD0\",\"canAddr\":16,\"three\":[1.23,13.4,14.5]}";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::string nodeId;
+    uint8_t canAddr;
+    std::array<float, 3> three;
+    ASSERT_TRUE(decoder.decodeMap<std::string>([&](std::string &key) {
+        if (key == "nodeId") {
+            return decoder.decode(&nodeId);
+        }
+        else if (key == "canAddr") {
+            return decoder.decode(&canAddr);
+        }
+        else if (key == "three") {
+            return decoder.decode(&three);
+        }
+        else {
+            return false;
+        }
+    }));
+    ASSERT_EQ("E93A142B282C4AD0", nodeId);
+    ASSERT_EQ(0x10, canAddr);
+    ASSERT_NEAR(1.23f, three[0], 1e-6);
+    ASSERT_NEAR(13.4f, three[1], 1e-6);
+    ASSERT_NEAR(14.5f, three[2], 1e-6);
+}
+
 // todo implement more tests
 
 // todo reimplement or delete everything below
@@ -200,30 +240,4 @@ TEST(TextDecoder, DecodeList)
 //     ASSERT_TRUE(decoder.decode(&four));
 //     ASSERT_EQ(1.23f, four[0]);
 //     ASSERT_EQ(4.56f, four[1]);
-// }
-
-// TEST(TextDecoder, DecodeMap)
-// {
-//     uint8_t buffer[] = { 0xA3, 0x18, 0x1D, 0x70, 0x45, 0x39, 0x33, 0x41, 0x31, 0x34, 0x32, 0x42, 0x32, 0x38, 0x32,
-//                          0x43, 0x34, 0x41, 0x44, 0x30, 0x19, 0x02, 0x8c, 0x10, 0x19, 0x60, 0x60, 0x83, 0xFA, 0x3F,
-//                          0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1 };
-//     FixedDepthThingSetTextDecoder decoder(buffer, sizeof(buffer));
-//     char nodeId[17];
-//     uint8_t canAddr;
-//     std::array<float, 3> three;
-//     ASSERT_TRUE(decoder.decodeMap<uint16_t>([&](uint16_t &key) {
-//         switch (key) {
-//             case 0x1D:
-//                 return decoder.decode(nodeId);
-//             case 0x028C:
-//                 return decoder.decode(&canAddr);
-//             case 0x6060:
-//                 return decoder.decode(&three);
-//             default:
-//                 return false;
-//         }
-//     }));
-//     ASSERT_STREQ("E93A142B282C4AD0", nodeId);
-//     ASSERT_EQ(0x10, canAddr);
-//     ASSERT_EQ(1.23f, three[0]);
 // }
