@@ -221,6 +221,16 @@ private: // todo repeated label, same in binarydecoder
         return ret;
     }
 
+    template <typename T> bool decodeValue(T *value, T (*parseFunc)(const char *, char **))
+    {
+        const char *startPtr = &_inputBuffer[_bufferElemPtr];
+        char *endPtr;
+        *value = parseFunc(startPtr, &endPtr);
+        size_t consumed = endPtr - startPtr;
+        _bufferElemPtr += consumed;
+        return true;
+    }
+
     template <class Fields>
     static std::function<bool(ThingSetTextDecoder &, Fields &)> switchDecode(uint32_t id, Fields)
     {
