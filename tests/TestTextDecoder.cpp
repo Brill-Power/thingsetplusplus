@@ -165,11 +165,11 @@ TEST(TextDecoder, DecodeArray)
 
 TEST(TextDecoder, DecodeMap)
 {
-    char buffer[] = "{\"nodeId\":\"E93A142B282C4AD0\",\"canAddr\":16,\"three\":[1.23,13.4,14.5]}";
+    char buffer[] = "{\"nodeId\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}";
     ThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::string nodeId;
-    uint8_t canAddr;
     std::array<float, 3> three;
+    uint8_t canAddr;
     ASSERT_TRUE(decoder.decodeMap<std::string>([&](std::string &key) {
         if (key == "nodeId") {
             return decoder.decode(&nodeId);
@@ -185,59 +185,8 @@ TEST(TextDecoder, DecodeMap)
         }
     }));
     ASSERT_EQ("E93A142B282C4AD0", nodeId);
-    ASSERT_EQ(0x10, canAddr);
     ASSERT_NEAR(1.23f, three[0], 1e-6);
     ASSERT_NEAR(13.4f, three[1], 1e-6);
     ASSERT_NEAR(14.5f, three[2], 1e-6);
+    ASSERT_EQ(0x10, canAddr);
 }
-
-// todo implement more tests
-
-// todo reimplement or delete everything below
-
-// TEST(TextDecoder, DecodeArrayOfFloats)
-// {
-//     uint8_t buffer[] = {
-//         0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
-//     };
-//     FixedDepthThingSetTextDecoder decoder(buffer, sizeof(buffer));
-//     std::array<float, 3> three;
-//     ASSERT_TRUE(decoder.decode(&three));
-// }
-
-// TEST(TextDecoder, FailToDecodeUndersizeArray)
-// {
-//     uint8_t buffer[] = {
-//         0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
-//     };
-//     FixedDepthThingSetTextDecoder decoder(buffer, sizeof(buffer));
-//     std::array<float, 4> four;
-//     ASSERT_FALSE(decoder.decode(&four));
-// }
-
-// TEST(TextDecoder, SkipUndersizeArrayAndSuccessfullyDecodeNextElement)
-// {
-//     uint8_t buffer[] = { 0x82, 0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91,
-//                          0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1, 0x19, 0x60, 0x7b };
-//     FixedDepthThingSetTextDecoder decoder(buffer, sizeof(buffer));
-//     ASSERT_TRUE(decoder.decodeListStart());
-//     std::array<float, 4> four;
-//     ASSERT_FALSE(decoder.decode(&four));
-//     ASSERT_TRUE(decoder.skip());
-//     uint16_t court;
-//     ASSERT_TRUE(decoder.decode(&court));
-//     ASSERT_EQ(0x607b, court);
-// }
-
-// TEST(TextDecoder, DecodeUndersizeArray)
-// {
-//     uint8_t buffer[] = {
-//         0x83, 0xFA, 0x3F, 0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1
-//     };
-//     FixedDepthThingSetTextDecoder decoder(buffer, sizeof(buffer),
-//                                             ThingSetTextDecoderOptions::allowUndersizedArrays);
-//     std::array<float, 4> four;
-//     ASSERT_TRUE(decoder.decode(&four));
-//     ASSERT_EQ(1.23f, four[0]);
-//     ASSERT_EQ(4.56f, four[1]);
-// }
