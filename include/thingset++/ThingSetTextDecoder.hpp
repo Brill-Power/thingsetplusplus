@@ -144,23 +144,6 @@ public:
             return false;
         }
 
-        // check if number of elements in stream matches array size
-        // elementCount = getState()->elem_count;
-        // if (size > elementCount && (_options & ThingSetTextDecoderOptions::allowUndersizedArrays) == 0) {
-        //     if (!getIsForwardOnly()) {
-        //         // wind the state back to before we started parsing the list, so that a
-        //         // call to `skip()` will skip the whole array
-        //         zcbor_process_backup(getState(), ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME, ZCBOR_MAX_ELEM_COUNT);
-        //         // because the backup is taken *after* it has consumed the byte(s) containing the number
-        //         // of elements in the array, this restore doesn't really work
-        //         // so we overwrite the payload pointer with the backup it takes
-        //         getState()->payload = getState()->payload_bak;
-        //         // we also need to increment this, because, yes, it has consumed this as well
-        //         getState()->elem_count++;
-        //     }
-        //     return false;
-        // }
-
         for (size_t i = 0; i < size; i++) {
             T *element = &value[i];
             if (!decode(element)) {
