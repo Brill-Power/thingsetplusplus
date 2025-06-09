@@ -7,13 +7,17 @@
 
 #include "ThingSetBinaryDecoder.hpp"
 #include "ThingSetBinaryEncoder.hpp"
+#include "ThingSetTextDecoder.hpp"
 #include "ThingSetTextEncoder.hpp"
 
 namespace ThingSet {
 
 /// @brief Represents a ThingSet value of a given type.
 /// @tparam T The type of the value.
-template <typename T> class ThingSetValue : public ThingSetEncodable, public ThingSetBinaryDecodable
+template <typename T>
+class ThingSetValue : public ThingSetEncodable,
+                      public ThingSetBinaryDecodable,
+                      public ThingSetTextDecodable // todo commonise these
 {
 protected:
     T _value;
@@ -34,7 +38,12 @@ public:
         return encoder.encode(_value);
     }
 
-    bool decode(ThingSetBinaryDecoder &decoder) override
+    bool decode(ThingSetBinaryDecoder &decoder) override // todo commonise this
+    {
+        return decoder.decode(&_value);
+    }
+
+    bool decode(ThingSetTextDecoder &decoder) override // todo commonise this
     {
         return decoder.decode(&_value);
     }
@@ -85,7 +94,8 @@ public:
 };
 
 template <typename Element, std::size_t Size>
-class ThingSetValue<std::array<Element, Size>> : public ThingSetEncodable, public ThingSetBinaryDecodable
+class ThingSetValue<std::array<Element, Size>>
+    : public ThingSetEncodable, public ThingSetBinaryDecodable, public ThingSetTextDecodable // todo commonise these
 {
 protected:
     std::array<Element, Size> _value;
@@ -103,7 +113,12 @@ public:
         return encoder.encode(_value);
     }
 
-    bool decode(ThingSetBinaryDecoder &decoder) override
+    bool decode(ThingSetBinaryDecoder &decoder) override // todo commonise this
+    {
+        return decoder.decode(&_value);
+    }
+
+    bool decode(ThingSetTextDecoder &decoder) override // todo commonise this
     {
         return decoder.decode(&_value);
     }
@@ -124,7 +139,9 @@ public:
     }
 };
 
-template <typename T> class ThingSetValue<T *> : public ThingSetEncodable, public ThingSetBinaryDecodable
+template <typename T>
+class ThingSetValue<T *>
+    : public ThingSetEncodable, public ThingSetBinaryDecodable, public ThingSetTextDecodable // todo commonise these
 {
 protected:
     T *_value;
@@ -138,7 +155,12 @@ public:
         return encoder.encode(_value);
     }
 
-    bool decode(ThingSetBinaryDecoder &decoder) override
+    bool decode(ThingSetBinaryDecoder &decoder) override // todo commonise this
+    {
+        return decoder.decode(_value);
+    }
+
+    bool decode(ThingSetTextDecoder &decoder) override // todo commonise this
     {
         return decoder.decode(_value);
     }

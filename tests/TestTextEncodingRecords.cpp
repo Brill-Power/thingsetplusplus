@@ -92,6 +92,16 @@ TEST(TextRecords, EncodeSimpleRecord)
         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 
+    ThingSetTextDecoder decoder(buffer, size);
+    std::array<ModuleRecord, 2> newModuleRecords;
+    ASSERT_TRUE(decoder.decode(&newModuleRecords));
+    ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
+    ASSERT_EQ(moduleRecords[1].voltage.getValue(), newModuleRecords[1].voltage.getValue());
+    ASSERT_EQ(moduleRecords[0].current.getValue(), newModuleRecords[0].current.getValue());
+    ASSERT_EQ(moduleRecords[1].current.getValue(), newModuleRecords[1].current.getValue());
+    ASSERT_EQ(moduleRecords[0].supercells.getValue()[0].soc.getValue(),
+              newModuleRecords[0].supercells.getValue()[0].soc.getValue());
+
     // todo add text decoding once decoder exists
 }
 

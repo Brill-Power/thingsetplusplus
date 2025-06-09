@@ -207,21 +207,19 @@ private:
     bool switchDecode(const uint32_t &id, Fields &f, std::index_sequence<Is...>)
     {
         bool ret = false;
-        return (
-            [&]{
-                if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
-                    ret = std::get<Is>(f)->decode(*this);
-                    return true;
-                } else {
-                    return false;
-                }
-            }()|| ...
-        );
+        return ([&] {
+            if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
+                ret = std::get<Is>(f)->decode(*this);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }() || ...);
         return ret;
     }
 
-    template <class Fields>
-    bool switchDecode(const uint32_t &id, Fields &f)
+    template <class Fields> bool switchDecode(const uint32_t &id, Fields &f)
     {
         return switchDecode<Fields>(id, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
@@ -247,7 +245,8 @@ public:
     {}
 
     template <size_t Size>
-    FixedDepthThingSetBinaryDecoder(std::array<uint8_t, Size> &buffer) : FixedDepthThingSetBinaryDecoder(buffer.data(), Size)
+    FixedDepthThingSetBinaryDecoder(std::array<uint8_t, Size> &buffer)
+        : FixedDepthThingSetBinaryDecoder(buffer.data(), Size)
     {}
 
     FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size)
@@ -255,7 +254,8 @@ public:
     {}
 
     template <size_t Size>
-    FixedDepthThingSetBinaryDecoder(std::array<uint8_t, Size> &buffer, int elementCount) : FixedDepthThingSetBinaryDecoder(buffer.data(), Size, elementCount)
+    FixedDepthThingSetBinaryDecoder(std::array<uint8_t, Size> &buffer, int elementCount)
+        : FixedDepthThingSetBinaryDecoder(buffer.data(), Size, elementCount)
     {}
 
     FixedDepthThingSetBinaryDecoder(uint8_t *buffer, size_t size, int elementCount)
