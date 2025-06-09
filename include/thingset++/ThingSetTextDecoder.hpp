@@ -170,10 +170,13 @@ public:
         }
         uint32_t id;
         while (decode(&id) && id < UINT16_MAX) {
+            _bufferElemPtr++; // ignore the ':'
+            printf("id: %i, buf: %c\n", id, _inputBuffer[_bufferElemPtr]);
             if (!switchDecode(id, bound)) {
                 printf("switchDecode failed"); // todo delete
                 return false;
             }
+            _bufferElemPtr++; // ignore the ','
         }
         return decodeMapEnd();
     }
@@ -185,6 +188,8 @@ private: // todo repeated label, same in binarydecoder
     {
         bool ret = false;
         return ([&] {
+            printf("id inside: %i\n",
+                   std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id);
             if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
                 ret = std::get<Is>(f)->decode(*this);
                 return true;
