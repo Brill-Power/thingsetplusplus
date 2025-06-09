@@ -190,3 +190,17 @@ TEST(TextDecoder, DecodeMap)
     ASSERT_NEAR(14.5f, three[2], 1e-6);
     ASSERT_EQ(0x10, canAddr);
 }
+
+TEST(TextDecoder, DecodeStruct)
+{
+    char buffer[] = "[{\"nodeId\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}]";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::array<StructTest, 1> newStructTest;
+
+    decoder.decode(&newStructTest);
+    ASSERT_EQ("E93A142B282C4AD0", newStructTest[0].nodeId.getValue());
+    ASSERT_NEAR(1.23f, newStructTest[0].three.getValue()[0], 1e-6);
+    ASSERT_NEAR(13.4f, newStructTest[0].three.getValue()[1], 1e-6);
+    ASSERT_NEAR(14.5f, newStructTest[0].three.getValue()[2], 1e-6);
+    ASSERT_EQ(0x10, newStructTest[0].canAddr.getValue());
+}
