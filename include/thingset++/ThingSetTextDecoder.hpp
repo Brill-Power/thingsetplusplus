@@ -168,12 +168,10 @@ public:
         if (!decodeMapStart()) {
             return false;
         }
-        uint32_t id;
-        while (decode(&id) && id < UINT16_MAX) {
+        std::string name;
+        while (decode(&name)) {
             _bufferElemPtr++; // ignore the ':'
-            printf("id: %i, buf: %c\n", id, _inputBuffer[_bufferElemPtr]);
-            if (!switchDecode(id, bound)) {
-                printf("switchDecode failed"); // todo delete
+            if (!switchDecode(name, bound)) {
                 return false;
             }
             _bufferElemPtr++; // ignore the ','
@@ -184,13 +182,11 @@ public:
 private: // todo repeated label, same in binarydecoder
     // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
     template <class Fields, std::size_t... Is>
-    bool switchDecode(const uint32_t &id, Fields &f, std::index_sequence<Is...>)
+    bool switchDecode(const std::string &name, Fields &f, std::index_sequence<Is...>)
     {
         bool ret = false;
         return ([&] {
-            printf("id inside: %i\n",
-                   std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id);
-            if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
+            if (name == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::getName()) {
                 ret = std::get<Is>(f)->decode(*this);
                 return true;
             }
@@ -199,9 +195,9 @@ private: // todo repeated label, same in binarydecoder
         return ret;
     }
 
-    template <class Fields> bool switchDecode(const uint32_t &id, Fields &f)
+    template <class Fields> bool switchDecode(const std::string &name, Fields &f)
     {
-        return switchDecode<Fields>(id, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
+        return switchDecode<Fields>(name, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
 
     template <typename T> bool decodeValue(T *value, T (*parseFunc)(const char *, char **))
