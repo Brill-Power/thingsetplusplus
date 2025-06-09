@@ -40,6 +40,7 @@ public:
     constexpr static const unsigned groupId = ParentId;
 
     constexpr static const unsigned id = Id;
+    constexpr static const std::string_view name = Name;
 };
 
 /// @brief Represents a ThingSet node with an ID.
