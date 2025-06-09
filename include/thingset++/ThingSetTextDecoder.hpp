@@ -25,7 +25,7 @@ enum ThingSetTextDecoderOptions
 {
     /// @brief If set, permits the decoding of arrays which are smaller than the declared
     /// size of the destination array.
-    allowUndersizedArrays = 1 << 0,
+    // allowUndersizedArrays = 1 << 0, // todo readd this
 };
 
 /// @brief Interface for values that can be decoded with a text encoder.
@@ -163,20 +163,19 @@ public:
         requires std::is_class_v<T>
     bool decode(T *value)
     {
-        // todo implement this
-        // auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
-        // if (!zcbor_map_start_decode(getState())) {
-        //     return false;
-        // }
-        // uint32_t id;
-        // while (decode(&id) && id < UINT16_MAX) {
-        //     std::function<bool(ThingSetTextDecoder &, decltype(bound) &)> func = compile_switch(id, bound);
-        //     if (!func(*this, bound)) {
-        //         return false;
-        //     }
-        // }
-        // return zcbor_map_end_decode(getState());
-        return true;
+        printf("in decode func"); // todo delete
+        auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
+        if (!decodeMapStart()) {
+            return false;
+        }
+        uint32_t id;
+        while (decode(&id) && id < UINT16_MAX) {
+            if (!switchDecode(id, bound)) {
+                printf("switchDecode failed"); // todo delete
+                return false;
+            }
+        }
+        return decodeMapEnd();
     }
 
 private: // todo repeated label, same in binarydecoder
@@ -187,15 +186,17 @@ private: // todo repeated label, same in binarydecoder
         bool ret = false;
         return ([&] {
             if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
-                std::get<Is>(f)->decode(*this);
                 ret = std::get<Is>(f)->decode(*this);
                 return true;
             }
-            else {
-                return false;
-            }
+            return false;
         }() || ...);
         return ret;
+    }
+
+    template <class Fields> bool switchDecode(const uint32_t &id, Fields &f)
+    {
+        return switchDecode<Fields>(id, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
 
     template <typename T> bool decodeValue(T *value, T (*parseFunc)(const char *, char **))
@@ -206,12 +207,6 @@ private: // todo repeated label, same in binarydecoder
         size_t consumed = endPtr - startPtr;
         _bufferElemPtr += consumed;
         return true;
-    }
-
-    template <class Fields>
-    static std::function<bool(ThingSetTextDecoder &, Fields &)> switchDecode(uint32_t id, Fields)
-    {
-        return switchDecode<Fields>(id, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
 };
 

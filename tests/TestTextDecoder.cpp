@@ -190,3 +190,38 @@ TEST(TextDecoder, DecodeMap)
     ASSERT_NEAR(14.5f, three[2], 1e-6);
     ASSERT_EQ(0x10, canAddr);
 }
+
+struct StructTest
+{
+    std::string nodeId;
+    std::array<float, 3> three;
+    uint8_t canAddr;
+};
+
+// todo delete if unused
+// TEST(TextDecoder, DecodeStruct)
+// {
+//     char buffer[] = "{\"nodeId\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}";
+//     ThingSetTextDecoder decoder(buffer, strlen(buffer));
+//     StructTest test;
+//     // ASSERT_TRUE(decoder.decodeMap<std::string>([&](std::string &key) {
+//     //     if (key == "nodeId") {
+//     //         return decoder.decode(&nodeId);
+//     //     }
+//     //     else if (key == "canAddr") {
+//     //         return decoder.decode(&canAddr);
+//     //     }
+//     //     else if (key == "three") {
+//     //         return decoder.decode(&three);
+//     //     }
+//     //     else {
+//     //         return false;
+//     //     }
+//     // }));
+//     decoder.decode(&test);
+//     ASSERT_EQ("E93A142B282C4AD0", test.nodeId);
+//     ASSERT_NEAR(1.23f, test.three[0], 1e-6);
+//     ASSERT_NEAR(13.4f, test.three[1], 1e-6);
+//     ASSERT_NEAR(14.5f, test.three[2], 1e-6);
+//     ASSERT_EQ(0x10, test.canAddr);
+// }
