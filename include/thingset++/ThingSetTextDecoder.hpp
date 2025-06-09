@@ -163,7 +163,6 @@ public:
         requires std::is_class_v<T>
     bool decode(T *value)
     {
-        printf("in decode func"); // todo delete
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
         if (!decodeMapStart()) {
             return false;
@@ -172,6 +171,7 @@ public:
         while (decode(&name)) {
             _bufferElemPtr++; // ignore the ':'
             if (!switchDecode(name, bound)) {
+                // TODO: this should skip the value and go on to the next key
                 return false;
             }
             _bufferElemPtr++; // ignore the ','

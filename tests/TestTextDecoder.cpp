@@ -173,13 +173,13 @@ TEST(TextDecoder, DecodeArray)
 
 TEST(TextDecoder, DecodeMap)
 {
-    char buffer[] = "{\"nodeId\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}";
+    char buffer[] = "{\"nodeID\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}";
     ThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::string nodeId;
     std::array<float, 3> three;
     uint8_t canAddr;
     ASSERT_TRUE(decoder.decodeMap<std::string>([&](std::string &key) {
-        if (key == "nodeId") {
+        if (key == "nodeID") {
             return decoder.decode(&nodeId);
         }
         else if (key == "canAddr") {
@@ -201,7 +201,7 @@ TEST(TextDecoder, DecodeMap)
 
 TEST(TextDecoder, DecodeStruct)
 {
-    char buffer[] = "[{\"nodeId\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}]";
+    char buffer[] = "[{\"nodeID\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}]";
     ThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::array<StructTest, 1> newStructTest;
 
