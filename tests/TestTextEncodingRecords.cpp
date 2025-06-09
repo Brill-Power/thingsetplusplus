@@ -66,43 +66,72 @@ struct ModuleRecord
           } }                                                                                                          \
     };
 
-TEST(TextRecords, EncodeSimpleRecord)
+// struct StructTest // todo delete this
+// {
+//     std::string nodeId;
+//     std::array<float, 3> three;
+//     uint8_t canAddr;
+// };
+
+// TEST(TextRecords,
+//      EncodeSimpleRecord) // todo make this one cohesive test, not sure if IDs or names should be stored as keys
+// {
+//     SETUP()
+//     ASSERT_EQ(24.0f, moduleRecords[0].voltage.getValue());
+//     float &v1 = moduleRecords[0].voltage;
+//     v1 = 26.0f;
+//     ASSERT_EQ(26.0f, moduleRecords[0].voltage.getValue());
+//     float *vp1 = &moduleRecords[0].voltage;
+//     *vp1 = 27.0f;
+//     ASSERT_EQ(27.0f, moduleRecords[0].voltage.getValue());
+//     moduleRecords[0].voltage = 25.0f;
+
+//     char buffer[TEXT_ENCODER_BUFFER_SIZE];
+//     size_t size = sizeof(buffer);
+//     ThingSetTextEncoder encoder(buffer, size);
+//     encoder.encode(moduleRecords.getValue());
+//     const char *expected =
+//         "[{\"voltage\":25.000000,\"current\":10.000000,\"error\":0,\"cellVoltages\":[3.200000,3.100000,2.900000,3."
+//         "300000,0.000000,2.800000],\"supercells\":[{\"soc\":0.100000,\"soh\":1.000000},{\"soc\":0.250000,\"soh\":1."
+//         "000000},{\"soc\":0.500000,\"soh\":1.000000},{\"soc\":0.750000,\"soh\":1.000000},{\"soc\":0.800000,\"soh\":1."
+//         "000000},{\"soc\":1.000000,\"soh\":1.000000}]},{\"voltage\":24.200001,\"current\":5.000000,\"error\":0,"
+//         "\"cellVoltages\":[3.100000,3.300000,3.000000,3.100000,3.200000,2.950000],\"supercells\":[{\"soc\":0.000000,"
+//         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,"
+//         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
+//     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+
+//     char *buffer2 = "[{1:\"}]";
+//     ThingSetTextDecoder decoder(buffer2, size);
+//     std::array<ModuleRecord, 2> newModuleRecords;
+//     ASSERT_TRUE(decoder.decode(&newModuleRecords));
+//     ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
+//     ASSERT_EQ(moduleRecords[1].voltage.getValue(), newModuleRecords[1].voltage.getValue());
+//     ASSERT_EQ(moduleRecords[0].current.getValue(), newModuleRecords[0].current.getValue());
+//     ASSERT_EQ(moduleRecords[1].current.getValue(), newModuleRecords[1].current.getValue());
+//     ASSERT_EQ(moduleRecords[0].supercells.getValue()[0].soc.getValue(),
+//               newModuleRecords[0].supercells.getValue()[0].soc.getValue());
+// }
+
+// todo delete below if unused
+struct StructTest
 {
-    SETUP()
-    ASSERT_EQ(24.0f, moduleRecords[0].voltage.getValue());
-    float &v1 = moduleRecords[0].voltage;
-    v1 = 26.0f;
-    ASSERT_EQ(26.0f, moduleRecords[0].voltage.getValue());
-    float *vp1 = &moduleRecords[0].voltage;
-    *vp1 = 27.0f;
-    ASSERT_EQ(27.0f, moduleRecords[0].voltage.getValue());
-    moduleRecords[0].voltage = 25.0f;
+    ThingSetReadOnlyProperty<0x701, 0x700, "nodeID", std::string> nodeId;
+    ThingSetReadOnlyProperty<0x702, 0x700, "three", std::array<float, 3>> three;
+    ThingSetReadOnlyProperty<0x703, 0x700, "canAddr", uint8_t> canAddr;
+};
 
-    char buffer[TEXT_ENCODER_BUFFER_SIZE];
-    size_t size = sizeof(buffer);
-    ThingSetTextEncoder encoder(buffer, size);
-    encoder.encode(moduleRecords.getValue());
-    const char *expected =
-        "[{\"voltage\":25.000000,\"current\":10.000000,\"error\":0,\"cellVoltages\":[3.200000,3.100000,2.900000,3."
-        "300000,0.000000,2.800000],\"supercells\":[{\"soc\":0.100000,\"soh\":1.000000},{\"soc\":0.250000,\"soh\":1."
-        "000000},{\"soc\":0.500000,\"soh\":1.000000},{\"soc\":0.750000,\"soh\":1.000000},{\"soc\":0.800000,\"soh\":1."
-        "000000},{\"soc\":1.000000,\"soh\":1.000000}]},{\"voltage\":24.200001,\"current\":5.000000,\"error\":0,"
-        "\"cellVoltages\":[3.100000,3.300000,3.000000,3.100000,3.200000,2.950000],\"supercells\":[{\"soc\":0.000000,"
-        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,"
-        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
-    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+TEST(TextDecoder, DecodeStruct)
+{
+    char buffer[] = "[{1793:\"E93A142B282C4AD0\",1794:[1.23,13.4,14.5],1795:16}]";
+    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::array<StructTest, 1> newStructTest;
 
-    ThingSetTextDecoder decoder(buffer, size);
-    std::array<ModuleRecord, 2> newModuleRecords;
-    ASSERT_TRUE(decoder.decode(&newModuleRecords));
-    ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
-    ASSERT_EQ(moduleRecords[1].voltage.getValue(), newModuleRecords[1].voltage.getValue());
-    ASSERT_EQ(moduleRecords[0].current.getValue(), newModuleRecords[0].current.getValue());
-    ASSERT_EQ(moduleRecords[1].current.getValue(), newModuleRecords[1].current.getValue());
-    ASSERT_EQ(moduleRecords[0].supercells.getValue()[0].soc.getValue(),
-              newModuleRecords[0].supercells.getValue()[0].soc.getValue());
-
-    // todo add text decoding once decoder exists
+    decoder.decode(&newStructTest);
+    ASSERT_EQ("E93A142B282C4AD0", newStructTest[0].nodeId.getValue());
+    ASSERT_NEAR(1.23f, newStructTest[0].three.getValue()[0], 1e-6);
+    ASSERT_NEAR(13.4f, newStructTest[0].three.getValue()[1], 1e-6);
+    ASSERT_NEAR(14.5f, newStructTest[0].three.getValue()[2], 1e-6);
+    ASSERT_EQ(0x10, newStructTest[0].canAddr.getValue());
 }
 
 TEST(TextRecords, InitialiseRecordArrayCopy)
