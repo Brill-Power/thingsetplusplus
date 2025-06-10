@@ -66,6 +66,45 @@ struct ModuleRecord
           } }                                                                                                          \
     };
 
+TEST(TextRecords,
+     EncodeSimpleRecord) // todo make this one cohesive test, not sure if IDs or names should be stored as keys
+{
+    SETUP()
+    ASSERT_EQ(24.0f, moduleRecords[0].voltage.getValue());
+    float &v1 = moduleRecords[0].voltage;
+    v1 = 26.0f;
+    ASSERT_EQ(26.0f, moduleRecords[0].voltage.getValue());
+    float *vp1 = &moduleRecords[0].voltage;
+    *vp1 = 27.0f;
+    ASSERT_EQ(27.0f, moduleRecords[0].voltage.getValue());
+    moduleRecords[0].voltage = 25.0f;
+
+    char buffer[TEXT_ENCODER_BUFFER_SIZE];
+    size_t size = sizeof(buffer);
+    ThingSetTextEncoder encoder(buffer, size);
+    encoder.encode(moduleRecords.getValue());
+    const char *expected =
+        "[{\"voltage\":25.000000,\"current\":10.000000,\"error\":0,\"cellVoltages\":[3.200000,3.100000,2.900000,3."
+        "300000,0.000000,2.800000],\"supercells\":[{\"soc\":0.100000,\"soh\":1.000000},{\"soc\":0.250000,\"soh\":1."
+        "000000},{\"soc\":0.500000,\"soh\":1.000000},{\"soc\":0.750000,\"soh\":1.000000},{\"soc\":0.800000,\"soh\":1."
+        "000000},{\"soc\":1.000000,\"soh\":1.000000}]},{\"voltage\":24.200001,\"current\":5.000000,\"error\":0,"
+        "\"cellVoltages\":[3.100000,3.300000,3.000000,3.100000,3.200000,2.950000],\"supercells\":[{\"soc\":0.000000,"
+        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,"
+        "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000}]}]";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+
+    // todo readd this for end to end encode/decode
+    // ThingSetTextDecoder decoder(buffer, size);
+    // std::array<ModuleRecord, 2> newModuleRecords;
+    // ASSERT_TRUE(decoder.decode(&newModuleRecords));
+    // ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
+    // ASSERT_EQ(moduleRecords[1].voltage.getValue(), newModuleRecords[1].voltage.getValue());
+    // ASSERT_EQ(moduleRecords[0].current.getValue(), newModuleRecords[0].current.getValue());
+    // ASSERT_EQ(moduleRecords[1].current.getValue(), newModuleRecords[1].current.getValue());
+    // ASSERT_EQ(moduleRecords[0].supercells.getValue()[0].soc.getValue(),
+    //           newModuleRecords[0].supercells.getValue()[0].soc.getValue());
+}
+
 TEST(TextRecords, InitialiseRecordArrayCopy)
 {
     SETUP()
