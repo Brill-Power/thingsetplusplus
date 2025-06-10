@@ -186,7 +186,8 @@ private: // todo repeated label, same in binarydecoder
     {
         bool ret = false;
         return ([&] {
-            if (name == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::name) {
+            if (name == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::name)
+            {
                 ret = std::get<Is>(f)->decode(*this);
                 return true;
             }
