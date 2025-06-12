@@ -5,6 +5,9 @@
  */
 #pragma once
 
+#define JSMN_STATIC
+#include "jsmn.h"
+
 #include "internal/bind_to_tuple.hpp"
 #include "zcbor_decode.h"
 #include <array>
@@ -42,6 +45,7 @@ private:
     char *_inputBuffer;
     size_t _bufferSize;
     size_t _bufferElemPtr;
+    jsmntok_t _tokens[128]; // todo change this number
     ThingSetTextDecoderOptions _options;
 
 protected:
@@ -163,13 +167,24 @@ public:
         requires std::is_class_v<T>
     bool decode(T *value)
     {
+
+        struct jsmn_parser parser;
+        int ret;
+
+        jsmn_init(&parser);
+
+        ret = jsmn_parse(&parser, _inputBuffer, _bufferSize - _bufferElemPtr, _tokens, sizeof(_tokens));
+
+        printf("tokens: %li\n", _tokens[0]);
+
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
         if (!decodeMapStart()) {
             return false;
         }
         std::string name;
         while (decode(&name)) {
-            _bufferElemPtr++; // ignore the ':'
+            _bufferElemPtr++;                                   // ignore the ':'
+            printf("elem: %c\n", _inputBuffer[_bufferElemPtr]); // todo delete
             if (!switchDecode(name, bound)) {
                 // TODO: this should skip the value and go on to the next key
                 return false;
