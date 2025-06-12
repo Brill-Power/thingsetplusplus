@@ -52,14 +52,14 @@ void ThingSetRegistry::registerOrUnregisterNode(
 
 void ThingSetRegistry::registerNode(ThingSetNode *node)
 {
-    LOG_DBG("Registering node %s (0x%x)", node->getName().data(), node->getId());
+    LOG_DEBUG("Registering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::registerOrUnregisterNode(
         node, [](auto &l, auto *n) { l.push_back(n); }, [](auto *p, auto *n) { return p->addChild(n); });
 }
 
 void ThingSetRegistry::unregisterNode(ThingSetNode *node)
 {
-    LOG_DBG("Unregistering node %s (0x%x)", node->getName().data(), node->getId());
+    LOG_DEBUG("Unregistering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::registerOrUnregisterNode(
         node, [](auto &l, auto *n) { l.remove(n); }, [](auto *p, auto *n) { return p->removeChild(n); });
 }

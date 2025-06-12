@@ -17,7 +17,7 @@ namespace ThingSet::Can::SocketCan {
 
 static bool tryClaimAddress(uint8_t nodeAddress, RawCanSocket &socket)
 {
-    LOG_DBG("Asserting claim to 0x%x", nodeAddress);
+    LOG_DEBUG("Asserting claim to 0x%x", nodeAddress);
     CanFdFrame frame(CanID()
                        .setSource(nodeAddress)
                        .setTarget(CanID::broadcastAddress)
@@ -30,7 +30,7 @@ static bool tryClaimAddress(uint8_t nodeAddress, RawCanSocket &socket)
 
 void ThingSetSocketCanInterface::AddressClaimer::run(const std::string &deviceName, uint8_t nodeAddress)
 {
-    LOG_DBG("Starting address claimer for 0x%x", nodeAddress);
+    LOG_DEBUG("Starting address claimer for 0x%x", nodeAddress);
     _socket.setFilter(
         CanID().setSource(CanID::anonymousAddress).setTarget(nodeAddress).setMessageType(MessageType::network));
         _socket.bind(deviceName);
@@ -82,7 +82,7 @@ bool ThingSetSocketCanInterface::bind(uint8_t nodeAddress)
         if (claimLookoutSocket.tryRead(claimedFrame, std::chrono::milliseconds(500))
             && claimedFrame.getId().getSource() == nodeAddress)
         {
-            LOG_DBG("0x%x in use; trying another", nodeAddress);
+            LOG_DEBUG("0x%x in use; trying another", nodeAddress);
             nodeAddress = (uint8_t)dist(rng);
         }
         else {
@@ -90,7 +90,7 @@ bool ThingSetSocketCanInterface::bind(uint8_t nodeAddress)
                 continue;
             }
 
-            LOG_DBG("Claim of 0x%x succeeded", nodeAddress);
+            LOG_DEBUG("Claim of 0x%x succeeded", nodeAddress);
             _nodeAddress = nodeAddress;
             break;
         }

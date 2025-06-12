@@ -17,6 +17,18 @@ ThingSetBinaryDecoder::ThingSetBinaryDecoder() : ThingSetBinaryDecoder(ThingSetB
 ThingSetBinaryDecoder::ThingSetBinaryDecoder(ThingSetBinaryDecoderOptions options) : _options(options)
 {}
 
+void ThingSetBinaryDecoder::initialiseState(zcbor_state_t *state, size_t depth, uint8_t *buffer, size_t size, int elementCount)
+{
+#ifdef zcbor_tstr_expect_term
+        zcbor_new_decode_state(_state, depth, buffer, size, elementCount);
+#else
+        zcbor_new_decode_state(state, depth, buffer, size, elementCount, NULL, 0);
+#ifdef ZCBOR_ENFORCE_CANONICAL
+        state->constant_state->enforce_canonical = false;
+#endif // ZCBOR_ENFORCE_CANONICAL
+#endif // zcbor_tstr_expect_term
+}
+
 bool ThingSetBinaryDecoder::getIsForwardOnly() const
 {
     return false;

@@ -28,15 +28,7 @@ public:
     StreamingThingSetBinaryDecoder(size_t elementCount, ThingSetBinaryDecoderOptions options)
         : ThingSetBinaryDecoder(options), _decodedLength(0)
     {
-#ifdef zcbor_tstr_expect_term
-        zcbor_new_decode_state(_state, BINARY_DECODER_DEFAULT_MAX_DEPTH, &_buffer[0], _buffer.size(), elementCount);
-#else
-        zcbor_new_decode_state(_state, BINARY_DECODER_DEFAULT_MAX_DEPTH, &_buffer[0], _buffer.size(), elementCount,
-                               NULL, 0);
-#ifdef ZCBOR_ENFORCE_CANONICAL
-        _state->constant_state->enforce_canonical = false;
-#endif // ZCBOR_ENFORCE_CANONICAL
-#endif // zcbor_tstr_expect_term
+        initialiseState(_state, BINARY_DECODER_DEFAULT_MAX_DEPTH, &_buffer[0], _buffer.size(), elementCount);
     }
 
     bool skip() override

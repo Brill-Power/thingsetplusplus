@@ -70,6 +70,7 @@ private:
     k_tid_t _handlerThreadId;
 
 public:
+    ThingSetSocketServerTransport();
     ThingSetSocketServerTransport(net_if *iface);
 
 protected:

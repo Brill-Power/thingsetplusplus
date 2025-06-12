@@ -8,7 +8,6 @@
 #include <net/if.h>
 #include <netinet/in.h>
 #include <ifaddrs.h>
-#include <iostream>
 
 namespace ThingSet::Ip {
 

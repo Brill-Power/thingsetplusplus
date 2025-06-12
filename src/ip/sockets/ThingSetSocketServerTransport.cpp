@@ -8,7 +8,6 @@
 #include "thingset++/internal/logging.hpp"
 #include <assert.h>
 #include <array>
-#include <iostream>
 
 #ifdef __ZEPHYR__
 #include "thingset++/ip/sockets/ZephyrStubs.h"
@@ -30,6 +29,8 @@ static struct k_thread handlerThread;
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <iostream>
+
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
 #endif // __ZEPHYR__
 
@@ -114,7 +115,7 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
     ssize_t sent = sendto(_publishSocketHandle, buffer, len, 0, (struct sockaddr *)&_broadcastAddress, sizeof(_broadcastAddress));
     if (sent < 0) {
-        LOG_ERR("Failed to send report: %zd %d", sent, errno);
+        LOG_ERROR("Failed to send report: %zd %d", sent, errno);
     }
     return sent == (ssize_t)len;
 }
@@ -123,14 +124,14 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 void _ThingSetSocketServerTransport::runAcceptor()
 {
     if (fcntl(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
-        LOG_ERR("Failed to configure socket: %d", errno);
+        LOG_ERROR("Failed to configure socket: %d", errno);
         // this isn't technically a fatal error; it just means we
         // won't get a clean shutdown, because we'll never be able
         // to break out of the acceptor loop
     }
 
     if (::listen(_listenSocketHandle, THINGSET_SERVER_MAX_CLIENTS) != 0) {
-        LOG_ERR("Failed to begin listening: %d", errno);
+        LOG_ERROR("Failed to begin listening: %d", errno);
         return;
     }
 
@@ -140,7 +141,7 @@ void _ThingSetSocketServerTransport::runAcceptor()
     while (_runAcceptor) {
         int ret = poll(listenPoll, 1, 10);
         if (ret < 0) {
-            LOG_ERR("Polling error: %d", errno);
+            LOG_ERROR("Polling error: %d", errno);
         }
         else if (ret == 0) {
             continue;
@@ -152,23 +153,23 @@ void _ThingSetSocketServerTransport::runAcceptor()
         int client_sock = accept(_listenSocketHandle, (sockaddr *)&clientAddr, &clientAddrLen);
         if (client_sock < 0) {
             if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                LOG_ERR("Accept failed: %d", errno);
+                LOG_ERROR("Accept failed: %d", errno);
             }
             continue;
         }
 
-        std::cout << "Connection from " << clientAddr << std::endl;
+        //std::cout << "Connection from " << clientAddr << std::endl;
 
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (_socketDescriptors[i].fd == -1) {
                 _socketDescriptors[i].fd = client_sock;
-                LOG_DBG("Assigned slot %d to socket %d", i, _socketDescriptors[i].fd);
+                LOG_DEBUG("Assigned slot %d to socket %d", i, _socketDescriptors[i].fd);
                 break;
             }
         }
     }
 
-    LOG_INF("Shut down acceptor thread");
+    LOG_INFO("Shut down acceptor thread");
 }
 
 void _ThingSetSocketServerTransport::runHandler()
@@ -177,7 +178,7 @@ void _ThingSetSocketServerTransport::runHandler()
         int ret = poll(_socketDescriptors.data(), _socketDescriptors.size(), 10);
 
         if (ret < 0) {
-            LOG_ERR("Polling error: %d", errno);
+            LOG_ERROR("Polling error: %d", errno);
         }
         else if (ret == 0) {
             continue;
@@ -194,11 +195,11 @@ void _ThingSetSocketServerTransport::runHandler()
                 int rxLen = recv(clientSocketHandle, rxBuf, sizeof(rxBuf), 0);
 
                 if (rxLen < 0) {
-                    LOG_ERR("Receive error: %d", errno);
+                    LOG_ERROR("Receive error: %d", errno);
                 }
                 else if (rxLen == 0) {
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
-                    std::cout << "Closing connection from " << addr << std::endl;
+                    //std::cout << "Closing connection from " << addr << std::endl;
 
                     close(clientSocketHandle);
                     _socketDescriptors[i].fd = -1;
@@ -214,7 +215,7 @@ void _ThingSetSocketServerTransport::runHandler()
         }
     }
 
-    LOG_INF("Shut down handler thread");
+    LOG_INFO("Shut down handler thread");
 }
 
 #ifdef __ZEPHYR__
@@ -226,6 +227,9 @@ static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
     __ASSERT(ret == 0, "Failed to get interface IP information: %d", ret);
     return std::make_pair(ipConfig->unicast->ipv4.address.in_addr, ipConfig->unicast->netmask);
 }
+
+ThingSetSocketServerTransport::ThingSetSocketServerTransport() : ThingSetSocketServerTransport(net_if_get_default())
+{}
 
 ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(iface))
 {}
