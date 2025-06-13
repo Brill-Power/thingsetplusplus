@@ -165,7 +165,7 @@ static int jsmn_parse_primitive(jsmn_parser *parser, const char *js, const size_
         }
         if (js[parser->pos] < 32 || js[parser->pos] >= 127) {
             parser->pos = start;
-            printf("erroneous_val @: %i", parser->pos);
+            printf("erroneous_val @: %i", parser->pos); // todo remove
             return JSMN_ERROR_INVAL;
         }
     }
