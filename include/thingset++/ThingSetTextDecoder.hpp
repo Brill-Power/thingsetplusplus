@@ -45,7 +45,7 @@ private:
     char *_inputBuffer;
     size_t _bufferSize;
     size_t _bufferElemPtr;
-    jsmntok_t _tokens[128]; // todo change this number
+    jsmntok_t _tokens[256]; // todo change this number
     ThingSetTextDecoderOptions _options;
 
 protected:
@@ -169,29 +169,111 @@ public:
     {
 
         struct jsmn_parser parser;
-        int ret;
+        // int ret;
 
         jsmn_init(&parser);
 
-        ret = jsmn_parse(&parser, _inputBuffer, _bufferSize - _bufferElemPtr, _tokens, sizeof(_tokens));
+        int num_tokens = jsmn_parse(&parser, _inputBuffer, _bufferSize - _bufferElemPtr + 1, _tokens, sizeof(_tokens));
 
-        printf("tokens: %li\n", _tokens[0]);
+        // if (num_tokens <= 0) {
+        //     printf("num_tok: %i", num_tokens);
+        //     return false;
+        // }
 
-        auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
+        printf("%s\n", _inputBuffer); // todo delete all of this
+        for (int i = 0; i < 25; i++) {
+            // printf("token %i: %li\n", i, _tokens[i]);
+            switch (_tokens[i].type) {
+                case JSMN_OBJECT:
+                    printf("Object");
+                    break;
+                case JSMN_ARRAY:
+                    printf("Array");
+                    break;
+                case JSMN_STRING:
+                    printf("String");
+                    break;
+                case JSMN_PRIMITIVE:
+                    printf("Primitive");
+                    break;
+                default:
+                    printf("Unknown");
+                    break;
+            }
+            printf(" %i %i\n", _tokens[i].start, _tokens[i].end);
+        }
+
         if (!decodeMapStart()) {
             return false;
         }
-        std::string name;
-        while (decode(&name)) {
-            _bufferElemPtr++;                                   // ignore the ':'
-            printf("elem: %c\n", _inputBuffer[_bufferElemPtr]); // todo delete
+
+        printf("num %i", num_tokens);
+
+        auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
+        // int num_tokens = 11; // todo use sizeof etc to get correct size here
+        int i = 2; // todo skips array and object tokens, handle this better
+
+        jsmntok_t prev_token;
+
+        while (i < num_tokens - 1) {
+            printf("elem: %c", _inputBuffer[_bufferElemPtr]); // todo remove
+            std::string name;
+            printf("type: %i", _tokens[i].type); // todo remove
+            printf("i: %i", i);                  // todo remove
+            decode(&name);
+            printf("name: %s", name.c_str()); // todo remove
+            _bufferElemPtr++;                 // skip the :, todo change this
+            i++;
             if (!switchDecode(name, bound)) {
                 // TODO: this should skip the value and go on to the next key
-                return false;
+                // return false;
             }
-            _bufferElemPtr++; // ignore the ','
+
+            if (_tokens[i].type == JSMN_ARRAY) {
+                i += _tokens[i].size + 1;
+                _bufferElemPtr = _tokens[i].start - 1;
+                printf("point %li", _bufferElemPtr);
+                printf("char %c", _inputBuffer[_bufferElemPtr]);
+            }
+            else {
+                // i++;
+                _bufferElemPtr = _tokens[i].start - 1;
+            }
+            printf("\n"); // todo remove
         }
+
         return decodeMapEnd();
+
+        // if (!decodeMapStart()) {
+        //     return false;
+        // }
+        // std::string name;
+        // while (decode(&name)) {
+        //     _bufferElemPtr++;                                   // ignore the ':'
+        //     printf("elem: %c\n", _inputBuffer[_bufferElemPtr]); // todo delete
+        //     if (!switchDecode(name, bound)) {
+        //         // TODO: this should skip the value and go on to the next key
+        //         return false;
+        //     }
+        //     _bufferElemPtr++; // ignore the ','
+        // }
+        // return decodeMapEnd();
+
+        // auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
+        // if (!decodeMapStart()) {
+        //     return false;
+        // }
+        // std::string name;
+        // while (decode(&name)) {
+        //     _bufferElemPtr++;                                   // ignore the ':'
+        //     printf("elem: %c\n", _inputBuffer[_bufferElemPtr]); // todo delete
+        //     if (!switchDecode(name, bound)) {
+        //         // TODO: this should skip the value and go on to the next key
+        //         return false;
+        //     }
+        //     _bufferElemPtr++; // ignore the ','
+        // }
+        // return decodeMapEnd();
     }
 
 private: // todo repeated label, same in binarydecoder
