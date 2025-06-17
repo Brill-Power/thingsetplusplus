@@ -173,7 +173,8 @@ public:
 
         jsmn_init(&parser);
 
-        int num_tokens = jsmn_parse(&parser, _inputBuffer, _bufferSize - _bufferElemPtr + 1, _tokens, sizeof(_tokens));
+        int num_tokens =
+            jsmn_parse(&parser, _inputBuffer, strlen(_inputBuffer) - _bufferElemPtr, _tokens, sizeof(_tokens));
 
         // if (num_tokens <= 0) {
         //     printf("num_tok: %i", num_tokens);

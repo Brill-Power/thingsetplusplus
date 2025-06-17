@@ -129,6 +129,7 @@ private:
             return false;
         }
         _responseBuffer[_responsePosition++] = value;
+        _responseBuffer[_responsePosition + 1] = '\0';
         return true;
     }
 
@@ -138,6 +139,10 @@ private:
     {
         if (!ensureBufferCapacity(value, format)) {
             return false;
+        }
+
+        if (_responseBuffer[_responseSize] == '\0') {
+            _responsePosition--;
         }
 
         int bytesWritten =
