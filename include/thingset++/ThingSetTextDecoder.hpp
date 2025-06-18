@@ -211,7 +211,7 @@ public:
         printf("num %i", num_tokens);
 
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
-        int i = 0; // todo skips array and object tokens, handle this better, just change to for loop?
+        int i = 0; // todo handle this better
 
         jsmntok_t prev_token;
 
@@ -241,20 +241,18 @@ public:
             i++;
             if (_tokens[i].type == JSMN_ARRAY) {
                 i++;
-                decodeListStart();
+                // todo need to switchDecode but calling decodeList instead?
                 continue;
             }
             else if (_tokens[i].type == JSMN_OBJECT) {
                 i++;
-                decodeMapStart();
+                // todo need to switchDecode but calling decodeMap instead?
                 continue;
             }
             else if (_tokens[i].type == JSMN_STRING) {
                 _bufferElemPtr--;
             }
-            if (!switchDecode(name,
-                              bound)) // todo when decoding object here, needs to set start and end point to decode from
-            {
+            if (!switchDecode(name, bound)) {
                 printf("failed"); // todo delete
                 continue;
             }
@@ -275,6 +273,21 @@ private: // todo repeated label, same in binarydecoder
             if (name == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::name)
             {
                 ret = std::get<Is>(f)->decode(*this);
+                return true;
+            }
+            return false;
+        }() || ...);
+        return ret;
+    }
+
+    template <class Fields, std::size_t... Is>
+    bool switchDecodeList(const std::string &name, Fields &f, std::index_sequence<Is...>)
+    {
+        bool ret = false;
+        return ([&] {
+            if (name == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::name)
+            {
+                ret = std::get<Is>(f)->decodeList(*this);
                 return true;
             }
             return false;
