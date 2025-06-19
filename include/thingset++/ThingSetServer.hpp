@@ -97,20 +97,20 @@ private:
         uint16_t id;
         if (context.decoder().decode(&context.path)) {
             if (!ThingSetRegistry::findByName(context.path, &context.node, &context.index)) {
-                response[0] = ThingSetStatusCode::notFound;
+                context.setStatus(ThingSetStatusCode::notFound);
                 return 1;
             }
         }
         else if (context.decoder().decode(&id)) {
             if (!ThingSetRegistry::findById(id, &context.node)) {
-                response[0] = ThingSetStatusCode::notFound;
+                context.setStatus(ThingSetStatusCode::notFound);
                 return 1;
             }
             context.useIds = true;
         }
         else {
             // fail
-            response[0] = ThingSetStatusCode::badRequest;
+            context.setStatus(ThingSetStatusCode::badRequest);
             return 1;
         }
         void *target;
@@ -130,7 +130,7 @@ private:
         } else if (context.isExec()) {
             return handleExec(context);
         }
-        response[0] = ThingSetStatusCode::notImplemented;
+        context.setStatus(ThingSetStatusCode::notImplemented);
         return 1;
     }
 };

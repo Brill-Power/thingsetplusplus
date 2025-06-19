@@ -19,15 +19,17 @@ namespace ThingSet {
 class ThingSetRequestContext
 {
 protected:
-    ThingSetRequestContext(uint8_t *resp, size_t responseLen);
+    /// @brief Pointer to the buffer into which the response will be written.
+    uint8_t *_response;
+
+    ThingSetRequestContext(uint8_t *resp);
 
 public:
     /// @brief Pointer to the ThingSet node this request relates to.
     ThingSetNode *node;
     /// @brief If the node is an array, indicates the array element to which the request relates.
     size_t index;
-    /// @brief Pointer to the buffer into which the response will be written.
-    uint8_t *response;
+
     /// @brief If true, keys in responses will be encoded as integer IDs; if false, as strings.
     bool useIds;
     /// @brief The path to the node to which this request relates.
@@ -41,6 +43,8 @@ public:
     virtual bool isUpdate() = 0;
     virtual bool isDelete() = 0;
     virtual bool isExec() = 0;
+
+    virtual bool setStatus(const ThingSetStatusCode &status) = 0;
 };
 
 template <typename T>
@@ -54,8 +58,8 @@ private:
     RequestType _requestType;
 
 protected:
-    _ThingSetRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
-        ThingSetRequestContext(resp, responseLen),
+    _ThingSetRequestContext(uint8_t *request, uint8_t *resp) :
+        ThingSetRequestContext(resp),
         _requestType((RequestType)request[0])
     {}
 
@@ -97,6 +101,8 @@ public:
     inline ThingSetDecoder &decoder() override {
         return _decoder;
     }
+
+    bool setStatus(const ThingSetStatusCode &status) override;
 };
 
 class ThingSetTextRequestContext : public _ThingSetRequestContext<ThingSetTextRequestType>
@@ -115,6 +121,8 @@ public:
     inline ThingSetDecoder &decoder() override {
         return _decoder;
     }
+
+    bool setStatus(const ThingSetStatusCode &status) override;
 };
 
 } // namespace ThingSet

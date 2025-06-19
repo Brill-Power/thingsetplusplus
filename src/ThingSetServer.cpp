@@ -23,7 +23,7 @@ _ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
 
 int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 {
-    context.response[0] = ThingSetStatusCode::content;
+    context.setStatus(ThingSetStatusCode::content);
     context.encoder().encodePreamble();
     void *target;
     if (context.node->tryCastTo(ThingSetNodeType::encodable, &target)) {
@@ -32,13 +32,13 @@ int _ThingSetServer::handleGet(ThingSetRequestContext &context)
             return context.encoder().getEncodedLength() + 1;
         }
     }
-    context.response[0] = ThingSetStatusCode::unsupportedFormat;
+    context.setStatus(ThingSetStatusCode::unsupportedFormat);
     return 1;
 }
 
 int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
 {
-    context.response[0] = ThingSetStatusCode::content;
+    context.setStatus(ThingSetStatusCode::content);
     context.encoder().encodePreamble();
     if (context.decoder().decodeNull()) {
         // expect that this is a group
@@ -62,7 +62,7 @@ int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
             return context.encoder().getEncodedLength() + 1;
         }
         else {
-            context.response[0] = ThingSetStatusCode::badRequest;
+            context.setStatus(ThingSetStatusCode::badRequest);
             return 1;
         }
     }
@@ -84,12 +84,12 @@ int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
             return context.encoder().getEncodedLength() + 1;
         }
         else {
-            context.response[0] = ThingSetStatusCode::notFound;
+            context.setStatus(ThingSetStatusCode::notFound);
             return 1;
         }
     }
     else {
-        context.response[0] = ThingSetStatusCode::badRequest;
+        context.setStatus(ThingSetStatusCode::badRequest);
         return 1;
     }
 }
@@ -98,11 +98,11 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
 {
     void *target;
     if (!context.node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
-        context.response[0] = ThingSetStatusCode::badRequest;
+        context.setStatus(ThingSetStatusCode::badRequest);
         return 1;
     }
     ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
-    context.response[0] = ThingSetStatusCode::changed;
+    context.setStatus(ThingSetStatusCode::changed);
     context.encoder().encodePreamble();
     if (context.decoder().decodeMap<std::string>([&](auto &key) {
             // concoct full path to node
@@ -110,24 +110,24 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
             ThingSetNode *child;
             size_t index;
             if (!ThingSetRegistry::findByName(fullPath, &child, &index)) {
-                context.response[0] = ThingSetStatusCode::notFound;
+                context.setStatus(ThingSetStatusCode::notFound);
                 return false;
             }
             if (!child->checkAccess(_access)) {
-                context.response[0] = ThingSetStatusCode::forbidden;
+                context.setStatus(ThingSetStatusCode::forbidden);
                 return false;
             }
             if (!child->tryCastTo(ThingSetNodeType::decodable, &target)) {
-                context.response[0] = ThingSetStatusCode::badRequest;
+                context.setStatus(ThingSetStatusCode::badRequest);
                 return false;
             }
             if (!parent->invokeCallback(child, ThingSetCallbackReason::willWrite)) {
-                context.response[0] = ThingSetStatusCode::forbidden;
+                context.setStatus(ThingSetStatusCode::forbidden);
                 return false;
             }
             ThingSetDecodable *decodable = reinterpret_cast<ThingSetDecodable *>(target);
             if (!decodable->decode(context.decoder())) {
-                context.response[0] = ThingSetStatusCode::badRequest;
+                context.setStatus(ThingSetStatusCode::badRequest);
                 return false;
             }
             // for now we ignore the return value here; what would returning false here mean?
@@ -145,7 +145,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
 int _ThingSetServer::handleExec(ThingSetRequestContext &context)
 {
     if (!context.node->checkAccess(_access)) {
-        context.response[0] = ThingSetStatusCode::forbidden;
+        context.setStatus(ThingSetStatusCode::forbidden);
         return 1;
     }
     void *target;
@@ -153,11 +153,11 @@ int _ThingSetServer::handleExec(ThingSetRequestContext &context)
         ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
         context.encoder().encodePreamble();
         if (invocable->invoke(context.decoder(), context.encoder())) {
-            context.response[0] = ThingSetStatusCode::changed;
+            context.setStatus(ThingSetStatusCode::changed);
             return context.encoder().getEncodedLength() + 1;
         }
     }
-    context.response[0] = ThingSetStatusCode::badRequest;
+    context.setStatus(ThingSetStatusCode::badRequest);
     return 1;
 }
 

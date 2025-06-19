@@ -193,7 +193,7 @@ public:
     int handleRequest(ThingSetRequestContext &context) override
     {
         if (context.isGet()) {
-            context.response[0] = ThingSetStatusCode::content;
+            context.setStatus(ThingSetStatusCode::content);
             context.encoder().encodePreamble();
             if (context.index == SIZE_MAX) {
                 context.encoder().encode(
