@@ -187,6 +187,24 @@ bool ThingSetTextDecoder::isInList()
     return (_bufferElemPtr < _bufferSize) && (_inputBuffer[_bufferElemPtr] != ']');
 }
 
+ThingSetEncodedNodeType ThingSetTextDecoder::peekType()
+{
+    jsmntok *token = &getTokens()[_tokenPtr];
+    switch (token->type)
+    {
+        case JSMN_PRIMITIVE:
+            return ThingSetEncodedNodeType::primitive;
+        case JSMN_STRING:
+            return ThingSetEncodedNodeType::string;
+        case JSMN_ARRAY:
+            return ThingSetEncodedNodeType::list;
+        case JSMN_OBJECT:
+            return ThingSetEncodedNodeType::map;
+        default:
+            return ThingSetEncodedNodeType::unknown;
+    }
+}
+
 bool ThingSetTextDecoder::ensureListSize(const size_t size, size_t &elementCount)
 {
     elementCount = size;

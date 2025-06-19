@@ -192,11 +192,11 @@ public:
 
     int handleRequest(ThingSetRequestContext &context) override
     {
-        if (context.requestType == ThingSetRequestType::get) {
+        if (context.isGet()) {
             context.response[0] = ThingSetStatusCode::content;
-            context.encoder.encodePreamble();
+            context.encoder().encodePreamble();
             if (context.index == SIZE_MAX) {
-                context.encoder.encode(
+                context.encoder().encode(
 #if defined(__APPLE__) || defined(__OpenBSD__)
                     // working round ambiguity on macOS and OpenBSD
                     // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
@@ -209,9 +209,9 @@ public:
                 );
             }
             else {
-                context.encoder.encode(this->_value[context.index]);
+                context.encoder().encode(this->_value[context.index]);
             }
-            return 1 + context.encoder.getEncodedLength();
+            return 1 + context.encoder().getEncodedLength();
         }
         return 0;
     }

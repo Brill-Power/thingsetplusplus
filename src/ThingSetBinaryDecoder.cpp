@@ -190,24 +190,29 @@ bool ThingSetBinaryDecoder::ensureListSize(const size_t size, size_t &elementCou
     return true;
 }
 
-zcbor_major_type_t ThingSetBinaryDecoder::peekType()
+ThingSetEncodedNodeType ThingSetBinaryDecoder::peekType()
 {
     zcbor_major_type_t type = ZCBOR_MAJOR_TYPE(this->getState()->payload[0]);
-    return type;
+    switch (type) {
+        case ZCBOR_MAJOR_TYPE_LIST:
+            return ThingSetEncodedNodeType::list;
+        case ZCBOR_MAJOR_TYPE_MAP:
+            return ThingSetEncodedNodeType::map;
+        case ZCBOR_MAJOR_TYPE_NINT:
+        case ZCBOR_MAJOR_TYPE_PINT:
+        case ZCBOR_MAJOR_TYPE_SIMPLE:
+            return ThingSetEncodedNodeType::primitive;
+        case ZCBOR_MAJOR_TYPE_BSTR:
+        case ZCBOR_MAJOR_TYPE_TSTR:
+            return ThingSetEncodedNodeType::string;
+        default:
+            return ThingSetEncodedNodeType::unknown;
+    }
 }
 
 bool ThingSetBinaryDecoder::skip()
 {
     return zcbor_any_skip(this->getState(), NULL);
-}
-
-bool ThingSetBinaryDecoder::skipUntil(zcbor_major_type_t sought)
-{
-    zcbor_major_type_t type;
-    while ((type = this->peekType()) != sought) {
-        this->skip();
-    };
-    return sought == type;
 }
 
 } // namespace ThingSet

@@ -34,7 +34,7 @@ enum ThingSetBinaryDecoderOptions
 class ThingSetBinaryDecodable
 {
 public:
-    virtual bool decode(ThingSetBinaryDecoder &decoder) = 0;
+    virtual bool decode(const ThingSetBinaryDecoder &decoder) = 0;
 };
 
 /// @brief Binary protocol decoder for ThingSet.
@@ -77,9 +77,8 @@ public:
     bool decodeListStart() override;
     bool decodeListEnd() override;
 
-    zcbor_major_type_t peekType();
+    ThingSetEncodedNodeType peekType() override;
     bool skip() override;
-    bool skipUntil(zcbor_major_type_t sought);
 
 protected:
     bool decodeMapStart() override;

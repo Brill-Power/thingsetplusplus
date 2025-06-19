@@ -59,6 +59,8 @@ public:
     bool decodeListEnd() override;
     bool skip() override;
 
+    ThingSetEncodedNodeType peekType() override;
+
 protected:
     bool decodeMapStart() override;
     bool decodeMapEnd() override;

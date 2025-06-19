@@ -33,7 +33,7 @@ awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function
         asio::ip::udp::endpoint sender;
         size_t length = co_await _subscribeSocket.async_receive_from(buffer, sender, use_awaitable);
         if (length > 4) {
-            if (_buffer[0] != ThingSetRequestType::report) {
+            if (_buffer[0] != ThingSetBinaryRequestType::report) {
                 continue;
             }
             // get actual length from message body to check we have received everything

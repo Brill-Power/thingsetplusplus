@@ -66,7 +66,7 @@ void _ThingSetSocketSubscriptionTransport::runListener()
         size_t length = recvfrom(_listenSocketHandle, _buffer, 1024, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
 
         if (length > 4) {
-            if (_buffer[0] != ThingSetRequestType::report) {
+            if (_buffer[0] != ThingSetBinaryRequestType::report) {
                 continue;
             }
 

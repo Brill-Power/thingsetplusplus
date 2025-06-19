@@ -12,6 +12,14 @@
 
 namespace ThingSet {
 
+enum struct ThingSetEncodedNodeType : uint8_t {
+    unknown = 0,
+    primitive = 1,
+    string = 2,
+    list = 3,
+    map = 4,
+};
+
 /// @brief Base class for decoders.
 class ThingSetDecoder
 {
@@ -41,7 +49,10 @@ public:
     virtual bool decodeListStart() = 0;
     virtual bool decodeListEnd() = 0;
 
+    virtual ThingSetEncodedNodeType peekType() = 0;
+
     virtual bool skip() = 0;
+    bool skipUntil(ThingSetEncodedNodeType sought);
 
     /// @brief Decode a list into an array of the specified length.
     /// @tparam T The type of items in the array.

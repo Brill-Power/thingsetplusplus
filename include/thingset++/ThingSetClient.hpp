@@ -45,7 +45,7 @@ public:
     /// @return True if the function was successfully executed, otherwise false.
     template <typename Result, typename... TArg> bool exec(const uint16_t &id, Result *result, TArg... args)
     {
-        return doRequest(id, ThingSetRequestType::exec, [&](auto encoder) { return encoder->encodeList(args...); }, result);
+        return doRequest(id, ThingSetBinaryRequestType::exec, [&](auto encoder) { return encoder->encodeList(args...); }, result);
     }
 
     /// @brief Execute a function which does not return a value.
@@ -55,7 +55,7 @@ public:
     /// @return True if the function was successfully executed, otherwise false.
     template <typename... TArg> bool exec(const uint16_t &id, TArg... args)
     {
-        return doRequest(id, ThingSetRequestType::exec, [&](auto encoder) { return encoder->encodeList(args...); });
+        return doRequest(id, ThingSetBinaryRequestType::exec, [&](auto encoder) { return encoder->encodeList(args...); });
     }
 
     /// @brief Gets a value.
@@ -65,7 +65,7 @@ public:
     /// @return True if retrieval succeeded, otherwise false.
     template <typename T> bool get(const uint16_t &id, T &result)
     {
-        return doRequest(id, ThingSetRequestType::get, [](auto) { return true; }, &result);
+        return doRequest(id, ThingSetBinaryRequestType::get, [](auto) { return true; }, &result);
     }
 
     template <typename T> bool update(const std::string &fullyQualifiedName, const T &value)
@@ -73,7 +73,7 @@ public:
         size_t index = fullyQualifiedName.find_last_of('/');
         const std::string pathToParent = index != std::string::npos ? fullyQualifiedName.substr(0, index) : "";
         const std::string key = fullyQualifiedName.substr(index + 1);
-        return doRequest(pathToParent, ThingSetRequestType::update, [&](auto encoder) {
+        return doRequest(pathToParent, ThingSetBinaryRequestType::update, [&](auto encoder) {
             return encoder->encodeMapStart() &&
                 encoder->encode(key) &&
                 encoder->encode(value) &&
@@ -89,7 +89,7 @@ private:
     /// @param encode A function to encode any additional data in a request.
     /// @param result A pointer to a variable which will contain the decoded result, if any. Pass null if no result is expected.
     /// @return True if invocation succeeded, otherwise false.
-    template <typename Id, typename T> bool doRequest(const Id &id, ThingSetRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, T *result)
+    template <typename Id, typename T> bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, T *result)
     {
         uint8_t *responseBuffer;
         size_t responseSize;
@@ -101,16 +101,16 @@ private:
         return false;
     }
 
-    template <typename Id> bool doRequest(const Id &id, ThingSetRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode)
+    template <typename Id> bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode)
     {
         uint8_t *responseBuffer;
         size_t responseSize;
         return doRequestCore(id, type, encode, &responseBuffer, responseSize);
     }
 
-    template <typename Id> bool doRequestCore(const Id &id, ThingSetRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, uint8_t **responseBuffer, size_t &responseSize)
+    template <typename Id> bool doRequestCore(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, uint8_t **responseBuffer, size_t &responseSize)
     {
-        _txBuffer[0] = type;
+        _txBuffer[0] = (uint8_t)type;
         FixedDepthThingSetBinaryEncoder encoder(_txBuffer + 1, _txBufferSize - 1);
         if (!encoder.encode(id) || !encode(&encoder)) {
             return false;

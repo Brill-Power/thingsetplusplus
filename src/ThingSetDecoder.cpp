@@ -37,4 +37,13 @@ bool ThingSetDecoder::decodeList(std::function<bool(size_t)> callback)
     return decodeListEnd();
 }
 
+bool ThingSetDecoder::skipUntil(ThingSetEncodedNodeType sought)
+{
+    ThingSetEncodedNodeType type;
+    while ((type = this->peekType()) != sought) {
+        this->skip();
+    };
+    return sought == type;
+}
+
 } // namespace ThingSet

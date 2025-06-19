@@ -8,9 +8,20 @@
 
 namespace ThingSet {
 
-ThingSetRequestContext::ThingSetRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen)
-    : index(SIZE_MAX), requestType((ThingSetRequestType)request[0]), response(resp), useIds(false),
-      encoder(resp + 1, responseLen - 1), decoder(request + 1, requestLen - 1, 2)
+ThingSetRequestContext::ThingSetRequestContext(uint8_t *resp, size_t responseLen)
+    : index(SIZE_MAX), response(resp), useIds(false)
+{}
+
+ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
+  _ThingSetRequestContext(request, requestLen, resp, responseLen),
+  _encoder(resp + 1, responseLen - 1),
+  _decoder(request + 1, requestLen - 1, 2)
+{}
+
+ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
+  _ThingSetRequestContext(request, requestLen, resp, responseLen),
+  _encoder(reinterpret_cast<char *>(resp) + 1, responseLen - 1),
+  _decoder(reinterpret_cast<char *>(request) + 1, requestLen - 1)
 {}
 
 } // namespace ThingSet

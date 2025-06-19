@@ -92,16 +92,16 @@ public:
 private:
     int requestCallback(Identifier &, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
     {
-        ThingSetRequestContext context(request, requestLen, response, responseLen);
+        ThingSetBinaryRequestContext context(request, requestLen, response, responseLen);
 
         uint16_t id;
-        if (context.decoder.decode(&context.path)) {
+        if (context.decoder().decode(&context.path)) {
             if (!ThingSetRegistry::findByName(context.path, &context.node, &context.index)) {
                 response[0] = ThingSetStatusCode::notFound;
                 return 1;
             }
         }
-        else if (context.decoder.decode(&id)) {
+        else if (context.decoder().decode(&id)) {
             if (!ThingSetRegistry::findById(id, &context.node)) {
                 response[0] = ThingSetStatusCode::notFound;
                 return 1;
@@ -121,21 +121,14 @@ private:
                 return result;
             }
         }
-        switch (request[0]) {
-            case ThingSetRequestType::get:
-                // LOG_SMART("Handling get for node ", context.node->getName(), " from ", identifier);
-                return handleGet(context);
-            case ThingSetRequestType::fetch:
-                // LOG_SMART("Handling fetch for node ", context.node->getName(), " from ", identifier);
-                return handleFetch(context);
-            case ThingSetRequestType::update:
-                // LOG_SMART("Handling update for node ", context.node->getName(), " from ", identifier);
-                return handleUpdate(context);
-            case ThingSetRequestType::exec:
-                // LOG_SMART("Handling exec for node ", context.node->getName(), " from ", identifier);
-                return handleExec(context);
-            default:
-                break;
+        if (context.isGet()) {
+            return handleGet(context);
+        } else if (context.isFetch()) {
+            return handleFetch(context);
+        } else if (context.isUpdate()) {
+            return handleUpdate(context);
+        } else if (context.isExec()) {
+            return handleExec(context);
         }
         response[0] = ThingSetStatusCode::notImplemented;
         return 1;

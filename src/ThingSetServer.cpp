@@ -24,12 +24,12 @@ _ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
 int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
-    context.encoder.encodePreamble();
+    context.encoder().encodePreamble();
     void *target;
     if (context.node->tryCastTo(ThingSetNodeType::encodable, &target)) {
         ThingSetEncodable *encodable = reinterpret_cast<ThingSetEncodable *>(target);
-        if (encodable->encode(context.encoder)) {
-            return context.encoder.getEncodedLength() + 1;
+        if (encodable->encode(context.encoder())) {
+            return context.encoder().getEncodedLength() + 1;
         }
     }
     context.response[0] = ThingSetStatusCode::unsupportedFormat;
@@ -39,8 +39,8 @@ int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
 {
     context.response[0] = ThingSetStatusCode::content;
-    context.encoder.encodePreamble();
-    if (context.decoder.decodeNull()) {
+    context.encoder().encodePreamble();
+    if (context.decoder().decodeNull()) {
         // expect that this is a group
         void *target;
         if (context.node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
@@ -50,38 +50,38 @@ int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
                 for (ThingSetNode *child : *parent) {
                     ids.push_back(child->getId());
                 }
-                context.encoder.encode(ids);
+                context.encoder().encode(ids);
             }
             else {
                 std::list<std::string_view> names;
                 for (ThingSetNode *child : *parent) {
                     names.push_back(child->getName());
                 }
-                context.encoder.encode(names);
+                context.encoder().encode(names);
             }
-            return context.encoder.getEncodedLength() + 1;
+            return context.encoder().getEncodedLength() + 1;
         }
         else {
             context.response[0] = ThingSetStatusCode::badRequest;
             return 1;
         }
     }
-    else if (context.decoder.peekType() == ZCBOR_MAJOR_TYPE_LIST && context.encoder.encodeListStart()) {
-        if (context.node == ThingSetRegistry::getMetadataNode() && context.decoder.decodeList([&context](size_t) {
+    else if (context.decoder().peekType() == ThingSetEncodedNodeType::list && context.encoder().encodeListStart()) {
+        if (context.node == ThingSetRegistry::getMetadataNode() && context.decoder().decodeList([&context](size_t) {
                 unsigned id;
-                if (!context.decoder.decode(&id)) {
+                if (!context.decoder().decode(&id)) {
                     return false;
                 }
                 ThingSetNode *n;
-                return ThingSetRegistry::findById(id, &n) && context.encoder.encodeMapStart()
-                       && context.encoder.encode(MetadataNameId) && context.encoder.encode(n->getName())
-                       && context.encoder.encode(MetadataTypeId) && context.encoder.encode(n->getType())
-                       && context.encoder.encode(MetadataAccessId) && context.encoder.encode(n->getAccess())
-                       && context.encoder.encodeMapEnd();
+                return ThingSetRegistry::findById(id, &n) && context.encoder().encodeMapStart()
+                       && context.encoder().encode(MetadataNameId) && context.encoder().encode(n->getName())
+                       && context.encoder().encode(MetadataTypeId) && context.encoder().encode(n->getType())
+                       && context.encoder().encode(MetadataAccessId) && context.encoder().encode(n->getAccess())
+                       && context.encoder().encodeMapEnd();
             })
-            && context.encoder.encodeListEnd())
+            && context.encoder().encodeListEnd())
         {
-            return context.encoder.getEncodedLength() + 1;
+            return context.encoder().getEncodedLength() + 1;
         }
         else {
             context.response[0] = ThingSetStatusCode::notFound;
@@ -103,8 +103,8 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     }
     ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
     context.response[0] = ThingSetStatusCode::changed;
-    context.encoder.encodePreamble();
-    if (context.decoder.decodeMap<std::string>([&](auto &key) {
+    context.encoder().encodePreamble();
+    if (context.decoder().decodeMap<std::string>([&](auto &key) {
             // concoct full path to node
             std::string fullPath = std::string(context.path) + (context.path.length() > 1 ? "/" : "") + key;
             ThingSetNode *child;
@@ -125,8 +125,8 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
                 context.response[0] = ThingSetStatusCode::forbidden;
                 return false;
             }
-            ThingSetBinaryDecodable *decodable = reinterpret_cast<ThingSetBinaryDecodable *>(target);
-            if (!decodable->decode(context.decoder)) {
+            ThingSetDecodable *decodable = reinterpret_cast<ThingSetDecodable *>(target);
+            if (!decodable->decode(context.decoder())) {
                 context.response[0] = ThingSetStatusCode::badRequest;
                 return false;
             }
@@ -135,8 +135,8 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
             return true;
         }))
     {
-        context.encoder.encodePreamble();
-        return context.encoder.getEncodedLength() + 1;
+        context.encoder().encodePreamble();
+        return context.encoder().getEncodedLength() + 1;
     }
     // just the error code
     return 1;
@@ -151,10 +151,10 @@ int _ThingSetServer::handleExec(ThingSetRequestContext &context)
     void *target;
     if (context.node->tryCastTo(ThingSetNodeType::function, &target)) {
         ThingSetInvocable *invocable = reinterpret_cast<ThingSetInvocable *>(target);
-        context.encoder.encodePreamble();
-        if (invocable->invoke(context.decoder, context.encoder)) {
+        context.encoder().encodePreamble();
+        if (invocable->invoke(context.decoder(), context.encoder())) {
             context.response[0] = ThingSetStatusCode::changed;
-            return context.encoder.getEncodedLength() + 1;
+            return context.encoder().getEncodedLength() + 1;
         }
     }
     context.response[0] = ThingSetStatusCode::badRequest;
