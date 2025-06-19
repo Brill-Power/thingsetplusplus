@@ -21,6 +21,60 @@ static const uint16_t MetadataAccessId = 0x1c;
 _ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
 {}
 
+int _ThingSetServer::handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+{
+    ThingSetBinaryRequestContext context(request, requestLen, response, responseLen);
+    return handleRequest(context);
+}
+
+int _ThingSetServer::handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+{
+    ThingSetTextRequestContext context(request, requestLen, response, responseLen);
+    return handleRequest(context);
+}
+
+int _ThingSetServer::handleRequest(ThingSetRequestContext &context)
+{
+    uint16_t id;
+    if (context.decoder().decode(&context.path)) {
+        if (!ThingSetRegistry::findByName(context.path, &context.node, &context.index)) {
+            context.setStatus(ThingSetStatusCode::notFound);
+            return 1;
+        }
+    }
+    else if (context.decoder().decode(&id)) {
+        if (!ThingSetRegistry::findById(id, &context.node)) {
+            context.setStatus(ThingSetStatusCode::notFound);
+            return 1;
+        }
+        context.useIds = true;
+    }
+    else {
+        // fail
+        context.setStatus(ThingSetStatusCode::badRequest);
+        return 1;
+    }
+    void *target;
+    if (context.node->tryCastTo(ThingSetNodeType::requestHandler, &target)) {
+        ThingSetCustomRequestHandler *handler = reinterpret_cast<ThingSetCustomRequestHandler *>(target);
+        int result = handler->handleRequest(context);
+        if (result != 0) {
+            return result;
+        }
+    }
+    if (context.isGet()) {
+        return handleGet(context);
+    } else if (context.isFetch()) {
+        return handleFetch(context);
+    } else if (context.isUpdate()) {
+        return handleUpdate(context);
+    } else if (context.isExec()) {
+        return handleExec(context);
+    }
+    context.setStatus(ThingSetStatusCode::notImplemented);
+    return 1;
+}
+
 int _ThingSetServer::handleGet(ThingSetRequestContext &context)
 {
     context.setStatus(ThingSetStatusCode::content);
