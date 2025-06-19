@@ -174,7 +174,9 @@ public:
                 // TODO: this should skip the value and go on to the next key
                 return false;
             }
-            _bufferElemPtr++; // ignore the ','
+            if (_inputBuffer[_bufferElemPtr] == ',') {
+                _bufferElemPtr++; // ignore the ','
+            }
         }
         return decodeMapEnd();
     }
