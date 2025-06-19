@@ -17,7 +17,7 @@ ThingSetBinaryDecoder::ThingSetBinaryDecoder() : ThingSetBinaryDecoder(ThingSetB
 ThingSetBinaryDecoder::ThingSetBinaryDecoder(ThingSetBinaryDecoderOptions options) : _options(options)
 {}
 
-void ThingSetBinaryDecoder::initialiseState(zcbor_state_t *state, size_t depth, uint8_t *buffer, size_t size, int elementCount)
+void ThingSetBinaryDecoder::initialiseState(zcbor_state_t *state, const size_t depth, const uint8_t *buffer, const size_t size, const int elementCount)
 {
 #ifdef zcbor_tstr_expect_term
         zcbor_new_decode_state(_state, depth, buffer, size, elementCount);
@@ -149,20 +149,45 @@ bool ThingSetBinaryDecoder::decodeListEnd()
     return zcbor_list_end_decode(getState());
 }
 
-bool ThingSetBinaryDecoder::decodeList(std::function<bool(size_t)> callback)
+bool ThingSetBinaryDecoder::decodeMapStart()
 {
-    if (!decodeListStart()) {
+    return zcbor_map_start_decode(getState());
+}
+
+bool ThingSetBinaryDecoder::decodeMapEnd()
+{
+    return zcbor_map_end_decode(getState());
+}
+
+bool ThingSetBinaryDecoder::isInMap()
+{
+    return getState()->elem_count != 0;
+}
+
+bool ThingSetBinaryDecoder::isInList()
+{
+    return getState()->elem_count != 0;
+}
+
+bool ThingSetBinaryDecoder::ensureListSize(const size_t size, size_t &elementCount)
+{
+    // check if number of elements in stream matches array size
+    elementCount = getState()->elem_count;
+    if (size > elementCount && (_options & ThingSetBinaryDecoderOptions::allowUndersizedArrays) == 0) {
+        if (!getIsForwardOnly()) {
+            // wind the state back to before we started parsing the list, so that a
+            // call to `skip()` will skip the whole array
+            zcbor_process_backup(getState(), ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME, ZCBOR_MAX_ELEM_COUNT);
+            // because the backup is taken *after* it has consumed the byte(s) containing the number
+            // of elements in the array, this restore doesn't really work
+            // so we overwrite the payload pointer with the backup it takes
+            getState()->payload = getState()->payload_bak;
+            // we also need to increment this, because, yes, it has consumed this as well
+            getState()->elem_count++;
+        }
         return false;
     }
-
-    size_t index = 0;
-    while (getState()->elem_count != 0) {
-        if (!callback(index++)) {
-            return false;
-        }
-    }
-
-    return decodeListEnd();
+    return true;
 }
 
 zcbor_major_type_t ThingSetBinaryDecoder::peekType()

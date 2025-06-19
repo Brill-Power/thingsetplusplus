@@ -1,6 +1,7 @@
 target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryDecoder.cpp
     ThingSetBinaryEncoder.cpp
+    ThingSetDecoder.cpp
     ThingSetNode.cpp
     ThingSetParentNode.cpp
     ThingSetRegistry.cpp

@@ -45,7 +45,7 @@ public:
                 *target = static_cast<ThingSetEncodable *>(this);
                 return true;
             case ThingSetNodeType::decodable:
-                *target = static_cast<ThingSetBinaryDecodable *>(this);
+                *target = static_cast<ThingSetDecodable *>(this);
                 return true;
             default:
                 return Base::tryCastTo(type, target);

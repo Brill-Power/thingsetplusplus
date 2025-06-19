@@ -61,13 +61,13 @@ TEST(BinaryDecoder, DecodeMap)
                          0x43, 0x34, 0x41, 0x44, 0x30, 0x19, 0x02, 0x8c, 0x10, 0x19, 0x60, 0x60, 0x83, 0xFA, 0x3F,
                          0x9D, 0x70, 0xA4, 0xFA, 0x40, 0x91, 0xEB, 0x85, 0xFA, 0x40, 0xFC, 0x7A, 0xE1 };
     FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
-    char nodeId[17];
+    std::string nodeId;
     uint8_t canAddr;
     std::array<float, 3> three;
     ASSERT_TRUE(decoder.decodeMap<uint16_t>([&](uint16_t &key) {
         switch (key) {
             case 0x1D:
-                return decoder.decode(nodeId);
+                return decoder.decode(&nodeId);
             case 0x028C:
                 return decoder.decode(&canAddr);
             case 0x6060:
@@ -76,7 +76,7 @@ TEST(BinaryDecoder, DecodeMap)
                 return false;
         }
     }));
-    ASSERT_STREQ("E93A142B282C4AD0", nodeId);
+    ASSERT_EQ("E93A142B282C4AD0", nodeId);
     ASSERT_EQ(0x10, canAddr);
     ASSERT_EQ(1.23f, three[0]);
 }

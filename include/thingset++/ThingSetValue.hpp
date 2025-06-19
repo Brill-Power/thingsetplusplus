@@ -16,8 +16,7 @@ namespace ThingSet {
 /// @tparam T The type of the value.
 template <typename T>
 class ThingSetValue : public ThingSetEncodable,
-                      public ThingSetBinaryDecodable,
-                      public ThingSetTextDecodable // todo commonise these
+                      public ThingSetDecodable
 {
 protected:
     T _value;
@@ -38,12 +37,7 @@ public:
         return encoder.encode(_value);
     }
 
-    bool decode(ThingSetBinaryDecoder &decoder) override // todo commonise this
-    {
-        return decoder.decode(&_value);
-    }
-
-    bool decode(ThingSetTextDecoder &decoder) override // todo commonise this
+    bool decode(ThingSetDecoder &decoder) override
     {
         return decoder.decode(&_value);
     }
@@ -95,7 +89,7 @@ public:
 
 template <typename Element, std::size_t Size>
 class ThingSetValue<std::array<Element, Size>>
-    : public ThingSetEncodable, public ThingSetBinaryDecodable, public ThingSetTextDecodable // todo commonise these
+    : public ThingSetEncodable, public ThingSetDecodable
 {
 protected:
     std::array<Element, Size> _value;
@@ -113,12 +107,7 @@ public:
         return encoder.encode(_value);
     }
 
-    bool decode(ThingSetBinaryDecoder &decoder) override // todo commonise this
-    {
-        return decoder.decode(&_value);
-    }
-
-    bool decode(ThingSetTextDecoder &decoder) override // todo commonise this
+    bool decode(ThingSetDecoder &decoder) override
     {
         return decoder.decode(&_value);
     }
@@ -141,7 +130,7 @@ public:
 
 template <typename T>
 class ThingSetValue<T *>
-    : public ThingSetEncodable, public ThingSetBinaryDecodable, public ThingSetTextDecodable // todo commonise these
+    : public ThingSetEncodable, public ThingSetDecodable
 {
 protected:
     T *_value;
@@ -155,12 +144,7 @@ public:
         return encoder.encode(_value);
     }
 
-    bool decode(ThingSetBinaryDecoder &decoder) override // todo commonise this
-    {
-        return decoder.decode(_value);
-    }
-
-    bool decode(ThingSetTextDecoder &decoder) override // todo commonise this
+    bool decode(ThingSetDecoder &decoder) override
     {
         return decoder.decode(_value);
     }

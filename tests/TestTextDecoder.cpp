@@ -19,21 +19,19 @@ struct StructTest
 TEST(TextDecoder, DecodeStdString)
 {
     char buffer[] = "\"Hello World\"";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::string value;
-    std::string *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, "Hello World");
 }
 
 TEST(TextDecoder, DecodeChar)
 {
-    char buffer[] = "F";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    char buffer[] = "\"F\"";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     char value;
-    char *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, 'F');
 }
@@ -41,32 +39,29 @@ TEST(TextDecoder, DecodeChar)
 TEST(TextDecoder, DecodeDouble)
 {
     char buffer[] = "12.4";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     double value;
-    double *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
-    ASSERT_NEAR(*valuePtr, 12.4F, 1e-6);
+    ASSERT_NEAR(value, 12.4F, 1e-6);
 }
 
 TEST(TextDecoder, DecodeFloat)
 {
     char buffer[] = "12.4";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     float value;
-    float *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
-    ASSERT_NEAR(*valuePtr, 12.4F, 1e-6);
+    ASSERT_NEAR(value, 12.4F, 1e-6);
 }
 
 TEST(TextDecoder, DecodeUint8)
 {
     char buffer[] = "255";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     uint8_t value;
-    uint8_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, UINT8_MAX);
 }
@@ -74,10 +69,9 @@ TEST(TextDecoder, DecodeUint8)
 TEST(TextDecoder, DecodeUint16)
 {
     char buffer[] = "65535";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     uint16_t value;
-    uint16_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, UINT16_MAX);
 }
@@ -85,10 +79,9 @@ TEST(TextDecoder, DecodeUint16)
 TEST(TextDecoder, DecodeUint32)
 {
     char buffer[] = "4294967295";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     uint32_t value;
-    uint32_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, UINT32_MAX);
 }
@@ -96,10 +89,9 @@ TEST(TextDecoder, DecodeUint32)
 TEST(TextDecoder, DecodeUint64)
 {
     char buffer[] = "18446744073709551615";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     uint64_t value;
-    uint64_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, UINT64_MAX);
 }
@@ -107,10 +99,9 @@ TEST(TextDecoder, DecodeUint64)
 TEST(TextDecoder, DecodeInt8)
 {
     char buffer[] = "-128";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     int8_t value;
-    int8_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, INT8_MIN);
 }
@@ -118,10 +109,9 @@ TEST(TextDecoder, DecodeInt8)
 TEST(TextDecoder, DecodeInt16)
 {
     char buffer[] = "-32768";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     int16_t value;
-    int16_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, INT16_MIN);
 }
@@ -129,10 +119,9 @@ TEST(TextDecoder, DecodeInt16)
 TEST(TextDecoder, DecodeInt32)
 {
     char buffer[] = "-2147483648";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     int32_t value;
-    int32_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, INT32_MIN);
 }
@@ -140,10 +129,9 @@ TEST(TextDecoder, DecodeInt32)
 TEST(TextDecoder, DecodeInt64)
 {
     char buffer[] = "-9223372036854775808";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     uint64_t value;
-    uint64_t *valuePtr = &value;
-    bool ret = decoder.decode(valuePtr);
+    bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, INT64_MIN);
 }
@@ -151,7 +139,7 @@ TEST(TextDecoder, DecodeInt64)
 TEST(TextDecoder, DecodeList)
 {
     char buffer[] = "[1234567890,9876543210]";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::tuple<uint64_t, uint64_t> values;
     bool ret = decoder.decodeList(values);
     ASSERT_TRUE(ret);
@@ -162,7 +150,7 @@ TEST(TextDecoder, DecodeList)
 TEST(TextDecoder, DecodeArray)
 {
     char buffer[] = "[1.23,13.4,14.5]";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::array<float, 3> values;
     bool ret = decoder.decode(&values);
     ASSERT_TRUE(ret);
@@ -174,7 +162,7 @@ TEST(TextDecoder, DecodeArray)
 TEST(TextDecoder, DecodeMap)
 {
     char buffer[] = "{\"nodeID\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::string nodeId;
     std::array<float, 3> three;
     uint8_t canAddr;
@@ -202,7 +190,7 @@ TEST(TextDecoder, DecodeMap)
 TEST(TextDecoder, DecodeStruct)
 {
     char buffer[] = "[{\"nodeID\":\"E93A142B282C4AD0\",\"three\":[1.23,13.4,14.5],\"canAddr\":16}]";
-    ThingSetTextDecoder decoder(buffer, strlen(buffer));
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
     std::array<StructTest, 1> newStructTest;
 
     decoder.decode(&newStructTest);

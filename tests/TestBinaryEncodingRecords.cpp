@@ -66,7 +66,7 @@ struct ModuleRecord
           } }                                                                                                          \
     };
 
-TEST(BinaryRecords, EncodeSimpleRecord)
+TEST(BinaryRecords, EncodeAndDecodeSimpleRecord)
 {
     SETUP()
     ASSERT_EQ(24.0f, moduleRecords[0].voltage.getValue());

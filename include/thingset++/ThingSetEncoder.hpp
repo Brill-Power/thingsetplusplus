@@ -213,7 +213,7 @@ private:
     }
 };
 
-/// @brief Interface for values that can be encoded with a text encoder.
+/// @brief Interface for values that can be encoded with any encoder.
 class ThingSetEncodable
 {
 public:
