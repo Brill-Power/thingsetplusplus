@@ -34,9 +34,9 @@ public:
     bool skip() override
     {
         switch (this->peekType()) {
-            case ZCBOR_MAJOR_TYPE_LIST:
+            case ThingSetEncodedNodeType::list:
                 return decodeList([&](size_t) { return zcbor_any_skip(this->getState(), NULL); });
-            case ZCBOR_MAJOR_TYPE_MAP: {
+            case ThingSetEncodedNodeType::map: {
                 if (!zcbor_list_start_decode(this->getState())) {
                     return false;
                 }

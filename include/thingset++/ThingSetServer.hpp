@@ -17,7 +17,7 @@ namespace ThingSet {
 /// Specifies a type which is probably a ThingSet property.
 template <typename T>
 concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_base_of_v<ThingSetEncodable, T>
-                                 && std::is_base_of_v<ThingSetBinaryDecodable, T>;
+                                 && std::is_base_of_v<ThingSetDecodable, T>;
 
 class _ThingSetServer
 {
@@ -98,7 +98,7 @@ public:
 private:
     int requestCallback(Identifier &, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
     {
-        if (request[0] >= (uint8_t)ThingSetBinaryRequestType::get && request[0] <= (uint8_t)ThingSetBinaryRequestType::report)
+        if (request[0] >= ThingSetBinaryRequestType::get && request[0] <= ThingSetBinaryRequestType::report)
         {
             return handleBinaryRequest(request, requestLen, response, responseLen);
         }

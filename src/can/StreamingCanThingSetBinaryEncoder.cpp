@@ -12,7 +12,7 @@ namespace ThingSet::Can {
 StreamingCanThingSetBinaryEncoder::StreamingCanThingSetBinaryEncoder(Can::ThingSetCanServerTransport &transport)
     : StreamingThingSetBinaryEncoder::StreamingThingSetBinaryEncoder(), _transport(transport), _sequenceNumber(0)
 {
-    _buffer[0] = ThingSetBinaryRequestType::report;
+    _buffer[0] = (uint8_t)ThingSetBinaryRequestType::report;
     zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[1], _buffer.size() - 1, 2);
 }
 

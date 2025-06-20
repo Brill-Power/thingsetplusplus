@@ -26,6 +26,14 @@ static inline bool operator==(const uint8_t &lhs, const ThingSetBinaryRequestTyp
     return lhs == (uint8_t)rhs;
 }
 
+static inline bool operator>=(const uint8_t &lhs, const ThingSetBinaryRequestType &rhs) {
+    return lhs >= (uint8_t)rhs;
+}
+
+static inline bool operator<=(const uint8_t &lhs, const ThingSetBinaryRequestType &rhs) {
+    return lhs <= (uint8_t)rhs;
+}
+
 static inline bool operator!=(const uint8_t &lhs, const ThingSetBinaryRequestType &rhs) {
     return !(lhs == rhs);
 }
