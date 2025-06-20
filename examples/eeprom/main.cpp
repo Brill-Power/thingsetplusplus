@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
         auto type = decoder.peekType();
         printf("Key 0x%x; type %d", key, type);
         switch (type) {
-            case ZCBOR_MAJOR_TYPE_LIST: {
+            case ThingSetEncodedNodeType::list: {
                 size_t elementCount = 0;
                 if (!decoder.decodeList([&](size_t i) {
                         elementCount = i + 1;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
                 printf("; num elements: %zu\n", elementCount);
                 return true;
             }
-            case ZCBOR_MAJOR_TYPE_TSTR: {
+            case ThingSetEncodedNodeType::string: {
                 string str;
                 if (decoder.decode(&str)) {
                     printf("; value %s\n", str.c_str());
@@ -95,23 +95,20 @@ int main(int argc, char *argv[])
                 }
                 return false;
             }
-            case ZCBOR_MAJOR_TYPE_SIMPLE: {
+            case ThingSetEncodedNodeType::primitive: {
                 float f;
+                uint64_t t;
                 bool b;
                 if (decoder.decode(&f)) {
                     printf("; value %f\n", f);
                     return true;
                 }
-                else if (decoder.decode(&b)) {
-                    printf("; value %s\n", b ? "true" : "false");
+                else if (decoder.decode(&t)) {
+                    printf("; value %llu\n", t);
                     return true;
                 }
-                return false;
-            }
-            case ZCBOR_MAJOR_TYPE_PINT: {
-                uint64_t t;
-                if (decoder.decode(&t)) {
-                    printf("; value %llu\n", t);
+                else if (decoder.decode(&b)) {
+                    printf("; value %s\n", b ? "true" : "false");
                     return true;
                 }
                 return false;
