@@ -16,6 +16,8 @@
 
 namespace ThingSet {
 
+class ThingSetEncodable;
+
 /// @brief Encoder base class for ThingSet.
 class ThingSetEncoder
 {
@@ -58,6 +60,8 @@ public:
     virtual bool encode(const int64_t &value) = 0;
     virtual bool encode(int64_t &value) = 0;
     virtual bool encode(int64_t *value) = 0;
+    bool encode(ThingSetEncodable &value);
+    bool encode(ThingSetEncodable *value);
     virtual bool encodeNull() = 0;
     virtual bool encodePreamble() = 0;
     /// @brief Encode the start of a list. In forward-only encoding scenarios, you should

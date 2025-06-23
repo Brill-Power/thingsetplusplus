@@ -25,7 +25,7 @@ class ThingSetTextDecoder : public ThingSetDecoder
 {
 protected:
     const char *_inputBuffer;
-    const size_t _bufferSize;
+    size_t _bufferSize;
     size_t _bufferElemPtr;
     size_t _tokenPtr;
     jsmn_parser _parser;

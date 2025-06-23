@@ -1,6 +1,7 @@
 target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryDecoder.cpp
     ThingSetBinaryEncoder.cpp
+    ThingSetEncoder.cpp
     ThingSetDecoder.cpp
     ThingSetNode.cpp
     ThingSetParentNode.cpp
@@ -27,4 +28,5 @@ endif()
 
 if(ENABLE_ZEPHYR)
     target_sources(thingset++ PRIVATE ZephyrLogRegistration.cpp)
+    add_subdirectory(zephyr)
 endif()

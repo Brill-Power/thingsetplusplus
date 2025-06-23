@@ -9,14 +9,36 @@
 namespace ThingSet {
 
 ThingSetRequestContext::ThingSetRequestContext(uint8_t *resp)
-    : _response(resp), index(SIZE_MAX), useIds(false)
+    : _response(resp), index(SIZE_MAX)
 {}
+
+uint16_t &ThingSetRequestContext::id()
+{
+    return _id.value();
+}
+
+std::string &ThingSetRequestContext::path()
+{
+    return _path.value();
+}
+
+bool ThingSetRequestContext::hasValidEndpoint()
+{
+    return _id.has_value() || _path.has_value();
+}
+
+bool ThingSetRequestContext::useIds()
+{
+    return _id.has_value();
+}
 
 ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
     _ThingSetRequestContext(request, resp),
     _encoder(resp + 1, responseLen - 1),
     _decoder(request + 1, requestLen - 1, 2)
-{}
+{
+    _decoder.decode(&_path.value()) || _decoder.decode(&_id.value());
+}
 
 bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
 {
@@ -28,7 +50,21 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
     _ThingSetRequestContext(request, resp),
     _encoder(reinterpret_cast<char *>(resp) + 4, responseLen - 4),
     _decoder(reinterpret_cast<char *>(request) + 1, requestLen - 1)
-{}
+{
+    // find first space, if any
+    char *pathStart = reinterpret_cast<char *>(request) + 1;
+    char *pathEnd = (char *)memchr(pathStart, ' ', requestLen);
+    if (pathEnd != nullptr)
+    {
+        _path = std::string(pathStart, pathEnd - pathStart);
+        _decoder = DefaultFixedSizeThingSetTextDecoder(reinterpret_cast<char *>(pathEnd + 1), requestLen - 1 - (pathEnd - pathStart));
+    }
+    else
+    {
+        _path = std::string(pathStart, requestLen - 1);
+    }
+
+}
 
 bool ThingSetTextRequestContext::setStatus(const ThingSetStatusCode &status)
 {

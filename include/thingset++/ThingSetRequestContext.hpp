@@ -12,6 +12,7 @@
 #include "ThingSetTextEncoder.hpp"
 #include "ThingSetNode.hpp"
 #include "ThingSetStatus.hpp"
+#include <optional>
 
 namespace ThingSet {
 
@@ -19,8 +20,12 @@ namespace ThingSet {
 class ThingSetRequestContext
 {
 protected:
+    size_t _requestLength;
     /// @brief Pointer to the buffer into which the response will be written.
     uint8_t *_response;
+    std::optional<uint16_t> _id;
+    /// @brief The path to the node to which this request relates.
+    std::optional<std::string> _path;
 
     ThingSetRequestContext(uint8_t *resp);
 
@@ -30,10 +35,13 @@ public:
     /// @brief If the node is an array, indicates the array element to which the request relates.
     size_t index;
 
+    bool hasValidEndpoint();
+
     /// @brief If true, keys in responses will be encoded as integer IDs; if false, as strings.
-    bool useIds;
-    /// @brief The path to the node to which this request relates.
-    std::string path;
+    bool useIds();
+
+    std::string &path();
+    uint16_t &id();
 
     virtual ThingSetEncoder &encoder() = 0;
     virtual ThingSetDecoder &decoder() = 0;
@@ -45,6 +53,8 @@ public:
     virtual bool isExec() = 0;
 
     virtual bool setStatus(const ThingSetStatusCode &status) = 0;
+
+    constexpr virtual size_t getHeaderLength() const = 0;
 };
 
 template <typename T>
@@ -103,6 +113,11 @@ public:
     }
 
     bool setStatus(const ThingSetStatusCode &status) override;
+
+    constexpr size_t getHeaderLength() const override
+    {
+        return 1;
+    }
 };
 
 class ThingSetTextRequestContext : public _ThingSetRequestContext<ThingSetTextRequestType>
@@ -123,6 +138,11 @@ public:
     }
 
     bool setStatus(const ThingSetStatusCode &status) override;
+
+    constexpr size_t getHeaderLength() const override
+    {
+        return 4;
+    }
 };
 
 } // namespace ThingSet
