@@ -52,7 +52,7 @@ int ThingSetZephyrShellServerTransport::onShellCommandExecuted(const shell *shel
         pos += ret;
     }
     requestBuffer.data()[--pos] = '\0';
-    int result = _callback(EmptyIdentifier(), reinterpret_cast<uint8_t *>(requestBuffer.data()), strlen(requestBuffer.data()), responseBuffer.data(), responseBuffer.size());
+    int result = _callback(EmptyIdentifier(), reinterpret_cast<uint8_t *>(requestBuffer.data()), pos, responseBuffer.data(), responseBuffer.size());
     if (result > 0) {
         responseBuffer[result] = '\0';
         shell_print(shell, "%s", responseBuffer.data());
