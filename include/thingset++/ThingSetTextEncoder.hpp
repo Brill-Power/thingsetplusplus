@@ -15,7 +15,7 @@ namespace ThingSet {
 /// @brief Text protocol encoder for ThingSet.
 class ThingSetTextEncoder : public ThingSetEncoder
 {
-private:
+private: // todo repeated label?
     char *_responseBuffer;
     size_t _responseSize;
     size_t _responsePosition;
@@ -134,7 +134,7 @@ private:
 
     /// @brief Add a value to the response buffer as a string
     /// @return True if successful, false otherwise
-    template <typename T> bool appendFormat(const T& value, const char *format)
+    template <typename T> bool appendFormat(const T &value, const char *format)
     {
         if (!ensureBufferCapacity(value, format)) {
             return false;

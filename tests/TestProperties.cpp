@@ -22,8 +22,6 @@ TEST(Properties, SimpleProperty)
     f32 = 1.0;
     u32 = 1U;
 
-    float &f = f32.getValue();
-
     uint8_t buffer[128];
     FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     f32.encode(encoder);

@@ -20,12 +20,12 @@ namespace ThingSet {
 class ThingSetInvocable
 {
 public:
-    virtual bool invoke(ThingSetBinaryDecoder &decoder, ThingSetBinaryEncoder &encoder) = 0;
+    virtual bool invoke(ThingSetDecoder &decoder, ThingSetEncoder &encoder) = 0;
 };
 
 template <typename Result, typename... Args>
 static bool invoke(std::function<Result(Args...)> &function, std::tuple<Args...> &arguments,
-                   ThingSetBinaryEncoder &encoder)
+                   ThingSetEncoder &encoder)
 {
     Result result = std::apply(function, arguments);
     return encoder.encode(result);
@@ -33,7 +33,7 @@ static bool invoke(std::function<Result(Args...)> &function, std::tuple<Args...>
 
 template <typename... Args>
 static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &arguments,
-                   ThingSetBinaryEncoder &encoder)
+                   ThingSetEncoder &encoder)
 {
     std::apply(function, arguments);
     return encoder.encodeNull();
@@ -70,7 +70,7 @@ public:
         return ThingSetNodeType::function;
     }
 
-    bool invoke(ThingSetBinaryDecoder &decoder, ThingSetBinaryEncoder &encoder) override
+    bool invoke(ThingSetDecoder &decoder, ThingSetEncoder &encoder) override
     {
         return decoder.decodeList(_arguments) && ThingSet::invoke(_function, _arguments, encoder);
     }

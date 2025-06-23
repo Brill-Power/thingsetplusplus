@@ -28,7 +28,7 @@ protected:
             {
                 uint8_t sender = frame.getId().getSource();
                 StreamingCanThingSetBinaryDecoder<Frame> *decoder = nullptr;
-                if (frame.getData()[0] == ThingSetRequestType::report) {
+                if (frame.getData()[0] == ThingSetBinaryRequestType::report) {
                     // new report, so create a new decoder and add to map
                     decodersByNodeAddress[sender] = StreamingCanThingSetBinaryDecoder<Frame>();
                     decoder = &decodersByNodeAddress[sender];

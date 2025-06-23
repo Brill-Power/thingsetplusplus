@@ -275,7 +275,7 @@ void _ThingSetZephyrCanInterface::onRequestResponseReceived(net_buf *buffer, int
         // if a response to a request we sent
         if ((self->_rxBuffer[0] >= ThingSetStatusCode::created && self->_rxBuffer[0] <= ThingSetStatusCode::notAGateway) ||
             // or if it is a new request inbound
-            (self->_rxBuffer[0] >= ThingSetRequestType::get && self->_rxBuffer[0] <= ThingSetRequestType::update)) {
+            (self->_rxBuffer[0] >= ThingSetBinaryRequestType::get && self->_rxBuffer[0] <= ThingSetBinaryRequestType::update)) {
             // regardless, dispatch accordingly
             result = self->_inboundRequestCallback(CanID::create(address.ext_id), self->_rxBuffer, len, self->_txBuffer, self->_txBufferSize);
             if (result >= 0) { // length should be zero if this is a reply

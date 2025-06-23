@@ -45,7 +45,7 @@ public:
                 *target = static_cast<ThingSetEncodable *>(this);
                 return true;
             case ThingSetNodeType::decodable:
-                *target = static_cast<ThingSetBinaryDecodable *>(this);
+                *target = static_cast<ThingSetDecodable *>(this);
                 return true;
             default:
                 return Base::tryCastTo(type, target);
@@ -121,6 +121,7 @@ public:
 
 /// @brief Partial specialisation of ThingSetProperty for record arrays.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size>
+    requires std::is_class_v<Element>
 class ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>
     : public _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode,
                                IdentifiableThingSetParentNode<Id, ParentId, Name>, Access, std::array<Element, Size>>,
@@ -172,17 +173,15 @@ public:
 
     bool findByName(const std::string &name, ThingSetNode **node, size_t *index) override
     {
-        if (!ThingSetParentNode::findByName(name, node, index)) {
-            // atoi is useless - it returns 0 on failure - so we check that the string actually
-            // contains a number before trying to parse it
-            if (name.c_str()[0] >= '0' && name.c_str()[0] <= '9') {
-                *index = std::atoi(name.c_str());
-                return true;
-            }
-            return false;
+        bool foundChild = ThingSetParentNode::findByName(name, node, index);
+        // atoi is useless - it returns 0 on failure - so we check that the string actually
+        // contains a number before trying to parse it
+        if (name.c_str()[0] >= '0' && name.c_str()[0] <= '9') {
+            *index = std::atoi(name.c_str());
+            return true;
         }
 
-        return true;
+        return foundChild;
     }
 
     bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override
@@ -192,11 +191,11 @@ public:
 
     int handleRequest(ThingSetRequestContext &context) override
     {
-        if (context.requestType == ThingSetRequestType::get) {
-            context.response[0] = ThingSetStatusCode::content;
-            context.encoder.encodePreamble();
+        if (context.isGet()) {
+            context.setStatus(ThingSetStatusCode::content);
+            context.encoder().encodePreamble();
             if (context.index == SIZE_MAX) {
-                context.encoder.encode(
+                context.encoder().encode(
 #if defined(__APPLE__) || defined(__OpenBSD__)
                     // working round ambiguity on macOS and OpenBSD
                     // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
@@ -204,14 +203,23 @@ public:
 #endif
                         this->_value.size()
 #if defined(__APPLE__) || defined(__OpenBSD__)
-                            )
+                    )
 #endif
                 );
             }
             else {
-                context.encoder.encode(this->_value[context.index]);
+                context.encoder().encode(this->_value[context.index]);
             }
-            return 1 + context.encoder.getEncodedLength();
+            return context.getHeaderLength() + context.encoder().getEncodedLength();
+        }
+        else if (context.isUpdate()) {
+            context.setStatus(ThingSetStatusCode::changed);
+            context.encoder().encodePreamble();
+            if (context.index == SIZE_MAX) {
+                context.setStatus(ThingSetStatusCode::badRequest);
+            }
+            context.decoder().decode(&this->_value[context.index]);
+            return context.getHeaderLength();
         }
         return 0;
     }

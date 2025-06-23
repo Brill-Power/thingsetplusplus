@@ -17,7 +17,7 @@ namespace ThingSet {
 /// Specifies a type which is probably a ThingSet property.
 template <typename T>
 concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_base_of_v<ThingSetEncodable, T>
-                                 && std::is_base_of_v<ThingSetBinaryDecodable, T>;
+                                 && std::is_base_of_v<ThingSetDecodable, T>;
 
 class _ThingSetServer
 {
@@ -30,11 +30,17 @@ protected:
 public:
     virtual bool listen() = 0;
 
-protected:
+private:
     int handleGet(ThingSetRequestContext &context);
     int handleFetch(ThingSetRequestContext &context);
     int handleUpdate(ThingSetRequestContext &context);
     int handleExec(ThingSetRequestContext &context);
+
+    int handleRequest(ThingSetRequestContext &context);
+
+protected:
+    int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
+    int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
 
     template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T,
               EncodableDecodableNode... Property>
@@ -92,53 +98,19 @@ public:
 private:
     int requestCallback(Identifier &, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
     {
-        ThingSetRequestContext context(request, requestLen, response, responseLen);
-
-        uint16_t id;
-        if (context.decoder.decode(&context.path)) {
-            if (!ThingSetRegistry::findByName(context.path, &context.node, &context.index)) {
-                response[0] = ThingSetStatusCode::notFound;
-                return 1;
-            }
+        if (request[0] >= ThingSetBinaryRequestType::get && request[0] <= ThingSetBinaryRequestType::report)
+        {
+            return handleBinaryRequest(request, requestLen, response, responseLen);
         }
-        else if (context.decoder.decode(&id)) {
-            if (!ThingSetRegistry::findById(id, &context.node)) {
-                response[0] = ThingSetStatusCode::notFound;
-                return 1;
-            }
-            context.useIds = true;
+        else if (request[0] >= (uint8_t)ThingSetTextRequestType::exec && request[0] <= (uint8_t)ThingSetTextRequestType::desire)
+        {
+            return handleTextRequest(request, requestLen, response, responseLen);
         }
-        else {
-            // fail
+        else
+        {
             response[0] = ThingSetStatusCode::badRequest;
             return 1;
         }
-        void *target;
-        if (context.node->tryCastTo(ThingSetNodeType::requestHandler, &target)) {
-            ThingSetCustomRequestHandler *handler = reinterpret_cast<ThingSetCustomRequestHandler *>(target);
-            int result = handler->handleRequest(context);
-            if (result != 0) {
-                return result;
-            }
-        }
-        switch (request[0]) {
-            case ThingSetRequestType::get:
-                // LOG_SMART("Handling get for node ", context.node->getName(), " from ", identifier);
-                return handleGet(context);
-            case ThingSetRequestType::fetch:
-                // LOG_SMART("Handling fetch for node ", context.node->getName(), " from ", identifier);
-                return handleFetch(context);
-            case ThingSetRequestType::update:
-                // LOG_SMART("Handling update for node ", context.node->getName(), " from ", identifier);
-                return handleUpdate(context);
-            case ThingSetRequestType::exec:
-                // LOG_SMART("Handling exec for node ", context.node->getName(), " from ", identifier);
-                return handleExec(context);
-            default:
-                break;
-        }
-        response[0] = ThingSetStatusCode::notImplemented;
-        return 1;
     }
 };
 
