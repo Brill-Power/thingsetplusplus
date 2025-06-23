@@ -37,7 +37,16 @@ ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, siz
     _encoder(resp + 1, responseLen - 1),
     _decoder(request + 1, requestLen - 1, 2)
 {
-    _decoder.decode(&_path.value()) || _decoder.decode(&_id.value());
+    std::string path;
+    uint16_t id;
+    if (_decoder.decode(&path))
+    {
+        _path = path;
+    }
+    else if (_decoder.decode(&id))
+    {
+        _id = id;
+    }
 }
 
 bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)

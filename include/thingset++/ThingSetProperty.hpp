@@ -149,21 +149,6 @@ public:
         return *this;
     }
 
-    bool encode(ThingSetEncoder &encoder) override
-    {
-        return encoder.encode(
-#if defined(__APPLE__) || defined(__OpenBSD__)
-                    // working round ambiguity on macOS and OpenBSD
-                    // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
-                    static_cast<uint32_t>(
-#endif
-                        this->_value.size()
-#if defined(__APPLE__) || defined(__OpenBSD__)
-                            )
-#endif
-        );
-    }
-
     ThingSetParentNode::ChildIterator begin() override
     {
         // don't expose child nodes
@@ -210,7 +195,17 @@ public:
             context.setStatus(ThingSetStatusCode::content);
             context.encoder().encodePreamble();
             if (context.index == SIZE_MAX) {
-                encode(context.encoder());
+                context.encoder().encode(
+#if defined(__APPLE__) || defined(__OpenBSD__)
+                    // working round ambiguity on macOS and OpenBSD
+                    // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
+                    static_cast<uint32_t>(
+#endif
+                        this->_value.size()
+#if defined(__APPLE__) || defined(__OpenBSD__)
+                    )
+#endif
+                );
             }
             else {
                 context.encoder().encode(this->_value[context.index]);
