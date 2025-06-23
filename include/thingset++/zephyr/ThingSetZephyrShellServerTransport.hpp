@@ -18,8 +18,6 @@ class ThingSetZephyrShellServerTransport : public ThingSetServerTransport<EmptyI
 {
 private:
     std::function<int(const EmptyIdentifier &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
-    std::array<char, CONFIG_SHELL_CMD_BUFF_SIZE> _requestBuffer;
-    std::array<uint8_t, CONFIG_SHELL_CMD_BUFF_SIZE> _responseBuffer;
 
     ThingSetZephyrShellServerTransport();
     ThingSetZephyrShellServerTransport(const ThingSetZephyrShellServerTransport &) = delete;

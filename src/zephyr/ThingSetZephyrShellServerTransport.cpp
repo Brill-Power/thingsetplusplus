@@ -40,19 +40,22 @@ int ThingSetZephyrShellServerTransport::_onShellCommandExecuted(const shell *she
 
 int ThingSetZephyrShellServerTransport::onShellCommandExecuted(const shell *shell, size_t argc, char **argv)
 {
+    std::array<char, CONFIG_SHELL_CMD_BUFF_SIZE / 2> requestBuffer;
+    std::array<uint8_t, CONFIG_SHELL_CMD_BUFF_SIZE * 2> responseBuffer;
     size_t pos = 0;
     for (size_t cnt = 1; cnt < argc; cnt++) {
-        int ret = snprintf(_requestBuffer.data() + pos, _requestBuffer.size() - pos, "%s ", argv[cnt]);
+        int ret = snprintf(requestBuffer.data() + pos, requestBuffer.size() - pos, "%s ", argv[cnt]);
         if (ret < 0) {
             shell_print(shell, "Error: Request too large.");
             return ret;
         }
         pos += ret;
     }
-    _requestBuffer.data()[--pos] = '\0';
-    int result = _callback(EmptyIdentifier(), reinterpret_cast<uint8_t *>(_requestBuffer.data()), strlen(_requestBuffer.data()), _responseBuffer.data(), _responseBuffer.size());
+    requestBuffer.data()[--pos] = '\0';
+    int result = _callback(EmptyIdentifier(), reinterpret_cast<uint8_t *>(requestBuffer.data()), strlen(requestBuffer.data()), responseBuffer.data(), responseBuffer.size());
     if (result > 0) {
-        shell_print(shell, "%s", _responseBuffer.data());
+        responseBuffer[result] = '\0';
+        shell_print(shell, "%s", responseBuffer.data());
     }
     return 0;
 }
