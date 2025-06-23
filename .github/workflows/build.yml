@@ -40,4 +40,5 @@ jobs:
 
       - name: Test
         run: |
+          west build -p -b native_sim/native/64 thingsetplusplus/tests/zephyr -T thingset++.ZephyrClientServer
           zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/ -p native_sim/native/64 -v -v
