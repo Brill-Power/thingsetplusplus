@@ -159,12 +159,12 @@ bool ThingSetBinaryDecoder::decodeMapEnd()
     return zcbor_map_end_decode(getState());
 }
 
-bool ThingSetBinaryDecoder::isInMap()
+bool ThingSetBinaryDecoder::isInMap() const
 {
     return getState()->elem_count != 0;
 }
 
-bool ThingSetBinaryDecoder::isInList()
+bool ThingSetBinaryDecoder::isInList() const
 {
     return getState()->elem_count != 0;
 }

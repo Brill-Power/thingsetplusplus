@@ -67,12 +67,17 @@ protected:
         return _state;
     }
 
+    const zcbor_state_t *getState() const override
+    {
+        return _state;
+    }
+
     bool getIsForwardOnly() const override
     {
         return true;
     }
 
-    size_t getDecodedLength() override
+    size_t getDecodedLength() const override
     {
         return _decodedLength;
     }

@@ -109,7 +109,7 @@ private:
     // The start of the buffer
     const uint8_t *_buffer;
     zcbor_state_t _state[depth];
-    ThingSetBinaryEncoderOptions _options;
+    const ThingSetBinaryEncoderOptions _options;
 
 protected:
     zcbor_state_t *getState() override

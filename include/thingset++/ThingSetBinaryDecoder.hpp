@@ -50,6 +50,7 @@ protected:
     static void initialiseState(zcbor_state_t *state, const size_t depth, const uint8_t *buffer, const size_t size, const int elementCount);
 
     virtual zcbor_state_t *getState() = 0;
+    virtual const zcbor_state_t *getState() const = 0;
 
     /// @brief Gets whether the stream that this decoder is decoding
     /// is forward-only.
@@ -57,7 +58,7 @@ protected:
     virtual bool getIsForwardOnly() const;
 
 public:
-    virtual size_t getDecodedLength() = 0;
+    virtual size_t getDecodedLength() const = 0;
 
     using ThingSetDecoder::decode;
     bool decode(std::string *value) override;
@@ -83,8 +84,8 @@ public:
 protected:
     bool decodeMapStart() override;
     bool decodeMapEnd() override;
-    bool isInMap() override;
-    bool isInList() override;
+    bool isInMap() const override;
+    bool isInList() const override;
     bool ensureListSize(const size_t size, size_t &elementCount) override;
 };
 
@@ -98,6 +99,11 @@ private:
 
 protected:
     zcbor_state_t *getState() override
+    {
+        return _state.data();
+    }
+
+    const zcbor_state_t *getState() const override
     {
         return _state.data();
     }
@@ -132,7 +138,7 @@ public:
         initialiseState(_state.data(), depth, buffer, size, elementCount);
     }
 
-    size_t getDecodedLength() override
+    size_t getDecodedLength() const override
     {
         return _state.data()->payload - _buffer;
     }
