@@ -85,25 +85,25 @@ public:
     /// will contain.
     /// @param count The number of elements in the list.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeListStart(uint32_t count) override;
+    bool encodeListStart(const uint32_t &count) override;
     bool encodeListEnd() override;
     /// @brief Encode the end of a list, specifying the number of elements the list
     /// contained. It should match the number passed to @ref encodeListStart.
     /// @param count The number of elements in the list.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeListEnd(uint32_t count) override;
+    bool encodeListEnd(const uint32_t &count) override;
     bool encodeMapStart() override;
     /// @brief Encode the start of a map, specifying the number of key-value pairs the map
     /// will contain.
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeMapStart(uint32_t count) override;
+    bool encodeMapStart(const uint32_t &count) override;
     bool encodeMapEnd() override;
     /// @brief Encode the end of a map, specifying the number of key-value pairs the map
     /// contained. It should match the number passed to @ref encodeMapStart.
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
-    bool encodeMapEnd(uint32_t count) override;
+    bool encodeMapEnd(const uint32_t &count) override;
 
 protected:
     bool encodeListSeparator() override;

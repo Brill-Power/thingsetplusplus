@@ -220,7 +220,7 @@ bool ThingSetTextEncoder::encodeMapStart()
     return append('{');
 }
 
-bool ThingSetTextEncoder::encodeMapStart(uint32_t)
+bool ThingSetTextEncoder::encodeMapStart(const uint32_t &)
 {
     return encodeMapStart();
 }
@@ -232,7 +232,7 @@ bool ThingSetTextEncoder::encodeMapEnd()
     return append('}');
 }
 
-bool ThingSetTextEncoder::encodeMapEnd(uint32_t)
+bool ThingSetTextEncoder::encodeMapEnd(const uint32_t &)
 {
     return encodeMapEnd();
 }
@@ -243,7 +243,7 @@ bool ThingSetTextEncoder::encodeListStart()
     return append('[');
 }
 
-bool ThingSetTextEncoder::encodeListStart(uint32_t)
+bool ThingSetTextEncoder::encodeListStart(const uint32_t &)
 {
     return encodeListStart();
 }
@@ -255,7 +255,7 @@ bool ThingSetTextEncoder::encodeListEnd()
     return append(']');
 }
 
-bool ThingSetTextEncoder::encodeListEnd(uint32_t)
+bool ThingSetTextEncoder::encodeListEnd(const uint32_t &)
 {
     return encodeListEnd();
 }

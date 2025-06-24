@@ -7,6 +7,11 @@
 
 namespace ThingSet {
 
+bool ThingSetEncoder::encode(const ThingSetEncodable &value)
+{
+    return value.encode(*this);
+}
+
 bool ThingSetEncoder::encode(ThingSetEncodable &value)
 {
     return value.encode(*this);
