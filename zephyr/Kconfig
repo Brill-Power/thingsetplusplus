@@ -37,6 +37,11 @@ config THINGSET_PLUS_PLUS_BACKEND_SOCKET
 	select NET_TCP
 	select NET_SOCKETS
 
+config THINGSET_PLUS_PLUS_BACKEND_SHELL
+	bool "Enable shell backend"
+	default false
+	select SHELL
+
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus
 source "../zephyr/subsys/logging/Kconfig.template.log_config"
