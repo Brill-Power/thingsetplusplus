@@ -166,11 +166,6 @@ public:
         return this->encode(value.data(), value.size());
     }
 
-    template <typename T, size_t size> bool encode(std::array<T, size> &value)
-    {
-        return this->encode(value.data(), value.size());
-    }
-
     template <typename T, size_t size> bool encode(T value[size])
     {
         return this->encode(value, size);
@@ -186,7 +181,7 @@ public:
         return encode(pair.first) && encodeKeyValuePairSeparator() && encode(pair.second) && encodeListSeparator();
     }
 
-    template <typename T> bool encode(T *value, size_t size)
+    template <typename T> bool encode(const T *value, const size_t &size)
     {
         bool result = encodeListStart(size);
         for (size_t i = 0; i < size; i++) {
