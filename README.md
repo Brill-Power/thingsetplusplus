@@ -7,16 +7,62 @@ ThingSet framework in C++.
 ThingSet is a transport-agnostic data accessibility framework for embedded devices. For more
 information on ThingSet, please visit [the ThingSet web site](https://thingset.io/).
 
-There are three transports in various stages of completeness and maturity:
+There are four transports in various stages of completeness and maturity:
 
 - SocketCAN - client and server (Linux)
 - Zephyr CAN - client and server (Zephyr RTOS)
 - TCP/UDP Sockets - client and server (Linux, macOS (client only), FreeBSD, OpenBSD, Zephyr RTOS)
 - TCP/UDP asio Sockets - client and server (Linux, macOS, FreeBSD, OpenBSD)
 
-The client components have had more real-world testing than the server.
+Both text (JSON) and binary (CBOR) encodings are supported.
 
-At present, only binary mode (CBOR) is supported.
+## Getting Started
+
+The basic building block is a property. A property has an ID, a parent, a name and a type. For
+example:
+
+```c++
+ThingSetReadWriteProperty<0x300, 0, "voltage", float> voltage = 24;
+```
+
+A property so declared provides its own storage for the given value. Alternatively,
+a property may be declared with a pointer:
+
+```c++
+float voltage;
+ThingSetReadWriteProperty<0x300, 0, "voltage", float *> voltageProperty(&voltage);
+```
+
+Assignment to the property will update the underlying value.
+
+All the basic primitive types are supported. Properties may also be structures*, or arrays of primitives
+or structures (known in C ThingSet as 'records').
+
+Structures should be declared thus:
+
+```c++
+struct ModuleRecord
+{
+    ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
+    ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+};
+```
+
+As in C ThingSet, the above will be serialised as a map, with either integer ID or string name keys.
+
+Once you have declared your properties, instantiate a server with an appropriate transport to expose
+them to clients.
+
+```c++
+ThingSetSocketServerTransport transport;
+auto server = ThingSetServerBuilder::build(transport);
+server.listen();
+```
+
+(* There is no direct equivalent of a single structure being a value in C ThingSet, which may cause
+compatibility problems.)
 
 ## Decoding
 
