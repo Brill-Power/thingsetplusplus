@@ -224,7 +224,7 @@ bool ThingSetBinaryEncoder::encodeListStart()
     return encodeListStart(UINT8_MAX);
 }
 
-bool ThingSetBinaryEncoder::encodeListStart(uint32_t count)
+bool ThingSetBinaryEncoder::encodeListStart(const uint32_t &count)
 {
     return this->ensureState() && zcbor_list_start_encode(this->getState(), count);
 }
@@ -234,7 +234,7 @@ bool ThingSetBinaryEncoder::encodeListEnd()
     return encodeListEnd(UINT8_MAX);
 }
 
-bool ThingSetBinaryEncoder::encodeListEnd(uint32_t count)
+bool ThingSetBinaryEncoder::encodeListEnd(const uint32_t &count)
 {
     if (this->getIsForwardOnly()) {
         return this->ensureState() && encodeListMapEnd(this->getState());
@@ -249,7 +249,7 @@ bool ThingSetBinaryEncoder::encodeMapStart()
     return encodeMapStart(UINT8_MAX);
 }
 
-bool ThingSetBinaryEncoder::encodeMapStart(uint32_t count)
+bool ThingSetBinaryEncoder::encodeMapStart(const uint32_t &count)
 {
     return this->ensureState() && zcbor_map_start_encode(this->getState(), count);
 }
@@ -259,7 +259,7 @@ bool ThingSetBinaryEncoder::encodeMapEnd()
     return encodeMapEnd(UINT8_MAX);
 }
 
-bool ThingSetBinaryEncoder::encodeMapEnd(uint32_t count)
+bool ThingSetBinaryEncoder::encodeMapEnd(const uint32_t &count)
 {
     if (this->getIsForwardOnly()) {
         return this->ensureState() && encodeListMapEnd(this->getState());

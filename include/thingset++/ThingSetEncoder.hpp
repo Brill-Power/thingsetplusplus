@@ -60,6 +60,7 @@ public:
     virtual bool encode(const int64_t &value) = 0;
     virtual bool encode(int64_t &value) = 0;
     virtual bool encode(int64_t *value) = 0;
+    bool encode(const ThingSetEncodable &value);
     bool encode(ThingSetEncodable &value);
     bool encode(ThingSetEncodable *value);
     virtual bool encodeNull() = 0;
@@ -73,36 +74,36 @@ public:
     /// will contain.
     /// @param count The number of elements in the list.
     /// @return True if encoding succeeded, otherwise false.
-    virtual bool encodeListStart(uint32_t count) = 0;
+    virtual bool encodeListStart(const uint32_t &count) = 0;
     virtual bool encodeListEnd() = 0;
     /// @brief Encode the end of a list, specifying the number of elements the list
     /// contained. It should match the number passed to @ref encodeListStart.
     /// @param count The number of elements in the list.
     /// @return True if encoding succeeded, otherwise false.
-    virtual bool encodeListEnd(uint32_t count) = 0;
+    virtual bool encodeListEnd(const uint32_t &count) = 0;
     virtual bool encodeMapStart() = 0;
     /// @brief Encode the start of a map, specifying the number of key-value pairs the map
     /// will contain.
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
-    virtual bool encodeMapStart(uint32_t count) = 0;
+    virtual bool encodeMapStart(const uint32_t &count) = 0;
     virtual bool encodeMapEnd() = 0;
     /// @brief Encode the end of a map, specifying the number of key-value pairs the map
     /// contained. It should match the number passed to @ref encodeMapStart.
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
-    virtual bool encodeMapEnd(uint32_t count) = 0;
+    virtual bool encodeMapEnd(const uint32_t &count) = 0;
 
     /// @brief Encode a linked list.
     /// @tparam T The type of items in the list.
     /// @param value A reference to the list to be encoded.
     /// @return True if encoding succeeded, otherwise false.
-    template <typename T> bool encode(std::list<T> &value)
+    template <typename T> bool encode(const std::list<T> &value)
     {
         if (!encodeListStart(value.size())) {
             return false;
         }
-        for (T &item : value) {
+        for (const T &item : value) {
             if (!encode(item)) {
                 return false;
             }
@@ -115,13 +116,13 @@ public:
     /// @tparam V The type of the values in the map.
     /// @param map A reference to the map to be encoded.
     /// @return True if encoding succeeded, otherwise false.
-    template <typename K, typename V> bool encode(std::map<K, V> &map)
+    template <typename K, typename V> bool encode(const std::map<K, V> &map)
     {
         if (!encodeMapStart(map.size())) {
             return false;
         }
-        for (auto const &[key, value] : map) {
-            if (!encode(std::make_pair(key, value))) {
+        for (const std::pair<K, V>& pair : map) {
+            if (!encode(pair)) {
                 return false;
             }
         }
@@ -134,7 +135,7 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     template <typename T>
         requires std::is_class_v<T>
-    bool encode(T &value)
+    bool encode(const T &value)
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
         auto count = std::tuple_size_v<decltype(bound)>;
@@ -160,7 +161,7 @@ public:
     /// @tparam size The size of the array.
     /// @param value A reference to the array to be encoded.
     /// @return True if encoding succeeded, otherwise false.
-    template <typename T, size_t size> bool encode(std::array<T, size> &value)
+    template <typename T, size_t size> bool encode(const std::array<T, size> &value)
     {
         return this->encode(value.data(), value.size());
     }
@@ -180,7 +181,7 @@ public:
         return encode(pair.first) && encodeKeyValuePairSeparator() && encode(pair.second) && encodeListSeparator();
     }
 
-    template <typename T> bool encode(T *value, size_t size)
+    template <typename T> bool encode(const T *value, const size_t &size)
     {
         bool result = encodeListStart(size);
         for (size_t i = 0; i < size; i++) {
@@ -221,7 +222,7 @@ private:
 class ThingSetEncodable
 {
 public:
-    virtual bool encode(ThingSetEncoder &encoder) = 0;
+    virtual bool encode(ThingSetEncoder &encoder) const = 0;
 };
 
 }; // namespace ThingSet

@@ -175,13 +175,13 @@ bool ThingSetTextDecoder::decodeMapEnd()
     return false;
 }
 
-bool ThingSetTextDecoder::isInMap()
+bool ThingSetTextDecoder::isInMap() const
 {
     // TODO: concoct better test that does not rely on exact formatting
     return (_bufferElemPtr < _bufferSize) && (_inputBuffer[_bufferElemPtr] != '}');
 }
 
-bool ThingSetTextDecoder::isInList()
+bool ThingSetTextDecoder::isInList() const
 {
     // TODO: concoct better test that does not rely on exact formatting
     return (_bufferElemPtr < _bufferSize) && (_inputBuffer[_bufferElemPtr] != ']');

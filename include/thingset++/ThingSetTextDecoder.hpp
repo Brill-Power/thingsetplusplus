@@ -64,8 +64,8 @@ public:
 protected:
     bool decodeMapStart() override;
     bool decodeMapEnd() override;
-    bool isInMap() override;
-    bool isInList() override;
+    bool isInMap() const override;
+    bool isInList() const override;
     bool ensureListSize(const size_t size, size_t &elementCount) override;
 
 private:

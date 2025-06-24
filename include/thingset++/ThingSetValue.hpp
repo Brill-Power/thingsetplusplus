@@ -32,7 +32,7 @@ public:
     ThingSetValue(const U &value) : _value(value)
     {}
 
-    bool encode(ThingSetEncoder &encoder) override
+    bool encode(ThingSetEncoder &encoder) const override
     {
         return encoder.encode(_value);
     }
@@ -43,6 +43,11 @@ public:
     }
 
     T &getValue()
+    {
+        return _value;
+    }
+
+    const T &getValue() const
     {
         return _value;
     }
@@ -102,7 +107,7 @@ public:
     ThingSetValue(std::array<Element, Size> &&value) : _value(std::move(value))
     {}
 
-    bool encode(ThingSetEncoder &encoder) override
+    bool encode(ThingSetEncoder &encoder) const override
     {
         return encoder.encode(_value);
     }
@@ -113,6 +118,11 @@ public:
     }
 
     std::array<Element, Size> &getValue()
+    {
+        return _value;
+    }
+
+    const std::array<Element, Size> &getValue() const
     {
         return _value;
     }
@@ -139,7 +149,7 @@ public:
     ThingSetValue(T *value) : _value(value)
     {}
 
-    bool encode(ThingSetEncoder &encoder) override
+    bool encode(ThingSetEncoder &encoder) const override
     {
         return encoder.encode(_value);
     }
@@ -162,6 +172,11 @@ public:
     }
 
     T *getValue()
+    {
+        return _value;
+    }
+
+    const T *getValue() const
     {
         return _value;
     }

@@ -163,8 +163,8 @@ public:
 protected:
     virtual bool decodeMapStart() = 0;
     virtual bool decodeMapEnd() = 0;
-    virtual bool isInMap() = 0;
-    virtual bool isInList() = 0;
+    virtual bool isInMap() const = 0;
+    virtual bool isInList() const = 0;
     virtual bool ensureListSize(const size_t size, size_t &elementCount) = 0;
 
 private:
