@@ -106,13 +106,13 @@ public:
         std::string name;
         while (decodeKey(id, name)) {
             if (id < UINT32_MAX) {
-                if (!switchDecode(id, bound)) {
+                if (!switchDecode(id, []<typename P>(){ return P::id; }, bound)) {
                     if (!skip()) {
                         return false;
                     }
                 }
             } else if (!name.empty()) {
-                if (!switchDecode(name, bound)) {
+                if (!switchDecode(name, []<typename P>(){ return P::name; }, bound)) {
                     if (!skip()) {
                         return false;
                     }
@@ -171,12 +171,15 @@ private:
     bool decodeKey(uint32_t &id, std::string &name);
 
     // thanks to https://stackoverflow.com/questions/75163129/convert-variadic-template-ints-to-switch-statement?rq=3
-    template <class Fields, std::size_t... Is>
-    bool switchDecode(const uint32_t &id, Fields &f, std::index_sequence<Is...>)
+    // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
+    template <typename Key, class Fields, std::size_t... Is>
+    bool switchDecode(const Key &key, auto keySelector, Fields &f, std::index_sequence<Is...>)
     {
         bool ret = false;
         return ([&] {
-            if (id == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::id) {
+            // https://lemire.me/blog/2025/03/15/speeding-up-c-code-with-template-lambdas/
+            // (for helping with passing template parameters to lambdas)
+            if (key == keySelector.template operator()<typename std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>>()) {
                 ret = std::get<Is>(f)->decode(*this);
                 return true;
             }
@@ -187,30 +190,9 @@ private:
         return ret;
     }
 
-    template <class Fields> bool switchDecode(const uint32_t &id, Fields &f)
+    template <typename Key, class Fields> bool switchDecode(const Key &key, auto keySelector, Fields &f)
     {
-        return switchDecode<Fields>(id, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
-    }
-
-    // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
-    template <class Fields, std::size_t... Is>
-    bool switchDecode(const std::string &name, Fields &f, std::index_sequence<Is...>)
-    {
-        bool ret = false;
-        return ([&] {
-            if (name == std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>::name)
-            {
-                ret = std::get<Is>(f)->decode(*this);
-                return true;
-            }
-            return false;
-        }() || ...);
-        return ret;
-    }
-
-    template <class Fields> bool switchDecode(const std::string &name, Fields &f)
-    {
-        return switchDecode<Fields>(name, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
+        return switchDecode<Key, Fields>(key, keySelector, f, std::make_index_sequence<std::tuple_size_v<Fields>>());
     }
 };
 
