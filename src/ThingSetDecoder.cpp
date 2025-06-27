@@ -7,14 +7,16 @@
 
 namespace ThingSet {
 
-bool ThingSetDecoder::decodeKey(uint32_t &id, std::string &name)
+bool ThingSetDecoder::decodeKey(std::optional<uint32_t> &id, std::optional<std::string> &name)
 {
-    id = UINT32_MAX;
-    name = "";
-    if (decode(&id)) {
+    uint32_t i;
+    std::string n;
+    if (decode(&i)) {
+        id = i;
         return true;
     }
-    else if (decode(&name)) {
+    else if (decode(&n)) {
+        name = n;
         return true;
     } else {
         return false;

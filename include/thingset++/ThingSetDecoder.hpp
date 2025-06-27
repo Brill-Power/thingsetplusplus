@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <string>
 #include <functional>
+#include <optional>
 #include "internal/bind_to_tuple.hpp"
 
 namespace ThingSet {
@@ -102,16 +103,16 @@ public:
         if (!decodeMapStart()) {
             return false;
         }
-        uint32_t id;
-        std::string name;
+        std::optional<uint32_t> id;
+        std::optional<std::string> name;
         while (decodeKey(id, name)) {
-            if (id < UINT32_MAX) {
+            if (id.has_value()) {
                 if (!switchDecode(id, []<typename P>(){ return P::id; }, bound)) {
                     if (!skip()) {
                         return false;
                     }
                 }
-            } else if (!name.empty()) {
+            } else if (name.has_value()) {
                 if (!switchDecode(name, []<typename P>(){ return P::name; }, bound)) {
                     if (!skip()) {
                         return false;
@@ -168,7 +169,7 @@ protected:
     virtual bool ensureListSize(const size_t size, size_t &elementCount) = 0;
 
 private:
-    bool decodeKey(uint32_t &id, std::string &name);
+    bool decodeKey(std::optional<uint32_t> &id, std::optional<std::string> &name);
 
     // thanks to https://stackoverflow.com/questions/75163129/convert-variadic-template-ints-to-switch-statement?rq=3
     // adapted from https://stackoverflow.com/questions/46278997/variadic-templates-and-switch-statement
