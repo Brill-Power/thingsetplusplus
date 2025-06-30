@@ -18,6 +18,7 @@ add_executable(testapp)
 include_directories(../include ../zcbor/include ../asio/asio/include)
 
 target_sources(testapp PRIVATE TestBinaryEncoder.cpp
+    TestStreamingBinaryEncoder.cpp
     TestBinaryDecoder.cpp
     TestTextEncoder.cpp
     TestTextDecoder.cpp

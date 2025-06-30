@@ -46,6 +46,10 @@ public:
     bool flush()
     {
         size_t currentLength = _state->payload - &_buffer[0];
+        if (currentLength > Size) {
+            writeIfNecessary();
+            currentLength = _state->payload - &_buffer[0];
+        }
         size_t remainder = _buffer.size() - currentLength;
         memset(&_buffer[currentLength], 0, remainder);
         bool result = write(currentLength, true);
