@@ -38,14 +38,6 @@ template <size_t N> struct StringLiteral
         return std::string_view(std::data(arr_), N - 1);
     }
 
-    template <int Length> requires (Length < N)
-    constexpr StringLiteral<N - Length> cut()
-    {
-        std::array<char, N - Length> array;
-        std::copy_n(&arr_[0], N - Length, std::data(array));
-        return StringLiteral(array);
-    }
-
     std::array<char, N> arr_{};
 };
 
