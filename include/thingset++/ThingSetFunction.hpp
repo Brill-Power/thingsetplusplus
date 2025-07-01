@@ -39,6 +39,15 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &
     return encoder.encodeNull();
 }
 
+template<template<size_t> typename T, size_t Size, typename Sequence = std::make_index_sequence<Size>>
+struct _ArgumentTransformer;
+
+template<template<size_t> typename T, size_t... Indices>
+struct _ArgumentTransformer<T, sizeof...(Indices), std::index_sequence<Indices...>>
+{
+    using type = std::tuple<typename T<Indices>::type...>;
+};
+
 /// @brief Represents an executable function.
 /// @tparam Id The unique integer ID of the ThingSet node.
 /// @tparam ParentId The integer ID of the parent node.
@@ -50,8 +59,41 @@ template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Acc
 class ThingSetFunction : public IdentifiableThingSetParentNode<Id, ParentId, Name>, public ThingSetInvocable
 {
 private:
+    template <unsigned ChildId, StringLiteral ArgName, typename T>
+    class ThingSetFunctionParameter : public IdentifiableThingSetNode<ChildId, Id, ArgName>
+    {
+        const std::string getType() const override
+        {
+            return ThingSetType<T>::name.str();
+        }
+
+        constexpr ThingSetNodeType getNodeType() const override
+        {
+            return ThingSetNodeType::parameter;
+        }
+
+        constexpr ThingSetAccess getAccess() const override
+        {
+            return ThingSetAccess::anyReadWrite;
+        }
+
+        bool checkAccess(ThingSetAccess) const override
+        {
+            return true;
+        }
+    };
+
+    template <size_t Index>
+    struct ParameterBuilder
+    {
+        using Tuple = std::tuple<Args...>;
+        using Type = std::tuple_element_t<Index, Tuple>;
+        typedef ThingSetFunctionParameter<Id + 1 + Index, Name + ThingSetType<Type>::name, Type> type;
+    };
+
     /// @brief The exposed function.
     std::function<Result(Args...)> _function;
+    _ArgumentTransformer<ParameterBuilder, sizeof...(Args)>::type _parameters;
     /// @brief The storage into which function arguments are decoded before invocation.
     std::tuple<Args...> _arguments;
 
@@ -62,7 +104,7 @@ public:
 
     const std::string getType() const override
     {
-        return ThingSetType<std::function<Result(Args...)>>::name;
+        return ThingSetType<std::function<Result(Args...)>>::name.str();
     }
 
     constexpr ThingSetNodeType getNodeType() const override

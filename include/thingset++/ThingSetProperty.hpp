@@ -30,7 +30,7 @@ protected:
 public:
     const std::string getType() const override
     {
-        return ThingSetType<std::remove_pointer_t<T>>::name;
+        return ThingSetType<std::remove_pointer_t<T>>::name.str();
     }
 
     constexpr ThingSetNodeType getNodeType() const override

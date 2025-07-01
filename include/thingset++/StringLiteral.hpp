@@ -38,8 +38,53 @@ template <size_t N> struct StringLiteral
         return std::string_view(std::data(arr_), N - 1);
     }
 
+    template <int Length> requires (Length < N)
+    constexpr StringLiteral<N - Length> cut()
+    {
+        std::array<char, N - Length> array;
+        std::copy_n(&arr_[0], N - Length, std::data(array));
+        return StringLiteral(array);
+    }
+
     std::array<char, N> arr_{};
 };
+
+template <size_t N1, size_t N2>
+constexpr inline StringLiteral<N1 + N2> operator,(const StringLiteral<N1> &left, const StringLiteral<N2> &right)
+{
+    std::array<char, N1 + N2> array;
+    std::copy_n(&left.arr_[0], N1, std::data(array));
+    array[N1 - 1] = ',';
+    std::copy_n(&right.arr_[0], N2, &(std::data(array))[N1]);
+    return StringLiteral(array);
+}
+
+template <size_t N1, size_t N2>
+constexpr inline StringLiteral<N1 + N2 - 1> operator+(const StringLiteral<N1> &left, const char (&right)[N2])
+{
+    std::array<char, N1 + N2 - 1> array;
+    std::copy_n(&left.arr_[0], N1, std::data(array));
+    std::copy_n(right, N2, &(std::data(array))[N1 - 1]);
+    return StringLiteral(array);
+}
+
+template <size_t N1, size_t N2>
+constexpr inline StringLiteral<N1 + N2 - 1> operator+(const char (&left)[N1], const StringLiteral<N2> &right)
+{
+    std::array<char, N1 + N2 - 1> array;
+    std::copy_n(left, N1, std::data(array));
+    std::copy_n(&right.arr_[0], N2, &(std::data(array))[N1 - 1]);
+    return StringLiteral(array);
+}
+
+template <size_t N1, size_t N2>
+constexpr inline StringLiteral<N1 + N2 - 1> operator+(const StringLiteral<N1> &left, const StringLiteral<N2> &right)
+{
+    std::array<char, N1 + N2 - 1> array;
+    std::copy_n(&left.arr_[0], N1, std::data(array));
+    std::copy_n(&right.arr_[0], N2, &(std::data(array))[N1 - 1]);
+    return StringLiteral(array);
+}
 
 template <size_t N1, size_t N2>
 constexpr inline bool operator==(const StringLiteral<N1> &_first, const StringLiteral<N2> &_second)
