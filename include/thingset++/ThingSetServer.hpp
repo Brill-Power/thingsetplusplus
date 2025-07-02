@@ -41,6 +41,7 @@ private:
 protected:
     int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
     int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
+    virtual bool handleForward(ThingSetRequestContext &context) = 0;
 
     template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T,
               EncodableDecodableNode... Property>
@@ -57,12 +58,28 @@ protected:
     }
 };
 
+class ThingSetForwarder
+{
+protected:
+    virtual bool tryForward(ThingSetRequestContext &context) = 0;
+};
+
+class DefaultForwarder : public ThingSetForwarder
+{
+protected:
+    inline bool tryForward(ThingSetRequestContext &) override
+    {
+        return false;
+    }
+};
+
 /// @brief Core server implementation.
 /// @tparam Identifier Type of client identifier
 /// @tparam Size Size of broadcast message frames
 /// @tparam Encoder Type of streaming encoder
-template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
-class ThingSetServer : public _ThingSetServer
+template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder, typename Forwarder = DefaultForwarder>
+    requires std::is_base_of_v<ThingSetForwarder, Forwarder>
+class ThingSetServer : public _ThingSetServer, public Forwarder
 {
 private:
     ThingSetServerTransport<Identifier, Size, Encoder> &_transport;
@@ -93,6 +110,12 @@ public:
             return false;
         }
         return encoder.flush();
+    }
+
+protected:
+    bool handleForward(ThingSetRequestContext &context) override
+    {
+        return this->tryForward(context);
     }
 
 private:

@@ -20,6 +20,7 @@ namespace ThingSet {
 class ThingSetRequestContext
 {
 protected:
+    uint8_t *_request;
     size_t _requestLength;
     /// @brief Pointer to the buffer into which the response will be written.
     uint8_t *_response;
@@ -27,7 +28,7 @@ protected:
     /// @brief The path to the node to which this request relates.
     std::optional<std::string> _path;
 
-    ThingSetRequestContext(uint8_t *resp);
+    ThingSetRequestContext(uint8_t *request, size_t requestLength, uint8_t *response);
 
 public:
     /// @brief Pointer to the ThingSet node this request relates to.
@@ -35,7 +36,11 @@ public:
     /// @brief If the node is an array, indicates the array element to which the request relates.
     size_t index;
 
+    /// @brief Indicates whether the request contains a valid endpoint.
     bool hasValidEndpoint();
+
+    /// @brief Indicates whether the request is to be forwarded to another device.
+    bool isToBeForwarded();
 
     /// @brief If true, keys in responses will be encoded as integer IDs; if false, as strings.
     bool useIds();
@@ -57,41 +62,33 @@ public:
     constexpr virtual size_t getHeaderLength() const = 0;
 };
 
-template <typename T>
-concept Enum = std::is_enum_v<T>;
-
-template <Enum RequestType>
+template <typename RequestType> requires std::is_enum_v<RequestType>
 class _ThingSetRequestContext : public ThingSetRequestContext
 {
-private:
-    /// @brief Specifies the request type.
-    RequestType _requestType;
-
 protected:
-    _ThingSetRequestContext(uint8_t *request, uint8_t *resp) :
-        ThingSetRequestContext(resp),
-        _requestType((RequestType)request[0])
+    _ThingSetRequestContext(uint8_t *request, size_t requestLength, uint8_t *resp) :
+        ThingSetRequestContext(request, requestLength, resp)
     {}
 
 public:
     bool isGet() override {
-        return _requestType == RequestType::get;
+        return (RequestType)_request[0] == RequestType::get;
     }
 
     bool isFetch() override {
-        return _requestType == RequestType::fetch;
+        return (RequestType)_request[0] == RequestType::fetch;
     }
 
     bool isUpdate() override {
-        return _requestType == RequestType::update;
+        return (RequestType)_request[0] == RequestType::update;
     }
 
     bool isDelete() override {
-        return _requestType == RequestType::remove;
+        return (RequestType)_request[0] == RequestType::remove;
     }
 
     bool isExec() override {
-        return _requestType == RequestType::exec;
+        return (RequestType)_request[0] == RequestType::exec;
     }
 };
 
