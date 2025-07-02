@@ -92,11 +92,11 @@ constexpr inline StringLiteral<N1 + N2 - 1> _concatenate(const Left &left, const
     return StringLiteral(array);
 }
 
-template <size_t N1, typename T>
-constexpr inline StringLiteral<N1 + T::size() - 1> operator+(const StringLiteral<N1> &left, const T& right)
+template <size_t N1, std::intmax_t I>
+constexpr inline StringLiteral<N1 + to_string_t<I>::size() - 1> operator+(const StringLiteral<N1> &left, const to_string_t<I>& right)
 {
     const char* rhs = right;
-    return _concatenate<N1, T::size()>(&left.arr_[0], rhs);
+    return _concatenate<N1, to_string_t<I>::size()>(&left.arr_[0], rhs);
 }
 
 template <size_t N1, size_t N2>
