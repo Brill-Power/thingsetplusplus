@@ -88,8 +88,8 @@ private:
     struct _ParameterBuilder
     {
         using Tuple = std::tuple<Args...>;
-        using Type = std::tuple_element_t<Index, Tuple>;
-        typedef ThingSetFunctionParameter<Id + 1 + Index, Name + ThingSetType<Type>::name + "_" + to_string_t<1 + Index>(), Type> type;
+        using ParameterType = std::tuple_element_t<Index, Tuple>;
+        typedef ThingSetFunctionParameter<Id + 1 + Index, Name + ThingSetType<ParameterType>::name + "_" + to_string_t<1 + Index>(), ParameterType> type;
     };
 
     /// @brief The exposed function.
