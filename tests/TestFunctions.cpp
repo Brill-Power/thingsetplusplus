@@ -22,9 +22,9 @@ static void voidvoid()
 }
 
 ThingSetUserFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
-ThingSetUserFunction<0x403, 0x0, "xVoid", void> xVoidVoidFunc(voidvoid);
-ThingSetUserFunction<0x404, 0x0, "xLambda", float, float, float> xFloatLambda([](float x, float y) { return x * y; });
-ThingSetUserFunction<0x405, 0x0, "xMap", std::map<std::string, float>> xGetMap([]() {
+ThingSetUserFunction<0x410, 0x0, "xVoid", void> xVoidVoidFunc(voidvoid);
+ThingSetUserFunction<0x420, 0x0, "xLambda", float, float, float> xFloatLambda([](float x, float y) { return x * y; });
+ThingSetUserFunction<0x430, 0x0, "xMap", std::map<std::string, float>> xGetMap([]() {
     auto map = std::map<std::string, float>();
     map.insert_or_assign("hello", 1.0f);
     map.insert_or_assign("world", 2.0f);
@@ -36,6 +36,21 @@ TEST(Functions, FunctionTypes)
     ASSERT_EQ("(i32,f32)->()", xTestFunc.getType());
     ASSERT_EQ("()->()", xVoidVoidFunc.getType());
     ASSERT_EQ("(f32,f32)->(f32)", xFloatLambda.getType());
+}
+
+TEST(Functions, FunctionParameters)
+{
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x401, &node));
+    ASSERT_EQ(0x400, node->getParentId());
+    ASSERT_EQ("xTesti32_1", node->getName());
+    ASSERT_TRUE(ThingSetRegistry::findById(0x402, &node));
+    ASSERT_EQ(0x400, node->getParentId());
+    ASSERT_EQ("xTestf32_2", node->getName());
+
+    ASSERT_TRUE(ThingSetRegistry::findById(0x421, &node));
+    ASSERT_EQ(0x420, node->getParentId());
+    ASSERT_EQ("xLambdaf32_1", node->getName());
 }
 
 TEST(Functions, InvokeLambda)
