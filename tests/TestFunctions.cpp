@@ -43,11 +43,14 @@ TEST(Functions, FunctionParameters)
     ThingSetNode *node;
     ASSERT_TRUE(ThingSetRegistry::findById(0x401, &node));
     ASSERT_EQ(0x400, node->getParentId());
-    ASSERT_EQ("xTesti32", node->getName());
+    ASSERT_EQ("xTesti32_1", node->getName());
+    ASSERT_TRUE(ThingSetRegistry::findById(0x402, &node));
+    ASSERT_EQ(0x400, node->getParentId());
+    ASSERT_EQ("xTestf32_2", node->getName());
 
     ASSERT_TRUE(ThingSetRegistry::findById(0x421, &node));
     ASSERT_EQ(0x420, node->getParentId());
-    ASSERT_EQ("xLambdaf32", node->getName());
+    ASSERT_EQ("xLambdaf32_1", node->getName());
 }
 
 TEST(Functions, InvokeLambda)

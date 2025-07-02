@@ -39,15 +39,6 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &
     return encoder.encodeNull();
 }
 
-template<template<size_t> typename T, size_t Size, typename Sequence = std::make_index_sequence<Size>>
-struct _ArgumentTransformer;
-
-template<template<size_t> typename T, size_t... Indices>
-struct _ArgumentTransformer<T, sizeof...(Indices), std::index_sequence<Indices...>>
-{
-    using type = std::tuple<typename T<Indices>::type...>;
-};
-
 /// @brief Represents an executable function.
 /// @tparam Id The unique integer ID of the ThingSet node.
 /// @tparam ParentId The integer ID of the parent node.
@@ -83,17 +74,28 @@ private:
         }
     };
 
+    // Inspired by https://stackoverflow.com/questions/67423250/transform-the-stdtuple-types-to-another-ones
+    template<template<size_t> typename T, size_t Size, typename Sequence = std::make_index_sequence<Size>>
+    struct _ArgumentTransformer;
+
+    template<template<size_t> typename T, size_t... Indices>
+    struct _ArgumentTransformer<T, sizeof...(Indices), std::index_sequence<Indices...>>
+    {
+        using type = std::tuple<typename T<Indices>::type...>;
+    };
+
     template <size_t Index>
-    struct ParameterBuilder
+    struct _ParameterBuilder
     {
         using Tuple = std::tuple<Args...>;
         using Type = std::tuple_element_t<Index, Tuple>;
-        typedef ThingSetFunctionParameter<Id + 1 + Index, Name + ThingSetType<Type>::name, Type> type;
+        typedef ThingSetFunctionParameter<Id + 1 + Index, Name + ThingSetType<Type>::name + "_" + to_string_t<1 + Index>(), Type> type;
     };
 
     /// @brief The exposed function.
     std::function<Result(Args...)> _function;
-    _ArgumentTransformer<ParameterBuilder, sizeof...(Args)>::type _parameters;
+    /// @brief A tuple containing ThingSet nodes which represent the parameters to the function.
+    _ArgumentTransformer<_ParameterBuilder, sizeof...(Args)>::type _parameters;
     /// @brief The storage into which function arguments are decoded before invocation.
     std::tuple<Args...> _arguments;
 
