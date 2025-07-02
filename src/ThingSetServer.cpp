@@ -41,6 +41,19 @@ int _ThingSetServer::handleRequest(ThingSetRequestContext &context)
         context.setStatus(ThingSetStatusCode::badRequest);
         return context.getHeaderLength();
     }
+    if (context.isToBeForwarded())
+    {
+        if (handleForward(context))
+        {
+            // TODO: get encoded length of response
+            return context.getHeaderLength();
+        }
+        else
+        {
+            context.setStatus(ThingSetStatusCode::notAGateway);
+            return context.getHeaderLength();
+        }
+    }
     if (context.useIds())
     {
         if (!ThingSetRegistry::findById(context.id(), &context.node)) {

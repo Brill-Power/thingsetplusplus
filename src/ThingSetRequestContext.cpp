@@ -8,8 +8,8 @@
 
 namespace ThingSet {
 
-ThingSetRequestContext::ThingSetRequestContext(uint8_t *resp)
-    : _response(resp), index(SIZE_MAX)
+ThingSetRequestContext::ThingSetRequestContext(uint8_t *request, size_t requestLength, uint8_t *response)
+    : _request(request), _requestLength(requestLength), _response(response), index(SIZE_MAX)
 {}
 
 uint16_t &ThingSetRequestContext::id()
@@ -27,13 +27,18 @@ bool ThingSetRequestContext::hasValidEndpoint()
     return _id.has_value() || _path.has_value();
 }
 
+bool ThingSetRequestContext::isToBeForwarded()
+{
+    return _path.has_value() && _path.value().length() > 1 && _path.value()[0] == '/';
+}
+
 bool ThingSetRequestContext::useIds()
 {
     return _id.has_value();
 }
 
 ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
-    _ThingSetRequestContext(request, resp),
+    _ThingSetRequestContext(request, requestLen, resp),
     _encoder(resp + 1, responseLen - 1),
     _decoder(request + 1, requestLen - 1, 2)
 {
@@ -56,7 +61,7 @@ bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
 }
 
 ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
-    _ThingSetRequestContext(request, resp),
+    _ThingSetRequestContext(request, requestLen, resp),
     _encoder(reinterpret_cast<char *>(resp) + 4, responseLen - 4),
     _decoder(reinterpret_cast<char *>(request) + 1, requestLen - 1)
 {
@@ -72,7 +77,6 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
     {
         _path = std::string(pathStart, requestLen - 1);
     }
-
 }
 
 bool ThingSetTextRequestContext::setStatus(const ThingSetStatusCode &status)
