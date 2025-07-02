@@ -4,6 +4,7 @@
 #include <array>
 #include <string>
 #include <string_view>
+#include <cstdint>
 
 // Adapted from the original in reflect-cpp
 // (https://github.com/getml/reflect-cpp/blob/main/include/rfl/internal/StringLiteral.hpp)
