@@ -83,41 +83,38 @@ constexpr inline StringLiteral<N1 + N2> operator,(const StringLiteral<N1> &left,
     return StringLiteral(array);
 }
 
+template <size_t N1, size_t N2, typename Left, typename Right>
+constexpr inline StringLiteral<N1 + N2 - 1> _concatenate(const Left &left, const Right &right)
+{
+    std::array<char, N1 + N2 - 1> array;
+    std::copy_n(left, N1, std::data(array));
+    std::copy_n(right, N2, &(std::data(array))[N1 - 1]);
+    return StringLiteral(array);
+}
+
 template <size_t N1, typename T>
 constexpr inline StringLiteral<N1 + T::size() - 1> operator+(const StringLiteral<N1> &left, const T& right)
 {
-    std::array<char, N1 + T::size() - 1> array;
-    std::copy_n(&left.arr_[0], N1, std::data(array));
     const char* rhs = right;
-    std::copy_n(rhs, T::size(), &(std::data(array))[N1 - 1]);
-    return StringLiteral(array);
+    return _concatenate<N1, T::size()>(&left.arr_[0], rhs);
 }
 
 template <size_t N1, size_t N2>
 constexpr inline StringLiteral<N1 + N2 - 1> operator+(const StringLiteral<N1> &left, const char (&right)[N2])
 {
-    std::array<char, N1 + N2 - 1> array;
-    std::copy_n(&left.arr_[0], N1, std::data(array));
-    std::copy_n(right, N2, &(std::data(array))[N1 - 1]);
-    return StringLiteral(array);
+    return _concatenate<N1, N2>(&left.arr_[0], right);
 }
 
 template <size_t N1, size_t N2>
 constexpr inline StringLiteral<N1 + N2 - 1> operator+(const char (&left)[N1], const StringLiteral<N2> &right)
 {
-    std::array<char, N1 + N2 - 1> array;
-    std::copy_n(left, N1, std::data(array));
-    std::copy_n(&right.arr_[0], N2, &(std::data(array))[N1 - 1]);
-    return StringLiteral(array);
+    return _concatenate<N1, N2>(left, &right.arr_[0]);
 }
 
 template <size_t N1, size_t N2>
 constexpr inline StringLiteral<N1 + N2 - 1> operator+(const StringLiteral<N1> &left, const StringLiteral<N2> &right)
 {
-    std::array<char, N1 + N2 - 1> array;
-    std::copy_n(&left.arr_[0], N1, std::data(array));
-    std::copy_n(&right.arr_[0], N2, &(std::data(array))[N1 - 1]);
-    return StringLiteral(array);
+    return _concatenate<N1, N2>(&left.arr_[0], &right.arr_[0]);
 }
 
 template <size_t N1, size_t N2>
