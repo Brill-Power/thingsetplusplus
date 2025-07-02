@@ -73,6 +73,7 @@ template <size_t N> struct StringLiteral
     std::array<char, N> arr_{};
 };
 
+/// @brief Joins two StringLiterals with a comma.
 template <size_t N1, size_t N2>
 constexpr inline StringLiteral<N1 + N2> operator,(const StringLiteral<N1> &left, const StringLiteral<N2> &right)
 {
@@ -83,6 +84,7 @@ constexpr inline StringLiteral<N1 + N2> operator,(const StringLiteral<N1> &left,
     return StringLiteral(array);
 }
 
+/// @brief Helper method to concatenate StringLiterals.
 template <size_t N1, size_t N2, typename Left, typename Right>
 constexpr inline StringLiteral<N1 + N2 - 1> _concatenate(const Left &left, const Right &right)
 {

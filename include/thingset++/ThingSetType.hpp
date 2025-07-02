@@ -15,20 +15,30 @@ template <typename T> struct ThingSetType
     static constexpr StringLiteral name = "record";
 };
 
+/// @brief Type of an array.
+/// @tparam T The type of the elements in the array.
+/// @tparam size The number of elements in the array.
 template <typename T, size_t size> struct ThingSetType<std::array<T, size>>
 {
     static constexpr StringLiteral name = ThingSetType<T>::name + "[]";
 };
 
+/// @brief Type of a function which takes no arguments.
+/// @tparam Result The return type of the function.
 template <typename Result> struct ThingSetType<std::function<Result()>>
 {
     static constexpr StringLiteral name =
         "()->(" + ThingSetType<Result>::name + ")";
 };
 
+/// @brief Type of a function which takes one or more arguments.
+/// @tparam Result The return type of the function.
+/// @tparam ...Args The types of the function arguments.
 template <typename Result, typename... Args> struct ThingSetType<std::function<Result(Args...)>>
 {
 private:
+    /// @brief Uses the , operator overload defined on StringLiteral to join
+    /// successive types together, each separated by a comma.
     struct _concatenator
     {
         static constexpr StringLiteral name = (ThingSetType<Args>::name, ...);
