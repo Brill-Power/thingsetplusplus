@@ -25,12 +25,17 @@ ThingSetCanInterface &ThingSetSocketCanServerTransport::getInterface()
 bool ThingSetSocketCanServerTransport::doPublish(const Can::CanID &id, uint8_t *buffer, size_t length)
 {
     CanFdFrame frame(id);
+    if (length > CAN_MAX_DLEN) {
+        // avoids a hard fault from the memcpy
+        return false;
+    }
     memcpy(frame.getData(), buffer, length);
     frame.setLength(length);
     return _publishSocket.write(frame) > 0;
 }
 
-bool ThingSetSocketCanServerTransport::listen(std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+bool ThingSetSocketCanServerTransport::listen(
+    std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     _listener.listen(CanID()
                          .setMessageType(MessageType::requestResponse)
@@ -44,10 +49,10 @@ bool ThingSetSocketCanServerTransport::listen(std::function<int(const CanID &, u
                          uint8_t response[THINGSET_RESPONSE_BUFFER_SIZE];
                          int responseLength = callback(sender, request, size, response, sizeof(response));
                          socket.write(response, responseLength);
-                         printf("Sent response of size %d bytes to 0x%x\n", responseLength, sender.getReplyId().getId());
+                         printf("Sent response of size %d bytes to 0x%x\n", responseLength,
+                                sender.getReplyId().getId());
                      });
     return true;
 }
-
 
 } // namespace ThingSet::Can::SocketCan
