@@ -42,8 +42,7 @@ public:
     {
         size_t currentLength = _state->payload - &_buffer[0];
         if (currentLength > Size) {
-            bool success = writeIfNecessary();
-            if (!success) {
+            if (!writeIfNecessary()) {
                 return false;
             }
             currentLength = _state->payload - &_buffer[0];

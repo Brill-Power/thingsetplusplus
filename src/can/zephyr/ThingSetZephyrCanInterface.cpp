@@ -34,7 +34,7 @@ bool _ThingSetZephyrCanInterface::publish(CanID &id, uint8_t *buffer, size_t len
     CanFrame frame(id);
     if (length > CAN_MAX_DLEN) {
         LOG_ERR("Buffer length exceeded, length clamped from %i", length);
-        length = CAN_MAX_DLEN;
+        return false;
     }
     memcpy(frame.getData(), buffer, length);
     frame.setLength(length);
