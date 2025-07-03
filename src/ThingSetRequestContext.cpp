@@ -40,13 +40,13 @@ bool ThingSetRequestContext::useIds()
 bool ThingSetRequestContext::tryGetNodeId(std::string &nodeId)
 {
     // first find nodeID by finding next slash
-    const size_t pos = path().find('/', 2);
+    const size_t pos = path().find('/', 1);
     if (pos == std::string::npos)
     {
         return false;
     }
 
-    nodeId = path().substr(2, pos);
+    nodeId = path().substr(1, pos);
     return true;
 }
 
