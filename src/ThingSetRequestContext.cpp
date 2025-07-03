@@ -65,7 +65,7 @@ uint8_t *ThingSetBinaryRequestContext::rewrite(const std::string &nodeId, uint8_
     }
 
     // calculate new start of path as an offset
-    size_t newPathStart = (nodeIdPathComponentStart + nodeId.length() + 1) - request;
+    size_t newPathStart = (nodeIdPathComponentStart + nodeId.length()) - request;
     // new length is old length less node ID and two slashes
     size_t newPathLength = path().length() - nodeId.length() - 2;
     // write new string header
