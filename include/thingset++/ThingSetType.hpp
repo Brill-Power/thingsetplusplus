@@ -41,12 +41,12 @@ private:
     /// successive types together, each separated by a comma.
     struct _concatenator
     {
-        static constexpr StringLiteral name = (ThingSetType<Args>::name, ...);
+        static constexpr StringLiteral value = (ThingSetType<Args>::name, ...);
     };
 
 public:
     static constexpr StringLiteral name =
-        "(" + _concatenator::name + ")->(" + ThingSetType<Result>::name + ")";
+        "(" + _concatenator::value + ")->(" + ThingSetType<Result>::name + ")";
 };
 
 template <> struct ThingSetType<void>

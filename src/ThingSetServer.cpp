@@ -18,41 +18,43 @@ static const uint16_t MetadataNameId = 0x1a;
 static const uint16_t MetadataTypeId = 0x1b;
 static const uint16_t MetadataAccessId = 0x1c;
 
+bool ThingSetForwarder::tryGetNodeId(const std::string &path, std::string &nodeId)
+{
+    const size_t pos = path.find('/', 1);
+    if (pos == std::string::npos)
+    {
+        return false;
+    }
+
+    nodeId = path.substr(1, pos);
+    return true;
+}
+
 _ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
 {}
 
-int _ThingSetServer::handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+int _ThingSetServer::handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
 {
-    ThingSetBinaryRequestContext context(request, requestLen, response, responseLen);
-    return handleRequest(context);
+    ThingSetBinaryRequestContext context(request, requestLen, response, responseSize);
+    return handleRequest(context, request, requestLen, response, responseSize);
 }
 
-int _ThingSetServer::handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+int _ThingSetServer::handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
 {
-    ThingSetTextRequestContext context(request, requestLen, response, responseLen);
-    return handleRequest(context);
+    ThingSetTextRequestContext context(request, requestLen, response, responseSize);
+    return handleRequest(context, request, requestLen, response, responseSize);
 }
 
-int _ThingSetServer::handleRequest(ThingSetRequestContext &context)
+int _ThingSetServer::handleRequest(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
 {
     if (!context.hasValidEndpoint())
     {
-        // fail
         context.setStatus(ThingSetStatusCode::badRequest);
         return context.getHeaderLength();
     }
     if (context.isToBeForwarded())
     {
-        if (handleForward(context))
-        {
-            // TODO: get encoded length of response
-            return context.getHeaderLength();
-        }
-        else
-        {
-            context.setStatus(ThingSetStatusCode::notAGateway);
-            return context.getHeaderLength();
-        }
+        return handleForward(context, request, requestLen, response, responseSize);
     }
     if (context.useIds())
     {
