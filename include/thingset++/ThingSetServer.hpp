@@ -21,19 +21,21 @@ concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_b
 
 class ThingSetForwarder
 {
-protected:
+public:
     virtual int handleForward(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) = 0;
 
+protected:
     static bool tryGetNodeId(const std::string &path, std::string &nodeId);
 };
 
-class _ThingSetServer : protected virtual ThingSetForwarder
+class _ThingSetServer
 {
 private:
     ThingSetAccess _access;
+    ThingSetForwarder *_forwarder;
 
 protected:
-    _ThingSetServer();
+    _ThingSetServer(ThingSetForwarder *forwarder);
 
 public:
     virtual bool listen() = 0;
@@ -65,30 +67,22 @@ protected:
     }
 };
 
-class DefaultForwarder : protected virtual ThingSetForwarder
-{
-protected:
-    inline int handleForward(ThingSetRequestContext &context, uint8_t *, size_t, uint8_t *, size_t) override
-    {
-        context.setStatus(ThingSetStatusCode::notAGateway);
-        return context.getHeaderLength();
-    }
-};
-
 /// @brief Core server implementation.
 /// @tparam Identifier Type of client identifier
 /// @tparam Size Size of broadcast message frames
 /// @tparam Encoder Type of streaming encoder
-template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder, typename Forwarder = DefaultForwarder>
-    requires std::is_base_of_v<ThingSetForwarder, Forwarder>
-class ThingSetServer : public _ThingSetServer, protected virtual Forwarder
+template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
+class ThingSetServer : public _ThingSetServer
 {
 private:
     ThingSetServerTransport<Identifier, Size, Encoder> &_transport;
 
 public:
-    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
-        : _ThingSetServer(), _transport(transport)
+    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport) : ThingSetServer(transport, nullptr)
+    {}
+
+    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport, ThingSetForwarder *forwarder)
+        : _ThingSetServer(forwarder), _transport(transport)
     {}
 
     bool listen() override
@@ -136,12 +130,11 @@ private:
 class ThingSetServerBuilder
 {
 public:
-    template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder, typename Forwarder = DefaultForwarder>
-        requires std::is_base_of_v<ThingSetForwarder, Forwarder>
+    template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
     static ThingSetServer<Identifier, Size, Encoder>
-    build(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
+    build(ThingSetServerTransport<Identifier, Size, Encoder> &transport, ThingSetForwarder *forwarder = nullptr)
     {
-        return ThingSetServer<Identifier, Size, Encoder, Forwarder>(transport);
+        return ThingSetServer<Identifier, Size, Encoder>(transport, forwarder);
     }
 };
 

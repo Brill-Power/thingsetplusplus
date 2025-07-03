@@ -29,7 +29,6 @@ public:
 
     bool connect() override;
 
-protected:
     int read(uint8_t *buffer, size_t len) override;
     bool write(uint8_t *buffer, size_t len) override;
 };

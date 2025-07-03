@@ -57,6 +57,8 @@ public:
 
     virtual bool setStatus(const ThingSetStatusCode &status) = 0;
 
+    virtual uint8_t *rewrite(const std::string &nodeId, uint8_t *request, size_t requestLength) = 0;
+
     constexpr virtual size_t getHeaderLength() const = 0;
 };
 
@@ -114,6 +116,8 @@ public:
 
     bool setStatus(const ThingSetStatusCode &status) override;
 
+    uint8_t *rewrite(const std::string &nodeId, uint8_t *request, size_t requestLength) override;
+
     constexpr size_t getHeaderLength() const override
     {
         return 1;
@@ -138,6 +142,8 @@ public:
     }
 
     bool setStatus(const ThingSetStatusCode &status) override;
+
+    uint8_t *rewrite(const std::string &nodeId, uint8_t *request, size_t requestLength) override;
 
     constexpr size_t getHeaderLength() const override
     {

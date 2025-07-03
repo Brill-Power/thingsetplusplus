@@ -54,6 +54,33 @@ ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, siz
     }
 }
 
+uint8_t *ThingSetBinaryRequestContext::rewrite(const std::string &nodeId, uint8_t *request, size_t requestLength)
+{
+    // first find string in buffer
+    uint8_t *requestEnd = &request[requestLength - 1];
+    uint8_t *nodeIdPathComponentStart = std::search(request, requestEnd, nodeId.begin(), nodeId.end());
+    if (nodeIdPathComponentStart == requestEnd)
+    {
+        return nullptr;
+    }
+
+    // calculate new start of path as an offset
+    size_t newPathStart = (nodeIdPathComponentStart + nodeId.length() + 1) - request;
+    // new length is old length less node ID and two slashes
+    size_t newPathLength = path().length() - nodeId.length() - 2;
+    // write new string header
+    // depending on string length need 1 or 2 bytes to
+    if (newPathLength < 25) {
+        request[--newPathStart] = 0x60 | newPathLength;
+    } else {
+        request[--newPathStart] = newPathLength;
+        request[--newPathStart] = 0x78;
+    }
+    // finally, copy verb from first byte
+    request[--newPathStart] = request[0];
+    return &request[newPathStart];
+}
+
 bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
 {
     _response[0] = status;
@@ -77,6 +104,14 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
     {
         _path = std::string(pathStart, requestLen - 1);
     }
+}
+
+uint8_t *ThingSetTextRequestContext::rewrite(const std::string &nodeId, uint8_t *request, size_t requestLength)
+{
+    // assuming ?/deadbeef12345678/Foo, we can take the first byte and
+    // replace the slash after the node ID
+    request[nodeId.length() + 2] = request[0];
+    return &request[nodeId.length() + 2];
 }
 
 bool ThingSetTextRequestContext::setStatus(const ThingSetStatusCode &status)
