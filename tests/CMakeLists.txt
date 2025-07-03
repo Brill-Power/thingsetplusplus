@@ -27,7 +27,8 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestFunctions.cpp
     TestAsioIpClientServer.cpp
     TestBinaryDecodingRecords.cpp
-    TestTextEncodingRecords.cpp)
+    TestTextEncodingRecords.cpp
+    TestRequestRewriter.cpp)
 # figure out how to get this to compile with Clang
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_sources(testapp PRIVATE TestBinaryEncodingRecords.cpp)
