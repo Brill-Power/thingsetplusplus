@@ -23,9 +23,6 @@ class ThingSetForwarder
 {
 public:
     virtual int handleForward(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) = 0;
-
-protected:
-    static bool tryGetNodeId(const std::string &path, std::string &nodeId);
 };
 
 class _ThingSetServer

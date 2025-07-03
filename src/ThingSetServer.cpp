@@ -18,18 +18,6 @@ static const uint16_t MetadataNameId = 0x1a;
 static const uint16_t MetadataTypeId = 0x1b;
 static const uint16_t MetadataAccessId = 0x1c;
 
-bool ThingSetForwarder::tryGetNodeId(const std::string &path, std::string &nodeId)
-{
-    const size_t pos = path.find('/', 1);
-    if (pos == std::string::npos)
-    {
-        return false;
-    }
-
-    nodeId = path.substr(1, pos);
-    return true;
-}
-
 _ThingSetServer::_ThingSetServer(ThingSetForwarder *forwarder) : _access(ThingSetAccess::anyReadWrite), _forwarder(forwarder)
 {}
 
