@@ -30,7 +30,7 @@ bool ThingSetForwarder::tryGetNodeId(const std::string &path, std::string &nodeI
     return true;
 }
 
-_ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
+_ThingSetServer::_ThingSetServer(ThingSetForwarder *forwarder) : _access(ThingSetAccess::anyReadWrite), _forwarder(forwarder)
 {}
 
 int _ThingSetServer::handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
@@ -54,7 +54,14 @@ int _ThingSetServer::handleRequest(ThingSetRequestContext &context, uint8_t *req
     }
     if (context.isToBeForwarded())
     {
-        return handleForward(context, request, requestLen, response, responseSize);
+        if (_forwarder) {
+            return _forwarder->handleForward(context, request, requestLen, response, responseSize);
+        }
+        else
+        {
+            context.setStatus(ThingSetStatusCode::notAGateway);
+            return context.getHeaderLength();
+        }
     }
     if (context.useIds())
     {
