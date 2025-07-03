@@ -37,6 +37,19 @@ bool ThingSetRequestContext::useIds()
     return _id.has_value();
 }
 
+bool ThingSetRequestContext::tryGetNodeId(std::string &nodeId)
+{
+    // first find nodeID by finding next slash
+    const size_t pos = path().find('/', 2);
+    if (pos == std::string::npos)
+    {
+        return false;
+    }
+
+    nodeId = path().substr(2, pos);
+    return true;
+}
+
 ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) :
     _ThingSetRequestContext(request, response),
     _encoder(response + 1, responseSize - 1),
@@ -54,8 +67,12 @@ ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, siz
     }
 }
 
-uint8_t *ThingSetBinaryRequestContext::rewrite(const std::string &nodeId, uint8_t *request, size_t requestLength)
+uint8_t *ThingSetBinaryRequestContext::rewrite(uint8_t *request, size_t requestLength, std::string &nodeId)
 {
+    if (!tryGetNodeId(nodeId)) {
+        return nullptr;
+    }
+
     // first find string in buffer
     uint8_t *requestEnd = &request[requestLength - 1];
     uint8_t *nodeIdPathComponentStart = std::search(request, requestEnd, nodeId.begin(), nodeId.end());
@@ -106,8 +123,12 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
     }
 }
 
-uint8_t *ThingSetTextRequestContext::rewrite(const std::string &nodeId, uint8_t *request, size_t requestLength)
+uint8_t *ThingSetTextRequestContext::rewrite(uint8_t *request, size_t requestLength, std::string &nodeId)
 {
+    if (!tryGetNodeId(nodeId)) {
+        return nullptr;
+    }
+
     // assuming ?/deadbeef12345678/Foo, we can take the first byte and
     // replace the slash after the node ID
     request[nodeId.length() + 2] = request[0];
