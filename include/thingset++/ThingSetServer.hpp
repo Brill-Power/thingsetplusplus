@@ -19,7 +19,15 @@ template <typename T>
 concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_base_of_v<ThingSetEncodable, T>
                                  && std::is_base_of_v<ThingSetDecodable, T>;
 
-class _ThingSetServer
+class ThingSetForwarder
+{
+protected:
+    virtual int handleForward(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) = 0;
+
+    static bool tryGetNodeId(const std::string &path, std::string &nodeId);
+};
+
+class _ThingSetServer : protected virtual ThingSetForwarder
 {
 private:
     ThingSetAccess _access;
@@ -36,12 +44,11 @@ private:
     int handleUpdate(ThingSetRequestContext &context);
     int handleExec(ThingSetRequestContext &context);
 
-    int handleRequest(ThingSetRequestContext &context);
+    int handleRequest(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
 protected:
-    int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
-    int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
-    virtual bool handleForward(ThingSetRequestContext &context) = 0;
+    int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
+    int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
     template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T,
               EncodableDecodableNode... Property>
@@ -58,18 +65,13 @@ protected:
     }
 };
 
-class ThingSetForwarder
+class DefaultForwarder : protected virtual ThingSetForwarder
 {
 protected:
-    virtual bool tryForward(ThingSetRequestContext &context) = 0;
-};
-
-class DefaultForwarder : public ThingSetForwarder
-{
-protected:
-    inline bool tryForward(ThingSetRequestContext &) override
+    inline int handleForward(ThingSetRequestContext &context, uint8_t *, size_t, uint8_t *, size_t) override
     {
-        return false;
+        context.setStatus(ThingSetStatusCode::notAGateway);
+        return context.getHeaderLength();
     }
 };
 
@@ -79,7 +81,7 @@ protected:
 /// @tparam Encoder Type of streaming encoder
 template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder, typename Forwarder = DefaultForwarder>
     requires std::is_base_of_v<ThingSetForwarder, Forwarder>
-class ThingSetServer : public _ThingSetServer, public Forwarder
+class ThingSetServer : public _ThingSetServer, protected virtual Forwarder
 {
 private:
     ThingSetServerTransport<Identifier, Size, Encoder> &_transport;
@@ -112,12 +114,6 @@ public:
         return encoder.flush();
     }
 
-protected:
-    bool handleForward(ThingSetRequestContext &context) override
-    {
-        return this->tryForward(context);
-    }
-
 private:
     int requestCallback(Identifier &, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
     {
@@ -140,11 +136,12 @@ private:
 class ThingSetServerBuilder
 {
 public:
-    template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
+    template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder, typename Forwarder = DefaultForwarder>
+        requires std::is_base_of_v<ThingSetForwarder, Forwarder>
     static ThingSetServer<Identifier, Size, Encoder>
     build(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
     {
-        return ThingSetServer<Identifier, Size, Encoder>(transport);
+        return ThingSetServer<Identifier, Size, Encoder, Forwarder>(transport);
     }
 };
 

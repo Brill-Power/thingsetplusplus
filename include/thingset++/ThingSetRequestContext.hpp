@@ -20,15 +20,13 @@ namespace ThingSet {
 class ThingSetRequestContext
 {
 protected:
-    uint8_t *_request;
-    size_t _requestLength;
     /// @brief Pointer to the buffer into which the response will be written.
     uint8_t *_response;
     std::optional<uint16_t> _id;
     /// @brief The path to the node to which this request relates.
     std::optional<std::string> _path;
 
-    ThingSetRequestContext(uint8_t *request, size_t requestLength, uint8_t *response);
+    ThingSetRequestContext(uint8_t *response);
 
 public:
     /// @brief Pointer to the ThingSet node this request relates to.
@@ -65,30 +63,35 @@ public:
 template <typename RequestType> requires std::is_enum_v<RequestType>
 class _ThingSetRequestContext : public ThingSetRequestContext
 {
+private:
+    RequestType _requestType;
+
 protected:
-    _ThingSetRequestContext(uint8_t *request, size_t requestLength, uint8_t *resp) :
-        ThingSetRequestContext(request, requestLength, resp)
-    {}
+    _ThingSetRequestContext(uint8_t *request, uint8_t *response) :
+        ThingSetRequestContext(response)
+    {
+        _requestType = (RequestType)request[0];
+    }
 
 public:
     bool isGet() override {
-        return (RequestType)_request[0] == RequestType::get;
+        return _requestType == RequestType::get;
     }
 
     bool isFetch() override {
-        return (RequestType)_request[0] == RequestType::fetch;
+        return _requestType == RequestType::fetch;
     }
 
     bool isUpdate() override {
-        return (RequestType)_request[0] == RequestType::update;
+        return _requestType == RequestType::update;
     }
 
     bool isDelete() override {
-        return (RequestType)_request[0] == RequestType::remove;
+        return _requestType == RequestType::remove;
     }
 
     bool isExec() override {
-        return (RequestType)_request[0] == RequestType::exec;
+        return _requestType == RequestType::exec;
     }
 };
 
@@ -99,7 +102,7 @@ private:
     DefaultFixedDepthThingSetBinaryDecoder _decoder;
 
 public:
-    ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen);
+    ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
     inline ThingSetEncoder &encoder() override {
         return _encoder;
@@ -124,7 +127,7 @@ private:
     DefaultFixedSizeThingSetTextDecoder _decoder;
 
 public:
-    ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen);
+    ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
     inline ThingSetEncoder &encoder() override {
         return _encoder;
