@@ -46,7 +46,7 @@ bool ThingSetRequestContext::tryGetNodeId(std::string &nodeId)
         return false;
     }
 
-    nodeId = path().substr(1, pos);
+    nodeId = path().substr(1, pos - 1);
     return true;
 }
 
