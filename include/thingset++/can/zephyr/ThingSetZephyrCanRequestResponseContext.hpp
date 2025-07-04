@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <thingset++/can/CanID.hpp>
+#include <zephyr/kernel.h>
 extern "C" {
 #include <canbus/isotp_fast.h>
 }
@@ -19,6 +20,7 @@ class ThingSetZephyrCanRequestResponseContext {
 private:
     ThingSetZephyrCanInterface &_canInterface;
     isotp_fast_ctx _requestResponseContext;
+    k_sem _lock;
     uint8_t *_rxBuffer;
     size_t _rxBufferSize;
     uint8_t *_txBuffer;
@@ -28,9 +30,11 @@ private:
 public:
     template<size_t RxSize, size_t TxSize>
     ThingSetZephyrCanRequestResponseContext(ThingSetZephyrCanInterface &canInterface, std::array<uint8_t, RxSize> rxBuffer,
-        std::array<uint8_t, TxSize> txBuffer) : _canInterface(canInterface), _rxBuffer(rxBuffer.data()) _rxBufferSize(RxSize),
+        std::array<uint8_t, TxSize> txBuffer) : _canInterface(canInterface), _rxBuffer(rxBuffer.data()), _rxBufferSize(RxSize),
         _txBuffer(txBuffer.data()), _txBufferSize(TxSize)
-    {}
+    {
+        k_sem_init(&_lock, 1, 1);
+    }
     ~ThingSetZephyrCanRequestResponseContext();
 
     ThingSetZephyrCanInterface &getInterface();

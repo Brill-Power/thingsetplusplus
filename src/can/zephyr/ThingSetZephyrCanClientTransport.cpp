@@ -10,7 +10,7 @@ namespace ThingSet::Can::Zephyr {
 
 bool ThingSetZephyrCanClientTransport::connect()
 {
-    return _requestResponseContext.bindRequestResponse(_targetNodeAddress, [&](const CanID &sender, uint8_t *rxBuffer, size_t rxSize, uint8_t *, size_t)
+    return _requestResponseContext.bind(_targetNodeAddress, [&](const CanID &sender, uint8_t *rxBuffer, size_t rxSize, uint8_t *, size_t)
     {
         ResponseMessage message;
         memcpy(message.buffer, rxBuffer, rxSize);

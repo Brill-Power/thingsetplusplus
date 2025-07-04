@@ -19,7 +19,6 @@ namespace ThingSet::Can::Zephyr {
 _ThingSetZephyrCanInterface::_ThingSetZephyrCanInterface(const device *const canDevice) : _canDevice(canDevice)
 {
     _nodeAddress = CanID::broadcastAddress;
-    k_sem_init(&_lock, 1, 1);
 }
 
 const device *const _ThingSetZephyrCanInterface::getDevice()
@@ -38,7 +37,7 @@ bool ThingSetZephyrCanStubInterface::bind(uint8_t nodeAddress)
 }
 
 ThingSetZephyrCanInterface::ThingSetZephyrCanInterface(const device *const canDevice)
-    : _ThingSetZephyrCanInterface(canDevice, rxBuffer)
+    : _ThingSetZephyrCanInterface(canDevice)
 {
 }
 
