@@ -8,7 +8,6 @@
 #include "thingset++/can/ThingSetCanInterface.hpp"
 #include <functional>
 #include <zephyr/device.h>
-#include <zephyr/kernel.h>
 #include <zephyr/drivers/can.h>
 
 namespace ThingSet::Can::Zephyr {
@@ -17,7 +16,6 @@ class _ThingSetZephyrCanInterface : public ThingSetCanInterface
 {
 protected:
     const device *const _canDevice;
-    k_sem _lock;
 
     _ThingSetZephyrCanInterface(const device *const canDevice);
 

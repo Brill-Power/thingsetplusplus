@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/ThingSetZephyrCanRequestResponseContext.hpp"
+#include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
+#include "thingset++/ThingSetStatus.hpp"
+#include "thingset++/internal/logging.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
@@ -35,7 +38,7 @@ const isotp_fast_opts ThingSetZephyrCanRequestResponseContext::flowControlOption
 static void onRequestResponseError(int8_t error, isotp_fast_addr addr, void *arg);
 static void onRequestResponseSent(int result, isotp_fast_addr addr, void *arg);
 
-ThingSetZephyrCanRequestResponseContext::~ThingSetZephyrCanRequestResponseContext
+ThingSetZephyrCanRequestResponseContext::~ThingSetZephyrCanRequestResponseContext()
 {
     // TODO: check if bound
     isotp_fast_unbind(&_requestResponseContext);
@@ -71,7 +74,7 @@ bool ThingSetZephyrCanRequestResponseContext::send(const uint8_t otherNodeAddres
     IsoTpFastAddress targetAddress(CanID()
                       .setMessageType(MessageType::requestResponse)
                       .setMessagePriority(MessagePriority::channel)
-                      .setSource(getNodeAddress())
+                      .setSource(_canInterface.getNodeAddress())
                       .setTarget(otherNodeAddress));
     return isotp_fast_send(&_requestResponseContext, buffer, len, targetAddress, nullptr) == 0;
 }
@@ -80,7 +83,7 @@ void ThingSetZephyrCanRequestResponseContext::onRequestResponseReceived(net_buf 
                                                                         isotp_fast_addr address, void *arg)
 {
     uint8_t errorResponse[] = { ThingSetStatusCode::internalServerError };
-    _ThingSetZephyrCanInterface *self = (_ThingSetZephyrCanInterface *)arg;
+    ThingSetZephyrCanRequestResponseContext *self = (ThingSetZephyrCanRequestResponseContext *)arg;
     size_t len = net_buf_frags_len(buffer);
     int result = k_sem_take(&self->_lock, K_SECONDS(1));
     bool taken;
