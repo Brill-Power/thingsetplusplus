@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019 Alexander Wachter
  * Copyright (c) 2023 Enphase Energy
- * Copyright (c) 2023 Brill Power
+ * Copyright (c) 2023-2025 Brill Power
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -74,24 +74,24 @@ static int get_send_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr tx_ad
     }
 
     if (create_if_not_found) {
-    int err = k_mem_slab_alloc(&isotp_send_ctx_slab, (void **)&context, K_NO_WAIT);
-    if (err != 0) {
-        return ISOTP_NO_CTX_LEFT;
-    }
-    *sctx = context;
-    context->ctx = ctx;
-    context->tx_addr = tx_addr;
-    context->bs = ctx->opts->bs;
-    context->stmin = ctx->opts->stmin;
-    context->state = ISOTP_TX_SEND_FF;
-    context->error = 0;
-    k_sem_init(&context->sem, 0, 1);
-    k_work_init(&context->work, send_work_handler);
-    k_timer_init(&context->timer, send_timeout_handler, NULL);
-    sys_slist_append(&ctx->isotp_send_ctx_list, &context->node);
-    LOG_DBG("Created new send context for recipient %x", tx_addr.ext_id);
+        int err = k_mem_slab_alloc(&isotp_send_ctx_slab, (void **)&context, K_NO_WAIT);
+        if (err != 0) {
+            return ISOTP_NO_CTX_LEFT;
+        }
+        *sctx = context;
+        context->ctx = ctx;
+        context->tx_addr = tx_addr;
+        context->bs = ctx->opts->bs;
+        context->stmin = ctx->opts->stmin;
+        context->state = ISOTP_TX_SEND_FF;
+        context->error = 0;
+        k_sem_init(&context->sem, 0, 1);
+        k_work_init(&context->work, send_work_handler);
+        k_timer_init(&context->timer, send_timeout_handler, NULL);
+        sys_slist_append(&ctx->isotp_send_ctx_list, &context->node);
+        LOG_DBG("Created new send context for recipient %x", tx_addr.ext_id);
 
-    return 0;
+        return 0;
     } else {
         return -ESRCH; // no such context, apparently
     }
@@ -128,7 +128,7 @@ static void free_recv_ctx_if_unowned(struct isotp_fast_recv_ctx *rctx)
     free_recv_ctx(rctx);
 }
 
-static int get_recv_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr rx_addr,
+static int get_recv_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr rx_addr, bool create_if_not_found,
                         struct isotp_fast_recv_ctx **rctx)
 {
     struct isotp_fast_recv_ctx *context;
@@ -151,34 +151,38 @@ static int get_recv_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr rx_ad
         }
     }
 
-    int err = k_mem_slab_alloc(&isotp_recv_ctx_slab, (void **)&context, K_NO_WAIT);
-    if (err != 0) {
-        LOG_ERR("No space for receive context - error %d.", err);
-        return ISOTP_NO_CTX_LEFT;
-    }
-    context->buffer = net_buf_alloc(&isotp_rx_pool, K_NO_WAIT);
-    if (!context->buffer) {
-        k_mem_slab_free(&isotp_recv_ctx_slab, context);
-        LOG_ERR("No net bufs.");
-        return ISOTP_NO_NET_BUF_LEFT;
-    }
-    context->frag = context->buffer;
-    *rctx = context;
-    context->ctx = ctx;
-    context->state = ISOTP_RX_STATE_WAIT_FF_SF;
-    context->rx_addr = rx_addr;
-    context->error = 0;
-#ifdef ISOTP_FAST_RECEIVE_QUEUE
-    k_msgq_init(&context->recv_queue, context->recv_queue_pool, sizeof(struct net_buf *),
-                CONFIG_ISOTP_FAST_RX_MAX_PACKET_COUNT);
-    LOG_DBG("Queue of length %d created", k_msgq_num_free_get(&context->recv_queue));
-#endif
-    k_work_init(&context->work, receive_work_handler);
-    k_timer_init(&context->timer, receive_timeout_handler, NULL);
-    sys_slist_append(&ctx->isotp_recv_ctx_list, &context->node);
-    LOG_DBG("Created new receive context %x", rx_addr.ext_id);
+    if (create_if_not_found) {
+        int err = k_mem_slab_alloc(&isotp_recv_ctx_slab, (void **)&context, K_NO_WAIT);
+        if (err != 0) {
+            LOG_ERR("No space for receive context - error %d.", err);
+            return ISOTP_NO_CTX_LEFT;
+        }
+        context->buffer = net_buf_alloc(&isotp_rx_pool, K_NO_WAIT);
+        if (!context->buffer) {
+            k_mem_slab_free(&isotp_recv_ctx_slab, context);
+            LOG_ERR("No net bufs.");
+            return ISOTP_NO_NET_BUF_LEFT;
+        }
+        context->frag = context->buffer;
+        *rctx = context;
+        context->ctx = ctx;
+        context->state = ISOTP_RX_STATE_WAIT_FF_SF;
+        context->rx_addr = rx_addr;
+        context->error = 0;
+    #ifdef ISOTP_FAST_RECEIVE_QUEUE
+        k_msgq_init(&context->recv_queue, context->recv_queue_pool, sizeof(struct net_buf *),
+                    CONFIG_ISOTP_FAST_RX_MAX_PACKET_COUNT);
+        LOG_DBG("Queue of length %d created", k_msgq_num_free_get(&context->recv_queue));
+    #endif
+        k_work_init(&context->work, receive_work_handler);
+        k_timer_init(&context->timer, receive_timeout_handler, NULL);
+        sys_slist_append(&ctx->isotp_recv_ctx_list, &context->node);
+        LOG_DBG("Created new receive context %x", rx_addr.ext_id);
 
-    return 0;
+        return 0;
+    } else {
+        return -ESRCH; // no such context, apparently
+    }
 }
 
 struct isotp_fast_addr isotp_fast_get_reply_addr(struct isotp_fast_ctx *ctx,
@@ -424,8 +428,9 @@ static void receive_state_machine(struct isotp_fast_recv_ctx *rctx)
             // net_buf_unref(ctx->buffer);
             // ctx->buffer = NULL;
             // ctx->state = ISOTP_RX_STATE_RECYCLE;
+            rctx->state = ISOTP_RX_STATE_UNBOUND;
             free_recv_ctx_if_unowned(rctx);
-            __fallthrough;
+            break;
         case ISOTP_RX_STATE_RECYCLE:
 #ifndef ISOTP_FAST_RECEIVE_QUEUE
             LOG_DBG("Message complete; dispatching");
@@ -481,6 +486,8 @@ static void process_ff_sf(struct isotp_fast_recv_ctx *rctx, struct can_frame *fr
 
         default:
             LOG_DBG("Got unexpected frame. Ignore");
+            receive_report_error(rctx, ISOTP_N_UNEXP_PDU);
+            k_work_submit(&rctx->work);
             return;
     }
 
@@ -504,6 +511,7 @@ static void process_cf(struct isotp_fast_recv_ctx *rctx, struct can_frame *frame
     if ((frame->data[index] & ISOTP_PCI_TYPE_MASK) != ISOTP_PCI_TYPE_CF) {
         LOG_DBG("Waiting for CF but got something else (%d)",
                 frame->data[index] >> ISOTP_PCI_TYPE_POS);
+        LOG_DBG("%x %x %x %x %x %x %x %x ...", frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data[4], frame->data[5], frame->data[6], frame->data[7]);
         receive_report_error(rctx, ISOTP_N_UNEXP_PDU);
         k_work_submit(&rctx->work);
         return;
@@ -574,8 +582,25 @@ static void receive_timeout_handler(struct k_timer *timer)
     k_work_submit(&rctx->work);
 }
 
-static void receive_can_rx(struct isotp_fast_recv_ctx *rctx, struct can_frame *frame)
+static void receive_can_rx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr sender_addr, struct can_frame *frame)
 {
+    size_t index = 0;
+    bool create_context = (frame->data[index] & ISOTP_PCI_TYPE_MASK) == ISOTP_PCI_TYPE_FF ||
+        (frame->data[index] & ISOTP_PCI_TYPE_MASK) == ISOTP_PCI_TYPE_SF;
+    struct isotp_fast_recv_ctx *rctx;
+    int result = get_recv_ctx(ctx, sender_addr, create_context, &rctx);
+    if (result == -ESRCH)
+    {
+        LOG_ERR("No existing context for continuing frame");
+        LOG_DBG("%x %x %x %x %x %x %x %x ...", frame->data[0], frame->data[1], frame->data[2], frame->data[3], frame->data[4], frame->data[5], frame->data[6], frame->data[7]);
+        return;
+    }
+    else if (result != 0)
+    {
+        LOG_ERR("RX buffer full");
+        return;
+    }
+
     switch (rctx->state) {
         case ISOTP_RX_STATE_WAIT_FF_SF:
             process_ff_sf(rctx, frame);
@@ -699,12 +724,7 @@ static void can_rx_callback(const struct device *dev, struct can_frame *frame, v
         send_can_rx(sctx, frame);
     }
     else {
-        struct isotp_fast_recv_ctx *rctx;
-        if (get_recv_ctx(ctx, sender_addr, &rctx) != 0) {
-            LOG_ERR("RX buffer full");
-            return;
-        }
-        receive_can_rx(rctx, frame);
+        receive_can_rx(ctx, sender_addr, frame);
     }
 }
 
