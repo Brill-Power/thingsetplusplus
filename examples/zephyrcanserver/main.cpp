@@ -15,8 +15,8 @@ static const struct device *canDevice = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
 
 std::array<uint8_t, 1024> rxBuffer;
 std::array<uint8_t, 1024> txBuffer;
-ThingSetZephyrCanInterface interface(canDevice, rxBuffer, txBuffer);
-ThingSetZephyrCanServerTransport transport(interface);
+ThingSetZephyrCanInterface interface(canDevice);
+ThingSetZephyrCanServerTransport transport(interface, rxBuffer, txBuffer);
 
 struct SupercellRecord
 {
