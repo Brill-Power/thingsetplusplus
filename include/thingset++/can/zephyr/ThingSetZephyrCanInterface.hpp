@@ -10,9 +10,6 @@
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/can.h>
-extern "C" {
-#include <canbus/isotp_fast.h>
-}
 
 namespace ThingSet::Can::Zephyr {
 
@@ -20,36 +17,18 @@ class _ThingSetZephyrCanInterface : public ThingSetCanInterface
 {
 protected:
     const device *const _canDevice;
-    isotp_fast_ctx _requestResponseContext;
     k_sem _lock;
-    uint8_t *_rxBuffer;
-    size_t _rxBufferSize;
-    uint8_t *_txBuffer;
-    size_t _txBufferSize;
-    std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> _inboundRequestCallback;
 
-    _ThingSetZephyrCanInterface(const device *const canDevice, uint8_t *rxBuffer, size_t rxBufferSize,
-                                uint8_t *txBuffer, size_t txBufferSize);
-    ~_ThingSetZephyrCanInterface();
+    _ThingSetZephyrCanInterface(const device *const canDevice);
 
 public:
     const device *const getDevice();
-
-    static const isotp_fast_opts flowControlOptions;
-
-    static void onRequestResponseReceived(net_buf *buffer, int remainingLength, isotp_fast_addr address, void *arg);
-
-    bool bindRequestResponse(const uint8_t otherNodeAddress, std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback);
-    bool bindRequestResponse(std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback);
-
-    bool send(const uint8_t otherNodeAddress, uint8_t *buffer, size_t len);
 };
 
 class ThingSetZephyrCanStubInterface : public _ThingSetZephyrCanInterface
 {
 public:
-    ThingSetZephyrCanStubInterface(const device *const canDevice, uint8_t *rxBuffer, size_t rxBufferSize,
-                                   uint8_t *txBuffer, size_t txBufferSize);
+    ThingSetZephyrCanStubInterface(const device *const canDevice);
 
     using ThingSetCanInterface::bind;
     bool bind(uint8_t nodeAddress) override;
@@ -69,16 +48,10 @@ private:
     int _claimFilterId;
     int _discoverFilterId;
 
-
 public:
     ThingSetZephyrCanInterface(ThingSetZephyrCanInterface &&) = delete;
     ThingSetZephyrCanInterface(const ThingSetZephyrCanInterface &) = delete;
-    template <size_t RxSize, size_t TxSize>
-    ThingSetZephyrCanInterface(const device *const canDevice, std::array<uint8_t, RxSize> &rxBuffer, std::array<uint8_t, TxSize> &txBuffer) : ThingSetZephyrCanInterface(canDevice, rxBuffer.data(), rxBuffer.size(), txBuffer.data(), txBuffer.size())
-    {}
-
-    ThingSetZephyrCanInterface(const device *const canDevice, uint8_t *rxBuffer, size_t rxBufferSize,
-                               uint8_t *txBuffer, size_t txBufferSize);
+    ThingSetZephyrCanInterface(const device *const canDevice);
     ~ThingSetZephyrCanInterface();
 
     using ThingSetCanInterface::bind;
