@@ -10,12 +10,6 @@
 
 namespace ThingSet::Can::Zephyr {
 
-
-ThingSetZephyrCanServerTransport::ThingSetZephyrCanServerTransport(_ThingSetZephyrCanInterface &canInterface)
-    : ThingSetCanServerTransport(), _canInterface(canInterface)
-{
-}
-
 ThingSetZephyrCanServerTransport::~ThingSetZephyrCanServerTransport()
 {
 }
@@ -38,7 +32,7 @@ bool ThingSetZephyrCanServerTransport::doPublish(const Can::CanID &id, uint8_t *
 
 bool ThingSetZephyrCanServerTransport::listen(std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
-    return _canInterface.bindRequestResponse(callback);
+    return _requestResponseContext.bind(callback);
 }
 
 } // namespace ThingSet::Can::Zephyr
