@@ -23,10 +23,10 @@ std::array<uint8_t, 1024> serverRxBuffer;
 std::array<uint8_t, 1024> serverTxBuffer;
 std::array<uint8_t, 1024> clientRxBuffer;
 std::array<uint8_t, 1024> clientTxBuffer;
-ThingSetZephyrCanInterface serverInterface(canDevice, serverRxBuffer, serverTxBuffer);
-ThingSetZephyrCanInterface clientInterface(canDevice, clientRxBuffer, clientTxBuffer);
-ThingSetZephyrCanServerTransport serverTransport(serverInterface);
-ThingSetZephyrCanClientTransport clientTransport(clientInterface, 0x01);
+ThingSetZephyrCanInterface serverInterface(canDevice);
+ThingSetZephyrCanInterface clientInterface(canDevice);
+ThingSetZephyrCanServerTransport serverTransport(serverInterface, serverRxBuffer, serverTxBuffer);
+ThingSetZephyrCanClientTransport clientTransport(clientInterface, 0x01, clientRxBuffer, clientTxBuffer);
 
 ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
 
