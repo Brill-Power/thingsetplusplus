@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/ThingSetZephyrCanClientTransport.hpp"
-#include "thingset++/internal/logging.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
@@ -15,8 +14,7 @@ bool ThingSetZephyrCanClientTransport::connect()
         ResponseMessage message;
         memcpy(message.buffer, rxBuffer, rxSize);
         message.length = rxSize;
-        k_msgq_put(&_responseQueue, &message, K_MSEC(100));
-        return 0;
+        return k_msgq_put(&_responseQueue, &message, K_MSEC(100));
     });
 }
 

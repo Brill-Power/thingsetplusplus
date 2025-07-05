@@ -82,23 +82,30 @@ bool ThingSetZephyrCanRequestResponseContext::send(const uint8_t otherNodeAddres
 void ThingSetZephyrCanRequestResponseContext::onRequestResponseReceived(net_buf *buffer, int remainingLength,
                                                                         isotp_fast_addr address, void *arg)
 {
-    uint8_t errorResponse[] = { ThingSetStatusCode::internalServerError };
     ThingSetZephyrCanRequestResponseContext *self = (ThingSetZephyrCanRequestResponseContext *)arg;
+    self->onRequestResponseReceived(buffer, remainingLength, address);
+}
+
+void ThingSetZephyrCanRequestResponseContext::onRequestResponseReceived(net_buf *buffer, int remainingLength,
+                                                                        isotp_fast_addr address)
+{
+    uint8_t errorResponse[] = { ThingSetStatusCode::internalServerError };
     size_t len = net_buf_frags_len(buffer);
-    int result = k_sem_take(&self->_lock, K_SECONDS(1));
+    int result = k_sem_take(&_lock, K_SECONDS(1));
     bool taken;
     uint8_t *txBuffer;
     if ((taken = (result == 0))) {
-        net_buf_linearize(self->_rxBuffer, self->_rxBufferSize, buffer, 0, len);
+        LOG_INFO("Linearising buffer of length %d into %p", len, _rxBuffer);
+        len = net_buf_linearize(_rxBuffer, _rxBufferSize, buffer, 0, len);
         // if a response to a request we sent
-        if ((self->_rxBuffer[0] >= ThingSetStatusCode::created && self->_rxBuffer[0] <= ThingSetStatusCode::notAGateway) ||
+        if ((_rxBuffer[0] >= ThingSetStatusCode::created && _rxBuffer[0] <= ThingSetStatusCode::notAGateway) ||
             // or if it is a new request inbound
-            (self->_rxBuffer[0] >= ThingSetBinaryRequestType::get && self->_rxBuffer[0] <= ThingSetBinaryRequestType::update)) {
+            (_rxBuffer[0] >= ThingSetBinaryRequestType::get && _rxBuffer[0] <= ThingSetBinaryRequestType::update)) {
             // regardless, dispatch accordingly
-            result = self->_inboundRequestCallback(CanID::create(address.ext_id), self->_rxBuffer, len, self->_txBuffer,
-                self->_txBufferSize);
+            result = _inboundRequestCallback(CanID::create(address.ext_id), _rxBuffer, len, _txBuffer,
+                _txBufferSize);
             if (result >= 0) { // length should be zero if this is a reply
-                txBuffer = self->_txBuffer;
+                txBuffer = _txBuffer;
                 len = result;
             }
             else {
@@ -117,14 +124,14 @@ void ThingSetZephyrCanRequestResponseContext::onRequestResponseReceived(net_buf 
         len = 1;
     }
     if (len > 0) {
-        result = isotp_fast_send(&self->_requestResponseContext, txBuffer, len,
+        result = isotp_fast_send(&_requestResponseContext, txBuffer, len,
                                 IsoTpFastAddress(CanID::create(address.ext_id).getReplyId()), nullptr);
     }
     if (result != 0) {
         LOG_ERROR("Error %d sending reply to message from 0x%d", result, address.ext_id);
     }
     if (taken) {
-        k_sem_give(&self->_lock);
+        k_sem_give(&_lock);
     }
 }
 

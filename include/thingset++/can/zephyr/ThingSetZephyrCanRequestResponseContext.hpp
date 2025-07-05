@@ -29,8 +29,8 @@ private:
 
 public:
     template<size_t RxSize, size_t TxSize>
-    ThingSetZephyrCanRequestResponseContext(ThingSetZephyrCanInterface &canInterface, std::array<uint8_t, RxSize> rxBuffer,
-        std::array<uint8_t, TxSize> txBuffer) : _canInterface(canInterface), _rxBuffer(rxBuffer.data()), _rxBufferSize(RxSize),
+    ThingSetZephyrCanRequestResponseContext(ThingSetZephyrCanInterface &canInterface, std::array<uint8_t, RxSize> &rxBuffer,
+        std::array<uint8_t, TxSize> &txBuffer) : _canInterface(canInterface), _rxBuffer(rxBuffer.data()), _rxBufferSize(RxSize),
         _txBuffer(txBuffer.data()), _txBufferSize(TxSize)
     {
         k_sem_init(&_lock, 1, 1);
@@ -44,8 +44,9 @@ public:
 
     bool send(const uint8_t otherNodeAddress, uint8_t *buffer, size_t len);
 
+private:
     static void onRequestResponseReceived(net_buf *buffer, int remainingLength, isotp_fast_addr address, void *arg);
-
+    void onRequestResponseReceived(net_buf *buffer, int remainingLength, isotp_fast_addr address);
     static const isotp_fast_opts flowControlOptions;
 };
 

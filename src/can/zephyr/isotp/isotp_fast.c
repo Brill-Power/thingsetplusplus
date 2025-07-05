@@ -99,15 +99,18 @@ static int get_send_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr tx_ad
 
 static inline void free_send_ctx(struct isotp_fast_send_ctx *sctx)
 {
-    LOG_DBG("Freeing send context for recipient %x", sctx->tx_addr.ext_id);
+    struct isotp_fast_addr tx_addr = sctx->tx_addr;
+    LOG_DBG("Freeing send context %x", tx_addr.ext_id);
     k_timer_stop(&sctx->timer);
     sys_slist_find_and_remove(&sctx->ctx->isotp_send_ctx_list, &sctx->node);
     k_mem_slab_free(&isotp_send_ctx_slab, sctx);
+    LOG_DBG("Freed send context %x", tx_addr.ext_id);
 }
 
 static inline void free_recv_ctx(struct isotp_fast_recv_ctx *rctx)
 {
-    LOG_DBG("Freeing receive context %x", rctx->rx_addr.ext_id);
+    struct isotp_fast_addr rx_addr = rctx->rx_addr;
+    LOG_DBG("Freeing receive context %x", rx_addr.ext_id);
     k_timer_stop(&rctx->timer);
     sys_slist_find_and_remove(&rctx->ctx->isotp_recv_ctx_list, &rctx->node);
     net_buf_unref(rctx->buffer);
@@ -116,6 +119,7 @@ static inline void free_recv_ctx(struct isotp_fast_recv_ctx *rctx)
     k_msgq_cleanup(&rctx->recv_queue);
 #endif
     k_mem_slab_free(&isotp_recv_ctx_slab, rctx);
+    LOG_DBG("Freed receive context %x", rx_addr.ext_id);
 }
 
 static void free_recv_ctx_if_unowned(struct isotp_fast_recv_ctx *rctx)
