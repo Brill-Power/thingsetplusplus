@@ -32,7 +32,7 @@ jobs:
           comment_mode: off
           check_name: posix
           files: |
-            **/*.xml
+            **/report.xml
 
   zephyr-build-and-test:
     permissions:
@@ -62,5 +62,5 @@ jobs:
           comment_mode: off
           check_name: zephyr
           files: |
-            twister.out/*.xml
+            **/*.xml
 
