@@ -91,7 +91,7 @@ size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLe
         (*request)[--newPathStart] = 0x60 | newPathLength;
     } else {
         (*request)[--newPathStart] = newPathLength;
-        (*request)[--newPathStart] = 0x78;
+        (*request)[--newPathStart] = 0x78; // i.e. 0x60 | 0x18 (single byte integer follows)
     }
     // finally, copy verb from first byte
     (*request)[--newPathStart] = (*request)[0];
