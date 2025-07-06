@@ -3,7 +3,9 @@ name: Unit testing
 on: [push, pull_request]
 
 jobs:
-  build:
+  posix-build-and-test:
+    permissions:
+      checks: write
     runs-on: ubuntu-latest
     container: gcc
     steps:
@@ -23,7 +25,18 @@ jobs:
         run: |
           cd tests && cmake -S . -B build && cd build && make && ./testapp --gtest_output="xml:report.xml"
 
-  zephyr-test:
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
+        with:
+          comment_mode: off
+          check_name: posix
+          files: |
+            **/*.xml
+
+  zephyr-build-and-test:
+    permissions:
+      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,7 +50,17 @@ jobs:
           app-path: thingsetplusplus
           toolchains: x86_64-zephyr-elf
 
-      - name: Test
+      - name: Run Zephyr Tests
         run: |
           west build -p -b native_sim/native/64 thingsetplusplus/tests/zephyr -T thingset++.ZephyrClientServer
           zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/ -p native_sim/native/64 -v -v
+
+      - name: Publish Zephyr Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
+        with:
+          comment_mode: off
+          check_name: zephyr
+          files: |
+            twister.out/*.xml
+
