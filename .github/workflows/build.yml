@@ -23,22 +23,21 @@ jobs:
         run: |
           cd tests && cmake -S . -B build && cd build && make && ./testapp --gtest_output="xml:report.xml"
 
-  # zephyr-test:
-  #   runs-on: ubuntu-latest
-  #   container: zephyrprojectrtos/ci:main
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         path: thingsetplusplus
+  zephyr-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: thingsetplusplus
 
-  #     - name: Setup Zephyr project
-  #       uses: zephyrproject-rtos/action-zephyr-setup@v1
-  #       with:
-  #         app-path: thingsetplusplus
-  #         toolchains: x86_64-zephyr-elf
+      - name: Setup Zephyr project
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: thingsetplusplus
+          toolchains: x86_64-zephyr-elf
 
-  #     - name: Test
-  #       run: |
-  #         west build -p -b native_sim/native/64 thingsetplusplus/tests/zephyr -T thingset++.ZephyrClientServer
-  #         zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/ -p native_sim/native/64 -v -v
+      - name: Test
+        run: |
+          west build -p -b native_sim/native/64 thingsetplusplus/tests/zephyr -T thingset++.ZephyrClientServer
+          zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/ -p native_sim/native/64 -v -v
