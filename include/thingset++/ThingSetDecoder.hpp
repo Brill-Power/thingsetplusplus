@@ -181,7 +181,7 @@ private:
         bool ret = false;
         return ([&] {
             using elementType = typename std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>;
-            if constexpr (std::is_base_of_v<ThingSetDecodable, elementType>) {
+            if constexpr (std::is_convertible_v<elementType *, ThingSetDecodable *>) {
                 // https://lemire.me/blog/2025/03/15/speeding-up-c-code-with-template-lambdas/
                 // (for helping with passing template parameters to lambdas)
                 if (key == keySelector.template operator()<elementType>()) {

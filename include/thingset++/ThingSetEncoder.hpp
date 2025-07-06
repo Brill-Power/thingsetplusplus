@@ -13,6 +13,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <typeinfo>
 
 namespace ThingSet {
 
@@ -142,17 +143,17 @@ public:
         if (!encodeMapStart(count)) {
             return false;
         }
-        for_each_element(bound, [this](auto &prop) {
-            if constexpr (std::is_base_of_v<ThingSetEncodable, decltype(prop)>) {
-            if (this->encodeKeysAsIds()) {
-                this->encode(prop->getId());
-            } else {
-                this->encode(prop->getName());
-            }
-            this->encodeKeyValuePairSeparator();
-            auto value = prop->getValue();
-            this->encode(value);
-            this->encodeListSeparator();
+        for_each_element(bound, [this]<typename P>(P &prop) {
+            if constexpr (std::is_convertible_v<P, const ThingSetEncodable *>) {
+                if (this->encodeKeysAsIds()) {
+                    this->encode(prop->getId());
+                } else {
+                    this->encode(prop->getName());
+                }
+                this->encodeKeyValuePairSeparator();
+                auto value = prop->getValue();
+                this->encode(value);
+                this->encodeListSeparator();
             }
         });
         return encodeMapEnd(count);
