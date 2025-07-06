@@ -143,6 +143,7 @@ public:
             return false;
         }
         for_each_element(bound, [this](auto &prop) {
+            if constexpr (std::is_base_of_v<ThingSetEncodable, decltype(prop)>) {
             if (this->encodeKeysAsIds()) {
                 this->encode(prop->getId());
             } else {
@@ -152,6 +153,7 @@ public:
             auto value = prop->getValue();
             this->encode(value);
             this->encodeListSeparator();
+            }
         });
         return encodeMapEnd(count);
     }
