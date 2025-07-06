@@ -22,6 +22,7 @@ enum struct ThingSetEncodedNodeType : uint8_t {
 };
 
 class ThingSetDecodable;
+class ThingSetNode;
 
 /// @brief Base class for decoders.
 class ThingSetDecoder
@@ -180,11 +181,13 @@ private:
     {
         bool ret = false;
         return ([&] {
-            using elementType = typename std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>;
-            if constexpr (std::is_convertible_v<elementType *, ThingSetDecodable *>) {
+            // check if this is actually a property; it might not be, in which case just skip it
+            using propertyType = typename std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>;
+            if constexpr (std::is_convertible_v<propertyType *, ThingSetDecodable *> and
+                std::is_convertible_v<propertyType *, ThingSetNode *>) {
                 // https://lemire.me/blog/2025/03/15/speeding-up-c-code-with-template-lambdas/
                 // (for helping with passing template parameters to lambdas)
-                if (key == keySelector.template operator()<elementType>()) {
+                if (key == keySelector.template operator()<propertyType>()) {
                     ret = std::get<Is>(f)->decode(*this);
                     return true;
                 }

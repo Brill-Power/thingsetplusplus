@@ -13,11 +13,11 @@
 #include <string>
 #include <string_view>
 #include <tuple>
-#include <typeinfo>
 
 namespace ThingSet {
 
 class ThingSetEncodable;
+class ThingSetNode;
 
 /// @brief Encoder base class for ThingSet.
 class ThingSetEncoder
@@ -144,11 +144,15 @@ public:
             return false;
         }
         for_each_element(bound, [this]<typename P>(P &prop) {
-            if constexpr (std::is_convertible_v<P, const ThingSetEncodable *>) {
+            // only try to encode fields that are ThingSet properties; just
+            // skip everything else
+            if constexpr (std::is_convertible_v<P, const ThingSetEncodable *> and
+                std::is_convertible_v<P, const ThingSetNode *>) {
+                using propertyType = std::remove_pointer_t<P>;
                 if (this->encodeKeysAsIds()) {
-                    this->encode(prop->getId());
+                    this->encode(propertyType::id);
                 } else {
-                    this->encode(prop->getName());
+                    this->encode(propertyType::name);
                 }
                 this->encodeKeyValuePairSeparator();
                 auto value = prop->getValue();
