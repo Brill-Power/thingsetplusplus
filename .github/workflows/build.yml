@@ -62,5 +62,7 @@ jobs:
           comment_mode: off
           check_name: zephyr
           files: |
-            **/*.xml
+            **/twister.json
+            **/twister.xml
+            **/twister_report.xml
 
