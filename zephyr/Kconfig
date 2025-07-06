@@ -28,6 +28,10 @@ config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH
 config THINGSET_PLUS_PLUS_BACKEND_CAN
 	bool "Enable CAN backend"
 	default false
+	select CAN
+	select ISOTP
+	select ISOTP_FAST
+	select ISOTP_FAST_FIXED_ADDRESSING
 
 config THINGSET_PLUS_PLUS_BACKEND_SOCKET
 	bool "Enable socket backend"
