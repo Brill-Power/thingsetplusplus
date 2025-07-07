@@ -19,13 +19,20 @@ template <typename T>
 concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_base_of_v<ThingSetEncodable, T>
                                  && std::is_base_of_v<ThingSetDecodable, T>;
 
+class ThingSetForwarder
+{
+public:
+    virtual int handleForward(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) = 0;
+};
+
 class _ThingSetServer
 {
 private:
     ThingSetAccess _access;
+    ThingSetForwarder *_forwarder;
 
 protected:
-    _ThingSetServer();
+    _ThingSetServer(ThingSetForwarder *forwarder);
 
 public:
     virtual bool listen() = 0;
@@ -36,11 +43,11 @@ private:
     int handleUpdate(ThingSetRequestContext &context);
     int handleExec(ThingSetRequestContext &context);
 
-    int handleRequest(ThingSetRequestContext &context);
+    int handleRequest(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
 protected:
-    int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
-    int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen);
+    int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
+    int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
     template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T,
               EncodableDecodableNode... Property>
@@ -68,8 +75,11 @@ private:
     ThingSetServerTransport<Identifier, Size, Encoder> &_transport;
 
 public:
-    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
-        : _ThingSetServer(), _transport(transport)
+    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport) : ThingSetServer(transport, nullptr)
+    {}
+
+    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport, ThingSetForwarder *forwarder)
+        : _ThingSetServer(forwarder), _transport(transport)
     {}
 
     bool listen() override
@@ -119,9 +129,9 @@ class ThingSetServerBuilder
 public:
     template <typename Identifier, size_t Size, StreamingBinaryEncoder<Size> Encoder>
     static ThingSetServer<Identifier, Size, Encoder>
-    build(ThingSetServerTransport<Identifier, Size, Encoder> &transport)
+    build(ThingSetServerTransport<Identifier, Size, Encoder> &transport, ThingSetForwarder *forwarder = nullptr)
     {
-        return ThingSetServer<Identifier, Size, Encoder>(transport);
+        return ThingSetServer<Identifier, Size, Encoder>(transport, forwarder);
     }
 };
 

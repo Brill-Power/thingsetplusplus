@@ -18,28 +18,38 @@ static const uint16_t MetadataNameId = 0x1a;
 static const uint16_t MetadataTypeId = 0x1b;
 static const uint16_t MetadataAccessId = 0x1c;
 
-_ThingSetServer::_ThingSetServer() : _access(ThingSetAccess::anyReadWrite)
+_ThingSetServer::_ThingSetServer(ThingSetForwarder *forwarder) : _access(ThingSetAccess::anyReadWrite), _forwarder(forwarder)
 {}
 
-int _ThingSetServer::handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+int _ThingSetServer::handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
 {
-    ThingSetBinaryRequestContext context(request, requestLen, response, responseLen);
-    return handleRequest(context);
+    ThingSetBinaryRequestContext context(request, requestLen, response, responseSize);
+    return handleRequest(context, request, requestLen, response, responseSize);
 }
 
-int _ThingSetServer::handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
+int _ThingSetServer::handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
 {
-    ThingSetTextRequestContext context(request, requestLen, response, responseLen);
-    return handleRequest(context);
+    ThingSetTextRequestContext context(request, requestLen, response, responseSize);
+    return handleRequest(context, request, requestLen, response, responseSize);
 }
 
-int _ThingSetServer::handleRequest(ThingSetRequestContext &context)
+int _ThingSetServer::handleRequest(ThingSetRequestContext &context, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
 {
     if (!context.hasValidEndpoint())
     {
-        // fail
         context.setStatus(ThingSetStatusCode::badRequest);
         return context.getHeaderLength();
+    }
+    if (context.isToBeForwarded())
+    {
+        if (_forwarder) {
+            return _forwarder->handleForward(context, request, requestLen, response, responseSize);
+        }
+        else
+        {
+            context.setStatus(ThingSetStatusCode::notAGateway);
+            return context.getHeaderLength();
+        }
     }
     if (context.useIds())
     {

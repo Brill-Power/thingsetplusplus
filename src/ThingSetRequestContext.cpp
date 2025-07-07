@@ -8,8 +8,8 @@
 
 namespace ThingSet {
 
-ThingSetRequestContext::ThingSetRequestContext(uint8_t *resp)
-    : _response(resp), index(SIZE_MAX)
+ThingSetRequestContext::ThingSetRequestContext(uint8_t *response)
+    : _response(response), index(SIZE_MAX)
 {}
 
 uint16_t &ThingSetRequestContext::id()
@@ -27,14 +27,32 @@ bool ThingSetRequestContext::hasValidEndpoint()
     return _id.has_value() || _path.has_value();
 }
 
+bool ThingSetRequestContext::isToBeForwarded()
+{
+    return _path.has_value() && _path.value().length() > 1 && _path.value()[0] == '/';
+}
+
 bool ThingSetRequestContext::useIds()
 {
     return _id.has_value();
 }
 
-ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
-    _ThingSetRequestContext(request, resp),
-    _encoder(resp + 1, responseLen - 1),
+bool ThingSetRequestContext::tryGetNodeId(std::string &nodeId)
+{
+    // first find nodeID by finding next slash
+    const size_t pos = path().find('/', 1);
+    if (pos == std::string::npos)
+    {
+        return false;
+    }
+
+    nodeId = path().substr(1, pos - 1);
+    return true;
+}
+
+ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) :
+    _ThingSetRequestContext(request, response),
+    _encoder(response + 1, responseSize - 1),
     _decoder(request + 1, requestLen - 1, 2)
 {
     std::string path;
@@ -49,15 +67,48 @@ ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, siz
     }
 }
 
+size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
+{
+    if (!tryGetNodeId(nodeId)) {
+        return 0;
+    }
+
+    // first find string in buffer
+    uint8_t *requestEnd = &(*request)[requestLength - 1];
+    uint8_t *nodeIdPathComponentStart = std::search(*request, requestEnd, nodeId.begin(), nodeId.end());
+    if (nodeIdPathComponentStart == requestEnd)
+    {
+        return 0;
+    }
+
+    // calculate new start of path as an offset
+    size_t newPathStart = (nodeIdPathComponentStart + nodeId.length() + 1) - *request;
+    // new length is old length less node ID and two slashes
+    size_t newPathLength = path().length() - nodeId.length() - 2;
+    // write new string header
+    // depending on string length need 1 or 2 bytes to
+    if (newPathLength < 25) {
+        (*request)[--newPathStart] = 0x60 | newPathLength;
+    } else {
+        (*request)[--newPathStart] = newPathLength;
+        (*request)[--newPathStart] = 0x78; // i.e. 0x60 | 0x18 (single byte integer follows)
+    }
+    // finally, copy verb from first byte
+    (*request)[--newPathStart] = (*request)[0];
+    size_t newLength = requestLength - newPathStart + 1;
+    *request = &(*request)[newPathStart];
+    return newLength;
+}
+
 bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
 {
     _response[0] = status;
     return true;
 }
 
-ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *resp, size_t responseLen) :
-    _ThingSetRequestContext(request, resp),
-    _encoder(reinterpret_cast<char *>(resp) + 4, responseLen - 4),
+ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) :
+    _ThingSetRequestContext(request, response),
+    _encoder(reinterpret_cast<char *>(response) + 4, responseSize - 4),
     _decoder(reinterpret_cast<char *>(request) + 1, requestLen - 1)
 {
     // find first space, if any
@@ -72,7 +123,20 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
     {
         _path = std::string(pathStart, requestLen - 1);
     }
+}
 
+size_t ThingSetTextRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
+{
+    if (!tryGetNodeId(nodeId)) {
+        return 0;
+    }
+
+    // assuming ?/deadbeef12345678/Foo, we can take the first byte and
+    // replace the slash after the node ID
+    request[nodeId.length() + 2] = request[0];
+    size_t newLength = requestLength - (nodeId.length() + 2);
+    *request = &(*request)[nodeId.length() + 2];
+    return newLength;
 }
 
 bool ThingSetTextRequestContext::setStatus(const ThingSetStatusCode &status)
