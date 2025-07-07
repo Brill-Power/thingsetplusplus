@@ -21,6 +21,9 @@ enum struct ThingSetEncodedNodeType : uint8_t {
     map = 4,
 };
 
+class ThingSetDecodable;
+class ThingSetNode;
+
 /// @brief Base class for decoders.
 class ThingSetDecoder
 {
@@ -107,13 +110,13 @@ public:
         std::optional<std::string> name;
         while (decodeKey(id, name)) {
             if (id.has_value()) {
-                if (!switchDecode(id, []<typename P>(){ return P::id; }, bound)) {
+                if (!switchDecode(id.value(), []<typename P>(){ return P::id; }, bound)) {
                     if (!skip()) {
                         return false;
                     }
                 }
             } else if (name.has_value()) {
-                if (!switchDecode(name, []<typename P>(){ return P::name; }, bound)) {
+                if (!switchDecode(name.value(), []<typename P>(){ return P::name; }, bound)) {
                     if (!skip()) {
                         return false;
                     }
@@ -178,15 +181,18 @@ private:
     {
         bool ret = false;
         return ([&] {
-            // https://lemire.me/blog/2025/03/15/speeding-up-c-code-with-template-lambdas/
-            // (for helping with passing template parameters to lambdas)
-            if (key == keySelector.template operator()<typename std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>>()) {
-                ret = std::get<Is>(f)->decode(*this);
-                return true;
+            // check if this is actually a property; it might not be, in which case just skip it
+            using propertyType = typename std::remove_pointer_t<std::remove_cvref_t<typename std::tuple_element<Is, Fields>::type>>;
+            if constexpr (std::is_convertible_v<propertyType *, ThingSetDecodable *> and
+                std::is_convertible_v<propertyType *, ThingSetNode *>) {
+                // https://lemire.me/blog/2025/03/15/speeding-up-c-code-with-template-lambdas/
+                // (for helping with passing template parameters to lambdas)
+                if (key == keySelector.template operator()<propertyType>()) {
+                    ret = std::get<Is>(f)->decode(*this);
+                    return true;
+                }
             }
-            else {
-                return false;
-            }
+            return false;
         }() || ...);
         return ret;
     }

@@ -16,6 +16,7 @@ struct SupercellRecord
 
 struct ModuleRecord
 {
+    bool ignored; // this field will be ignored by the encoder and decoder
     ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
     ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
     ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;

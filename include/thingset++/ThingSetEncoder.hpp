@@ -17,6 +17,7 @@
 namespace ThingSet {
 
 class ThingSetEncodable;
+class ThingSetNode;
 
 /// @brief Encoder base class for ThingSet.
 class ThingSetEncoder
@@ -142,16 +143,22 @@ public:
         if (!encodeMapStart(count)) {
             return false;
         }
-        for_each_element(bound, [this](auto &prop) {
-            if (this->encodeKeysAsIds()) {
-                this->encode(prop->getId());
-            } else {
-                this->encode(prop->getName());
+        for_each_element(bound, [this]<typename P>(P &prop) {
+            // only try to encode fields that are ThingSet properties; just
+            // skip everything else
+            if constexpr (std::is_convertible_v<P, const ThingSetEncodable *> and
+                std::is_convertible_v<P, const ThingSetNode *>) {
+                using propertyType = std::remove_pointer_t<P>;
+                if (this->encodeKeysAsIds()) {
+                    this->encode(propertyType::id);
+                } else {
+                    this->encode(propertyType::name);
+                }
+                this->encodeKeyValuePairSeparator();
+                auto value = prop->getValue();
+                this->encode(value);
+                this->encodeListSeparator();
             }
-            this->encodeKeyValuePairSeparator();
-            auto value = prop->getValue();
-            this->encode(value);
-            this->encodeListSeparator();
         });
         return encodeMapEnd(count);
     }
