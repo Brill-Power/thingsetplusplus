@@ -104,7 +104,7 @@ public:
         : IdentifiableThingSetParentNode<Id, ParentId, Name>::IdentifiableThingSetParentNode(), _function(function)
     {}
 
-    const std::string getType() const override
+    constexpr const std::string getType() const override
     {
         return ThingSetType<std::function<Result(Args...)>>::name.str();
     }
@@ -133,7 +133,7 @@ public:
         }
     }
 
-    ThingSetAccess getAccess() const override
+    constexpr ThingSetAccess getAccess() const override
     {
         return Access;
     }

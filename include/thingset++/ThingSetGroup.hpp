@@ -28,7 +28,7 @@ public:
     ThingSetGroup(std::function<bool(ThingSetNode *, ThingSetCallbackReason)> callback)
         : IdentifiableThingSetParentNode<Id, ParentId, Name>(), _callback(callback){};
 
-    const std::string getType() const override
+    constexpr const std::string getType() const override
     {
         return "group";
     }
@@ -44,7 +44,7 @@ public:
         return true;
     }
 
-    ThingSetAccess getAccess() const override
+    constexpr ThingSetAccess getAccess() const override
     {
         return ThingSetAccess::anyRead;
     }

@@ -18,7 +18,7 @@ template <typename T, typename Base, unsigned Id, unsigned ParentId, StringLiter
 concept IdentifiableBase = std::is_base_of_v<_IdentifiableThingSetNode<Base, Id, ParentId, Name>, T>;
 
 template <unsigned Id, unsigned ParentId, StringLiteral Name, NodeBase NodeBase,
-          IdentifiableBase<NodeBase, Id, ParentId, Name> Base, ThingSetAccess Access, typename T>
+          IdentifiableBase<NodeBase, Id, ParentId, Name> Base, ThingSetAccess Access, typename T, uint32_t Subset = 0>
 class _ThingSetProperty : public ThingSetValue<T>, public Base
 {
 protected:
@@ -28,7 +28,7 @@ protected:
     {}
 
 public:
-    const std::string getType() const override
+    constexpr const std::string getType() const override
     {
         return ThingSetType<std::remove_pointer_t<T>>::name.str();
     }
@@ -52,7 +52,12 @@ public:
         }
     }
 
-    ThingSetAccess getAccess() const override
+    constexpr uint32_t getSubsets() const override
+    {
+        return Subset;
+    }
+
+    constexpr ThingSetAccess getAccess() const override
     {
         return Access;
     }
@@ -69,16 +74,16 @@ public:
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
 /// @tparam Access The access permissions for this property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
+template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, uint32_t Subset = 0>
 class ThingSetProperty : public _ThingSetProperty<Id, ParentId, Name, ThingSetNode,
-                                                  IdentifiableThingSetNode<Id, ParentId, Name>, Access, T>
+                                                  IdentifiableThingSetNode<Id, ParentId, Name>, Access, T, Subset>
 {
 public:
     ThingSetProperty()
-        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T>()
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T, Subset>()
     {}
     ThingSetProperty(const T &value)
-        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T>(
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T, Subset>(
               value)
     {}
 
@@ -96,15 +101,13 @@ public:
 };
 
 /// @brief Partial specialisation of ThingSetProperty for pointers to values.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T>
-class ThingSetProperty<Id, ParentId, Name, Access, T *>
-    : public _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access,
-                               T *>
+template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, uint32_t Subset>
+class ThingSetProperty<Id, ParentId, Name, Access, T *, Subset>
+    : public _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T *, Subset>
 {
 public:
     ThingSetProperty(T *value)
-        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access,
-                            T *>(value)
+        : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T *, Subset>(value)
     {}
 
     auto &operator=(T &value)
@@ -120,21 +123,21 @@ public:
 };
 
 /// @brief Partial specialisation of ThingSetProperty for record arrays.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size>
+template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, uint32_t Subset>
     requires std::is_class_v<Element>
-class ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>>
+class ThingSetProperty<Id, ParentId, Name, Access, std::array<Element, Size>, Subset>
     : public _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode,
-                               IdentifiableThingSetParentNode<Id, ParentId, Name>, Access, std::array<Element, Size>>,
+                               IdentifiableThingSetParentNode<Id, ParentId, Name>, Access, std::array<Element, Size>, Subset>,
       public ThingSetCustomRequestHandler
 {
 public:
     ThingSetProperty()
         : _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode, IdentifiableThingSetParentNode<Id, ParentId, Name>,
-                            Access, std::array<Element, Size>>()
+                            Access, std::array<Element, Size>, Subset>()
     {}
     ThingSetProperty(const std::array<Element, Size> &value)
         : _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode, IdentifiableThingSetParentNode<Id, ParentId, Name>,
-                            Access, std::array<Element, Size>>(value)
+                            Access, std::array<Element, Size>, Subset>(value)
     {}
 
     auto &operator=(const std::array<Element, Size> &value)
@@ -159,7 +162,7 @@ public:
     {
         if (!_ThingSetProperty<Id, ParentId, Name, ThingSetParentNode,
                                IdentifiableThingSetParentNode<Id, ParentId, Name>, Access,
-                               std::array<Element, Size>>::tryCastTo(type, target))
+                               std::array<Element, Size>, Subset>::tryCastTo(type, target))
         {
             if (type == ThingSetNodeType::requestHandler) {
                 *target = static_cast<ThingSetCustomRequestHandler *>(this);
@@ -230,33 +233,33 @@ public:
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
-using ThingSetReadOnlyProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead, T>;
+template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, uint32_t Subset = 0>
+using ThingSetReadOnlyProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead, T, Subset>;
 
 /// @brief A ThingSet property that can be read and written by anyone.
 /// @tparam T The type of the value stored by this property.
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
-using ThingSetReadWriteProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyReadWrite, T>;
+template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, uint32_t Subset = 0>
+using ThingSetReadWriteProperty = ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyReadWrite, T, Subset>;
 
 /// @brief A ThingSet property that can be read by anyone but only written by advanced users.
 /// @tparam T The type of the value stored by this property.
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
+template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, uint32_t Subset = 0>
 using ThingSetReadAdvancedWriteProperty =
-    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T>;
+    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T, Subset>;
 
 /// @brief A ThingSet property that can be read by anyone but only written by the manufacturer.
 /// @tparam T The type of the value stored by this property.
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T>
+template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, uint32_t Subset = 0>
 using ThingSetReadManufacturerWriteProperty =
-    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T>;
+    ThingSetProperty<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T, Subset>;
 
 } // namespace ThingSet
