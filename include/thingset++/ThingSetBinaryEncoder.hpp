@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "ThingSetEncoder.hpp"
+#include "thingset++/ThingSetEncoder.hpp"
 #include "zcbor_encode.h"
 
 #define BINARY_ENCODER_MAX_NULL_TERMINATED_STRING_LENGTH 256

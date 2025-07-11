@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include "FlatteningIterator.hpp"
-#include "StringLiteral.hpp"
-#include "ThingSetParentNode.hpp"
+#include "thingset++/FlatteningIterator.hpp"
+#include "thingset++/StringLiteral.hpp"
+#include "thingset++/ThingSetParentNode.hpp"
 #include <array>
 #include <functional>
 #include <list>

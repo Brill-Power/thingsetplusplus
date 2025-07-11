@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "ThingSetAccess.hpp"
+#include "thingset++/ThingSetAccess.hpp"
 #include <string_view>
 
 namespace ThingSet {
