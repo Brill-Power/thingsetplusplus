@@ -5,11 +5,10 @@
  */
 #pragma once
 
-#include "IdentifiableThingSetNode.hpp"
-#include "StringLiteral.hpp"
-#include "ThingSetBinaryDecoder.hpp"
-#include "ThingSetBinaryEncoder.hpp"
-#include "ThingSetType.hpp"
+#include "thingset++/IdentifiableThingSetNode.hpp"
+#include "thingset++/ThingSetDecoder.hpp"
+#include "thingset++/ThingSetEncoder.hpp"
+#include "thingset++/ThingSetType.hpp"
 #include <concepts>
 #include <functional>
 #include <tuple>

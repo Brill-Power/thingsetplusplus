@@ -6,9 +6,8 @@
 
 #pragma once
 
-#include "IdentifiableThingSetNode.hpp"
-#include "StringLiteral.hpp"
-#include "ThingSetParentNode.hpp"
+#include "thingset++/IdentifiableThingSetNode.hpp"
+#include "thingset++/ThingSetParentNode.hpp"
 
 namespace ThingSet {
 

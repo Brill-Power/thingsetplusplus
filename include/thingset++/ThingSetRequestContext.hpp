@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "ThingSetBinaryDecoder.hpp"
-#include "ThingSetBinaryEncoder.hpp"
-#include "ThingSetTextDecoder.hpp"
-#include "ThingSetTextEncoder.hpp"
-#include "ThingSetNode.hpp"
-#include "ThingSetStatus.hpp"
+#include "thingset++/ThingSetBinaryEncoder.hpp"
+#include "thingset++/ThingSetBinaryDecoder.hpp"
+#include "thingset++/ThingSetTextEncoder.hpp"
+#include "thingset++/ThingSetTextDecoder.hpp"
+#include "thingset++/ThingSetNode.hpp"
+#include "thingset++/ThingSetStatus.hpp"
 #include <optional>
 
 namespace ThingSet {

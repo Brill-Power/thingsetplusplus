@@ -49,16 +49,16 @@ protected:
     int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
     int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
-    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, uint32_t Subset,
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset, SubsetType Subset,
               EncodableDecodableNode... Property>
-    bool encode(ThingSetEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T, Subset> &property,
+    bool encode(ThingSetEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T, SubsetType, Subset> &property,
                 Property &...properties)
     {
         return encode(encoder, property) && encode(encoder, properties...);
     }
 
-    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, uint32_t Subset>
-    bool encode(ThingSetEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T, Subset> &property)
+    template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset, SubsetType Subset>
+    bool encode(ThingSetEncoder &encoder, ThingSetProperty<Id, ParentId, Name, Access, T, SubsetType, Subset> &property)
     {
         return encoder.encode(property.getId()) && encoder.encode(property.getValue());
     }
