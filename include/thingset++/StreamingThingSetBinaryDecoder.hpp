@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "ThingSetBinaryDecoder.hpp"
+#include "thingset++/ThingSetBinaryDecoder.hpp"
 
 namespace ThingSet {
 

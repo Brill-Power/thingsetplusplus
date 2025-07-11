@@ -4,15 +4,17 @@
 // A forward iterator that "flattens" a container of containers.  For example,
 // a vector<vector<int>> containing { { 1, 2, 3 }, { 4, 5, 6 } } is iterated as
 // a single range, { 1, 2, 3, 4, 5, 6 }.
-template <typename OuterIterator> class FlatteningIterator
+template <typename OuterIterator, typename InnerIterator = std::iterator_traits<OuterIterator>::value_type::iterator> class FlatteningIterator
 {
 public:
     typedef OuterIterator outer_iterator;
     // https://stackoverflow.com/questions/3967996/how-to-retrieve-value-type-from-iterator-in-c
-    typedef typename std::iterator_traits<OuterIterator>::value_type::iterator inner_iterator;
+    typedef InnerIterator inner_iterator;
 
     typedef typename inner_iterator::value_type value_type;
     typedef typename inner_iterator::reference reference;
+    // https://www.reedbeta.com/blog/ranges-compatible-containers/
+    typedef typename inner_iterator::difference_type difference_type;
 
     FlatteningIterator()
     {}
@@ -39,6 +41,11 @@ public:
         if (inner_it_ == outer_it_->end())
             advance_past_empty_inner_containers();
         return *this;
+    }
+
+    void operator++(int)
+    {
+        ++*this;
     }
 
     friend bool operator==(const FlatteningIterator &a, const FlatteningIterator &b)
@@ -72,12 +79,14 @@ private:
     inner_iterator inner_it_;
 };
 
-template <typename Iterator> FlatteningIterator<Iterator> flatten(Iterator it)
+template <typename OuterIterator, typename InnerIterator = std::iterator_traits<OuterIterator>::value_type::iterator>
+FlatteningIterator<OuterIterator, InnerIterator> flatten(OuterIterator it)
 {
-    return FlatteningIterator<Iterator>(it, it);
+    return FlatteningIterator<OuterIterator, InnerIterator>(it, it);
 }
 
-template <typename Iterator> FlatteningIterator<Iterator> flatten(Iterator first, Iterator last)
+template <typename OuterIterator, typename InnerIterator = std::iterator_traits<OuterIterator>::value_type::iterator>
+FlatteningIterator<OuterIterator, InnerIterator> flatten(OuterIterator first, OuterIterator last)
 {
-    return FlatteningIterator<Iterator>(first, last);
+    return FlatteningIterator<OuterIterator, InnerIterator>(first, last);
 }

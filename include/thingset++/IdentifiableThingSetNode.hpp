@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include "StringLiteral.hpp"
-#include "ThingSetNode.hpp"
-#include "ThingSetRegistry.hpp"
+#include "thingset++/StringLiteral.hpp"
+#include "thingset++/ThingSetNode.hpp"
+#include "thingset++/ThingSetRegistry.hpp"
 
 namespace ThingSet {
 
@@ -36,8 +36,6 @@ public:
     {
         return ParentId;
     }
-
-    constexpr static const unsigned groupId = ParentId;
 
     constexpr static const unsigned id = Id;
     constexpr static const std::string_view &name = Name.string_view();

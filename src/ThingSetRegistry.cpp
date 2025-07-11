@@ -19,10 +19,10 @@ ThingSetRegistry::ThingSetRegistry()
 
 ThingSetNode *ThingSetRegistry::getMetadataNode()
 {
-    return &getInstance()._metadataNode;
+    return &instance()._metadataNode;
 }
 
-ThingSetRegistry &ThingSetRegistry::getInstance()
+ThingSetRegistry &ThingSetRegistry::instance()
 {
     static ThingSetRegistry instance;
     return instance;
@@ -33,7 +33,7 @@ void ThingSetRegistry::registerOrUnregisterNode(
     std::function<bool(ThingSetParentNode *, ThingSetNode *)> parentNodeAction)
 {
     unsigned id = node->getId();
-    NodeList &list = getInstance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
+    NodeList &list = _nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
     nodeListAction(list, node);
     ThingSetParentNode *parent;
     if (node->getParentId() != id && findParentById(node->getParentId(), &parent)) {
@@ -42,7 +42,7 @@ void ThingSetRegistry::registerOrUnregisterNode(
     void *target;
     if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
         parent = reinterpret_cast<ThingSetParentNode *>(target);
-        for (auto n : getInstance()) {
+        for (auto n : *this) {
             if (n->getParentId() == node->getId()) {
                 parent->addChild(n);
             }
@@ -53,14 +53,14 @@ void ThingSetRegistry::registerOrUnregisterNode(
 void ThingSetRegistry::registerNode(ThingSetNode *node)
 {
     LOG_DEBUG("Registering node %s (0x%x)", node->getName().data(), node->getId());
-    ThingSetRegistry::registerOrUnregisterNode(
+    ThingSetRegistry::instance().registerOrUnregisterNode(
         node, [](auto &l, auto *n) { l.push_back(n); }, [](auto *p, auto *n) { return p->addChild(n); });
 }
 
 void ThingSetRegistry::unregisterNode(ThingSetNode *node)
 {
     LOG_DEBUG("Unregistering node %s (0x%x)", node->getName().data(), node->getId());
-    ThingSetRegistry::registerOrUnregisterNode(
+    ThingSetRegistry::instance().registerOrUnregisterNode(
         node, [](auto &l, auto *n) { l.remove(n); }, [](auto *p, auto *n) { return p->removeChild(n); });
 }
 
@@ -78,12 +78,12 @@ bool ThingSetRegistry::findParentById(const unsigned id, ThingSetParentNode **pa
 
 bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node, size_t *index)
 {
-    return getInstance()._rootNode.findByName(name, node, index);
+    return instance()._rootNode.findByName(name, node, index);
 }
 
 bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)
 {
-    NodeList list = getInstance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
+    NodeList list = instance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
     for (ThingSetNode *n : list) {
         if (n && (n->getId() == id)) {
             *node = n;
@@ -95,15 +95,38 @@ bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)
 
 FlatteningIterator<NodeMap::iterator> ThingSetRegistry::begin()
 {
-    auto begin = _nodeMap.begin();
-    auto end = _nodeMap.end();
+    auto begin = instance()._nodeMap.begin();
+    auto end = instance()._nodeMap.end();
     return flatten(begin, end);
+}
+
+FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::cbegin() const
+{
+    auto begin = instance()._nodeMap.cbegin();
+    auto end = instance()._nodeMap.cend();
+    return flatten<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator>(begin, end);
+}
+
+FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::begin() const
+{
+    return cbegin();
 }
 
 FlatteningIterator<NodeMap::iterator> ThingSetRegistry::end()
 {
-    auto end = _nodeMap.end();
+    auto end = instance()._nodeMap.end();
     return flatten(end);
+}
+
+FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::cend() const
+{
+    auto end = instance()._nodeMap.cend();
+    return flatten<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator>(end);
+}
+
+FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::end() const
+{
+    return cend();
 }
 
 } // namespace ThingSet

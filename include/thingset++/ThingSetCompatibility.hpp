@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "ThingSet.hpp"
+#include "thingset++/ThingSet.hpp"
 
 #define TS_ID_ROOT 0x00
 

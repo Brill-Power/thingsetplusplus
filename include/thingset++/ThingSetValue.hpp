@@ -5,10 +5,10 @@
  */
 #pragma once
 
-#include "ThingSetBinaryDecoder.hpp"
-#include "ThingSetBinaryEncoder.hpp"
-#include "ThingSetTextDecoder.hpp"
-#include "ThingSetTextEncoder.hpp"
+#include "thingset++/ThingSetBinaryDecoder.hpp"
+#include "thingset++/ThingSetBinaryEncoder.hpp"
+#include "thingset++/ThingSetTextDecoder.hpp"
+#include "thingset++/ThingSetTextEncoder.hpp"
 
 namespace ThingSet {
 
