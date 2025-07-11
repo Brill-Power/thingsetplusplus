@@ -7,6 +7,7 @@
 
 #include "thingset++/ThingSetAccess.hpp"
 #include <string_view>
+#include <cstdint>
 
 namespace ThingSet {
 
