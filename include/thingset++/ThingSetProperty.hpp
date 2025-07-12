@@ -8,7 +8,8 @@
 #include "thingset++/IdentifiableThingSetNode.hpp"
 #include "thingset++/ThingSetCustomRequestHandler.hpp"
 #include "thingset++/ThingSetType.hpp"
-#include "thingset++/ThingSetValue.hpp"
+#include "thingset++/ThingSetEncoder.hpp"
+#include "thingset++/ThingSetDecoder.hpp"
 
 namespace ThingSet {
 
@@ -29,15 +30,81 @@ static constexpr Subset operator|(const Subset &lhs, const Subset &rhs)
 template <unsigned Id, unsigned ParentId, StringLiteral Name, NodeBase NodeBase,
           IdentifiableBase<NodeBase, Id, ParentId, Name> Base, ThingSetAccess Access, typename T, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0>
           requires std::is_enum_v<SubsetType>
-class _ThingSetProperty : public ThingSetValue<T>, public Base
+class _ThingSetProperty : public Base, public ThingSetEncodable, public ThingSetDecodable
 {
 protected:
-    _ThingSetProperty() : ThingSetValue<T>(), Base()
+    T _value;
+
+    _ThingSetProperty() : Base(), _value(T())
     {}
-    _ThingSetProperty(const T &value) : ThingSetValue<T>(value), Base()
+    _ThingSetProperty(const T &value) : Base(), _value(value)
+    {}
+    _ThingSetProperty(T &&value) : Base(), _value(std::move(value))
+    {}
+    template <class U, typename std::enable_if<std::is_convertible_v<U, T>, bool>::type = true>
+    _ThingSetProperty(const U &value) : Base(), _value(value)
     {}
 
 public:
+    bool encode(ThingSetEncoder &encoder) const override
+    {
+        return encoder.encode(_value);
+    }
+
+    bool decode(ThingSetDecoder &decoder) override
+    {
+        return decoder.decode(&_value);
+    }
+
+    T &getValue()
+    {
+        return _value;
+    }
+
+    const T &getValue() const
+    {
+        return _value;
+    }
+
+    operator T &()
+    {
+        return _value;
+    }
+
+    T *operator&()
+    {
+        return &_value;
+    }
+
+    T &operator()()
+    {
+        return _value;
+    }
+
+    const T &operator()() const
+    {
+        return _value;
+    }
+
+    auto &operator=(const T &value)
+    {
+        _value = value;
+        return *this;
+    }
+
+    auto &operator=(T &&value)
+    {
+        _value = std::move(value);
+        return *this;
+    }
+
+    template <class U, typename std::enable_if<std::is_convertible_v<U, T>, bool>::type = true>
+    auto &operator=(const U &value)
+    {
+        _value = value;
+        return this;
+    }
+
     constexpr const std::string getType() const override
     {
         return ThingSetType<std::remove_pointer_t<T>>::name.str();
@@ -98,17 +165,7 @@ public:
               value)
     {}
 
-    auto &operator=(const T &value)
-    {
-        this->_value = value;
-        return *this;
-    }
-
-    auto &operator=(T &&value)
-    {
-        this->_value = std::move(value);
-        return *this;
-    }
+    using _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T, SubsetType, Subset>::operator=;
 };
 
 /// @brief Partial specialisation of ThingSetProperty for pointers to values.
@@ -121,9 +178,10 @@ public:
         : _ThingSetProperty<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode<Id, ParentId, Name>, Access, T *, SubsetType, Subset>(value)
     {}
 
-    auto &operator=(T &value)
+    auto &operator=(const T &value)
     {
         *this->_value = value;
+        return *this;
     }
 
     auto &operator=(T &&value)
@@ -151,16 +209,17 @@ public:
                             Access, std::array<Element, Size>, SubsetType, Subset>(value)
     {}
 
-    auto &operator=(const std::array<Element, Size> &value)
+    using _ThingSetProperty<Id, ParentId, Name, ThingSetParentNode, IdentifiableThingSetParentNode<Id, ParentId, Name>,
+                            Access, std::array<Element, Size>, SubsetType, Subset>::operator=;
+
+    Element &operator[](int index)
     {
-        this->_value = value;
-        return *this;
+        return this->_value[index];
     }
 
-    auto &operator=(std::array<Element, Size> &&value)
+    std::size_t size() const
     {
-        this->_value = std::move(value);
-        return *this;
+        return this->_value.size();
     }
 
     ThingSetParentNode::ChildIterator begin() override
