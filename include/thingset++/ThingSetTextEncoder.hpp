@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "ThingSetEncoder.hpp"
+#include "thingset++/ThingSetEncoder.hpp"
 #include <cstring>
 
 #define TEXT_ENCODER_BUFFER_SIZE 1024

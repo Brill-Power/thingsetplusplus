@@ -5,12 +5,13 @@
  */
 #pragma once
 
-#include "FlatteningIterator.hpp"
-#include "StringLiteral.hpp"
-#include "ThingSetParentNode.hpp"
+#include "thingset++/FlatteningIterator.hpp"
+#include "thingset++/StringLiteral.hpp"
+#include "thingset++/ThingSetParentNode.hpp"
 #include <array>
 #include <functional>
 #include <list>
+#include <ranges>
 
 #define NODE_MAP_LOOKUP_BUCKETS 8
 
@@ -23,7 +24,8 @@ typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
 class ThingSetRegistry
 {
 private:
-    template <unsigned Id, unsigned ParentId, StringLiteral Name> class OverlayNode : public ThingSetParentNode
+    template <unsigned Id, unsigned ParentId, StringLiteral Name>
+    class OverlayNode : public ThingSetParentNode
     {
     public:
         constexpr virtual const std::string_view getName() const override
@@ -90,9 +92,6 @@ public:
 
     static ThingSetNode *getMetadataNode();
 
-    static void registerNode(ThingSetNode *node);
-    static void unregisterNode(ThingSetNode *node);
-
     /// @brief Find a node by its fully-qualified name.
     /// @param name The full string path of the node that is sought.
     /// @param node When the method returns, contains a pointer to the node if it was found.
@@ -108,13 +107,27 @@ public:
 
     FlatteningIterator<NodeMap::iterator> begin();
     FlatteningIterator<NodeMap::iterator> end();
+    FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> cbegin() const;
+    FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> cend() const;
+    FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> begin() const;
+    FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> end() const;
+
+    template <typename SubsetType> requires std::is_enum_v<SubsetType>
+    static auto nodesInSubset(SubsetType subset)
+    {
+        uint32_t s = (uint32_t)subset;
+        return instance() | std::views::filter([s](auto n) { return (n->getSubsets() & s) == s; });
+    }
+
+    static void registerNode(ThingSetNode *node);
+    static void unregisterNode(ThingSetNode *node);
+
+    static ThingSetRegistry &instance();
 
 private:
-    static ThingSetRegistry &getInstance();
-
-    static void registerOrUnregisterNode(ThingSetNode *node,
-                                         std::function<void(NodeList &, ThingSetNode *)> nodeListAction,
-                                         std::function<bool(ThingSetParentNode *, ThingSetNode *)> parentNodeAction);
+    void registerOrUnregisterNode(ThingSetNode *node,
+                                  std::function<void(NodeList &, ThingSetNode *)> nodeListAction,
+                                  std::function<bool(ThingSetParentNode *, ThingSetNode *)> parentNodeAction);
 };
 
 } // namespace ThingSet

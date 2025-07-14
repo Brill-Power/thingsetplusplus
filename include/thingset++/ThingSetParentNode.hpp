@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "ThingSetNode.hpp"
+#include "thingset++/ThingSetNode.hpp"
 #include <list>
 
 namespace ThingSet {

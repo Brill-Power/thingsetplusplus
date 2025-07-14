@@ -6,7 +6,7 @@
 #pragma once
 
 #include "thingset++/ThingSetDecoder.hpp"
-#include "internal/bind_to_tuple.hpp"
+#include "thingset++/internal/bind_to_tuple.hpp"
 #include "zcbor_decode.h"
 #include <array>
 #include <functional>

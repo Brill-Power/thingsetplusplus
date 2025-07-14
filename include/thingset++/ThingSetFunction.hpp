@@ -5,11 +5,10 @@
  */
 #pragma once
 
-#include "IdentifiableThingSetNode.hpp"
-#include "StringLiteral.hpp"
-#include "ThingSetBinaryDecoder.hpp"
-#include "ThingSetBinaryEncoder.hpp"
-#include "ThingSetType.hpp"
+#include "thingset++/IdentifiableThingSetNode.hpp"
+#include "thingset++/ThingSetDecoder.hpp"
+#include "thingset++/ThingSetEncoder.hpp"
+#include "thingset++/ThingSetType.hpp"
 #include <concepts>
 #include <functional>
 #include <tuple>
@@ -104,7 +103,7 @@ public:
         : IdentifiableThingSetParentNode<Id, ParentId, Name>::IdentifiableThingSetParentNode(), _function(function)
     {}
 
-    const std::string getType() const override
+    constexpr const std::string getType() const override
     {
         return ThingSetType<std::function<Result(Args...)>>::name.str();
     }
@@ -133,7 +132,7 @@ public:
         }
     }
 
-    ThingSetAccess getAccess() const override
+    constexpr ThingSetAccess getAccess() const override
     {
         return Access;
     }

@@ -25,6 +25,7 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestCompatibility.cpp
     TestProperties.cpp
     TestFunctions.cpp
+    TestSubsets.cpp
     TestAsioIpClientServer.cpp
     TestBinaryDecodingRecords.cpp
     TestTextEncodingRecords.cpp
