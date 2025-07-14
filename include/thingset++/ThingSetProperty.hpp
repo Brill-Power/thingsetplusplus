@@ -140,11 +140,11 @@ class ThingSetProperty<std::array<Element, Size>, SubsetType>
       public ThingSetCustomRequestHandler
 {
 public:
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset)
+    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0)
         : _ThingSetProperty<ThingSetParentNode, IdentifiableThingSetParentNode, std::array<Element, Size>, SubsetType>(id, parentId, name, access, subset)
     {}
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset, const std::array<Element, Size> &value)
-        : _ThingSetProperty<ThingSetParentNode, IdentifiableThingSetParentNode, std::array<Element, Size>, SubsetType>(id, parentId, name, access, subset, value)
+    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const std::array<Element, Size> &value, SubsetType subset = (SubsetType)0)
+        : _ThingSetProperty<ThingSetParentNode, IdentifiableThingSetParentNode, std::array<Element, Size>, SubsetType>(id, parentId, name, access, value, subset)
     {}
 
     using ThingSetValue<std::array<Element, Size>>::operator =;
