@@ -88,7 +88,7 @@ public:
     auto &operator=(const U &value)
     {
         _value = value;
-        return this;
+        return *this;
     }
 };
 

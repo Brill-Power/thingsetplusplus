@@ -14,42 +14,39 @@ namespace ThingSet {
 template <typename T>
 concept NodeBase = std::is_base_of_v<ThingSetNode, T>;
 
-template <NodeBase Base, unsigned Id, unsigned ParentId, StringLiteral Name>
+template <NodeBase Base>
 class _IdentifiableThingSetNode : public Base
 {
 protected:
-    _IdentifiableThingSetNode() : Base()
+    const unsigned _id;
+    const unsigned _parentId;
+    const std::string_view _name;
+
+    _IdentifiableThingSetNode(const unsigned id, const unsigned parentId, const std::string_view name) : Base(), _id(id), _parentId(parentId), _name(name)
     {}
 
 public:
-    constexpr const std::string_view getName() const override
+    const std::string_view getName() const override
     {
-        return Name.string_view();
+        return _name;
     }
 
-    constexpr unsigned getId() const override
+    unsigned getId() const override
     {
-        return Id;
+        return _id;
     }
 
-    constexpr unsigned getParentId() const override
+    unsigned getParentId() const override
     {
-        return ParentId;
+        return _parentId;
     }
-
-    constexpr static const unsigned id = Id;
-    constexpr static const std::string_view &name = Name.string_view();
 };
 
 /// @brief Represents a ThingSet node with an ID.
-/// @tparam Id The unique integer ID of the ThingSet node.
-/// @tparam ParentId The integer ID of the parent node.
-/// @tparam Name The name of the node.
-template <unsigned Id, unsigned ParentId, StringLiteral Name>
-class IdentifiableThingSetNode : public _IdentifiableThingSetNode<ThingSetNode, Id, ParentId, Name>
+class IdentifiableThingSetNode : public _IdentifiableThingSetNode<ThingSetNode>
 {
 protected:
-    constexpr IdentifiableThingSetNode() : _IdentifiableThingSetNode<ThingSetNode, Id, ParentId, Name>()
+    IdentifiableThingSetNode(const unsigned id, const unsigned parentId, const std::string_view name) : _IdentifiableThingSetNode<ThingSetNode>(id, parentId, name)
     {
         ThingSetRegistry::registerNode(this);
     }
@@ -61,14 +58,10 @@ protected:
 };
 
 /// @brief Represents a ThingSet node with an ID and which may have one or more child nodes.
-/// @tparam Id The unique integer ID of the ThingSet node.
-/// @tparam ParentId The integer ID of the parent node.
-/// @tparam Name The name of the node.
-template <unsigned Id, unsigned ParentId, StringLiteral Name>
-class IdentifiableThingSetParentNode : public _IdentifiableThingSetNode<ThingSetParentNode, Id, ParentId, Name>
+class IdentifiableThingSetParentNode : public _IdentifiableThingSetNode<ThingSetParentNode>
 {
 protected:
-    constexpr IdentifiableThingSetParentNode() : _IdentifiableThingSetNode<ThingSetParentNode, Id, ParentId, Name>()
+    IdentifiableThingSetParentNode(const unsigned id, const unsigned parentId, const std::string_view name) : _IdentifiableThingSetNode<ThingSetParentNode>(id, parentId, name)
     {
         ThingSetRegistry::registerNode(this);
     }

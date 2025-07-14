@@ -4,24 +4,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/ThingSet.hpp"
+#include "thingset++/ThingSetRecordMember.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;
 
 struct SupercellRecord
 {
-    ThingSetReadOnlyProperty<0x611, 0x610, "soc", float> soc;
-    ThingSetReadOnlyProperty<0x612, 0x610, "soh", float> soh;
+    ThingSetReadOnlyRecordMember<0x611, 0x610, "soc", float> soc;
+    ThingSetReadOnlyRecordMember<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
     bool ignored; // this field will be ignored by the encoder and decoder
-    ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
-    ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadOnlyProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadOnlyRecordMember<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadOnlyRecordMember<0x602, 0x600, "current", float> current;
+    ThingSetReadOnlyRecordMember<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadOnlyRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadOnlyRecordMember<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
 #define ASSERT_BUFFER_EQ(expected, actual, actual_len)                                                                 \
@@ -31,7 +32,7 @@ struct ModuleRecord
     }
 
 #define SETUP()                                                                                                        \
-    ThingSetReadOnlyProperty<0x610, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords = {                       \
+    ThingSetReadOnlyRecordMember<0x610, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords = {                   \
         { (ModuleRecord){                                                                                              \
               .voltage = 24.0f,                                                                                        \
               .current = 10.0f,                                                                                        \
@@ -111,7 +112,7 @@ TEST(TextRecords,
 TEST(TextRecords, InitialiseRecordArrayCopy)
 {
     SETUP()
-    ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
+    ThingSetReadOnlyRecordMember<0x800, 0x0, "Modules", std::array<ModuleRecord, 2>> records(moduleRecords.getValue());
     ASSERT_EQ(24.2f, records[1].voltage.getValue());
     char buffer[TEXT_ENCODER_BUFFER_SIZE];
     size_t size = sizeof(buffer);
@@ -131,7 +132,7 @@ TEST(TextRecords, InitialiseRecordArrayCopy)
 TEST(TextRecords, InitialiseRecordArrayInline)
 {
     SETUP()
-    ThingSetReadOnlyProperty<0x800, 0x0, "Modules", std::array<ModuleRecord, 1>> records = { { (ModuleRecord){
+    ThingSetReadOnlyRecordMember<0x800, 0x0, "Modules", std::array<ModuleRecord, 1>> records = { { (ModuleRecord){
         .voltage = 24.0f,
         .current = 10.0f,
         .error = 0,

@@ -22,7 +22,7 @@ static std::array<uint8_t, 1024> txBuffer;
 #define ASIO_TEST(Name, Body) \
 TEST(AsioIpClientServer, Name) \
 { \
-    ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24; \
+    ThingSetProperty totalVoltage { 0x300, 0, "totalVoltage", ThingSetAccess::anyReadWrite, 24.0f }; \
     ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; }); \
 \
     io_context serverContext(1); \

@@ -17,7 +17,7 @@ static inline bool defaultCallback(ThingSetNode *, ThingSetCallbackReason)
 }
 
 template <unsigned Id, unsigned ParentId, StringLiteral Name>
-class ThingSetGroup : public IdentifiableThingSetParentNode<Id, ParentId, Name>
+class ThingSetGroup : public IdentifiableThingSetParentNode
 {
 private:
     std::function<bool(ThingSetNode *, ThingSetCallbackReason)> _callback;
@@ -25,7 +25,7 @@ private:
 public:
     ThingSetGroup() : ThingSetGroup(defaultCallback){};
     ThingSetGroup(std::function<bool(ThingSetNode *, ThingSetCallbackReason)> callback)
-        : IdentifiableThingSetParentNode<Id, ParentId, Name>(), _callback(callback){};
+        : IdentifiableThingSetParentNode(Id, ParentId, Name.string_view()), _callback(callback){};
 
     constexpr const std::string getType() const override
     {

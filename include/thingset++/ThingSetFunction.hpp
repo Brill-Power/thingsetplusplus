@@ -46,12 +46,16 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &
 /// @tparam Result The return type of the function.
 /// @tparam ...Args The argument types of the function, if any.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Result, typename... Args>
-class ThingSetFunction : public IdentifiableThingSetParentNode<Id, ParentId, Name>, public ThingSetInvocable
+class ThingSetFunction : public IdentifiableThingSetParentNode, public ThingSetInvocable
 {
 private:
     template <unsigned ChildId, StringLiteral ArgName, typename T>
-    class ThingSetFunctionParameter : public IdentifiableThingSetNode<ChildId, Id, ArgName>
+    class ThingSetFunctionParameter : public IdentifiableThingSetNode
     {
+    public:
+        ThingSetFunctionParameter() : IdentifiableThingSetNode(ChildId, Id, ArgName.string_view())
+        {}
+
         const std::string getType() const override
         {
             return ThingSetType<T>::name.str();
@@ -100,7 +104,7 @@ private:
 
 public:
     ThingSetFunction(std::function<Result(Args...)> function)
-        : IdentifiableThingSetParentNode<Id, ParentId, Name>::IdentifiableThingSetParentNode(), _function(function)
+        : IdentifiableThingSetParentNode(Id, ParentId, Name.string_view()), _function(function)
     {}
 
     constexpr const std::string getType() const override
