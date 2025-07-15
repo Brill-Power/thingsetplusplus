@@ -21,27 +21,27 @@ static bool onConfigChange(ThingSetNode *node, ThingSetCallbackReason reason)
 }
 
 ThingSetGroup<0x100, 0x0, "Config"> configGroup(onConfigChange);
-ThingSetReadWriteProperty<0x101, 0x100, "sMinVoltage", float> minVoltage;
-ThingSetReadWriteProperty<0x102, 0x100, "sMaxVoltage", float> maxVoltage;
+ThingSetReadWriteProperty<float> minVoltage { 0x101, 0x100, "sMinVoltage" };
+ThingSetReadWriteProperty<float> maxVoltage { 0x102, 0x100, "sMaxVoltage" };
 
 struct SupercellRecord
 {
-    ThingSetReadOnlyProperty<0x611, 0x610, "soc", float> soc;
-    ThingSetReadOnlyProperty<0x612, 0x610, "soh", float> soh;
+    ThingSetReadWriteRecordMember<0x611, 0x610, "soc", float> soc;
+    ThingSetReadWriteRecordMember<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
-    ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
-    ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadOnlyProperty<0x610, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadWriteRecordMember<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadWriteRecordMember<0x602, 0x600, "current", float> current;
+    ThingSetReadWriteRecordMember<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadWriteRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadWriteRecordMember<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-static inline ThingSetReadOnlyProperty<0x1d, 0, "NodeID", std::string> nodeId = Eui::getString();
+static inline ThingSetReadOnlyProperty<std::string> nodeId = Eui::getString() { 0x1d, 0, "NodeID" };
 
-ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
+ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
 static void test(int argi, float argf)
 {
@@ -52,7 +52,7 @@ ThingSetUserFunction<0x400, 0x0, "xTest", void, int, float> xTestFunc(test);
 // ThingSetParameter<0x401, 0x400, "xTestInt", int> intArg;
 // ThingSetParameter<0x402, 0x400, "xTestFloat", float> floatArg;
 
-ThingSetReadOnlyProperty<0x600, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
+ThingSetReadOnlyProperty<std::array<ModuleRecord, 2>> moduleRecords { 0x600, 0, "Modules" };
 
 int main()
 {

@@ -28,7 +28,7 @@ ThingSetZephyrCanInterface clientInterface(canDevice);
 ThingSetZephyrCanServerTransport serverTransport(serverInterface, serverRxBuffer, serverTxBuffer);
 ThingSetZephyrCanClientTransport clientTransport(clientInterface, 0x01, clientRxBuffer, clientTxBuffer);
 
-ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
+ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
 ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 

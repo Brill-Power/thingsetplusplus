@@ -132,6 +132,18 @@ public:
         return _value[index];
     }
 
+    auto &operator=(const std::array<Element, Size> &value)
+    {
+        _value = value;
+        return *this;
+    }
+
+    auto &operator=(std::array<Element, Size> &&value)
+    {
+        _value = std::move(value);
+        return *this;
+    }
+
     std::size_t size() const
     {
         return _value.size();

@@ -20,22 +20,22 @@ ThingSetZephyrCanServerTransport transport(interface, rxBuffer, txBuffer);
 
 struct SupercellRecord
 {
-    ThingSetReadOnlyProperty<0x611, 0x610, "soc", float> soc;
-    ThingSetReadOnlyProperty<0x612, 0x610, "soh", float> soh;
+    ThingSetReadWriteRecordMember<0x611, 0x610, "soc", float> soc;
+    ThingSetReadWriteRecordMember<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
-    ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
-    ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadOnlyProperty<0x610, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadWriteRecordMember<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadWriteRecordMember<0x602, 0x600, "current", float> current;
+    ThingSetReadWriteRecordMember<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadWriteRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadWriteRecordMember<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-ThingSetReadOnlyProperty<0x600, 0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
+ThingSetReadOnlyProperty<std::array<ModuleRecord, 2>> moduleRecords { 0x600, 0, "Modules" };
 
-ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
+ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
 ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 

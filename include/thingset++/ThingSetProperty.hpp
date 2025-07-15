@@ -71,9 +71,9 @@ public:
 /// @tparam T Type of value.
 /// @tparam NodeBase Ultimate base class.
 /// @tparam Base Intermediate base class.
-template <typename T, ThingSetAccess Access, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0, NodeBase Base = ThingSetNode>
+template <typename T, ThingSetAccess Access, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0>
           requires std::is_enum_v<SubsetType>
-class ThingSetProperty : public ThingSetValue<T>, public Base
+class ThingSetProperty : public ThingSetValue<T>, public ThingSetNode
 {
 private:
     const uint16_t _id;
@@ -83,7 +83,7 @@ private:
 public:
     ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name) :
         ThingSetValue<T>(),
-        Base(),
+        ThingSetNode(),
         _id(id),
         _parentId(parentId),
         _name(name)
@@ -93,7 +93,7 @@ public:
 
     ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, const T &value) :
         ThingSetValue<T>(value),
-        Base(),
+        ThingSetNode(),
         _id(id),
         _parentId(parentId),
         _name(name)
@@ -138,7 +138,7 @@ public:
                 *target = static_cast<ThingSetDecodable *>(this);
                 return true;
             default:
-                return Base::tryCastTo(type, target);
+                return ThingSetNode::tryCastTo(type, target);
         }
     }
 
@@ -155,7 +155,7 @@ public:
 
 /// @brief Partial specialisation of ThingSetProperty for pointers to values.
 template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset> requires std::is_enum_v<SubsetType>
-class ThingSetProperty<T *, Access, SubsetType, Subset, ThingSetNode>
+class ThingSetProperty<T *, Access, SubsetType, Subset>
     : public ThingSetValue<T *>, public ThingSetNode
 {
 private:
@@ -239,7 +239,7 @@ public:
 /// @brief Partial specialisation of ThingSetProperty for record arrays.
 template <typename Element, std::size_t Size, ThingSetAccess Access, typename SubsetType, SubsetType Subset>
     requires std::is_class_v<Element>
-class ThingSetProperty<std::array<Element, Size>, Access, SubsetType, Subset, ThingSetParentNode>
+class ThingSetProperty<std::array<Element, Size>, Access, SubsetType, Subset>
     : public ThingSetValue<std::array<Element, Size>>, public ThingSetParentNode,
       public ThingSetCustomRequestHandler
 {

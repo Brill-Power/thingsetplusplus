@@ -20,7 +20,7 @@ static std::array<uint8_t, 1024> txBuffer;
 #define SOCKET_TEST(Name, Body) \
 TEST(SocketIpClientServer, Name) \
 { \
-    ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24; \
+    ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f }; \
     ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; }); \
 \
     ThingSetSocketServerTransport serverTransport; \

@@ -7,6 +7,7 @@
 #include "thingset++/ThingSetFunction.hpp"
 #include "thingset++/ThingSetGroup.hpp"
 #include "thingset++/ThingSetProperty.hpp"
+#include "thingset++/ThingSetRecordMember.hpp"
 
 #ifdef __ZEPHYR__
 #ifdef CONFIG_THINGSET_PLUS_PLUS_SERVER
