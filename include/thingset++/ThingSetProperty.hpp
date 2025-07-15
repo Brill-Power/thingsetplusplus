@@ -210,7 +210,7 @@ public:
                 *target = static_cast<ThingSetDecodable *>(this);
                 return true;
             default:
-                return IdentifiableThingSetNode::tryCastTo(type, target);
+                return ThingSetNode::tryCastTo(type, target);
         }
     }
 
