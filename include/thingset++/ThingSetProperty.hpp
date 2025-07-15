@@ -72,7 +72,7 @@ public:
 /// @tparam NodeBase Ultimate base class.
 /// @tparam Base Intermediate base class.
 template <typename T, ThingSetAccess Access, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0>
-          requires std::is_enum_v<SubsetType>
+          requires std::is_integral_v<SubsetType> or std::is_enum_v<SubsetType>
 class ThingSetProperty : public ThingSetValue<T>, public ThingSetNode
 {
 private:
@@ -154,7 +154,8 @@ public:
 };
 
 /// @brief Partial specialisation of ThingSetProperty for pointers to values.
-template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset> requires std::is_enum_v<SubsetType>
+template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset>
+    requires std::is_integral_v<SubsetType> or std::is_enum_v<SubsetType>
 class ThingSetProperty<T *, Access, SubsetType, Subset>
     : public ThingSetValue<T *>, public ThingSetNode
 {

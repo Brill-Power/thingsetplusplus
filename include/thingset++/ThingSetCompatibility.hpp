@@ -86,9 +86,9 @@ template <typename T> struct __ArrayHolder {
 /// @tparam Access The access permissions for this property.
 struct __PropertyBuilder
 {
-    template <typename T>
-    static ThingSetProperty<T*> build(const unsigned id, const unsigned parentId, const std::string name, ThingSetAccess access, T* value) {
-        return ThingSetProperty<T*>(id, parentId, name, access, value);
+    template <ThingSetAccess Access, uint32_t Subset, typename T>
+    static ThingSetProperty<T*, Access, uint32_t, Subset> build(const unsigned id, const unsigned parentId, const std::string name, T* value) {
+        return ThingSetProperty<T*, Access, uint32_t, Subset>(id, parentId, name, value);
     }
 };
 
@@ -98,7 +98,7 @@ struct __PropertyBuilder
     ThingSet::ThingSetGroup<id, parentId, name> thingset_##id;
 
 #define THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, type)                                          \
-    auto thingset_##id = ThingSet::__PropertyBuilder::build(id, parentId, name, ThingSet::convertAccess<access>::value, pointer);
+    auto thingset_##id = ThingSet::__PropertyBuilder::build<ThingSet::convertAccess<access>::value, subsets>(id, parentId, name, pointer);
 
 #define THINGSET_ADD_ITEM_BOOL(parentId, id, name, pointer, access, subsets)                                           \
     THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, bool)
@@ -137,6 +137,6 @@ struct __PropertyBuilder
     ThingSet::__ArrayHolder<float> variableName = { .array = arr, .maxElements = sizeof(arr), .numElements = usedElements };
 
 #define THINGSET_ADD_ITEM_ARRAY(parentId, id, name, arrayHolder, access, subsets) \
-    auto thingset_##id = ThingSet::__PropertyBuilder::build(id, parentId, name, ThingSet::convertAccess<access>::value, arrayHolder.array);
+    auto thingset_##id = ThingSet::__PropertyBuilder::build<ThingSet::convertAccess<access>::value, subsets>(id, parentId, name, arrayHolder.array);
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))

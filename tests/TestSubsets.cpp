@@ -10,9 +10,9 @@ using namespace ThingSet;
 
 TEST(Subsets, Collection)
 {
-    ThingSetProperty<float> f32 { 0x100, 0, "f32", ThingSetAccess::anyRead, Subset::live };
-    ThingSetProperty<int32_t> i32 { 0x200, 0, "i32", ThingSetAccess::anyRead };
-    ThingSetProperty<uint32_t> u32 { 0x201, 0, "u32", ThingSetAccess::anyRead, Subset::live };
+    ThingSetReadOnlyProperty<float, Subset::live> f32 { 0x100, 0, "f32" };
+    ThingSetReadOnlyProperty<int32_t> i32 { 0x200, 0, "i32" };
+    ThingSetReadOnlyProperty<uint32_t, Subset::live> u32 { 0x201, 0, "u32" };
 
     size_t count = 0;
     std::array<const char *, 2> names = {
@@ -29,7 +29,7 @@ TEST(Subsets, Collection)
 
 TEST(Subsets, Multiple)
 {
-    ThingSetProperty<float> f32 { 0x100, 0, "f32", ThingSetAccess::anyReadWrite, Subset::live | Subset::persisted };
+    ThingSetReadWriteProperty<float, Subset::live | Subset::persisted> f32 { 0x100, 0, "f32" };
 
     size_t count = 0;
     for (auto node : ThingSetRegistry::nodesInSubset(Subset::live))
