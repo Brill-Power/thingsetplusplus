@@ -15,7 +15,7 @@ namespace ThingSet {
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
 /// @tparam Access The access permissions for this property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset,
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset,
           SubsetType Subset = (SubsetType)0, NodeBase NodeBase = ThingSetNode, IdentifiableBase<NodeBase> Base = IdentifiableThingSetNode>
           requires std::is_enum_v<SubsetType>
 class ThingSetRecordMember : public ThingSetValue<T>, public Base
@@ -72,7 +72,7 @@ public:
 };
 
 /// @brief Partial specialisation of ThingSetRecordMember for pointers to values.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
 class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset, ThingSetNode, IdentifiableThingSetNode>
     : public ThingSetValue<T *>, public IdentifiableThingSetNode
 {
@@ -131,12 +131,12 @@ public:
         return *this;
     }
 
-    constexpr static const unsigned id = Id;
+    constexpr static const uint16_t id = Id;
     constexpr static const std::string_view &name = Name.string_view();
 };
 
 /// @brief Partial specialisation of ThingSetRecordMember for record arrays.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, typename SubsetType, SubsetType Subset>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, typename SubsetType, SubsetType Subset>
     requires std::is_class_v<Element>
 class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset, ThingSetParentNode, IdentifiableThingSetParentNode>
     : public ThingSetValue<std::array<Element, Size>>, public IdentifiableThingSetParentNode,
@@ -258,7 +258,7 @@ public:
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadOnlyRecordMember = ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyRead, T, Subset, S>;
 
 /// @brief A ThingSet property that can be read and written by anyone.
@@ -266,7 +266,7 @@ using ThingSetReadOnlyRecordMember = ThingSetRecordMember<Id, ParentId, Name, Th
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadWriteRecordMember = ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyReadWrite, T, Subset, S>;
 
 /// @brief A ThingSet property that can be read by anyone but only written by advanced users.
@@ -274,7 +274,7 @@ using ThingSetReadWriteRecordMember = ThingSetRecordMember<Id, ParentId, Name, T
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadAdvancedWriteRecordMember =
     ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T, Subset, S>;
 
@@ -283,7 +283,7 @@ using ThingSetReadAdvancedWriteRecordMember =
 /// @tparam Id The unique ID of the property.
 /// @tparam ParentId The ID of the parent container of this property.
 /// @tparam Name The human-readable name of the property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadManufacturerWriteRecordMember =
     ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T, Subset, S>;
 

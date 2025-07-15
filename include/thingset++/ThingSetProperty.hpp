@@ -15,7 +15,7 @@ namespace ThingSet {
 template <typename T, typename Base>
 concept IdentifiableBase = std::is_base_of_v<_IdentifiableThingSetNode<Base>, T>;
 
-enum struct Subset
+enum struct Subset : uint8_t
 {
     persisted = 1 << 0,
     live = 1 << 1,
@@ -40,13 +40,13 @@ private:
     const SubsetType _subset;
 
 public:
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0) :
+    ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0) :
         ThingSetValue<T>(),
         Base(id, parentId, name),
         _access(access),
         _subset(subset)
     {}
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const T &value, SubsetType subset = (SubsetType)0) :
+    ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, ThingSetAccess access, const T &value, SubsetType subset = (SubsetType)0) :
         ThingSetValue<T>(value),
         Base(id, parentId, name),
         _access(access),
@@ -105,7 +105,7 @@ private:
     const SubsetType _subset;
 
 public:
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, T *value, SubsetType subset = (SubsetType)0) :
+    ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, ThingSetAccess access, T *value, SubsetType subset = (SubsetType)0) :
         ThingSetValue<T *>(value),
         IdentifiableThingSetNode(id, parentId, name),
         _access(access),
@@ -175,13 +175,13 @@ private:
     const SubsetType _subset;
 
 public:
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0) :
+    ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0) :
         ThingSetValue<std::array<Element, Size>>(),
         IdentifiableThingSetParentNode(id, parentId, name),
         _access(access),
         _subset(subset)
     {}
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const std::array<Element, Size> &value, SubsetType subset = (SubsetType)0) :
+    ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, ThingSetAccess access, const std::array<Element, Size> &value, SubsetType subset = (SubsetType)0) :
         ThingSetValue<std::array<Element, Size>>(value),
         IdentifiableThingSetParentNode(id, parentId, name),
         _access(access),

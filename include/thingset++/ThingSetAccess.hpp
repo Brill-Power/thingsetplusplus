@@ -6,11 +6,12 @@
 #pragma once
 
 #include <type_traits>
+#include <cstdint>
 
 namespace ThingSet {
 
 /// @brief Specifies ThingSet access controls.
-enum ThingSetAccess
+enum struct ThingSetAccess : uint8_t
 {
     userRead = 1 << 0,
     expertRead = 1 << 1,
@@ -26,13 +27,19 @@ enum ThingSetAccess
     anyReadWrite = anyRead | anyWrite,
 };
 
-constexpr inline ThingSetAccess operator|(ThingSetAccess lhs, ThingSetAccess rhs)
+constexpr inline ThingSetAccess operator&(const ThingSetAccess &lhs, const ThingSetAccess &rhs)
+{
+    using T = std::underlying_type_t<ThingSetAccess>;
+    return static_cast<ThingSetAccess>(static_cast<T>(lhs) & static_cast<T>(rhs));
+}
+
+constexpr inline ThingSetAccess operator|(const ThingSetAccess &lhs, const ThingSetAccess &rhs)
 {
     using T = std::underlying_type_t<ThingSetAccess>;
     return static_cast<ThingSetAccess>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 
-constexpr inline ThingSetAccess &operator|=(ThingSetAccess &lhs, ThingSetAccess &rhs)
+constexpr inline ThingSetAccess &operator|=(ThingSetAccess &lhs, const ThingSetAccess &rhs)
 {
     lhs = lhs | rhs;
     return lhs;

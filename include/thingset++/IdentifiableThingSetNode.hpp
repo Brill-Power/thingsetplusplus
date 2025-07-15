@@ -19,11 +19,11 @@ template <NodeBase Base>
 class _IdentifiableThingSetNode : public Base
 {
 protected:
-    const unsigned _id;
-    const unsigned _parentId;
+    const uint16_t _id;
+    const uint16_t _parentId;
     const std::string_view _name;
 
-    _IdentifiableThingSetNode(const unsigned id, const unsigned parentId, const std::string_view name) : ThingSetNode(), _id(id), _parentId(parentId), _name(name)
+    _IdentifiableThingSetNode(const uint16_t id, const uint16_t parentId, const std::string_view name) : ThingSetNode(), _id(id), _parentId(parentId), _name(name)
     {
         ThingSetRegistry::registerNode(this);
     }
@@ -55,11 +55,11 @@ template <>
 class _IdentifiableThingSetNode<ThingSetParentNode> : public ThingSetParentNode
 {
 protected:
-    const unsigned _id;
-    const unsigned _parentId;
+    const uint16_t _id;
+    const uint16_t _parentId;
     const std::string_view _name;
 
-    _IdentifiableThingSetNode(const unsigned id, const unsigned parentId, const std::string_view name) : ThingSetParentNode(), _id(id), _parentId(parentId), _name(name)
+    _IdentifiableThingSetNode(const uint16_t id, const uint16_t parentId, const std::string_view name) : ThingSetParentNode(), _id(id), _parentId(parentId), _name(name)
     {
         ThingSetRegistry::registerNode(this);
     }
