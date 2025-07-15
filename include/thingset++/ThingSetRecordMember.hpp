@@ -261,37 +261,7 @@ public:
 
     int handleRequest(ThingSetRequestContext &context) override
     {
-        if (context.isGet()) {
-            context.setStatus(ThingSetStatusCode::content);
-            context.encoder().encodePreamble();
-            if (context.index == SIZE_MAX) {
-                context.encoder().encode(
-#if defined(__APPLE__) || defined(__OpenBSD__)
-                    // working round ambiguity on macOS and OpenBSD
-                    // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
-                    static_cast<uint32_t>(
-#endif
-                        this->_value.size()
-#if defined(__APPLE__) || defined(__OpenBSD__)
-                    )
-#endif
-                );
-            }
-            else {
-                context.encoder().encode(this->_value[context.index]);
-            }
-            return context.getHeaderLength() + context.encoder().getEncodedLength();
-        }
-        else if (context.isUpdate()) {
-            context.setStatus(ThingSetStatusCode::changed);
-            context.encoder().encodePreamble();
-            if (context.index == SIZE_MAX) {
-                context.setStatus(ThingSetStatusCode::badRequest);
-            }
-            context.decoder().decode(&this->_value[context.index]);
-            return context.getHeaderLength();
-        }
-        return 0;
+        return ThingSetRecordPropertyHelpers::handleRequest(context, this->_value);
     }
 };
 

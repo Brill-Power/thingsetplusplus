@@ -26,6 +26,46 @@ static constexpr Subset operator|(const Subset &lhs, const Subset &rhs)
     return (Subset)(((uint32_t)lhs) | ((uint32_t)rhs));
 }
 
+class ThingSetRecordPropertyHelpers
+{
+public:
+    template <typename Element, std::size_t Size>
+    static int handleRequest(ThingSetRequestContext &context, std::array<Element, Size> &value)
+    {
+        if (context.isGet()) {
+            context.setStatus(ThingSetStatusCode::content);
+            context.encoder().encodePreamble();
+            if (context.index == SIZE_MAX) {
+                context.encoder().encode(
+    #if defined(__APPLE__) || defined(__OpenBSD__)
+                    // working round ambiguity on macOS and OpenBSD
+                    // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
+                    static_cast<uint32_t>(
+    #endif
+                        value.size()
+    #if defined(__APPLE__) || defined(__OpenBSD__)
+                    )
+    #endif
+                );
+            }
+            else {
+                context.encoder().encode(value[context.index]);
+            }
+            return context.getHeaderLength() + context.encoder().getEncodedLength();
+        }
+        else if (context.isUpdate()) {
+            context.setStatus(ThingSetStatusCode::changed);
+            context.encoder().encodePreamble();
+            if (context.index == SIZE_MAX) {
+                context.setStatus(ThingSetStatusCode::badRequest);
+            }
+            context.decoder().decode(&value[context.index]);
+            return context.getHeaderLength();
+        }
+        return 0;
+    }
+};
+
 /// @brief @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
 /// @tparam SubsetType Type of subset enumeration.
 /// @tparam T Type of value.
@@ -275,7 +315,7 @@ public:
                 *target = static_cast<ThingSetCustomRequestHandler *>(this);
                 return true;
             default:
-                return IdentifiableThingSetParentNode::tryCastTo(type, target);
+                return ThingSetParentNode::tryCastTo(type, target);
         }
     }
 
@@ -296,7 +336,7 @@ public:
         // contains a number before trying to parse it
         if (name.c_str()[0] >= '0' && name.c_str()[0] <= '9') {
             *index = std::atoi(name.c_str());
-            return true;
+            return *index < Size;
         }
 
         return foundChild;
@@ -309,37 +349,7 @@ public:
 
     int handleRequest(ThingSetRequestContext &context) override
     {
-        if (context.isGet()) {
-            context.setStatus(ThingSetStatusCode::content);
-            context.encoder().encodePreamble();
-            if (context.index == SIZE_MAX) {
-                context.encoder().encode(
-#if defined(__APPLE__) || defined(__OpenBSD__)
-                    // working round ambiguity on macOS and OpenBSD
-                    // https://stackoverflow.com/questions/42004974/function-overloading-integer-types-and-stdsize-t-on-64-bit-systems
-                    static_cast<uint32_t>(
-#endif
-                        this->_value.size()
-#if defined(__APPLE__) || defined(__OpenBSD__)
-                    )
-#endif
-                );
-            }
-            else {
-                context.encoder().encode(this->_value[context.index]);
-            }
-            return context.getHeaderLength() + context.encoder().getEncodedLength();
-        }
-        else if (context.isUpdate()) {
-            context.setStatus(ThingSetStatusCode::changed);
-            context.encoder().encodePreamble();
-            if (context.index == SIZE_MAX) {
-                context.setStatus(ThingSetStatusCode::badRequest);
-            }
-            context.decoder().decode(&this->_value[context.index]);
-            return context.getHeaderLength();
-        }
-        return 0;
+        return ThingSetRecordPropertyHelpers::handleRequest(context, this->_value);
     }
 };
 
