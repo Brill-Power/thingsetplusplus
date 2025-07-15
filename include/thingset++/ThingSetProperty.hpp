@@ -95,27 +95,6 @@ public:
     }
 };
 
-// /// @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
-// /// @tparam T The type of the value stored by this property.
-// /// @tparam Id The unique ID of the property.
-// /// @tparam ParentId The ID of the parent container of this property.
-// /// @tparam Name The human-readable name of the property.
-// /// @tparam Access The access permissions for this property.
-// template <typename T, typename SubsetType = Subset> requires std::is_enum_v<SubsetType>
-// class ThingSetProperty : public _ThingSetProperty<ThingSetNode,
-//                                                   IdentifiableThingSetNode, T, SubsetType>
-// {
-// public:
-//     ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0)
-//         : _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T, SubsetType>(id, parentId, name, access, subset)
-//     {}
-//     ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const T &value, SubsetType subset = (SubsetType)0)
-//         : _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T, SubsetType>(id, parentId, name, access, value, subset)
-//     {}
-
-//     using ThingSetValue<T>::operator =;
-// };
-
 /// @brief Partial specialisation of ThingSetProperty for pointers to values.
 template <typename T, typename SubsetType> requires std::is_enum_v<SubsetType>
 class ThingSetProperty<T *, SubsetType, ThingSetNode, IdentifiableThingSetNode>

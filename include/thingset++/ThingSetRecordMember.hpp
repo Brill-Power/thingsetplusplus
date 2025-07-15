@@ -9,21 +9,28 @@
 
 namespace ThingSet {
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, NodeBase NodeBase,
-          IdentifiableBase<NodeBase> Base, ThingSetAccess Access, typename T, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0>
+/// @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
+/// @tparam T The type of the value stored by this property.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
+/// @tparam Access The access permissions for this property.
+template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset,
+          SubsetType Subset = (SubsetType)0, NodeBase NodeBase = ThingSetNode, IdentifiableBase<NodeBase> Base = IdentifiableThingSetNode>
           requires std::is_enum_v<SubsetType>
-class _ThingSetRecordMember : public ThingSetValue<T>, public Base
+class ThingSetRecordMember : public ThingSetValue<T>, public Base
 {
-protected:
-    _ThingSetRecordMember() : ThingSetValue<T>(), Base(Id, ParentId, Name.string_view())
+public:
+    ThingSetRecordMember() : ThingSetValue<T>(), Base(Id, ParentId, Name.string_view())
     {}
-    _ThingSetRecordMember(const T &value) : ThingSetValue<T>(value), Base(Id, ParentId, Name.string_view())
+    ThingSetRecordMember(const T &value) : ThingSetValue<T>(value), Base(Id, ParentId, Name.string_view())
     {}
 
-public:
+    using ThingSetValue<T>::operator=;
+
     constexpr const std::string getType() const override
     {
-        return ThingSetType<std::remove_pointer_t<T>>::name.str();
+        return ThingSetType<T>::name.str();
     }
 
     constexpr ThingSetNodeType getNodeType() const override
@@ -64,52 +71,58 @@ public:
     constexpr static const std::string_view &name = Name.string_view();
 };
 
-/// @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
-/// @tparam T The type of the value stored by this property.
-/// @tparam Id The unique ID of the property.
-/// @tparam ParentId The ID of the parent container of this property.
-/// @tparam Name The human-readable name of the property.
-/// @tparam Access The access permissions for this property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0>
-    requires std::is_enum_v<SubsetType>
-class ThingSetRecordMember : public _ThingSetRecordMember<Id, ParentId, Name, ThingSetNode,
-                                                  IdentifiableThingSetNode, Access, T, SubsetType, Subset>
-{
-public:
-    ThingSetRecordMember()
-        : _ThingSetRecordMember<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode, Access, T, SubsetType, Subset>()
-    {}
-    ThingSetRecordMember(const T &value)
-        : _ThingSetRecordMember<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode, Access, T, SubsetType, Subset>(
-              value)
-    {}
-
-    auto &operator=(const T &value)
-    {
-        this->_value = value;
-        return *this;
-    }
-
-    auto &operator=(T &&value)
-    {
-        this->_value = std::move(value);
-        return *this;
-    }
-};
-
 /// @brief Partial specialisation of ThingSetRecordMember for pointers to values.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
-class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset>
-    : public _ThingSetRecordMember<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode, Access, T *, SubsetType, Subset>
+class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset, ThingSetNode, IdentifiableThingSetNode>
+    : public ThingSetValue<T *>, public IdentifiableThingSetNode
 {
 public:
-    ThingSetRecordMember(T *value)
-        : _ThingSetRecordMember<Id, ParentId, Name, ThingSetNode, IdentifiableThingSetNode, Access, T *, SubsetType, Subset>(value)
+    ThingSetRecordMember(T *value) : ThingSetValue<T *>(value), IdentifiableThingSetNode(Id, ParentId, Name.string_view())
     {}
+
+    constexpr const std::string getType() const override
+    {
+        return ThingSetType<std::remove_pointer_t<T>>::name.str();
+    }
+
+    constexpr ThingSetNodeType getNodeType() const override
+    {
+        return ThingSetNodeType::value;
+    }
+
+    bool tryCastTo(ThingSetNodeType type, void **target) override
+    {
+        switch (type) {
+            case ThingSetNodeType::encodable:
+                *target = static_cast<ThingSetEncodable *>(this);
+                return true;
+            case ThingSetNodeType::decodable:
+                *target = static_cast<ThingSetDecodable *>(this);
+                return true;
+            default:
+                return IdentifiableThingSetNode::tryCastTo(type, target);
+        }
+    }
+
+    constexpr uint32_t getSubsets() const override
+    {
+        return (uint32_t)Subset;
+    }
+
+    constexpr ThingSetAccess getAccess() const override
+    {
+        return Access;
+    }
+
+    bool checkAccess(ThingSetAccess access) const override
+    {
+        return (Access & access) == Access;
+    }
 
     auto &operator=(T &value)
     {
         *this->_value = value;
+        return *this;
     }
 
     auto &operator=(T &&value)
@@ -117,37 +130,26 @@ public:
         *this->_value = std::move(value);
         return *this;
     }
+
+    constexpr static const unsigned id = Id;
+    constexpr static const std::string_view &name = Name.string_view();
 };
 
 /// @brief Partial specialisation of ThingSetRecordMember for record arrays.
 template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, typename SubsetType, SubsetType Subset>
     requires std::is_class_v<Element>
-class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset>
-    : public _ThingSetRecordMember<Id, ParentId, Name, ThingSetParentNode,
-                               IdentifiableThingSetParentNode, Access, std::array<Element, Size>, SubsetType, Subset>,
+class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset, ThingSetParentNode, IdentifiableThingSetParentNode>
+    : public ThingSetValue<std::array<Element, Size>>, public IdentifiableThingSetParentNode,
       public ThingSetCustomRequestHandler
 {
 public:
-    ThingSetRecordMember()
-        : _ThingSetRecordMember<Id, ParentId, Name, ThingSetParentNode, IdentifiableThingSetParentNode,
-                            Access, std::array<Element, Size>, SubsetType, Subset>()
+    ThingSetRecordMember() : ThingSetValue<std::array<Element, Size>>(), IdentifiableThingSetNode(Id, ParentId, Name.string_view())
     {}
-    ThingSetRecordMember(const std::array<Element, Size> &value)
-        : _ThingSetRecordMember<Id, ParentId, Name, ThingSetParentNode, IdentifiableThingSetParentNode,
-                            Access, std::array<Element, Size>, SubsetType, Subset>(value)
+    ThingSetRecordMember(const std::array<Element, Size> &value) : ThingSetValue<std::array<Element, Size>>(value),
+        IdentifiableThingSetNode(Id, ParentId, Name.string_view())
     {}
 
-    auto &operator=(const std::array<Element, Size> &value)
-    {
-        this->_value = value;
-        return *this;
-    }
-
-    auto &operator=(std::array<Element, Size> &&value)
-    {
-        this->_value = std::move(value);
-        return *this;
-    }
+    using ThingSetValue<std::array<Element, Size>>::operator=;
 
     ThingSetParentNode::ChildIterator begin() override
     {
@@ -155,20 +157,46 @@ public:
         return this->end();
     }
 
+    constexpr const std::string getType() const override
+    {
+        return ThingSetType<std::array<Element, Size>>::name.str();
+    }
+
+    constexpr ThingSetNodeType getNodeType() const override
+    {
+        return ThingSetNodeType::value;
+    }
+
     bool tryCastTo(ThingSetNodeType type, void **target) override
     {
-        if (!_ThingSetRecordMember<Id, ParentId, Name, ThingSetParentNode,
-                               IdentifiableThingSetParentNode, Access,
-                               std::array<Element, Size>, SubsetType, Subset>::tryCastTo(type, target))
-        {
-            if (type == ThingSetNodeType::requestHandler) {
+        switch (type) {
+            case ThingSetNodeType::encodable:
+                *target = static_cast<ThingSetEncodable *>(this);
+                return true;
+            case ThingSetNodeType::decodable:
+                *target = static_cast<ThingSetDecodable *>(this);
+                return true;
+            case ThingSetNodeType::requestHandler:
                 *target = static_cast<ThingSetCustomRequestHandler *>(this);
                 return true;
-            }
-
-            return false;
+            default:
+                return IdentifiableThingSetParentNode::tryCastTo(type, target);
         }
-        return true;
+    }
+
+    constexpr uint32_t getSubsets() const override
+    {
+        return (uint32_t)Subset;
+    }
+
+    constexpr ThingSetAccess getAccess() const override
+    {
+        return Access;
+    }
+
+    bool checkAccess(ThingSetAccess access) const override
+    {
+        return (Access & access) == Access;
     }
 
     bool findByName(const std::string &name, ThingSetNode **node, size_t *index) override
