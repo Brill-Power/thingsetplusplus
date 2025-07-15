@@ -41,7 +41,7 @@ struct ModuleRecord
     ThingSetReadWriteRecordMember<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-static inline ThingSetReadOnlyProperty<std::string> nodeId = Eui::getString() { 0x1d, 0, "NodeID" };
+static inline ThingSetReadOnlyProperty nodeId = { 0x1d, 0, "NodeID", Eui::getString() };
 
 ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
