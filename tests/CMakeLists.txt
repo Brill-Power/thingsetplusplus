@@ -27,13 +27,11 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestFunctions.cpp
     TestSubsets.cpp
     TestAsioIpClientServer.cpp
+    TestBinaryEncodingRecords.cpp
     TestBinaryDecodingRecords.cpp
     TestTextEncodingRecords.cpp
     TestRequestRewriter.cpp)
-# figure out how to get this to compile with Clang
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_sources(testapp PRIVATE TestBinaryEncodingRecords.cpp)
-endif()
+
 # regrettably exlcude this test until we figure out why Socket server is broken on macOS
 if(NOT APPLE)
     target_sources(testapp PRIVATE TestSocketIpClientServer.cpp)
