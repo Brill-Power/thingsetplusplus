@@ -112,6 +112,17 @@ public:
         return encodeListEnd(value.size());
     }
 
+    /// @brief Encodes an enum as its underlying value.
+    /// @tparam T The type of the enum.
+    /// @tparam U The underlying type of the enum.
+    /// @param value The enum value.
+    /// @return True if encoding succeeded, otherwise false.
+    template <typename T, typename U = std::underlying_type_t<T>> requires std::is_enum_v<T>
+    bool encode(const T &value)
+    {
+        return encode(static_cast<U>(value));
+    }
+
     /// @brief Encode a map.
     /// @tparam K The type of the keys in the map.
     /// @tparam V The type of the values in the map.

@@ -58,6 +58,18 @@ public:
     virtual bool skip() = 0;
     bool skipUntil(ThingSetEncodedNodeType sought);
 
+    template <typename T, typename U = std::underlying_type_t<T>> requires std::is_enum_v<T>
+    bool decode(T *value)
+    {
+        U underlying;
+        if (decode(&underlying)) {
+            *value = static_cast<T>(underlying);
+            return true;
+        }
+
+        return false;
+    }
+
     /// @brief Decode a list into an array of the specified length.
     /// @tparam T The type of items in the array.
     /// @param value A pointer to the start of the array into which list elements should be decoded.
