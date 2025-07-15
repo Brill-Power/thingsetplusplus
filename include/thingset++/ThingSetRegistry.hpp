@@ -48,11 +48,6 @@ private:
             return "group";
         }
 
-        constexpr ThingSetNodeType getNodeType() const override
-        {
-            return ThingSetNodeType::group;
-        }
-
         bool tryCastTo(ThingSetNodeType type, void **target) override
         {
             switch (type) {
@@ -67,11 +62,6 @@ private:
         ThingSetAccess getAccess() const override
         {
             return ThingSetAccess::userRead;
-        }
-
-        bool checkAccess(ThingSetAccess) const override
-        {
-            return true;
         }
 
         bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override

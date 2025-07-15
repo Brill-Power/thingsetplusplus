@@ -39,13 +39,9 @@ public:
 
     constexpr virtual const std::string getType() const = 0;
 
-    constexpr virtual ThingSetNodeType getNodeType() const = 0;
-
     virtual bool tryCastTo(ThingSetNodeType type, void **target);
 
     constexpr virtual ThingSetAccess getAccess() const = 0;
-
-    virtual bool checkAccess(ThingSetAccess access) const = 0;
 
     constexpr virtual uint32_t getSubsets() const
     {

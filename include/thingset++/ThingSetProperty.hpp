@@ -88,11 +88,6 @@ public:
         return ThingSetType<T>::name.str();
     }
 
-    constexpr ThingSetNodeType getNodeType() const override
-    {
-        return ThingSetNodeType::value;
-    }
-
     bool tryCastTo(ThingSetNodeType type, void **target) override
     {
         switch (type) {
@@ -115,11 +110,6 @@ public:
     ThingSetAccess getAccess() const override
     {
         return Access;
-    }
-
-    bool checkAccess(ThingSetAccess access) const override
-    {
-        return (Access & access) == access;
     }
 };
 
@@ -169,11 +159,6 @@ public:
         return ThingSetType<std::remove_pointer_t<T>>::name.str();
     }
 
-    constexpr ThingSetNodeType getNodeType() const override
-    {
-        return ThingSetNodeType::value;
-    }
-
     bool tryCastTo(ThingSetNodeType type, void **target) override
     {
         switch (type) {
@@ -196,11 +181,6 @@ public:
     ThingSetAccess getAccess() const override
     {
         return Access;
-    }
-
-    bool checkAccess(ThingSetAccess access) const override
-    {
-        return (Access & access) == access;
     }
 
     auto &operator=(T &value)
@@ -282,11 +262,6 @@ public:
         return ThingSetType<std::array<Element, Size>>::name.str();
     }
 
-    constexpr ThingSetNodeType getNodeType() const override
-    {
-        return ThingSetNodeType::value;
-    }
-
     bool tryCastTo(ThingSetNodeType type, void **target) override
     {
         switch (type) {
@@ -312,11 +287,6 @@ public:
     ThingSetAccess getAccess() const override
     {
         return Access;
-    }
-
-    bool checkAccess(ThingSetAccess access) const override
-    {
-        return (Access & access) == access;
     }
 
     bool findByName(const std::string &name, ThingSetNode **node, size_t *index) override

@@ -61,19 +61,9 @@ private:
             return ThingSetType<T>::name.str();
         }
 
-        constexpr ThingSetNodeType getNodeType() const override
-        {
-            return ThingSetNodeType::parameter;
-        }
-
         constexpr ThingSetAccess getAccess() const override
         {
             return ThingSetAccess::anyReadWrite;
-        }
-
-        bool checkAccess(ThingSetAccess) const override
-        {
-            return true;
         }
     };
 
@@ -112,11 +102,6 @@ public:
         return ThingSetType<std::function<Result(Args...)>>::name.str();
     }
 
-    constexpr ThingSetNodeType getNodeType() const override
-    {
-        return ThingSetNodeType::function;
-    }
-
     bool invoke(ThingSetDecoder &decoder, ThingSetEncoder &encoder) override
     {
         return decoder.decodeList(_arguments) && ThingSet::invoke(_function, _arguments, encoder);
@@ -139,11 +124,6 @@ public:
     constexpr ThingSetAccess getAccess() const override
     {
         return Access;
-    }
-
-    bool checkAccess(ThingSetAccess access) const override
-    {
-        return (access & Access) == Access;
     }
 
     bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override

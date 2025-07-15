@@ -32,17 +32,6 @@ public:
         return "group";
     }
 
-    constexpr ThingSetNodeType getNodeType() const override
-    {
-        return ThingSetNodeType::group;
-    }
-
-    bool checkAccess(ThingSetAccess) const override
-    {
-        // no access control on groups at the moment
-        return true;
-    }
-
     constexpr ThingSetAccess getAccess() const override
     {
         return ThingSetAccess::anyRead;
