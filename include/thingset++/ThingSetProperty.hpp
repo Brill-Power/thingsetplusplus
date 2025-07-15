@@ -31,21 +31,57 @@ static constexpr Subset operator|(const Subset &lhs, const Subset &rhs)
 /// @tparam T Type of value.
 /// @tparam NodeBase Ultimate base class.
 /// @tparam Base Intermediate base class.
-template <typename T, ThingSetAccess Access, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0, NodeBase NodeBase = ThingSetNode, IdentifiableBase<NodeBase> Base = IdentifiableThingSetNode>
+template <typename T, ThingSetAccess Access, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0, NodeBase Base = ThingSetNode>
           requires std::is_enum_v<SubsetType>
 class ThingSetProperty : public ThingSetValue<T>, public Base
 {
+private:
+    const uint16_t _id;
+    const uint16_t _parentId;
+    const std::string_view _name;
+
 public:
     ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name) :
         ThingSetValue<T>(),
-        Base(id, parentId, name)
-    {}
+        Base(),
+        _id(id),
+        _parentId(parentId),
+        _name(name)
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
     ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, const T &value) :
         ThingSetValue<T>(value),
-        Base(id, parentId, name)
-    {}
+        Base(),
+        _id(id),
+        _parentId(parentId),
+        _name(name)
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
+    ~ThingSetProperty()
+    {
+        ThingSetRegistry::unregisterNode(this);
+    }
 
     using ThingSetValue<T>::operator=;
+
+    const std::string_view getName() const override
+    {
+        return _name;
+    }
+
+    unsigned getId() const override
+    {
+        return _id;
+    }
+
+    unsigned getParentId() const override
+    {
+        return _parentId;
+    }
 
     constexpr const std::string getType() const override
     {
@@ -89,14 +125,44 @@ public:
 
 /// @brief Partial specialisation of ThingSetProperty for pointers to values.
 template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset> requires std::is_enum_v<SubsetType>
-class ThingSetProperty<T *, Access, SubsetType, Subset, ThingSetNode, IdentifiableThingSetNode>
-    : public ThingSetValue<T *>, public IdentifiableThingSetNode
+class ThingSetProperty<T *, Access, SubsetType, Subset, ThingSetNode>
+    : public ThingSetValue<T *>, public ThingSetNode
 {
+private:
+    const uint16_t _id;
+    const uint16_t _parentId;
+    const std::string_view _name;
+
 public:
     ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, T *value) :
         ThingSetValue<T *>(value),
-        IdentifiableThingSetNode(id, parentId, name)
-    {}
+        ThingSetNode(),
+        _id(id),
+        _parentId(parentId),
+        _name(name)
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
+    ~ThingSetProperty()
+    {
+        ThingSetRegistry::unregisterNode(this);
+    }
+
+    const std::string_view getName() const override
+    {
+        return _name;
+    }
+
+    unsigned getId() const override
+    {
+        return _id;
+    }
+
+    unsigned getParentId() const override
+    {
+        return _parentId;
+    }
 
     constexpr const std::string getType() const override
     {
@@ -153,21 +219,57 @@ public:
 /// @brief Partial specialisation of ThingSetProperty for record arrays.
 template <typename Element, std::size_t Size, ThingSetAccess Access, typename SubsetType, SubsetType Subset>
     requires std::is_class_v<Element>
-class ThingSetProperty<std::array<Element, Size>, Access, SubsetType, Subset, ThingSetParentNode, IdentifiableThingSetParentNode>
-    : public ThingSetValue<std::array<Element, Size>>, public IdentifiableThingSetParentNode,
+class ThingSetProperty<std::array<Element, Size>, Access, SubsetType, Subset, ThingSetParentNode>
+    : public ThingSetValue<std::array<Element, Size>>, public ThingSetParentNode,
       public ThingSetCustomRequestHandler
 {
+private:
+    const uint16_t _id;
+    const uint16_t _parentId;
+    const std::string_view _name;
+
 public:
     ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name) :
         ThingSetValue<std::array<Element, Size>>(),
-        IdentifiableThingSetParentNode(id, parentId, name)
-    {}
+        ThingSetParentNode(),
+        _id(id),
+        _parentId(parentId),
+        _name(name)
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
     ThingSetProperty(const uint16_t id, const uint16_t parentId, const std::string_view name, const std::array<Element, Size> &value) :
         ThingSetValue<std::array<Element, Size>>(value),
-        IdentifiableThingSetParentNode(id, parentId, name)
-    {}
+        ThingSetParentNode(),
+        _id(id),
+        _parentId(parentId),
+        _name(name)
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
+    ~ThingSetProperty()
+    {
+        ThingSetRegistry::unregisterNode(this);
+    }
 
     using ThingSetValue<std::array<Element, Size>>::operator=;
+
+    const std::string_view getName() const override
+    {
+        return _name;
+    }
+
+    unsigned getId() const override
+    {
+        return _id;
+    }
+
+    unsigned getParentId() const override
+    {
+        return _parentId;
+    }
 
     ThingSetParentNode::ChildIterator begin() override
     {

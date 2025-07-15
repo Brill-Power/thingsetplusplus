@@ -16,17 +16,42 @@ namespace ThingSet {
 /// @tparam Name The human-readable name of the property.
 /// @tparam Access The access permissions for this property.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset,
-          SubsetType Subset = (SubsetType)0, NodeBase NodeBase = ThingSetNode, IdentifiableBase<NodeBase> Base = IdentifiableThingSetNode>
+          SubsetType Subset = (SubsetType)0, NodeBase Base = ThingSetNode>
           requires std::is_enum_v<SubsetType>
 class ThingSetRecordMember : public ThingSetValue<T>, public Base
 {
 public:
-    ThingSetRecordMember() : ThingSetValue<T>(), Base(Id, ParentId, Name.string_view())
-    {}
-    ThingSetRecordMember(const T &value) : ThingSetValue<T>(value), Base(Id, ParentId, Name.string_view())
-    {}
+    ThingSetRecordMember() : ThingSetValue<T>(), Base()
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
+    ThingSetRecordMember(const T &value) : ThingSetValue<T>(value), Base()
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
+    ~ThingSetRecordMember()
+    {
+        ThingSetRegistry::unregisterNode(this);
+    }
 
     using ThingSetValue<T>::operator=;
+
+    constexpr const std::string_view getName() const override
+    {
+        return Name.string_view();
+    }
+
+    constexpr unsigned getId() const override
+    {
+        return Id;
+    }
+
+    constexpr unsigned getParentId() const override
+    {
+        return ParentId;
+    }
 
     constexpr const std::string getType() const override
     {
@@ -73,12 +98,34 @@ public:
 
 /// @brief Partial specialisation of ThingSetRecordMember for pointers to values.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
-class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset, ThingSetNode, IdentifiableThingSetNode>
-    : public ThingSetValue<T *>, public IdentifiableThingSetNode
+class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset, ThingSetNode>
+    : public ThingSetValue<T *>, public ThingSetNode
 {
 public:
-    ThingSetRecordMember(T *value) : ThingSetValue<T *>(value), IdentifiableThingSetNode(Id, ParentId, Name.string_view())
-    {}
+    ThingSetRecordMember(T *value) : ThingSetValue<T *>(value), ThingSetNode()
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
+    ~ThingSetRecordMember()
+    {
+        ThingSetRegistry::unregisterNode(this);
+    }
+
+    constexpr const std::string_view getName() const override
+    {
+        return Name.string_view();
+    }
+
+    constexpr unsigned getId() const override
+    {
+        return Id;
+    }
+
+    constexpr unsigned getParentId() const override
+    {
+        return ParentId;
+    }
 
     constexpr const std::string getType() const override
     {
@@ -138,18 +185,43 @@ public:
 /// @brief Partial specialisation of ThingSetRecordMember for record arrays.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, typename SubsetType, SubsetType Subset>
     requires std::is_class_v<Element>
-class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset, ThingSetParentNode, IdentifiableThingSetParentNode>
-    : public ThingSetValue<std::array<Element, Size>>, public IdentifiableThingSetParentNode,
+class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset, ThingSetParentNode>
+    : public ThingSetValue<std::array<Element, Size>>, public ThingSetParentNode,
       public ThingSetCustomRequestHandler
 {
 public:
-    ThingSetRecordMember() : ThingSetValue<std::array<Element, Size>>(), IdentifiableThingSetNode(Id, ParentId, Name.string_view())
-    {}
+    ThingSetRecordMember() : ThingSetValue<std::array<Element, Size>>(), ThingSetParentNode()
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
     ThingSetRecordMember(const std::array<Element, Size> &value) : ThingSetValue<std::array<Element, Size>>(value),
-        IdentifiableThingSetNode(Id, ParentId, Name.string_view())
-    {}
+        ThingSetParentNode()
+    {
+        ThingSetRegistry::registerNode(this);
+    }
+
+    ~ThingSetRecordMember()
+    {
+        ThingSetRegistry::unregisterNode(this);
+    }
 
     using ThingSetValue<std::array<Element, Size>>::operator=;
+
+    constexpr const std::string_view getName() const override
+    {
+        return Name.string_view();
+    }
+
+    constexpr unsigned getId() const override
+    {
+        return Id;
+    }
+
+    constexpr unsigned getParentId() const override
+    {
+        return ParentId;
+    }
 
     ThingSetParentNode::ChildIterator begin() override
     {
@@ -180,7 +252,7 @@ public:
                 *target = static_cast<ThingSetCustomRequestHandler *>(this);
                 return true;
             default:
-                return IdentifiableThingSetParentNode::tryCastTo(type, target);
+                return ThingSetParentNode::tryCastTo(type, target);
         }
     }
 
