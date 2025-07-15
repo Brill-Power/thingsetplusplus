@@ -13,7 +13,7 @@
 
 namespace ThingSet {
 
-static inline ThingSetProperty<std::string> nodeId { 0x1d, 0, "NodeID", ThingSetAccess::userRead, Eui::getString() };
+static inline ThingSetReadOnlyProperty<std::string> nodeId { 0x1d, 0, "NodeID", Eui::getString() };
 static const uint16_t MetadataNameId = 0x1a;
 static const uint16_t MetadataTypeId = 0x1b;
 static const uint16_t MetadataAccessId = 0x1c;

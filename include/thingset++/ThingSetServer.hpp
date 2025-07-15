@@ -49,16 +49,16 @@ protected:
     int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
     int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
 
-    template <typename T, typename SubsetType = Subset,
+    template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset,
               EncodableDecodableNode... Property>
-    bool encode(ThingSetEncoder &encoder, ThingSetProperty<T, SubsetType> &property,
+    bool encode(ThingSetEncoder &encoder, ThingSetProperty<T, Access, SubsetType, Subset> &property,
                 Property &...properties)
     {
         return encode(encoder, property) && encode(encoder, properties...);
     }
 
-    template <typename T, typename SubsetType = Subset>
-    bool encode(ThingSetEncoder &encoder, ThingSetProperty<T, SubsetType> &property)
+    template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset>
+    bool encode(ThingSetEncoder &encoder, ThingSetProperty<T, Access, SubsetType, Subset> &property)
     {
         return encoder.encode(property.getId()) && encoder.encode(property.getValue());
     }
