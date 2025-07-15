@@ -204,7 +204,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
             context.setStatus(ThingSetStatusCode::notFound);
             return false;
         }
-        if ((child->getAccess() & _access) != _access) {
+        if ((child->getAccess() & _access) == ThingSetAccess::none) {
             context.setStatus(ThingSetStatusCode::forbidden);
             return false;
         }
@@ -235,7 +235,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
 
 int _ThingSetServer::handleExec(ThingSetRequestContext &context)
 {
-    if ((context.node->getAccess() & _access) != _access) {
+    if ((context.node->getAccess() & _access) == ThingSetAccess::none) {
         context.setStatus(ThingSetStatusCode::forbidden);
         return context.getHeaderLength();
     }

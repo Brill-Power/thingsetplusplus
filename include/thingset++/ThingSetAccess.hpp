@@ -13,6 +13,7 @@ namespace ThingSet {
 /// @brief Specifies ThingSet access controls.
 enum struct ThingSetAccess : uint8_t
 {
+    none = 0,
     userRead = 1 << 0,
     expertRead = 1 << 1,
     manufacturerRead = 1 << 2,
