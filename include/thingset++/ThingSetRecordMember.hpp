@@ -16,17 +16,17 @@ namespace ThingSet {
 /// @tparam Name The human-readable name of the property.
 /// @tparam Access The access permissions for this property.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType = Subset,
-          SubsetType Subset = (SubsetType)0, NodeBase Base = ThingSetNode>
+          SubsetType Subset = (SubsetType)0>
           requires std::is_enum_v<SubsetType>
-class ThingSetRecordMember : public ThingSetValue<T>, public Base
+class ThingSetRecordMember : public ThingSetValue<T>, public ThingSetNode
 {
 public:
-    ThingSetRecordMember() : ThingSetValue<T>(), Base()
+    ThingSetRecordMember() : ThingSetValue<T>(), ThingSetNode()
     {
         ThingSetRegistry::registerNode(this);
     }
 
-    ThingSetRecordMember(const T &value) : ThingSetValue<T>(value), Base()
+    ThingSetRecordMember(const T &value) : ThingSetValue<T>(value), ThingSetNode()
     {
         ThingSetRegistry::registerNode(this);
     }
@@ -68,7 +68,7 @@ public:
                 *target = static_cast<ThingSetDecodable *>(this);
                 return true;
             default:
-                return Base::tryCastTo(type, target);
+                return ThingSetNode::tryCastTo(type, target);
         }
     }
 
@@ -88,7 +88,7 @@ public:
 
 /// @brief Partial specialisation of ThingSetRecordMember for pointers to values.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
-class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset, ThingSetNode>
+class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset>
     : public ThingSetValue<T *>, public ThingSetNode
 {
 public:
@@ -165,7 +165,7 @@ public:
 /// @brief Partial specialisation of ThingSetRecordMember for record arrays.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, typename SubsetType, SubsetType Subset>
     requires std::is_class_v<Element>
-class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset, ThingSetParentNode>
+class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset>
     : public ThingSetValue<std::array<Element, Size>>, public ThingSetParentNode,
       public ThingSetCustomRequestHandler
 {
@@ -263,6 +263,9 @@ public:
     {
         return ThingSetRecordPropertyHelpers::handleRequest(context, this->_value);
     }
+
+    constexpr static const unsigned id = Id;
+    constexpr static const std::string_view &name = Name.string_view();
 };
 
 /// @brief A ThingSet property that can be read by anyone.
