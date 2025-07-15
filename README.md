@@ -22,7 +22,7 @@ The basic building block is a property. A property has an ID, a parent, a name a
 example:
 
 ```c++
-ThingSetReadWriteProperty<float> voltage = 24 { 0x300, 0, "voltage" };
+ThingSetReadWriteProperty voltage { 0x300, 0, "voltage", 24.0f };
 ```
 
 A property so declared provides its own storage for the given value. Alternatively,
@@ -30,7 +30,7 @@ a property may be declared with a pointer:
 
 ```c++
 float voltage;
-ThingSetReadWriteProperty<float *> voltageProperty(&voltage) { 0x300, 0, "voltage" };
+ThingSetReadWriteProperty voltageProperty { 0x300, 0, "voltage", &voltage };
 ```
 
 Assignment to the property will update the underlying value.
@@ -43,10 +43,10 @@ Structures should be declared thus:
 ```c++
 struct ModuleRecord
 {
-    ThingSetReadOnlyProperty<float> voltage { 0x601, 0x600, "voltage" };
-    ThingSetReadOnlyProperty<float> current { 0x602, 0x600, "current" };
-    ThingSetReadOnlyProperty<uint64_t> error { 0x603, 0x600, "error" };
-    ThingSetReadOnlyProperty<std::array<float, 6>> cellVoltages { 0x604, 0x600, "cellVoltages" };
+    ThingSetReadWriteRecordMember<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadWriteRecordMember<0x602, 0x600, "current", float> current;
+    ThingSetReadWriteRecordMember<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadWriteRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
 };
 ```
 
