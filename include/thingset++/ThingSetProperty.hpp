@@ -26,32 +26,38 @@ static constexpr Subset operator|(const Subset &lhs, const Subset &rhs)
     return (Subset)(((uint32_t)lhs) | ((uint32_t)rhs));
 }
 
-template <NodeBase NodeBase, IdentifiableBase<NodeBase> Base, typename T, typename SubsetType = Subset>
+/// @brief @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
+/// @tparam SubsetType Type of subset enumeration.
+/// @tparam T Type of value.
+/// @tparam NodeBase Ultimate base class.
+/// @tparam Base Intermediate base class.
+template <typename T, typename SubsetType = Subset, NodeBase NodeBase = ThingSetNode, IdentifiableBase<NodeBase> Base = IdentifiableThingSetNode>
           requires std::is_enum_v<SubsetType>
-class _ThingSetProperty : public ThingSetValue<T>, public Base
+class ThingSetProperty : public ThingSetValue<T>, public Base
 {
 private:
     const ThingSetAccess _access;
     const SubsetType _subset;
 
-protected:
-    _ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = 0) :
+public:
+    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0) :
         ThingSetValue<T>(),
         Base(id, parentId, name),
         _access(access),
         _subset(subset)
     {}
-    _ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const T &value, SubsetType subset = 0) :
+    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const T &value, SubsetType subset = (SubsetType)0) :
         ThingSetValue<T>(value),
         Base(id, parentId, name),
         _access(access),
         _subset(subset)
     {}
 
-public:
+    using ThingSetValue<T>::operator=;
+
     constexpr const std::string getType() const override
     {
-        return ThingSetType<std::remove_pointer_t<T>>::name.str();
+        return ThingSetType<T>::name.str();
     }
 
     constexpr ThingSetNodeType getNodeType() const override
@@ -89,40 +95,87 @@ public:
     }
 };
 
-/// @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
-/// @tparam T The type of the value stored by this property.
-/// @tparam Id The unique ID of the property.
-/// @tparam ParentId The ID of the parent container of this property.
-/// @tparam Name The human-readable name of the property.
-/// @tparam Access The access permissions for this property.
-template <typename T, typename SubsetType = Subset> requires std::is_enum_v<SubsetType>
-class ThingSetProperty : public _ThingSetProperty<ThingSetNode,
-                                                  IdentifiableThingSetNode, T, SubsetType>
-{
-public:
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0)
-        : _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T, SubsetType>(id, parentId, name, access, subset)
-    {}
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const T &value, SubsetType subset = (SubsetType)0)
-        : _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T, SubsetType>(id, parentId, name, access, value, subset)
-    {}
+// /// @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
+// /// @tparam T The type of the value stored by this property.
+// /// @tparam Id The unique ID of the property.
+// /// @tparam ParentId The ID of the parent container of this property.
+// /// @tparam Name The human-readable name of the property.
+// /// @tparam Access The access permissions for this property.
+// template <typename T, typename SubsetType = Subset> requires std::is_enum_v<SubsetType>
+// class ThingSetProperty : public _ThingSetProperty<ThingSetNode,
+//                                                   IdentifiableThingSetNode, T, SubsetType>
+// {
+// public:
+//     ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0)
+//         : _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T, SubsetType>(id, parentId, name, access, subset)
+//     {}
+//     ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const T &value, SubsetType subset = (SubsetType)0)
+//         : _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T, SubsetType>(id, parentId, name, access, value, subset)
+//     {}
 
-    using ThingSetValue<T>::operator =;
-};
+//     using ThingSetValue<T>::operator =;
+// };
 
 /// @brief Partial specialisation of ThingSetProperty for pointers to values.
 template <typename T, typename SubsetType> requires std::is_enum_v<SubsetType>
-class ThingSetProperty<T *, SubsetType>
-    : public _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T *, SubsetType>
+class ThingSetProperty<T *, SubsetType, ThingSetNode, IdentifiableThingSetNode>
+    : public ThingSetValue<T *>, public IdentifiableThingSetNode
 {
+private:
+    const ThingSetAccess _access;
+    const SubsetType _subset;
+
 public:
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, T *value, SubsetType subset = (SubsetType)0)
-        : _ThingSetProperty<ThingSetNode, IdentifiableThingSetNode, T *, SubsetType>(id, parentId, name, access, value, subset)
+    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, T *value, SubsetType subset = (SubsetType)0) :
+        ThingSetValue<T *>(value),
+        IdentifiableThingSetNode(id, parentId, name),
+        _access(access),
+        _subset(subset)
     {}
+
+    constexpr const std::string getType() const override
+    {
+        return ThingSetType<std::remove_pointer_t<T>>::name.str();
+    }
+
+    constexpr ThingSetNodeType getNodeType() const override
+    {
+        return ThingSetNodeType::value;
+    }
+
+    bool tryCastTo(ThingSetNodeType type, void **target) override
+    {
+        switch (type) {
+            case ThingSetNodeType::encodable:
+                *target = static_cast<ThingSetEncodable *>(this);
+                return true;
+            case ThingSetNodeType::decodable:
+                *target = static_cast<ThingSetDecodable *>(this);
+                return true;
+            default:
+                return IdentifiableThingSetNode::tryCastTo(type, target);
+        }
+    }
+
+    uint32_t getSubsets() const override
+    {
+        return (uint32_t)_subset;
+    }
+
+    ThingSetAccess getAccess() const override
+    {
+        return _access;
+    }
+
+    bool checkAccess(ThingSetAccess access) const override
+    {
+        return (_access & access) == access;
+    }
 
     auto &operator=(T &value)
     {
         *this->_value = value;
+        return *this;
     }
 
     auto &operator=(T &&value)
@@ -134,20 +187,29 @@ public:
 
 /// @brief Partial specialisation of ThingSetProperty for record arrays.
 template <typename Element, std::size_t Size, typename SubsetType> requires std::is_class_v<Element>
-class ThingSetProperty<std::array<Element, Size>, SubsetType>
-    : public _ThingSetProperty<ThingSetParentNode,
-                               IdentifiableThingSetParentNode, std::array<Element, Size>, SubsetType>,
+class ThingSetProperty<std::array<Element, Size>, SubsetType, ThingSetParentNode, IdentifiableThingSetParentNode>
+    : public ThingSetValue<std::array<Element, Size>>, public IdentifiableThingSetParentNode,
       public ThingSetCustomRequestHandler
 {
+private:
+    const ThingSetAccess _access;
+    const SubsetType _subset;
+
 public:
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0)
-        : _ThingSetProperty<ThingSetParentNode, IdentifiableThingSetParentNode, std::array<Element, Size>, SubsetType>(id, parentId, name, access, subset)
+    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, SubsetType subset = (SubsetType)0) :
+        ThingSetValue<std::array<Element, Size>>(),
+        IdentifiableThingSetParentNode(id, parentId, name),
+        _access(access),
+        _subset(subset)
     {}
-    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const std::array<Element, Size> &value, SubsetType subset = (SubsetType)0)
-        : _ThingSetProperty<ThingSetParentNode, IdentifiableThingSetParentNode, std::array<Element, Size>, SubsetType>(id, parentId, name, access, value, subset)
+    ThingSetProperty(const unsigned id, const unsigned parentId, const std::string_view name, ThingSetAccess access, const std::array<Element, Size> &value, SubsetType subset = (SubsetType)0) :
+        ThingSetValue<std::array<Element, Size>>(value),
+        IdentifiableThingSetParentNode(id, parentId, name),
+        _access(access),
+        _subset(subset)
     {}
 
-    using ThingSetValue<std::array<Element, Size>>::operator =;
+    using ThingSetValue<std::array<Element, Size>>::operator=;
 
     ThingSetParentNode::ChildIterator begin() override
     {
@@ -155,18 +217,46 @@ public:
         return this->end();
     }
 
+    constexpr const std::string getType() const override
+    {
+        return ThingSetType<std::array<Element, Size>>::name.str();
+    }
+
+    constexpr ThingSetNodeType getNodeType() const override
+    {
+        return ThingSetNodeType::value;
+    }
+
     bool tryCastTo(ThingSetNodeType type, void **target) override
     {
-        if (!_ThingSetProperty<ThingSetParentNode, IdentifiableThingSetParentNode, std::array<Element, Size>, SubsetType>::tryCastTo(type, target))
-        {
-            if (type == ThingSetNodeType::requestHandler) {
+        switch (type) {
+            case ThingSetNodeType::encodable:
+                *target = static_cast<ThingSetEncodable *>(this);
+                return true;
+            case ThingSetNodeType::decodable:
+                *target = static_cast<ThingSetDecodable *>(this);
+                return true;
+            case ThingSetNodeType::requestHandler:
                 *target = static_cast<ThingSetCustomRequestHandler *>(this);
                 return true;
-            }
-
-            return false;
+            default:
+                return IdentifiableThingSetParentNode::tryCastTo(type, target);
         }
-        return true;
+    }
+
+    uint32_t getSubsets() const override
+    {
+        return (uint32_t)_subset;
+    }
+
+    ThingSetAccess getAccess() const override
+    {
+        return _access;
+    }
+
+    bool checkAccess(ThingSetAccess access) const override
+    {
+        return (_access & access) == access;
     }
 
     bool findByName(const std::string &name, ThingSetNode **node, size_t *index) override
