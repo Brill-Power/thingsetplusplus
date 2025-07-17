@@ -43,12 +43,12 @@ public:
         return Name.string_view();
     }
 
-    constexpr unsigned getId() const override
+    constexpr uint16_t getId() const override
     {
         return Id;
     }
 
-    constexpr unsigned getParentId() const override
+    constexpr uint16_t getParentId() const override
     {
         return ParentId;
     }
@@ -107,12 +107,12 @@ public:
         return Name.string_view();
     }
 
-    constexpr unsigned getId() const override
+    constexpr uint16_t getId() const override
     {
         return Id;
     }
 
-    constexpr unsigned getParentId() const override
+    constexpr uint16_t getParentId() const override
     {
         return ParentId;
     }
@@ -193,12 +193,12 @@ public:
         return Name.string_view();
     }
 
-    constexpr unsigned getId() const override
+    constexpr uint16_t getId() const override
     {
         return Id;
     }
 
-    constexpr unsigned getParentId() const override
+    constexpr uint16_t getParentId() const override
     {
         return ParentId;
     }

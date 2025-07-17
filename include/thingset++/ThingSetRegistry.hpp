@@ -24,7 +24,7 @@ typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
 class ThingSetRegistry
 {
 private:
-    template <unsigned Id, unsigned ParentId, StringLiteral Name>
+    template <uint16_t Id, uint16_t ParentId, StringLiteral Name>
     class OverlayNode : public ThingSetParentNode
     {
     public:
@@ -33,12 +33,12 @@ private:
             return Name.string_view();
         }
 
-        constexpr virtual unsigned getId() const override
+        constexpr virtual uint16_t getId() const override
         {
             return Id;
         }
 
-        constexpr virtual unsigned getParentId() const override
+        constexpr virtual uint16_t getParentId() const override
         {
             return ParentId;
         }

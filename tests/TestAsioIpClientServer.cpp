@@ -54,9 +54,15 @@ TEST(AsioIpClientServer, Name) \
     ASSERT_TRUE(clientRanSuccessfully); \
 }
 
-ASIO_TEST(GetFloat,
+ASIO_TEST(GetFloatById,
     float tv;
     ASSERT_TRUE(client.get(0x300, tv));
+    ASSERT_EQ(24.0f, tv);
+)
+
+ASIO_TEST(GetFloatByName,
+    float tv;
+    ASSERT_TRUE(client.get("totalVoltage", tv));
     ASSERT_EQ(24.0f, tv);
 )
 

@@ -39,12 +39,12 @@ public:
         return _name;
     }
 
-    unsigned getId() const override
+    uint16_t getId() const override
     {
         return _id;
     }
 
-    unsigned getParentId() const override
+    uint16_t getParentId() const override
     {
         return _parentId;
     }
@@ -75,12 +75,12 @@ public:
         return _name;
     }
 
-    unsigned getId() const override
+    uint16_t getId() const override
     {
         return _id;
     }
 
-    unsigned getParentId() const override
+    uint16_t getParentId() const override
     {
         return _parentId;
     }

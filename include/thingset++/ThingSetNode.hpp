@@ -33,9 +33,9 @@ public:
 
     constexpr virtual const std::string_view getName() const = 0;
 
-    constexpr virtual unsigned getId() const = 0;
+    constexpr virtual uint16_t getId() const = 0;
 
-    constexpr virtual unsigned getParentId() const = 0;
+    constexpr virtual uint16_t getParentId() const = 0;
 
     constexpr virtual const std::string getType() const = 0;
 
