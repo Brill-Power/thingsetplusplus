@@ -17,12 +17,16 @@
 
 namespace ThingSet {
 
-typedef std::list<ThingSetNode *> NodeList;
-typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
+//typedef std::list<ThingSetNode *> NodeList;
+
 
 /// @brief Repository of all current ThingSet nodes.
 class ThingSetRegistry
 {
+public:
+    typedef IntrusiveLinkedList<ThingSetNode, &ThingSetNode::list> NodeList;
+    typedef std::array<NodeList, NODE_MAP_LOOKUP_BUCKETS> NodeMap;
+
 private:
     template <uint16_t Id, uint16_t ParentId, StringLiteral Name>
     class OverlayNode : public ThingSetParentNode
