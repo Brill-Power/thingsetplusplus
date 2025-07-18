@@ -7,6 +7,7 @@
 #pragma once
 
 #include "thingset++/ThingSetNode.hpp"
+#include "thingset++/IntrusiveLinkedList.hpp"
 #include <list>
 
 namespace ThingSet {
@@ -28,10 +29,10 @@ enum ThingSetCallbackReason
 class ThingSetParentNode : public ThingSetNode
 {
 private:
-    std::list<ThingSetNode *> _children;
+    IntrusiveLinkedList<ThingSetNode, &ThingSetNode::children> _children;
 
 public:
-    typedef typename std::list<ThingSetNode *>::iterator ChildIterator;
+    typedef IntrusiveLinkedList<ThingSetNode, &ThingSetNode::children>::iterator ChildIterator;
 
 public:
     virtual ChildIterator begin();

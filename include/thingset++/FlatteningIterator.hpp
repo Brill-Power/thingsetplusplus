@@ -30,7 +30,7 @@ public:
         advance_past_empty_inner_containers();
     }
 
-    reference operator*() const
+    value_type operator*() const
     {
         return *inner_it_;
     }

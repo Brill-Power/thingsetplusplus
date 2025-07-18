@@ -93,38 +93,38 @@ bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)
     return false;
 }
 
-FlatteningIterator<NodeMap::iterator> ThingSetRegistry::begin()
+FlatteningIterator<ThingSetRegistry::NodeMap::iterator> ThingSetRegistry::begin()
 {
     auto begin = instance()._nodeMap.begin();
     auto end = instance()._nodeMap.end();
     return flatten(begin, end);
 }
 
-FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::cbegin() const
+FlatteningIterator<ThingSetRegistry::NodeMap::const_iterator, std::iterator_traits<ThingSetRegistry::NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::cbegin() const
 {
     auto begin = instance()._nodeMap.cbegin();
     auto end = instance()._nodeMap.cend();
     return flatten<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator>(begin, end);
 }
 
-FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::begin() const
+FlatteningIterator<ThingSetRegistry::NodeMap::const_iterator, std::iterator_traits<ThingSetRegistry::NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::begin() const
 {
     return cbegin();
 }
 
-FlatteningIterator<NodeMap::iterator> ThingSetRegistry::end()
+FlatteningIterator<ThingSetRegistry::NodeMap::iterator> ThingSetRegistry::end()
 {
     auto end = instance()._nodeMap.end();
     return flatten(end);
 }
 
-FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::cend() const
+FlatteningIterator<ThingSetRegistry::NodeMap::const_iterator, std::iterator_traits<ThingSetRegistry::NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::cend() const
 {
     auto end = instance()._nodeMap.cend();
-    return flatten<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator>(end);
+    return flatten<ThingSetRegistry::NodeMap::const_iterator, std::iterator_traits<ThingSetRegistry::NodeMap::const_iterator>::value_type::const_iterator>(end);
 }
 
-FlatteningIterator<NodeMap::const_iterator, std::iterator_traits<NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::end() const
+FlatteningIterator<ThingSetRegistry::NodeMap::const_iterator, std::iterator_traits<ThingSetRegistry::NodeMap::const_iterator>::value_type::const_iterator> ThingSetRegistry::end() const
 {
     return cend();
 }
