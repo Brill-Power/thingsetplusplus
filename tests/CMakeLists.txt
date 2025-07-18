@@ -23,6 +23,7 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestTextEncoder.cpp
     TestTextDecoder.cpp
     TestCompatibility.cpp
+    TestIntrusiveLinkedList.cpp
     TestProperties.cpp
     TestFunctions.cpp
     TestSubsets.cpp

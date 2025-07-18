@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <new>
 
+namespace ThingSet {
+
 struct IntrusiveLinkedListNode
 {
     IntrusiveLinkedListNode *next;
@@ -105,6 +107,21 @@ public:
         return cend();
     }
 
+    size_t count()
+    {
+        size_t count = 0;
+        for (T *x : *this)
+        {
+            count++;
+        }
+        return count;
+    }
+
+    void push_back(T &object)
+    {
+        push_back(&object);
+    }
+
     void push_back(T *object)
     {
         IntrusiveLinkedListNode *node = &(object->*Member);
@@ -118,7 +135,12 @@ public:
         }
     }
 
-    bool remove (T *object)
+    bool remove(T &object)
+    {
+        return remove(&object);
+    }
+
+    bool remove(T *object)
     {
         IntrusiveLinkedListNode *node = &(object->*Member);
 
@@ -146,3 +168,5 @@ public:
         return false;
     }
 };
+
+} // namespace ThingSet
