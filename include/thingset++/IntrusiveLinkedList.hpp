@@ -10,11 +10,25 @@
 
 namespace ThingSet {
 
-struct IntrusiveLinkedListNode
+class IntrusiveLinkedListNode;
+
+template <typename T, IntrusiveLinkedListNode T::*Member>
+class IntrusiveLinkedList;
+
+/// @brief Holds a pointer to the next member of an intrusive
+/// linked list.
+class IntrusiveLinkedListNode
 {
+    template <typename T, IntrusiveLinkedListNode T::*Member>
+    friend class IntrusiveLinkedList;
+
     IntrusiveLinkedListNode *next;
 };
 
+/// @brief Intrusive linked list.
+/// @tparam T The type of elements in the list.
+/// @tparam Member The member in the type which contains the list
+/// member pointer.
 template <typename T, IntrusiveLinkedListNode T::*Member>
 class IntrusiveLinkedList
 {
@@ -107,10 +121,10 @@ public:
         return cend();
     }
 
-    size_t count()
+    size_t count() const
     {
         size_t count = 0;
-        for (T *x : *this)
+        for (const T *x : *this)
         {
             count++;
         }
