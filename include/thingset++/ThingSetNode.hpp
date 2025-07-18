@@ -26,14 +26,17 @@ enum ThingSetNodeType
 };
 
 class ThingSetRegistry;
+class ThingSetParentNode;
 
 /// @brief Base class for all nodes.
 class ThingSetNode
 {
 friend class ThingSetRegistry;
+friend class ThingSetParentNode;
 
 private:
     IntrusiveLinkedListNode list;
+    IntrusiveLinkedListNode children;
 
 public:
     constexpr ThingSetNode()
