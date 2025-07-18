@@ -15,15 +15,11 @@ template <typename T>
 concept NodeBase = std::is_base_of_v<ThingSetNode, T>;
 
 /// @brief Represents a ThingSet node with an ID.
-template <NodeBase Base>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, NodeBase Base>
 class _IdentifiableThingSetNode : public Base
 {
 protected:
-    const uint16_t _id;
-    const uint16_t _parentId;
-    const std::string_view _name;
-
-    _IdentifiableThingSetNode(const uint16_t id, const uint16_t parentId, const std::string_view name) : ThingSetNode(), _id(id), _parentId(parentId), _name(name)
+    _IdentifiableThingSetNode() : ThingSetNode()
     {
         ThingSetRegistry::registerNode(this);
     }
@@ -36,30 +32,26 @@ protected:
 public:
     const std::string_view getName() const override
     {
-        return _name;
+        return Name.string_view();
     }
 
     uint16_t getId() const override
     {
-        return _id;
+        return Id;
     }
 
     uint16_t getParentId() const override
     {
-        return _parentId;
+        return ParentId;
     }
 };
 
 /// @brief Represents a ThingSet node with an ID and which may have one or more child nodes.
-template <>
-class _IdentifiableThingSetNode<ThingSetParentNode> : public ThingSetParentNode
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name>
+class _IdentifiableThingSetNode<Id, ParentId, Name, ThingSetParentNode> : public ThingSetParentNode
 {
 protected:
-    const uint16_t _id;
-    const uint16_t _parentId;
-    const std::string_view _name;
-
-    _IdentifiableThingSetNode(const uint16_t id, const uint16_t parentId, const std::string_view name) : ThingSetParentNode(), _id(id), _parentId(parentId), _name(name)
+    _IdentifiableThingSetNode() : ThingSetParentNode()
     {
         ThingSetRegistry::registerNode(this);
     }
@@ -72,17 +64,17 @@ protected:
 public:
     const std::string_view getName() const override
     {
-        return _name;
+        return Name.string_view();
     }
 
     uint16_t getId() const override
     {
-        return _id;
+        return Id;
     }
 
     uint16_t getParentId() const override
     {
-        return _parentId;
+        return ParentId;
     }
 
     bool tryCastTo(ThingSetNodeType type, void **target) override
@@ -97,7 +89,9 @@ public:
     }
 };
 
-using IdentifiableThingSetNode = _IdentifiableThingSetNode<ThingSetNode>;
-using IdentifiableThingSetParentNode = _IdentifiableThingSetNode<ThingSetParentNode>;
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name>
+using IdentifiableThingSetNode = _IdentifiableThingSetNode<Id, ParentId, Name, ThingSetNode>;
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name>
+using IdentifiableThingSetParentNode = _IdentifiableThingSetNode<Id, ParentId, Name, ThingSetParentNode>;
 
 } // namespace ThingSet

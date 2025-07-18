@@ -12,9 +12,6 @@
 
 namespace ThingSet {
 
-template <typename T, typename Base>
-concept IdentifiableBase = std::is_base_of_v<_IdentifiableThingSetNode<Base>, T>;
-
 enum struct Subset : uint8_t
 {
     persisted = 1 << 0,

@@ -45,15 +45,15 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &
 /// @tparam Access Access control flags.
 /// @tparam Result The return type of the function.
 /// @tparam ...Args The argument types of the function, if any.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Result, typename... Args>
-class ThingSetFunction : public IdentifiableThingSetParentNode, public ThingSetInvocable
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Result, typename... Args>
+class ThingSetFunction : public IdentifiableThingSetParentNode<Id, ParentId, Name>, public ThingSetInvocable
 {
 private:
-    template <unsigned ChildId, StringLiteral ArgName, typename T>
-    class ThingSetFunctionParameter : public IdentifiableThingSetNode
+    template <uint16_t ChildId, StringLiteral ArgName, typename T>
+    class ThingSetFunctionParameter : public IdentifiableThingSetNode<ChildId, Id, ArgName>
     {
     public:
-        ThingSetFunctionParameter() : IdentifiableThingSetNode(ChildId, Id, ArgName.string_view())
+        ThingSetFunctionParameter() : IdentifiableThingSetNode<ChildId, Id, ArgName>()
         {}
 
         const std::string getType() const override
@@ -94,7 +94,7 @@ private:
 
 public:
     ThingSetFunction(std::function<Result(Args...)> function)
-        : IdentifiableThingSetParentNode(Id, ParentId, Name.string_view()), _function(function)
+        : IdentifiableThingSetParentNode<Id, ParentId, Name>(), _function(function)
     {}
 
     constexpr const std::string getType() const override
@@ -132,13 +132,13 @@ public:
     }
 };
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Result, Args...>;
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Result, Args...>;
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetManufacturerFunction =
     ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Result, Args...>;
 
