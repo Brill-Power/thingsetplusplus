@@ -268,36 +268,36 @@ public:
     constexpr static const std::string_view &name = Name.string_view();
 };
 
-/// @brief A ThingSet property that can be read by anyone.
-/// @tparam T The type of the value stored by this property.
-/// @tparam Id The unique ID of the property.
-/// @tparam ParentId The ID of the parent container of this property.
-/// @tparam Name The human-readable name of the property.
+/// @brief A ThingSet record member that can be read by anyone.
+/// @tparam T The type of the value stored by this record member.
+/// @tparam Id The unique ID of the record member.
+/// @tparam ParentId The ID of the parent container of this record member.
+/// @tparam Name The human-readable name of the record member.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadOnlyRecordMember = ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyRead, T, Subset, S>;
 
-/// @brief A ThingSet property that can be read and written by anyone.
-/// @tparam T The type of the value stored by this property.
-/// @tparam Id The unique ID of the property.
-/// @tparam ParentId The ID of the parent container of this property.
-/// @tparam Name The human-readable name of the property.
+/// @brief A ThingSet record member that can be read and written by anyone.
+/// @tparam T The type of the value stored by this record member.
+/// @tparam Id The unique ID of the record member.
+/// @tparam ParentId The ID of the parent container of this record member.
+/// @tparam Name The human-readable name of the record member.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadWriteRecordMember = ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyReadWrite, T, Subset, S>;
 
-/// @brief A ThingSet property that can be read by anyone but only written by advanced users.
-/// @tparam T The type of the value stored by this property.
-/// @tparam Id The unique ID of the property.
-/// @tparam ParentId The ID of the parent container of this property.
-/// @tparam Name The human-readable name of the property.
+/// @brief A ThingSet record member that can be read by anyone but only written by advanced users.
+/// @tparam T The type of the value stored by this record member.
+/// @tparam Id The unique ID of the record member.
+/// @tparam ParentId The ID of the parent container of this record member.
+/// @tparam Name The human-readable name of the record member.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadAdvancedWriteRecordMember =
     ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T, Subset, S>;
 
-/// @brief A ThingSet property that can be read by anyone but only written by the manufacturer.
-/// @tparam T The type of the value stored by this property.
-/// @tparam Id The unique ID of the property.
-/// @tparam ParentId The ID of the parent container of this property.
-/// @tparam Name The human-readable name of the property.
+/// @brief A ThingSet record member that can be read by anyone but only written by the manufacturer.
+/// @tparam T The type of the value stored by this record member.
+/// @tparam Id The unique ID of the record member.
+/// @tparam ParentId The ID of the parent container of this record member.
+/// @tparam Name The human-readable name of the record member.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename T, Subset S = (Subset)0>
 using ThingSetReadManufacturerWriteRecordMember =
     ThingSetRecordMember<Id, ParentId, Name, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, T, Subset, S>;
