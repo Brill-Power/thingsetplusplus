@@ -68,6 +68,16 @@ public:
         return doRequest(id, ThingSetBinaryRequestType::get, [](auto) { return true; }, &result);
     }
 
+    /// @brief Gets a value.
+    /// @tparam T The type of the value to get.
+    /// @param id The string identifier of the value.
+    /// @param result A reference to a variable which will hold the retrieved value.
+    /// @return True if retrieval succeeded, otherwise false.
+    template <typename T> bool get(const std::string &id, T &result)
+    {
+        return doRequest(id, ThingSetBinaryRequestType::get, [](auto) { return true; }, &result);
+    }
+
     template <typename T> bool update(const std::string &fullyQualifiedName, const T &value)
     {
         size_t index = fullyQualifiedName.find_last_of('/');
@@ -89,7 +99,9 @@ private:
     /// @param encode A function to encode any additional data in a request.
     /// @param result A pointer to a variable which will contain the decoded result, if any. Pass null if no result is expected.
     /// @return True if invocation succeeded, otherwise false.
-    template <typename Id, typename T> bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, T *result)
+    template <typename Id, typename T>
+        requires std::is_integral_v<Id> or std::is_convertible_v<Id, std::string_view>
+    bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, T *result)
     {
         uint8_t *responseBuffer;
         size_t responseSize;
@@ -101,14 +113,18 @@ private:
         return false;
     }
 
-    template <typename Id> bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode)
+    template <typename Id>
+        requires std::is_integral_v<Id> or std::is_convertible_v<Id, std::string_view>
+    bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode)
     {
         uint8_t *responseBuffer;
         size_t responseSize;
         return doRequestCore(id, type, encode, &responseBuffer, responseSize);
     }
 
-    template <typename Id> bool doRequestCore(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, uint8_t **responseBuffer, size_t &responseSize)
+    template <typename Id>
+        requires std::is_integral_v<Id> or std::is_convertible_v<Id, std::string_view>
+    bool doRequestCore(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, uint8_t **responseBuffer, size_t &responseSize)
     {
         _txBuffer[0] = (uint8_t)type;
         FixedDepthThingSetBinaryEncoder encoder(_txBuffer + 1, _txBufferSize - 1);

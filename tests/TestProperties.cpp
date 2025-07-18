@@ -10,9 +10,9 @@ using namespace ThingSet;
 
 TEST(Properties, SimpleProperty)
 {
-    ThingSetReadOnlyProperty<0x100, 0, "f32", float> f32;
-    ThingSetReadOnlyProperty<0x200, 0, "i32", int32_t> i32;
-    ThingSetReadOnlyProperty<0x201, 0, "u32", uint32_t> u32;
+    ThingSetReadOnlyProperty<float> f32 { 0x100, 0, "f32" };
+    ThingSetReadOnlyProperty<int32_t> i32 { 0x200, 0, "i32" };
+    ThingSetReadOnlyProperty<uint32_t> u32 { 0x201, 0, "u32" };
 
     ThingSetNode *node;
     ASSERT_TRUE(ThingSetRegistry::findById(0x100, &node));
@@ -33,7 +33,7 @@ TEST(Properties, SimpleProperty)
 TEST(Properties, PointerProperty)
 {
     float rf32 = 1.0;
-    ThingSetReadOnlyProperty<0x101, 0, "rf32", float *> prf32(&rf32);
+    ThingSetReadOnlyProperty prf32 { 0x101, 0, "rf32", &rf32 };
     ASSERT_EQ("f32", prf32.getType());
     prf32 = 1.5;
     ASSERT_EQ(1.5, rf32);

@@ -4,16 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/ThingSetTextDecoder.hpp"
-#include "thingset++/ThingSetProperty.hpp"
+#include "thingset++/ThingSetRecordMember.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;
 
 struct StructTest
 {
-    ThingSetReadOnlyProperty<0x701, 0x700, "nodeID", std::string> nodeId;
-    ThingSetReadOnlyProperty<0x702, 0x700, "three", std::array<float, 3>> three;
-    ThingSetReadOnlyProperty<0x703, 0x700, "canAddr", uint8_t> canAddr;
+    ThingSetReadOnlyRecordMember<0x701, 0x700, "nodeID", std::string> nodeId;
+    ThingSetReadOnlyRecordMember<0x702, 0x700, "three", std::array<float, 3>> three;
+    ThingSetReadOnlyRecordMember<0x703, 0x700, "canAddr", uint8_t> canAddr;
 };
 
 TEST(TextDecoder, DecodeStdString)

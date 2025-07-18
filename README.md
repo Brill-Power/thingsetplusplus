@@ -18,11 +18,19 @@ Both text (JSON) and binary (CBOR) encodings are supported.
 
 ## Getting Started
 
-The basic building block is a property. A property has an ID, a parent, a name and a type. For
-example:
+### Server
+
+The basic building block is a property. A property has an ID, a parent, a name and a value of a
+certain type. For example:
 
 ```c++
-ThingSetReadWriteProperty<0x300, 0, "voltage", float> voltage = 24;
+ThingSetReadWriteProperty<float> voltage { 0x300, 0, "voltage" };
+```
+
+The type will be inferred if the value is specified at initialisation:
+
+```c++
+ThingSetReadWriteProperty voltage { 0x300, 0, "voltage", 24.0f };
 ```
 
 A property so declared provides its own storage for the given value. Alternatively,
@@ -30,10 +38,11 @@ a property may be declared with a pointer:
 
 ```c++
 float voltage;
-ThingSetReadWriteProperty<0x300, 0, "voltage", float *> voltageProperty(&voltage);
+ThingSetReadWriteProperty voltageProperty { 0x300, 0, "voltage", &voltage };
 ```
 
-Assignment to the property will update the underlying value.
+The type will be inferred from the pointer type. Assignment to the property will update
+the underlying value.
 
 All the basic primitive types are supported. Properties may also be structures*, or arrays of primitives
 or structures (known in C ThingSet as 'records').
@@ -43,10 +52,10 @@ Structures should be declared thus:
 ```c++
 struct ModuleRecord
 {
-    ThingSetReadOnlyProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetReadOnlyProperty<0x602, 0x600, "current", float> current;
-    ThingSetReadOnlyProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetReadOnlyProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadWriteRecordMember<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadWriteRecordMember<0x602, 0x600, "current", float> current;
+    ThingSetReadWriteRecordMember<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadWriteRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
 };
 ```
 
@@ -64,25 +73,41 @@ server.listen();
 (* There is no direct equivalent of a single structure being a value in C ThingSet, which may cause
 compatibility problems.)
 
-## Decoding
+### Client
 
-The decoder adopts a typical object-oriented approach. The various overloads of `decode`
-handle most primitive types, C and C++ (i.e. `std::array`) arrays and appropriately-designed complex
-types. Other methods decode maps (`decodeMap`) and lists into a tuple or via a callback for each
-element (`decodeList`).
+The client is instantiated along similar lines:
 
-## Encoding
+```c++
+std::array<uint8_t, 1024> rxBuffer;
+std::array<uint8_t, 1024> txBuffer;
+ThingSetSocketClientTransport clientTransport("127.0.0.1");
+ThingSetClient client(clientTransport, rxBuffer, txBuffer);
+client.connect();
+```
 
-As with the decoder, the encoder adopts a similar object-oriented approach. Various overloads of
-`encode` handle most types. `encodeListStart` and `encodeMapStart` are provided to allow greater
-control over the encoding process.
+Values can then be retrieved:
 
-## Streaming
+```c++
+float voltage;
+if (client.get(0x300, voltage)) {
+    ...
+}
+```
 
-Of particular interest may be the `Streaming...` variants of the encoder and decoder. These allow
-efficient encoding and decoding of streams of data with very little memory footprint. The
-`StreamingCanThingSetBinaryEncoder`, in particular, can encode lengthy multi-frame CAN reports while
-requiring only 128 bytes (i.e. 2 CAN-FD frames' worth) of buffer space.
+...or updated:
+
+```c++
+client.update("voltage", 25.0f);
+```
+
+...and functions invoked:
+
+```c++
+int result;
+if (client.exec(0x1000, &result, 2, 3)) {
+    ...
+}
+```
 
 ## Examples and Tests
 

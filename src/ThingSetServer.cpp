@@ -13,7 +13,7 @@
 
 namespace ThingSet {
 
-static inline ThingSetProperty<0x1d, 0, "NodeID", ThingSetAccess::userRead, std::string> nodeId(Eui::getString());
+static inline ThingSetReadOnlyProperty<std::string> nodeId { 0x1d, 0, "NodeID", Eui::getString() };
 static const uint16_t MetadataNameId = 0x1a;
 static const uint16_t MetadataTypeId = 0x1b;
 static const uint16_t MetadataAccessId = 0x1c;
@@ -204,7 +204,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
             context.setStatus(ThingSetStatusCode::notFound);
             return false;
         }
-        if (!child->checkAccess(_access)) {
+        if ((child->getAccess() & _access) == ThingSetAccess::none) {
             context.setStatus(ThingSetStatusCode::forbidden);
             return false;
         }
@@ -235,7 +235,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
 
 int _ThingSetServer::handleExec(ThingSetRequestContext &context)
 {
-    if (!context.node->checkAccess(_access)) {
+    if ((context.node->getAccess() & _access) == ThingSetAccess::none) {
         context.setStatus(ThingSetStatusCode::forbidden);
         return context.getHeaderLength();
     }

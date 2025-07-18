@@ -45,31 +45,25 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &
 /// @tparam Access Access control flags.
 /// @tparam Result The return type of the function.
 /// @tparam ...Args The argument types of the function, if any.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Result, typename... Args>
 class ThingSetFunction : public IdentifiableThingSetParentNode<Id, ParentId, Name>, public ThingSetInvocable
 {
 private:
-    template <unsigned ChildId, StringLiteral ArgName, typename T>
+    template <uint16_t ChildId, StringLiteral ArgName, typename T>
     class ThingSetFunctionParameter : public IdentifiableThingSetNode<ChildId, Id, ArgName>
     {
+    public:
+        ThingSetFunctionParameter() : IdentifiableThingSetNode<ChildId, Id, ArgName>()
+        {}
+
         const std::string getType() const override
         {
             return ThingSetType<T>::name.str();
         }
 
-        constexpr ThingSetNodeType getNodeType() const override
-        {
-            return ThingSetNodeType::parameter;
-        }
-
         constexpr ThingSetAccess getAccess() const override
         {
             return ThingSetAccess::anyReadWrite;
-        }
-
-        bool checkAccess(ThingSetAccess) const override
-        {
-            return true;
         }
     };
 
@@ -100,17 +94,12 @@ private:
 
 public:
     ThingSetFunction(std::function<Result(Args...)> function)
-        : IdentifiableThingSetParentNode<Id, ParentId, Name>::IdentifiableThingSetParentNode(), _function(function)
+        : IdentifiableThingSetParentNode<Id, ParentId, Name>(), _function(function)
     {}
 
     constexpr const std::string getType() const override
     {
         return ThingSetType<std::function<Result(Args...)>>::name.str();
-    }
-
-    constexpr ThingSetNodeType getNodeType() const override
-    {
-        return ThingSetNodeType::function;
     }
 
     bool invoke(ThingSetDecoder &decoder, ThingSetEncoder &encoder) override
@@ -137,24 +126,19 @@ public:
         return Access;
     }
 
-    bool checkAccess(ThingSetAccess access) const override
-    {
-        return (access & Access) == Access;
-    }
-
     bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override
     {
         return true;
     }
 };
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Result, Args...>;
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Result, Args...>;
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetManufacturerFunction =
     ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Result, Args...>;
 

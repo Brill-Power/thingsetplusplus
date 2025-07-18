@@ -20,22 +20,22 @@ ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
 
 struct SupercellRecord
 {
-    ThingSetReadWriteProperty<0x611, 0x610, "soc", float> soc;
-    ThingSetReadWriteProperty<0x612, 0x610, "soh", float> soh;
+    ThingSetReadWriteRecordMember<0x611, 0x610, "soc", float> soc;
+    ThingSetReadWriteRecordMember<0x612, 0x610, "soh", float> soh;
 };
 
 struct ModuleRecord
 {
-    ThingSetReadWriteProperty<0x601, 0x600, "voltage", float> voltage;
-    ThingSetReadWriteProperty<0x602, 0x600, "current", float> current;
-    ThingSetReadWriteProperty<0x603, 0x600, "error", uint64_t> error;
-    ThingSetReadWriteProperty<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadWriteProperty<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadWriteRecordMember<0x601, 0x600, "voltage", float> voltage;
+    ThingSetReadWriteRecordMember<0x602, 0x600, "current", float> current;
+    ThingSetReadWriteRecordMember<0x603, 0x600, "error", uint64_t> error;
+    ThingSetReadWriteRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadWriteRecordMember<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
-ThingSetReadWriteProperty<0x300, 0, "totalVoltage", float> totalVoltage = 24;
+ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
-ThingSetReadWriteProperty<0x620, 0x0, "Modules", std::array<ModuleRecord, 2>> moduleRecords;
+ThingSetReadWriteProperty<std::array<ModuleRecord, 2>> moduleRecords { 0x620, 0x0, "Modules" };
 
 ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 

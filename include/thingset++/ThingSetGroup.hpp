@@ -16,7 +16,7 @@ static inline bool defaultCallback(ThingSetNode *, ThingSetCallbackReason)
     return true;
 }
 
-template <unsigned Id, unsigned ParentId, StringLiteral Name>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name>
 class ThingSetGroup : public IdentifiableThingSetParentNode<Id, ParentId, Name>
 {
 private:
@@ -30,17 +30,6 @@ public:
     constexpr const std::string getType() const override
     {
         return "group";
-    }
-
-    constexpr ThingSetNodeType getNodeType() const override
-    {
-        return ThingSetNodeType::group;
-    }
-
-    bool checkAccess(ThingSetAccess) const override
-    {
-        // no access control on groups at the moment
-        return true;
     }
 
     constexpr ThingSetAccess getAccess() const override

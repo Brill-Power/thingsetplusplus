@@ -27,7 +27,7 @@ protected:
     const char *_inputBuffer;
     size_t _bufferSize;
     size_t _bufferElemPtr;
-    size_t _tokenPtr;
+    size_t _tokenIndex;
     jsmn_parser _parser;
 
     ThingSetTextDecoder(const char *buffer, const size_t size);

@@ -88,7 +88,7 @@ public:
     auto &operator=(const U &value)
     {
         _value = value;
-        return this;
+        return *this;
     }
 };
 
@@ -130,6 +130,18 @@ public:
     Element &operator[](int index)
     {
         return _value[index];
+    }
+
+    auto &operator=(const std::array<Element, Size> &value)
+    {
+        _value = value;
+        return *this;
+    }
+
+    auto &operator=(std::array<Element, Size> &&value)
+    {
+        _value = std::move(value);
+        return *this;
     }
 
     std::size_t size() const

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2024 Brill Power.
+ * Copyright (c) The ThingSet Project Contributors.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -84,11 +85,11 @@ template <typename T> struct __ArrayHolder {
 /// @tparam ParentId The ID of the parent container.
 /// @tparam Name The name of the property.
 /// @tparam Access The access permissions for this property.
-template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Access> struct __PropertyBuilder
+struct __PropertyBuilder
 {
-    template <typename T>
-    static ThingSetProperty<Id, ParentId, Name, Access, T*> build(T** value) {
-        return ThingSetProperty<Id, ParentId, Name, Access, T*>(*value);
+    template <ThingSetAccess Access, uint32_t Subset, typename T>
+    static ThingSetProperty<T*, Access, uint32_t, Subset> build(const unsigned id, const unsigned parentId, const std::string name, T* value) {
+        return ThingSetProperty<T*, Access, uint32_t, Subset>(id, parentId, name, value);
     }
 };
 
@@ -98,7 +99,7 @@ template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Acc
     ThingSet::ThingSetGroup<id, parentId, name> thingset_##id;
 
 #define THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, type)                                          \
-    ThingSet::ThingSetProperty<id, parentId, name, ThingSet::convertAccess<access>::value, type *> thingset_##id(pointer);
+    auto thingset_##id = ThingSet::__PropertyBuilder::build<ThingSet::convertAccess<access>::value, subsets>(id, parentId, name, pointer);
 
 #define THINGSET_ADD_ITEM_BOOL(parentId, id, name, pointer, access, subsets)                                           \
     THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, bool)
@@ -137,6 +138,6 @@ template <unsigned Id, unsigned ParentId, StringLiteral Name, ThingSetAccess Acc
     ThingSet::__ArrayHolder<float> variableName = { .array = arr, .maxElements = sizeof(arr), .numElements = usedElements };
 
 #define THINGSET_ADD_ITEM_ARRAY(parentId, id, name, arrayHolder, access, subsets) \
-    auto thingset_##id = ThingSet::__PropertyBuilder<parentId, id, name, ThingSet::convertAccess<access>::value>::build(arrayHolder.array);
+    auto thingset_##id = ThingSet::__PropertyBuilder::build<ThingSet::convertAccess<access>::value, subsets>(id, parentId, name, arrayHolder.array);
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))

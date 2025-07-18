@@ -8,7 +8,7 @@
 
 namespace ThingSet {
 
-ThingSetTextDecoder::ThingSetTextDecoder(const char *buffer, const size_t size) : _inputBuffer(buffer), _bufferSize(size), _bufferElemPtr(0), _tokenPtr(0)
+ThingSetTextDecoder::ThingSetTextDecoder(const char *buffer, const size_t size) : _inputBuffer(buffer), _bufferSize(size), _bufferElemPtr(0), _tokenIndex(0)
 {
     jsmn_init(&_parser);
 }
@@ -189,7 +189,7 @@ bool ThingSetTextDecoder::isInList() const
 
 ThingSetEncodedNodeType ThingSetTextDecoder::peekType()
 {
-    jsmntok *token = &getTokens()[_tokenPtr];
+    jsmntok *token = &getTokens()[_tokenIndex];
     switch (token->type)
     {
         case JSMN_PRIMITIVE:
@@ -213,7 +213,7 @@ bool ThingSetTextDecoder::ensureListSize(const size_t size, size_t &elementCount
 
 bool ThingSetTextDecoder::expectType(const jsmntype_t &type, jsmntok **t)
 {
-    jsmntok *token = &getTokens()[_tokenPtr];
+    jsmntok *token = &getTokens()[_tokenIndex];
     if (t) {
         *t = token;
     }
@@ -226,14 +226,14 @@ bool ThingSetTextDecoder::expectType(const jsmntype_t &type, jsmntok **t)
         offset = 1;
     }
     _bufferElemPtr = token->start + offset;
-    _tokenPtr++;
+    _tokenIndex++;
     return true;
 }
 
 bool ThingSetTextDecoder::skip()
 {
-    _tokenPtr++;
-    jsmntok *token = &getTokens()[_tokenPtr];
+    _tokenIndex++;
+    jsmntok *token = &getTokens()[_tokenIndex];
     _bufferElemPtr = token->start;
     return true;
 }
