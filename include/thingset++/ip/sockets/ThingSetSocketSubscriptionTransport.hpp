@@ -17,22 +17,20 @@
 
 namespace ThingSet::Ip::Sockets {
 
-/// @brief Subscription transport for Zephyr sockets.
+/// @brief Subscription transport for sockets.
 class _ThingSetSocketSubscriptionTransport : public ThingSetSubscriptionTransport<SocketEndpoint>
 {
 private:
     sockaddr_in _listenAddress;
     int _listenSocketHandle;
-    uint8_t _buffer[1024];
     std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> _callback;
 
-public:
+protected:
     _ThingSetSocketSubscriptionTransport();
     ~_ThingSetSocketSubscriptionTransport();
 
     bool subscribe(std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> callback) override;
 
-protected:
     void runListener();
     virtual void startThread() = 0;
 };

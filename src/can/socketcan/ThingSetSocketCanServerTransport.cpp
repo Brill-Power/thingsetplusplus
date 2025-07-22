@@ -25,7 +25,7 @@ ThingSetCanInterface &ThingSetSocketCanServerTransport::getInterface()
 bool ThingSetSocketCanServerTransport::doPublish(const Can::CanID &id, uint8_t *buffer, size_t length)
 {
     CanFdFrame frame(id);
-    if (length > CAN_MAX_DLEN) {
+    if (length > CANFD_MAX_DLEN) {
         // avoids a hard fault from the memcpy
         return false;
     }

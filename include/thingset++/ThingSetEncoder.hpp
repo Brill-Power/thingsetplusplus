@@ -166,8 +166,7 @@ public:
                     this->encode(propertyType::name);
                 }
                 this->encodeKeyValuePairSeparator();
-                auto value = prop->getValue();
-                this->encode(value);
+                this->encode(prop->getValue());
                 this->encodeListSeparator();
             }
         });

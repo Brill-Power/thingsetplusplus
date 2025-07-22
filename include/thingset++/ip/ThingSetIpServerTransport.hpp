@@ -13,10 +13,12 @@ namespace ThingSet::Ip {
 /// @brief Server transport for UDP protocol.
 /// @tparam Identifier Type of client identifier
 template <typename Identifier>
-class ThingSetIpServerTransport : public ThingSetServerTransport<Identifier, THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<Identifier>>
+class ThingSetIpServerTransport : public ThingSetServerTransport<Identifier, THINGSET_STREAMING_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<Identifier>>
 {
 protected:
-    ThingSetIpServerTransport()
+    uint8_t _messageNumber;
+
+    ThingSetIpServerTransport() : _messageNumber(0)
     {}
 
 public:
@@ -32,4 +34,4 @@ public:
     virtual bool publish(uint8_t *buffer, size_t len) = 0;
 };
 
-} // namespace ThingSet::Ip::Udp
+} // namespace ThingSet::Ip

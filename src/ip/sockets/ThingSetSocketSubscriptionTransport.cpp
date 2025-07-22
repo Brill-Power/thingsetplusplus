@@ -5,8 +5,10 @@
  */
 
 #include "thingset++/ip/sockets/ThingSetSocketSubscriptionTransport.hpp"
+#include "thingset++/ip/StreamingUdpThingSetBinaryDecoder.hpp"
 #include "thingset++/ip/sockets/ZephyrStubs.h"
 #include "thingset++/ThingSetStatus.hpp"
+#include <map>
 #ifdef __ZEPHYR__
 #include <assert.h>
 #include <zephyr/kernel.h>
@@ -60,23 +62,13 @@ bool _ThingSetSocketSubscriptionTransport::subscribe(std::function<void(const So
 
 void _ThingSetSocketSubscriptionTransport::runListener()
 {
+    std::map<in_addr_t, StreamingUdpThingSetBinaryDecoder>  decodersBySender;
     for (;;) {
         SocketEndpoint sourceAddress;
         socklen_t sourceAddressSize = sizeof(sourceAddress);
-        size_t length = recvfrom(_listenSocketHandle, _buffer, 1024, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
-
-        if (length > 4) {
-            if (_buffer[0] != ThingSetBinaryRequestType::report) {
-                continue;
-            }
-
-            size_t actual_length = _buffer[1] | (_buffer[2] << 8);
-
-            if (actual_length == (length - 3)) {
-                DefaultFixedDepthThingSetBinaryDecoder decoder(&_buffer[3], actual_length, 2);
-                _callback(sourceAddress, decoder);
-            }
-        }
+        Frame frame;
+        frame.length = recvfrom(_listenSocketHandle, frame.buffer, THINGSET_STREAMING_MSG_SIZE, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
+        SubscriptionListener::handle<MessageType>(frame, sourceAddress, sourceAddress.sin_addr.s_addr, decodersBySender, _callback);
     }
 }
 

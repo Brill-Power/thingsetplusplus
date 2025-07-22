@@ -159,8 +159,9 @@ int _ThingSetServer::handleFetch(ThingSetRequestContext &context)
             return context.getHeaderLength();
         }
     }
-    else if (context.decoder().peekType() == ThingSetEncodedNodeType::list && context.encoder().encodeListStart()) {
-        if (context.node == ThingSetRegistry::getMetadataNode() && context.decoder().decodeList([&context](size_t) {
+    else if (context.node == ThingSetRegistry::getMetadataNode() && context.decoder().peekType() == ThingSetEncodedNodeType::list
+        && context.encoder().encodeListStart()) {
+        if (context.decoder().decodeList([&context](size_t) {
                 unsigned id;
                 if (!context.decoder().decode(&id)) {
                     return false;

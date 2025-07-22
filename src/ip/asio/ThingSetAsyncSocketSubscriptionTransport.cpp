@@ -5,6 +5,7 @@
  */
 
 #include "thingset++/ip/asio/ThingSetAsyncSocketSubscriptionTransport.hpp"
+#include "thingset++/ip/StreamingUdpThingSetBinaryDecoder.hpp"
 #include "thingset++/ThingSetStatus.hpp"
 #include <asio/co_spawn.hpp>
 #include <asio/detached.hpp>
@@ -28,21 +29,13 @@ ThingSetAsyncSocketSubscriptionTransport::~ThingSetAsyncSocketSubscriptionTransp
 
 awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function<void(const asio::ip::udp::endpoint &, ThingSetBinaryDecoder &)> callback)
 {
+    std::map<asio::ip::udp::endpoint, StreamingUdpThingSetBinaryDecoder>  decodersBySender;
     for (;;) {
-        auto buffer = asio::buffer(_buffer, 1024);
+        Frame frame;
+        auto buffer = asio::buffer(frame.buffer, THINGSET_STREAMING_MSG_SIZE);
         asio::ip::udp::endpoint sender;
-        size_t length = co_await _subscribeSocket.async_receive_from(buffer, sender, use_awaitable);
-        if (length > 4) {
-            if (_buffer[0] != ThingSetBinaryRequestType::report) {
-                continue;
-            }
-            // get actual length from message body to check we have received everything
-            size_t actualLength = _buffer[1] | (_buffer[2] << 8);
-            if (actualLength == length - 3) {
-                DefaultFixedDepthThingSetBinaryDecoder decoder(&_buffer[3], actualLength, 2);
-                callback(sender, decoder);
-            }
-        }
+        frame.length = co_await _subscribeSocket.async_receive_from(buffer, sender, use_awaitable);
+        SubscriptionListener::handle<MessageType>(frame, sender, sender, decodersBySender, callback);
     }
 }
 

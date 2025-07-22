@@ -102,6 +102,12 @@ bool _ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoi
 
 bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 {
+    buffer[1] = _messageNumber;
+    MessageType messageType = (MessageType)(buffer[0] & 0xF0);
+    if (messageType == MessageType::single || messageType == MessageType::last) {
+        _messageNumber++;
+    }
+
     sockaddr_in addr;
     socklen_t addrLen = sizeof(addr);
     if (getsockname(_publishSocketHandle, (struct sockaddr *)&addr, &addrLen) != 0) {

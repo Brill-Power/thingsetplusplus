@@ -42,6 +42,11 @@ public:
         return _frame.data;
     }
 
+    const uint8_t *getData() const
+    {
+        return _frame.data;
+    }
+
     virtual uint8_t getLength() const = 0;
     virtual Self &setLength(uint8_t length) = 0;
 };

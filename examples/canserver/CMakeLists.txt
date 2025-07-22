@@ -8,7 +8,7 @@ set(ENABLE_SERVER ON)
 
 project(canserver LANGUAGES C CXX VERSION 1.0.0)
 
-add_compile_definitions(DEBUG_LOGGING)
+# add_compile_definitions(DEBUG_LOGGING)
 
 add_subdirectory(../../ thingset++)
 

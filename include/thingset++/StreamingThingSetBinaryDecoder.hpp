@@ -11,10 +11,11 @@ namespace ThingSet {
 
 /// @brief Base class for streaming decoders.
 /// @tparam Size Size of the chunks which should be read from the underlying stream.
-template <size_t Size> class StreamingThingSetBinaryDecoder : public virtual ThingSetBinaryDecoder
+template <size_t Size>
+class StreamingThingSetBinaryDecoder : public virtual ThingSetBinaryDecoder
 {
 private:
-size_t _decodedLength;
+    size_t _decodedLength;
 
 protected:
     zcbor_state_t _state[BINARY_DECODER_DEFAULT_MAX_DEPTH];
@@ -84,16 +85,22 @@ protected:
 
     virtual int read() = 0;
 
+    virtual size_t headerSize() const
+    {
+        return 0;
+    }
+
 private:
     bool ensureLength()
     {
         size_t currentPos = _state->payload - &_buffer[0];
-        if (currentPos > Size) {
-            memmove(&_buffer[0], &_buffer[Size], Size);
-            _decodedLength += Size;
+        size_t dataSize = Size - headerSize();
+        if (currentPos > dataSize) {
+            memmove(&_buffer[0], &_buffer[dataSize], dataSize);
+            _decodedLength += dataSize;
             int readSize = read();
-            size_t newPos = currentPos - Size;
-            zcbor_update_state(_state, &_buffer[newPos], Size + readSize - newPos);
+            size_t newPos = currentPos - dataSize;
+            zcbor_update_state(_state, &_buffer[newPos], dataSize + readSize - newPos);
         }
         return true;
     }

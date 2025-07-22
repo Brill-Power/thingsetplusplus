@@ -15,9 +15,6 @@ using namespace ThingSet;
 using namespace ThingSet::Ip;
 using namespace ThingSet::Ip::Async;
 
-ThingSetGroup<0x600, 0, "Modules"> modules;
-ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
-
 struct SupercellRecord
 {
     ThingSetReadWriteRecordMember<0x611, 0x610, "soc", float> soc;
@@ -26,20 +23,20 @@ struct SupercellRecord
 
 struct ModuleRecord
 {
-    ThingSetReadWriteRecordMember<0x601, 0x600, "voltage", float> voltage;
-    ThingSetReadWriteRecordMember<0x602, 0x600, "current", float> current;
-    ThingSetReadWriteRecordMember<0x603, 0x600, "error", uint64_t> error;
-    ThingSetReadWriteRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadWriteRecordMember<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadWriteRecordMember<0x601, 0x620, "voltage", float> voltage;
+    ThingSetReadWriteRecordMember<0x602, 0x620, "current", float> current;
+    ThingSetReadWriteRecordMember<0x603, 0x620, "error", uint64_t> error;
+    ThingSetReadWriteRecordMember<0x604, 0x620, "cellVoltages", std::array<float, 6>> cellVoltages;
+    ThingSetReadWriteRecordMember<0x610, 0x620, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
 ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
-ThingSetReadWriteProperty<std::array<ModuleRecord, 2>> moduleRecords { 0x620, 0x0, "Modules" };
+ThingSetReadWriteProperty<std::array<ModuleRecord, 8>> moduleRecords { 0x620, 0x0, "Modules" };
 
 ThingSetUserFunction<0x1000, 0x0, "xDoSomething", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
-void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer<asio::ip::tcp::endpoint, THINGSET_STREAMING_ENCODER_UDP_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<asio::ip::tcp::endpoint>> *server)
+void publishCallback(const asio::error_code & /*e*/, asio::steady_timer *t, ThingSetServer<asio::ip::tcp::endpoint, THINGSET_STREAMING_MSG_SIZE, StreamingUdpThingSetBinaryEncoder<asio::ip::tcp::endpoint>> *server)
 {
     std::cout << "Publishing report" << std::endl;
     for (int i = 0; i < moduleRecords.size(); i++) {
@@ -99,6 +96,10 @@ int main(int argc, char *argv[])
                           .error = 0,
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
+
+    for (auto rec : moduleRecords.getValue()) {
+        rec.error = 0x0E;
+    }
 
     asio::io_context ioContext(1);
 

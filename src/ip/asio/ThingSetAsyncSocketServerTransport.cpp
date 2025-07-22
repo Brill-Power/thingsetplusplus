@@ -24,11 +24,17 @@ using asio::ip::udp;
 
 namespace ThingSet::Ip::Async {
 
-ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const asio::ip::address_v4 bindAddress, const asio::ip::address_v4 broadcastAddress) : _ioContext(ioContext), _publishSocket(ioContext), _bindAddress(bindAddress), _broadcastAddress(broadcastAddress), _signals(_ioContext, SIGINT, SIGTERM)
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const asio::ip::address_v4 bindAddress, const asio::ip::address_v4 broadcastAddress) :
+    _ioContext(ioContext),
+    _publishSocket(ioContext),
+    _bindAddress(bindAddress),
+    _broadcastAddress(broadcastAddress),
+    _signals(_ioContext, SIGINT, SIGTERM)
 {
 }
 
-ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const std::string &bindInterface) : ThingSetAsyncSocketServerTransport(ioContext)
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext, const std::string &bindInterface) :
+    ThingSetAsyncSocketServerTransport(ioContext)
 {
     in_addr address;
     in_addr subnet;
@@ -37,12 +43,13 @@ ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_
     _broadcastAddress = asio::ip::make_address_v4(ntohl(address.s_addr | (~subnet.s_addr)));
 }
 
-ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) : ThingSetAsyncSocketServerTransport(ioContext, asio::ip::address_v4::any(), asio::ip::address_v4::broadcast())
+ThingSetAsyncSocketServerTransport::ThingSetAsyncSocketServerTransport(asio::io_context &ioContext) :
+    ThingSetAsyncSocketServerTransport(ioContext, asio::ip::address_v4::any(), asio::ip::address_v4::broadcast())
 {
 }
 
 awaitable<void> ThingSetAsyncSocketServerTransport::handle(asio::ip::tcp::socket socket,
-                                           std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
+    std::function<int(const asio::ip::tcp::endpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
     char request[1024];
     char response[1024];
@@ -93,6 +100,11 @@ bool ThingSetAsyncSocketServerTransport::publish(uint8_t *buffer, size_t len)
 {
     if (_publishSocket.is_open()) {
         udp::endpoint endpoint(_broadcastAddress, 9002);
+        buffer[1] = _messageNumber;
+        MessageType messageType = (MessageType)(buffer[0] & 0xF0);
+        if (messageType == MessageType::single || messageType == MessageType::last) {
+            _messageNumber++;
+        }
         size_t sent = _publishSocket.send_to(asio::buffer(buffer, len), endpoint);
         return sent == len;
     }

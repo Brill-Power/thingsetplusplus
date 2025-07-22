@@ -13,7 +13,7 @@ namespace ThingSet::Can::SocketCan {
 class ThingSetSocketCanSubscriptionTransport : public ThingSetCanSubscriptionTransport<CanFdFrame>
 {
 private:
-    class SocketCanSubscriptionListener : public SubscriptionListener, public RawCanSocketListener
+    class SocketCanSubscriptionListener : protected SubscriptionListener, public RawCanSocketListener
     {
     public:
         bool run(const std::string &deviceName, std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback);

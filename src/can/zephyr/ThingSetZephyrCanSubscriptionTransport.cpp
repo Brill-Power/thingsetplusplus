@@ -45,7 +45,7 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runL
     {
         can_frame rawFrame = _frameQueue.pop();
         CanFrame frame(rawFrame);
-        handle(frame, decodersByNodeAddress, _callback);
+        handle<MultiFrameMessageType>(frame, frame.getId(), frame.getId().getSource(), decodersByNodeAddress, _callback);
     }
 }
 
