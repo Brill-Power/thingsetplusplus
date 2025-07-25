@@ -39,27 +39,13 @@ void ThingSetRegistry::registerOrUnregisterNode(
     if (node->getParentId() != id && findParentById(node->getParentId(), &parent)) {
         parentNodeAction(parent, node);
     }
-#ifdef DEBUG_LOGGING
-    auto count = list.count();
-    LOG_DEBUG("%zu nodes in bucket %d", count, id % NODE_MAP_LOOKUP_BUCKETS);
-    if (count > 0) {
-        printf("(");
-        for (auto m : list) {
-            printf("0x%x %p, ", m->getId(), (void *)m);
-        }
-        printf("\b\b \b");
-        printf(")\n");
-    }
-#endif // DEBUG_LOGGING
 }
 
 void ThingSetRegistry::registerNode(ThingSetNode *node)
 {
-    LOG_DEBUG("Registering node %s (0x%x; %p)", node->getName().data(), node->getId(), (void *)node);
+    LOG_DEBUG("Registering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::instance().registerOrUnregisterNode(
-        node, [](auto &l, auto *n) {
-            l.push_back(n);
-        }, [](auto *p, auto *n) { return p->addChild(n); });
+        node, [](auto &l, auto *n) { l.push_back(n); }, [](auto *p, auto *n) { return p->addChild(n); });
     void *target;
     if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
         ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
@@ -73,11 +59,9 @@ void ThingSetRegistry::registerNode(ThingSetNode *node)
 
 void ThingSetRegistry::unregisterNode(ThingSetNode *node)
 {
-    LOG_DEBUG("Unregistering node %s (0x%x; %p)", node->getName().data(), node->getId(), (void *)node);
+    LOG_DEBUG("Unregistering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::instance().registerOrUnregisterNode(
-        node, [](auto &l, auto *n) {
-            l.remove(n);
-        }, [](auto *p, auto *n) { return p->removeChild(n); });
+        node, [](auto &l, auto *n) { l.remove(n); }, [](auto *p, auto *n) { return p->removeChild(n); });
 }
 
 bool ThingSetRegistry::findParentById(const unsigned id, ThingSetParentNode **parent)
