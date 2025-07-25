@@ -6,7 +6,7 @@
 #pragma once
 
 #include "thingset++/ThingSetAccess.hpp"
-#include "thingset++/IntrusiveLinkedList.hpp"
+#include "thingset++/internal/IntrusiveLinkedList.hpp"
 #include <string_view>
 #include <cstdint>
 

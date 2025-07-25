@@ -7,7 +7,7 @@
 #pragma once
 
 #include "thingset++/ThingSetNode.hpp"
-#include "thingset++/IntrusiveLinkedList.hpp"
+#include "thingset++/internal/IntrusiveLinkedList.hpp"
 #include <list>
 
 namespace ThingSet {

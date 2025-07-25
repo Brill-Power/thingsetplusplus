@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "gtest/gtest.h"
-#include "thingset++/IntrusiveLinkedList.hpp"
+#include "thingset++/internal/IntrusiveLinkedList.hpp"
 
 using namespace ThingSet;
 
