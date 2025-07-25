@@ -38,6 +38,29 @@ TEST(Intrusion, AddRemoveNonExistent)
     ASSERT_EQ(1, list.count());
 }
 
+TEST(Intrusion, AddRemoveInBetween)
+{
+    IntrusiveLinkedList<Something, &Something::node> list;
+    Something s;
+    s.index = 1;
+    list.push_back(s);
+    ASSERT_EQ(1, list.count());
+    Something t;
+    t.index = 2;
+    list.push_back(t);
+    Something u;
+    t.index = 3;
+    list.push_back(u);
+    Something v;
+    t.index = 4;
+    list.push_back(v);
+    ASSERT_EQ(4, list.count());
+    list.remove(u);
+    ASSERT_EQ(3, list.count());
+    list.remove(t);
+    ASSERT_EQ(2, list.count());
+}
+
 TEST(Intrusion, Iterate)
 {
     IntrusiveLinkedList<Something, &Something::node> list;

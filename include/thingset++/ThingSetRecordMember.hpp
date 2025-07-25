@@ -20,20 +20,69 @@ template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Acc
           requires std::is_enum_v<SubsetType>
 class ThingSetRecordMember : public ThingSetValue<T>, public ThingSetNode
 {
+private:
+    class _RecordMemberProxy : public ThingSetNode
+    {
+    public:
+        constexpr const std::string_view getName() const override
+        {
+            return Name.string_view();
+        }
+
+        constexpr uint16_t getId() const override
+        {
+            return Id;
+        }
+
+        constexpr uint16_t getParentId() const override
+        {
+            return ParentId;
+        }
+
+        constexpr const std::string getType() const override
+        {
+            return ThingSetType<T>::name.str();
+        }
+
+        constexpr uint32_t getSubsets() const override
+        {
+            return (uint32_t)Subset;
+        }
+
+        constexpr ThingSetAccess getAccess() const override
+        {
+            return Access;
+        }
+    };
+
+    static ThingSetNode *proxy()
+    {
+        static _RecordMemberProxy proxy;
+        return &proxy;
+    }
+
+    static size_t refCount;
+
 public:
     ThingSetRecordMember() : ThingSetValue<T>(), ThingSetNode()
     {
-        ThingSetRegistry::registerNode(this);
+        if (refCount++ == 0) {
+            ThingSetRegistry::registerNode(proxy());
+        }
     }
 
     ThingSetRecordMember(const T &value) : ThingSetValue<T>(value), ThingSetNode()
     {
-        ThingSetRegistry::registerNode(this);
+        if (refCount++ == 0) {
+            ThingSetRegistry::registerNode(proxy());
+        }
     }
 
     ~ThingSetRecordMember()
     {
-        ThingSetRegistry::unregisterNode(this);
+        if (--refCount == 0) {
+            ThingSetRegistry::unregisterNode(proxy());
+        }
     }
 
     using ThingSetValue<T>::operator=;
@@ -86,20 +135,71 @@ public:
     constexpr static const std::string_view &name = Name.string_view();
 };
 
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
+          requires std::is_enum_v<SubsetType>
+size_t ThingSetRecordMember<Id, ParentId, Name, Access, T, SubsetType, Subset>::refCount = 0;
+
 /// @brief Partial specialisation of ThingSetRecordMember for pointers to values.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
 class ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset>
     : public ThingSetValue<T *>, public ThingSetNode
 {
+private:
+    class _RecordMemberProxy : public ThingSetNode
+    {
+    public:
+        constexpr const std::string_view getName() const override
+        {
+            return Name.string_view();
+        }
+
+        constexpr uint16_t getId() const override
+        {
+            return Id;
+        }
+
+        constexpr uint16_t getParentId() const override
+        {
+            return ParentId;
+        }
+
+        constexpr const std::string getType() const override
+        {
+            return ThingSetType<std::remove_pointer_t<T>>::name.str();
+        }
+
+        constexpr uint32_t getSubsets() const override
+        {
+            return (uint32_t)Subset;
+        }
+
+        constexpr ThingSetAccess getAccess() const override
+        {
+            return Access;
+        }
+    };
+
+    static ThingSetNode *proxy()
+    {
+        static _RecordMemberProxy proxy;
+        return &proxy;
+    }
+
+    static size_t refCount;
+
 public:
     ThingSetRecordMember(T *value) : ThingSetValue<T *>(value), ThingSetNode()
     {
-        ThingSetRegistry::registerNode(this);
+        if (refCount++ == 0) {
+            ThingSetRegistry::registerNode(proxy());
+        }
     }
 
     ~ThingSetRecordMember()
     {
-        ThingSetRegistry::unregisterNode(this);
+        if (--refCount == 0) {
+            ThingSetRegistry::unregisterNode(proxy());
+        }
     }
 
     constexpr const std::string_view getName() const override
@@ -162,6 +262,9 @@ public:
     constexpr static const std::string_view &name = Name.string_view();
 };
 
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename T, typename SubsetType, SubsetType Subset>
+size_t ThingSetRecordMember<Id, ParentId, Name, Access, T *, SubsetType, Subset>::refCount = 0;
+
 /// @brief Partial specialisation of ThingSetRecordMember for record arrays.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, typename SubsetType, SubsetType Subset>
     requires std::is_class_v<Element>
@@ -169,21 +272,75 @@ class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>
     : public ThingSetValue<std::array<Element, Size>>, public ThingSetParentNode,
       public ThingSetCustomRequestHandler
 {
+private:
+    class _RecordMemberProxy : public ThingSetParentNode
+    {
+    public:
+        constexpr const std::string_view getName() const override
+        {
+            return Name.string_view();
+        }
+
+        constexpr uint16_t getId() const override
+        {
+            return Id;
+        }
+
+        constexpr uint16_t getParentId() const override
+        {
+            return ParentId;
+        }
+
+        constexpr const std::string getType() const override
+        {
+            return ThingSetType<std::array<Element, Size>>::name.str();
+        }
+
+        constexpr uint32_t getSubsets() const override
+        {
+            return (uint32_t)Subset;
+        }
+
+        constexpr ThingSetAccess getAccess() const override
+        {
+            return Access;
+        }
+
+        bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override
+        {
+            return true;
+        }
+    };
+
+    static ThingSetNode *proxy()
+    {
+        static _RecordMemberProxy proxy;
+        return &proxy;
+    }
+
+    static size_t refCount;
+
 public:
     ThingSetRecordMember() : ThingSetValue<std::array<Element, Size>>(), ThingSetParentNode()
     {
-        ThingSetRegistry::registerNode(this);
+        if (refCount++ == 0) {
+            ThingSetRegistry::registerNode(proxy());
+        }
     }
 
     ThingSetRecordMember(const std::array<Element, Size> &value) : ThingSetValue<std::array<Element, Size>>(value),
         ThingSetParentNode()
     {
-        ThingSetRegistry::registerNode(this);
+        if (refCount++ == 0) {
+            ThingSetRegistry::registerNode(proxy());
+        }
     }
 
     ~ThingSetRecordMember()
     {
-        ThingSetRegistry::unregisterNode(this);
+        if (--refCount == 0) {
+            ThingSetRegistry::unregisterNode(proxy());
+        }
     }
 
     using ThingSetValue<std::array<Element, Size>>::operator=;
@@ -267,6 +424,10 @@ public:
     constexpr static const unsigned id = Id;
     constexpr static const std::string_view &name = Name.string_view();
 };
+
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Element, std::size_t Size, typename SubsetType, SubsetType Subset>
+    requires std::is_class_v<Element>
+size_t ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>, SubsetType, Subset>::refCount = 0;
 
 /// @brief A ThingSet record member that can be read by anyone.
 /// @tparam T The type of the value stored by this record member.

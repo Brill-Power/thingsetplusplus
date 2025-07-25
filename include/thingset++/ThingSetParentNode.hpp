@@ -25,27 +25,31 @@ enum ThingSetCallbackReason
     didWrite
 };
 
+class ThingSetRegistry;
+
 /// @brief Storage and behaviour for nodes that have children.
 class ThingSetParentNode : public ThingSetNode
 {
+friend class ThingSetRegistry;
+
 private:
     IntrusiveLinkedList<ThingSetNode, &ThingSetNode::children> _children;
 
 public:
     typedef IntrusiveLinkedList<ThingSetNode, &ThingSetNode::children>::iterator ChildIterator;
 
-public:
     virtual ChildIterator begin();
     ChildIterator end();
-
-    bool addChild(ThingSetNode *child);
-    bool removeChild(ThingSetNode *child);
 
     bool tryCastTo(ThingSetNodeType type, void **target) override;
 
     virtual bool findByName(const std::string &name, ThingSetNode **node, size_t *index);
 
     virtual bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const = 0;
+
+private:
+    bool addChild(ThingSetNode *child);
+    bool removeChild(ThingSetNode *child);
 };
 
 } // namespace ThingSet

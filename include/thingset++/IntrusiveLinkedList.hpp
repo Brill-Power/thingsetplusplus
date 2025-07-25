@@ -23,6 +23,10 @@ class IntrusiveLinkedListNode
     friend class IntrusiveLinkedList;
 
     IntrusiveLinkedListNode *next;
+
+public:
+    constexpr IntrusiveLinkedListNode() : next(nullptr)
+    {}
 };
 
 /// @brief Intrusive linked list.
@@ -124,7 +128,7 @@ public:
     size_t count() const
     {
         size_t count = 0;
-        for (const T *x : *this)
+        for ([[maybe_unused]] const T *_ : *this)
         {
             count++;
         }
@@ -139,7 +143,11 @@ public:
     void push_back(T *object)
     {
         IntrusiveLinkedListNode *node = &(object->*Member);
-        node->next = nullptr; // should we check this first?
+        if (node->next) {
+            // what is the right behaviour here?
+            // we could just set it to null and carry on, but...
+            return;
+        }
         if (_tail == nullptr) {
             _tail = node;
             _head = node;

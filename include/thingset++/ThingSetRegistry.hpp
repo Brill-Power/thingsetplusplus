@@ -17,9 +17,6 @@
 
 namespace ThingSet {
 
-//typedef std::list<ThingSetNode *> NodeList;
-
-
 /// @brief Repository of all current ThingSet nodes.
 class ThingSetRegistry
 {
@@ -86,6 +83,7 @@ public:
 
     static ThingSetNode *getMetadataNode();
 
+    static bool findByName(const std::string &name, ThingSetNode **node);
     /// @brief Find a node by its fully-qualified name.
     /// @param name The full string path of the node that is sought.
     /// @param node When the method returns, contains a pointer to the node if it was found.

@@ -39,15 +39,6 @@ void ThingSetRegistry::registerOrUnregisterNode(
     if (node->getParentId() != id && findParentById(node->getParentId(), &parent)) {
         parentNodeAction(parent, node);
     }
-    void *target;
-    if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
-        parent = reinterpret_cast<ThingSetParentNode *>(target);
-        for (auto n : *this) {
-            if (n->getParentId() == node->getId()) {
-                parent->addChild(n);
-            }
-        }
-    }
 }
 
 void ThingSetRegistry::registerNode(ThingSetNode *node)
@@ -55,6 +46,15 @@ void ThingSetRegistry::registerNode(ThingSetNode *node)
     LOG_DEBUG("Registering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::instance().registerOrUnregisterNode(
         node, [](auto &l, auto *n) { l.push_back(n); }, [](auto *p, auto *n) { return p->addChild(n); });
+    void *target;
+    if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
+        ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
+        for (auto n : instance()) {
+            if (n->getParentId() == node->getId()) {
+                parent->addChild(n);
+            }
+        }
+    }
 }
 
 void ThingSetRegistry::unregisterNode(ThingSetNode *node)
@@ -74,6 +74,12 @@ bool ThingSetRegistry::findParentById(const unsigned id, ThingSetParentNode **pa
     }
 
     return false;
+}
+
+bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
+{
+    size_t index;
+    return instance()._rootNode.findByName(name, node, &index);
 }
 
 bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node, size_t *index)
