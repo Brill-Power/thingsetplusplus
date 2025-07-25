@@ -273,7 +273,7 @@ class ThingSetRecordMember<Id, ParentId, Name, Access, std::array<Element, Size>
       public ThingSetCustomRequestHandler
 {
 private:
-    class _RecordMemberProxy : public ThingSetNode
+    class _RecordMemberProxy : public ThingSetParentNode
     {
     public:
         constexpr const std::string_view getName() const override
@@ -304,6 +304,11 @@ private:
         constexpr ThingSetAccess getAccess() const override
         {
             return Access;
+        }
+
+        bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override
+        {
+            return true;
         }
     };
 

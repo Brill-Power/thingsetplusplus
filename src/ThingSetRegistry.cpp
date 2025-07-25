@@ -76,6 +76,12 @@ bool ThingSetRegistry::findParentById(const unsigned id, ThingSetParentNode **pa
     return false;
 }
 
+bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node)
+{
+    size_t index;
+    return instance()._rootNode.findByName(name, node, &index);
+}
+
 bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node, size_t *index)
 {
     return instance()._rootNode.findByName(name, node, index);
