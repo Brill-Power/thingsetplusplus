@@ -5,12 +5,13 @@
  */
 #pragma once
 
+#include "thingset++/Streaming.hpp"
 #include "thingset++/StreamingThingSetBinaryDecoder.hpp"
 #include <queue>
 
 namespace ThingSet {
 
-template <size_t Size, typename Message, typename MessageType>
+template <size_t Size, typename Message, StreamingMessageType MessageType>
     requires std::is_enum_v<MessageType>
 class StreamingQueuingThingSetBinaryDecoder : public StreamingThingSetBinaryDecoder<Size>
 {

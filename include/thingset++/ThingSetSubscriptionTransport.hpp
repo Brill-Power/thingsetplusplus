@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "thingset++/Streaming.hpp"
 #include "thingset++/ThingSetBinaryDecoder.hpp"
 #include "thingset++/ThingSetStatus.hpp"
 
@@ -21,7 +22,7 @@ protected:
     class SubscriptionListener
     {
     public:
-        template <typename MessageType, typename Message, typename Decoder, typename Key = Identifier>
+        template <StreamingMessageType MessageType, typename Message, typename Decoder, typename Key = Identifier>
         static bool handle(Message &frame, const Identifier &identifier, const Key &key, std::map<Key, Decoder> &decodersBySender, std::function<void(const Identifier &, ThingSetBinaryDecoder &)>& callback)
         {
             Decoder *decoder = nullptr;

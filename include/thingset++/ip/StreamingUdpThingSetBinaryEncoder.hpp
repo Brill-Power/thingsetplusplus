@@ -7,7 +7,7 @@
 
 #include "thingset++/StreamingThingSetBinaryEncoder.hpp"
 #include "thingset++/ThingSetStatus.hpp"
-#include "thingset++/ip/StreamingUdpConstants.hpp"
+#include "thingset++/ip/StreamingUdp.hpp"
 
 namespace ThingSet::Ip {
 
