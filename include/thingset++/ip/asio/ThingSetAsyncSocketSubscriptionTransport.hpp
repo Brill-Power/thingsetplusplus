@@ -18,7 +18,6 @@ class ThingSetAsyncSocketSubscriptionTransport : public ThingSetSubscriptionTran
 private:
     asio::io_context &_ioContext;
     asio::ip::udp::socket _subscribeSocket;
-    uint8_t _buffer[1024];
 
 public:
     ThingSetAsyncSocketSubscriptionTransport(asio::io_context &ioContext);

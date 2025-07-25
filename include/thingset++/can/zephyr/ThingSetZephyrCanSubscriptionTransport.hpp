@@ -16,7 +16,7 @@ namespace ThingSet::Can::Zephyr {
 class ThingSetZephyrCanSubscriptionTransport : public ThingSetCanSubscriptionTransport<CanFrame>
 {
 private:
-    class ZephyrCanSubscriptionListener : public SubscriptionListener
+    class ZephyrCanSubscriptionListener : protected SubscriptionListener
     {
     private:
         const device *const _canDevice;

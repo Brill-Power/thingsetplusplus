@@ -1,3 +1,5 @@
+target_sources(thingset++ PRIVATE StreamingUdpThingSetBinaryDecoder.cpp)
+
 if(ENABLE_ASIO)
     message("ASIO IP support enabled")
     add_subdirectory(asio)

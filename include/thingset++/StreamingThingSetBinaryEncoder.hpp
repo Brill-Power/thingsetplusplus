@@ -45,12 +45,13 @@ public:
     /// @brief Write remaining buffer to the output.
     bool flush()
     {
-        size_t currentLength = _state->payload - &_buffer[0];
-        if (currentLength > Size) {
+        size_t headerSize = this->headerSize();
+        size_t currentLength = _state->payload - &_buffer[headerSize];
+        if (currentLength > (Size - headerSize)) {
             if (!writeIfNecessary()) {
                 return false;
             }
-            currentLength = _state->payload - &_buffer[0];
+            currentLength = _state->payload - &_buffer[headerSize];
         }
         size_t remainder = _buffer.size() - currentLength;
         memset(&_buffer[currentLength], 0, remainder);
@@ -60,6 +61,11 @@ public:
     }
 
 protected:
+    virtual size_t headerSize() const
+    {
+        return 0;
+    }
+
     bool ensureState() override
     {
         return writeIfNecessary();
@@ -73,22 +79,23 @@ protected:
     virtual bool write(size_t length, bool flushing) = 0;
 
 private:
-    /// @brief If the buffer contains more than @tparam Size bytes worth of data,
+    /// @brief If the buffer contains more than @ref Size bytes worth of data,
     /// writes the data to the underlying stream.
-    /// @return True.
+    /// @return True if writing succeeded or was not necessary; false if writing failed.
     bool writeIfNecessary()
     {
-        size_t currentPos = _state->payload - &_buffer[0];
-        if (currentPos > Size) {
-            if (!write(Size, false)) {
+        size_t headerSize = this->headerSize();
+        size_t dataSize = Size - headerSize;
+        size_t currentPos = _state->payload - &_buffer[headerSize];
+        if (currentPos > dataSize) {
+            if (!write(dataSize, false)) {
                 // not sure what else to do with this for now
                 return false;
             }
-            memmove(&_buffer[0], &_buffer[Size],
-                    Size);           // move to start
-            _exportedLength += Size; // keep track
-            size_t newPos = currentPos - Size;
-            zcbor_update_state(_state, &_buffer[newPos], _buffer.size() - newPos);
+            memmove(&_buffer[headerSize], &_buffer[Size], Size); // move to start
+            _exportedLength += dataSize; // keep track
+            size_t newPos = currentPos - dataSize;
+            zcbor_update_state(_state, &_buffer[headerSize + newPos], _buffer.size() - newPos);
         }
         return true;
     }

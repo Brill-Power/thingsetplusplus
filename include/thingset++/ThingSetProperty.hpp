@@ -64,10 +64,10 @@ public:
 };
 
 /// @brief @brief Encapsulates a ThingSet property, which is a value that can be read and/or written via the ThingSet API.
-/// @tparam SubsetType Type of subset enumeration.
 /// @tparam T Type of value.
-/// @tparam NodeBase Ultimate base class.
-/// @tparam Base Intermediate base class.
+/// @tparam Access Access control.
+/// @tparam SubsetType Type of subset enumeration.
+/// @tparam Subset Value of subset enumeration. Defaults to 0.
 template <typename T, ThingSetAccess Access, typename SubsetType = Subset, SubsetType Subset = (SubsetType)0>
           requires std::is_integral_v<SubsetType> or std::is_enum_v<SubsetType>
 class ThingSetProperty : public ThingSetValue<T>, public ThingSetNode

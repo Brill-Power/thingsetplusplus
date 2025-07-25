@@ -16,9 +16,6 @@
 using namespace ThingSet;
 using namespace ThingSet::Ip::Async;
 
-ThingSetGroup<0x600, 0, "Modules"> modules;
-ThingSetGroup<0x610, 0x610, "Supercells"> supercells;
-
 struct SupercellRecord
 {
     ThingSetReadWriteRecordMember<0x611, 0x610, "soc", float> soc;
@@ -31,12 +28,12 @@ struct ModuleRecord
     ThingSetReadWriteRecordMember<0x602, 0x600, "current", float> current;
     ThingSetReadWriteRecordMember<0x603, 0x600, "error", uint64_t> error;
     ThingSetReadWriteRecordMember<0x604, 0x600, "cellVoltages", std::array<float, 6>> cellVoltages;
-    ThingSetReadWriteRecordMember<0x609, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
+    ThingSetReadWriteRecordMember<0x610, 0x600, "supercells", std::array<SupercellRecord, 6>> supercells;
 };
 
 ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0 };
 
-ThingSetReadWriteProperty<std::array<ModuleRecord, 2>> moduleRecords { 0x620, 0x0, "Modules" };
+ThingSetReadWriteProperty<std::array<ModuleRecord, 8>> moduleRecords { 0x600, 0x0, "Modules" };
 
 std::array<uint8_t, 1024> rxBuffer;
 std::array<uint8_t, 1024> txBuffer;
@@ -65,12 +62,16 @@ int main(int argc, char *argv[])
     float voltage;
     if (client.get(0x300, voltage)) {
         std::cout << "Voltage: " << voltage << std::endl;
+    } else {
+        std::cout << "Failed to get" << std::endl;
     }
 
     // invokes a method which adds 2 + 3 and returns the result
     int result;
     if (client.exec(0x1000, &result, 2, 3)) {
         std::cout << "Executed: " << result << std::endl;
+    } else {
+        std::cout << "Failed to exec" << std::endl;
     }
 
     listener.subscribe([&](auto sender, auto id) {

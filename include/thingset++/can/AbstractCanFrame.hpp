@@ -24,6 +24,13 @@ protected:
     {}
 
 public:
+    using native_type = T;
+
+    static constexpr unsigned payloadSize()
+    {
+        return Size;
+    }
+
     static constexpr size_t size()
     {
         return sizeof(T);
@@ -38,6 +45,11 @@ public:
     virtual Self &setId(const CanID &id) = 0;
 
     uint8_t *getData()
+    {
+        return _frame.data;
+    }
+
+    const uint8_t *getData() const
     {
         return _frame.data;
     }

@@ -9,8 +9,16 @@
 #include "thingset++/can/ThingSetCanInterface.hpp"
 #include "thingset++/can/StreamingCanThingSetBinaryDecoder.hpp"
 #include "thingset++/ThingSetStatus.hpp"
+#include "thingset++/can/AbstractCanFrame.hpp"
 
 namespace ThingSet::Can {
+
+template <typename Frame, typename T = Frame::native_type, unsigned Size = Frame::payloadSize()>
+    requires std::is_base_of_v<AbstractCanFrame<Frame, T, Size>, Frame>
+MultiFrameMessageType getMessageType(const Frame &message)
+{
+    return message.getId().getMultiFrameMessageType();
+}
 
 class _ThingSetCanSubscriptionTransport
 {
@@ -21,30 +29,6 @@ protected:
 template <typename Frame>
 class ThingSetCanSubscriptionTransport : public _ThingSetCanSubscriptionTransport, public ThingSetSubscriptionTransport<CanID>
 {
-protected:
-    class SubscriptionListener {
-        protected:
-            bool handle(Frame &frame, std::map<uint8_t, StreamingCanThingSetBinaryDecoder<Frame>> &decodersByNodeAddress, std::function<void(const CanID &, ThingSetBinaryDecoder &)>& callback)
-            {
-                uint8_t sender = frame.getId().getSource();
-                StreamingCanThingSetBinaryDecoder<Frame> *decoder = nullptr;
-                if (frame.getData()[0] == ThingSetBinaryRequestType::report) {
-                    // new report, so create a new decoder and add to map
-                    decodersByNodeAddress[sender] = StreamingCanThingSetBinaryDecoder<Frame>();
-                    decoder = &decodersByNodeAddress[sender];
-                } else {
-                    auto found = decodersByNodeAddress.find(sender);
-                    if (found != decodersByNodeAddress.end()) {
-                        decoder = &found->second;
-                    }
-                }
-                if (decoder && decoder->enqueue(std::move(frame))) {
-                    callback(frame.getId(), *decoder);
-                }
-                return true;
-            }
-    };
-
 protected:
     virtual ThingSetCanInterface &getInterface() = 0;
 };
