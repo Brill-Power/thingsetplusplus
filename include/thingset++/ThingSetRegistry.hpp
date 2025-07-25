@@ -17,9 +17,6 @@
 
 namespace ThingSet {
 
-//typedef std::list<ThingSetNode *> NodeList;
-
-
 /// @brief Repository of all current ThingSet nodes.
 class ThingSetRegistry
 {
