@@ -62,7 +62,7 @@ bool _ThingSetSocketSubscriptionTransport::subscribe(std::function<void(const So
 
 void _ThingSetSocketSubscriptionTransport::runListener()
 {
-    std::map<in_addr_t, StreamingUdpThingSetBinaryDecoder>  decodersBySender;
+    std::map<decltype(_listenAddress.sin_addr.s_addr), StreamingUdpThingSetBinaryDecoder>  decodersBySender;
     for (;;) {
         SocketEndpoint sourceAddress;
         socklen_t sourceAddressSize = sizeof(sourceAddress);
