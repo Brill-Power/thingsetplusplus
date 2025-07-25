@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(ENABLE_ASIO ON)
 set(ENABLE_CLIENT ON)
 
-# add_compile_definitions(DEBUG_LOGGING)
+add_compile_definitions(DEBUG_LOGGING)
 
 project(asioclient LANGUAGES C CXX VERSION 1.0.0)
 
