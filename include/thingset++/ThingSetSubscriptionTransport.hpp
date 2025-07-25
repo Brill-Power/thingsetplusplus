@@ -22,7 +22,7 @@ protected:
     class SubscriptionListener
     {
     public:
-        template <StreamingMessageType MessageType, typename Message, typename Decoder, typename Key = Identifier>
+        template <typename Decoder, typename Message, typename Key = Identifier, StreamingMessageType MessageType = Decoder::message_type>
         static bool handle(Message &frame, const Identifier &identifier, const Key &key, std::map<Key, Decoder> &decodersBySender, std::function<void(const Identifier &, ThingSetBinaryDecoder &)>& callback)
         {
             Decoder *decoder = nullptr;

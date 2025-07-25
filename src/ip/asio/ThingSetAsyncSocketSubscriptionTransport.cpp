@@ -35,7 +35,7 @@ awaitable<void> ThingSetAsyncSocketSubscriptionTransport::listener(std::function
         auto buffer = asio::buffer(frame.buffer, THINGSET_STREAMING_MSG_SIZE);
         asio::ip::udp::endpoint sender;
         frame.length = co_await _subscribeSocket.async_receive_from(buffer, sender, use_awaitable);
-        SubscriptionListener::handle<MessageType>(frame, sender, sender, decodersBySender, callback);
+        SubscriptionListener::handle(frame, sender, sender, decodersBySender, callback);
     }
 }
 

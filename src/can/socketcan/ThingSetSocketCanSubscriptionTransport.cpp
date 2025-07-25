@@ -33,7 +33,7 @@ bool ThingSetSocketCanSubscriptionTransport::SocketCanSubscriptionListener::run(
         while (_run) {
             CanFdFrame frame;
             if (_socket.read(frame) > 0) {
-                handle<MultiFrameMessageType>(frame, frame.getId(), frame.getId().getSource(), decodersByNodeAddress, callback);
+                handle(frame, frame.getId(), frame.getId().getSource(), decodersByNodeAddress, callback);
             }
         }
     };

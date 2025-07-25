@@ -13,7 +13,8 @@
 
 namespace ThingSet::Can {
 
-template <typename Frame>//, typename T, unsigned Size> requires std::is_base_of_v<AbstractCanFrame<Frame, T, Size>, Frame>
+template <typename Frame, typename T = Frame::native_type, unsigned Size = Frame::payloadSize()>
+    requires std::is_base_of_v<AbstractCanFrame<Frame, T, Size>, Frame>
 MultiFrameMessageType getMessageType(const Frame &message)
 {
     return message.getId().getMultiFrameMessageType();

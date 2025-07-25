@@ -19,6 +19,8 @@ private:
     std::queue<Message> _queue;
 
 public:
+    using message_type = MessageType;
+
     StreamingQueuingThingSetBinaryDecoder() : StreamingThingSetBinaryDecoder<Size>(2)
     {}
 

@@ -68,7 +68,7 @@ void _ThingSetSocketSubscriptionTransport::runListener()
         socklen_t sourceAddressSize = sizeof(sourceAddress);
         Frame frame;
         frame.length = recvfrom(_listenSocketHandle, frame.buffer, THINGSET_STREAMING_MSG_SIZE, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
-        SubscriptionListener::handle<MessageType>(frame, sourceAddress, sourceAddress.sin_addr.s_addr, decodersBySender, _callback);
+        SubscriptionListener::handle(frame, sourceAddress, sourceAddress.sin_addr.s_addr, decodersBySender, _callback);
     }
 }
 

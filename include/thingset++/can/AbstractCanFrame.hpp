@@ -24,6 +24,13 @@ protected:
     {}
 
 public:
+    using native_type = T;
+
+    static constexpr unsigned payloadSize()
+    {
+        return Size;
+    }
+
     static constexpr size_t size()
     {
         return sizeof(T);
