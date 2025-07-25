@@ -97,10 +97,6 @@ int main(int argc, char *argv[])
                           .cellVoltages = { { 3.1f, 3.3f, 3.0f, 3.1f, 3.2f, 2.95f } },
                       } };
 
-    for (auto rec : moduleRecords.getValue()) {
-        rec.error = 0x0E;
-    }
-
     asio::io_context ioContext(1);
 
     ThingSetAsyncSocketServerTransport transport = getTransport(ioContext, argc, argv);
