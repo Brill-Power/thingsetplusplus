@@ -13,7 +13,7 @@ MessageType getMessageType(const Frame &message)
     return (MessageType)(message.buffer[0] & 0xF0);
 }
 
-StreamingUdpThingSetBinaryDecoder::StreamingUdpThingSetBinaryDecoder()
+StreamingUdpThingSetBinaryDecoder::StreamingUdpThingSetBinaryDecoder() : StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_MSG_SIZE, Frame, MessageType, THINGSET_STREAMING_DECODER_UDP_QUEUE_TYPE>()
 {}
 
 void StreamingUdpThingSetBinaryDecoder::getBuffer(const Frame &message, const uint8_t **buffer, size_t *length) const

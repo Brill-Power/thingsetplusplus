@@ -43,7 +43,7 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runL
     std::map<uint8_t, StreamingCanThingSetBinaryDecoder<CanFrame>> decodersByNodeAddress;
     while (true)
     {
-        can_frame rawFrame = _frameQueue.pop();
+        can_frame rawFrame = _frameQueue.pop_front();
         CanFrame frame(rawFrame);
         handle(frame, frame.getId(), frame.getId().getSource(), decodersByNodeAddress, _callback);
     }
