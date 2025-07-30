@@ -36,7 +36,7 @@ template <typename Frame>
 class StreamingCanThingSetBinaryDecoder : public StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_DECODER_CAN_MSG_SIZE, Frame, MultiFrameMessageType, THINGSET_STREAMING_DECODER_CAN_QUEUE_TYPE>
 {
 public:
-    StreamingCanThingSetBinaryDecoder() : StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_DECODER_CAN_MSG_SIZE, Frame, MultiFrameMessageType>()
+    StreamingCanThingSetBinaryDecoder() : StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_DECODER_CAN_MSG_SIZE, Frame, MultiFrameMessageType, THINGSET_STREAMING_DECODER_CAN_QUEUE_TYPE>()
     {}
 
 protected:
