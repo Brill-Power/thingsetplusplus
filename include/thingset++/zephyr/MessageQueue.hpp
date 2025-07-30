@@ -51,6 +51,13 @@ public:
         pop_front();
     }
 
+    T front()
+    {
+        T result;
+        k_msgq_peek(&_queue, &result);
+        return result;
+    }
+
     T pop_front()
     {
         T result;
