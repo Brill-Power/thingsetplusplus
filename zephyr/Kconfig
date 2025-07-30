@@ -56,5 +56,6 @@ module-str = thingsetplusplus
 source "../zephyr/subsys/logging/Kconfig.template.log_config"
 
 rsource "../src/can/zephyr/Kconfig"
+rsource "../src/ip/sockets/Kconfig"
 
 endif

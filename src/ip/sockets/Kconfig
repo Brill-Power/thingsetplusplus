@@ -1,0 +1,6 @@
+config THINGSET_SOCKETS_REPORT_DECODER_QUEUE_SIZE
+    int "ThingSet Sockets decoder queue size for inbound report frames"
+    default 8
+    help
+        Size of queue for report frames to be decoded by streaming
+        decoder.
