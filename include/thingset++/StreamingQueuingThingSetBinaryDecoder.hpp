@@ -52,7 +52,7 @@ private:
             return 0;
         }
         while (pos <= maxSize && !_queue.empty()) {
-            Message &message = _queue.front();
+            const Message &message = _queue.front();
             const uint8_t *buffer;
             size_t length;
             getBuffer(message, &buffer, &length);

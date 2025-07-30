@@ -26,6 +26,11 @@ public:
         k_msgq_init(&_queue, _buffer.data(), sizeof(T), Size);
     }
 
+    bool empty()
+    {
+        return k_msgq_num_used_get(&_queue) == 0;
+    }
+
     bool push(const T &value)
     {
         return k_msgq_put(&_queue, &value, K_NO_WAIT) == 0;
