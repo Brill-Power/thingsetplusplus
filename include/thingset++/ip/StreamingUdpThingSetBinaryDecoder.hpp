@@ -13,7 +13,7 @@
 namespace ThingSet::Ip {
 
 template <typename T>
-using UdpDecoderMessageQueue = MessageQueue<T, THINGSET_SOCKETS_REPORT_DECODER_QUEUE_SIZE>;
+using UdpDecoderMessageQueue = ThingSet::Zephyr::MessageQueue<T, THINGSET_SOCKETS_REPORT_DECODER_QUEUE_SIZE>;
 
 }
 #define THINGSET_STREAMING_DECODER_UDP_QUEUE_TYPE UdpDecoderMessageQueue

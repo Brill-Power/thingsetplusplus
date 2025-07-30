@@ -22,7 +22,7 @@
 namespace ThingSet::Can {
 
 template <typename T>
-using CanDecoderMessageQueue = MessageQueue<T, CONFIG_THINGSET_CAN_REPORT_DECODER_QUEUE_SIZE>;
+using CanDecoderMessageQueue = ThingSet::Zephyr::MessageQueue<T, CONFIG_THINGSET_CAN_REPORT_DECODER_QUEUE_SIZE>;
 
 }
 #define THINGSET_STREAMING_DECODER_CAN_QUEUE_TYPE CanDecoderMessageQueue
