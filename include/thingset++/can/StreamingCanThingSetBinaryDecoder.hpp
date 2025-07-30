@@ -17,10 +17,23 @@
 #define THINGSET_STREAMING_DECODER_CAN_MSG_SIZE CANFD_MAX_DLEN
 #endif
 
+#ifdef __ZEPHYR__
+#include "thingset++/zephyr/MessageQueue.hpp"
+namespace ThingSet::Can {
+
+template <typename T>
+using CanDecoderMessageQueue = MessageQueue<T, CONFIG_THINGSET_CAN_REPORT_DECODER_QUEUE_SIZE>;
+
+}
+#define THINGSET_STREAMING_DECODER_CAN_QUEUE_TYPE CanDecoderMessageQueue
+#else
+#define THINGSET_STREAMING_DECODER_CAN_QUEUE_TYPE std::queue
+#endif
+
 namespace ThingSet::Can {
 
 template <typename Frame>
-class StreamingCanThingSetBinaryDecoder : public StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_DECODER_CAN_MSG_SIZE, Frame, MultiFrameMessageType>
+class StreamingCanThingSetBinaryDecoder : public StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_DECODER_CAN_MSG_SIZE, Frame, MultiFrameMessageType, THINGSET_STREAMING_DECODER_CAN_QUEUE_TYPE>
 {
 public:
     StreamingCanThingSetBinaryDecoder() : StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_DECODER_CAN_MSG_SIZE, Frame, MultiFrameMessageType>()

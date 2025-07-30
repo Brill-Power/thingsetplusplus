@@ -36,7 +36,22 @@ public:
         return k_msgq_put(&_queue, &value, K_NO_WAIT) == 0;
     }
 
-    T pop()
+    void push_back(const T &value)
+    {
+        push(value);
+    }
+
+    void push_back(T &&value)
+    {
+        push(value);
+    }
+
+    void pop()
+    {
+        pop_front();
+    }
+
+    T pop_front()
     {
         T result;
         k_msgq_get(&_queue, &result, K_FOREVER);

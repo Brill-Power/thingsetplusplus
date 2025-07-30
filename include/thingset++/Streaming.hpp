@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>
 
 namespace ThingSet {
 
@@ -16,6 +17,6 @@ concept StreamingMessageType = requires
     T::consecutive;
     T::single;
     T::last;
-};
+} and std::is_enum_v<T>;
 
 } // ThingSet

@@ -8,6 +8,19 @@
 #include "thingset++/StreamingQueuingThingSetBinaryDecoder.hpp"
 #include "thingset++/ip/StreamingUdp.hpp"
 
+#ifdef __ZEPHYR__
+#include "thingset++/zephyr/MessageQueue.hpp"
+namespace ThingSet::Ip {
+
+template <typename T>
+using UdpDecoderMessageQueue = MessageQueue<T, THINGSET_SOCKETS_REPORT_DECODER_QUEUE_SIZE>;
+
+}
+#define THINGSET_STREAMING_DECODER_UDP_QUEUE_TYPE UdpDecoderMessageQueue
+#else
+#define THINGSET_STREAMING_DECODER_UDP_QUEUE_TYPE std::queue
+#endif
+
 namespace ThingSet::Ip {
 
 struct Frame
@@ -23,7 +36,7 @@ struct Frame
 
 MessageType getMessageType(const Frame &message);
 
-class StreamingUdpThingSetBinaryDecoder : public StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_MSG_SIZE, Frame, MessageType>
+class StreamingUdpThingSetBinaryDecoder : public StreamingQueuingThingSetBinaryDecoder<THINGSET_STREAMING_MSG_SIZE, Frame, MessageType, THINGSET_STREAMING_DECODER_UDP_QUEUE_TYPE>
 {
 public:
     StreamingUdpThingSetBinaryDecoder();

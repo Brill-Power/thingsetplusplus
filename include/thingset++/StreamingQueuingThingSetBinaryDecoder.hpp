@@ -11,15 +11,15 @@
 
 namespace ThingSet {
 
-template <size_t Size, typename Message, StreamingMessageType MessageType>
-    requires std::is_enum_v<MessageType>
+template <size_t Size, typename Message, StreamingMessageType MessageType, template <typename> typename Queue = std::queue>
 class StreamingQueuingThingSetBinaryDecoder : public StreamingThingSetBinaryDecoder<Size>
 {
 private:
-    std::queue<Message> _queue;
+    Queue<Message> _queue;
 
 public:
     using message_type = MessageType;
+
 
     StreamingQueuingThingSetBinaryDecoder() : StreamingThingSetBinaryDecoder<Size>(2)
     {}

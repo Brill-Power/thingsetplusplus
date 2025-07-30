@@ -21,4 +21,11 @@ config THINGSET_CAN_REPORT_SEND_TIMEOUT
 	  Timeout in milliseconds to wait for a report frame to be successfully
 	  submitted to the CAN TX FIFO.
 
+config THINGSET_CAN_REPORT_DECODER_QUEUE_SIZE
+	int "ThingSet CAN decoder queue size for inbound report frames"
+    default 8
+    help
+        Size of queue for report frames to be decoded by streaming
+        decoder.
+
 rsource "isotp/Kconfig"
