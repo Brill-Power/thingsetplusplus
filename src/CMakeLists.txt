@@ -1,3 +1,9 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0")
+    message(FATAL_ERROR "Insufficient gcc version (need 12.0 or later)")
+  endif()
+endif()
+
 target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetBinaryDecoder.cpp
     ThingSetBinaryEncoder.cpp
