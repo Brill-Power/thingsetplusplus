@@ -49,3 +49,22 @@ TEST(Properties, PointerProperty)
     ASSERT_EQ(5, encoder.getEncodedLength());
     ASSERT_EQ(0xFA, buffer[0]);
 }
+
+TEST(Properties, ArrayProperty)
+{
+    ThingSetReadOnlyProperty<std::array<uint32_t, 4>> u32s { 0x301, 0, "u32s", { { 0, 1, 2, 3 } } };
+    ASSERT_EQ("u32[]", u32s.getType());
+    u32s[0] = 5;
+    ASSERT_EQ(5, u32s[0]);
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x301, &node));
+    ASSERT_EQ(0x301, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    u32s.encode(encoder);
+
+    ASSERT_EQ(5, encoder.getEncodedLength());
+    ASSERT_EQ(0x84, buffer[0]);
+}
