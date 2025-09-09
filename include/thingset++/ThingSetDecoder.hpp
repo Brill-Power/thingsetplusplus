@@ -24,6 +24,9 @@ enum struct ThingSetEncodedNodeType : uint8_t {
 class ThingSetDecodable;
 class ThingSetNode;
 
+template<typename T>
+concept IsDecodable = std::is_base_of_v<ThingSetDecodable, T>;
+
 /// @brief Base class for decoders.
 class ThingSetDecoder
 {
@@ -52,6 +55,14 @@ public:
     bool decodeList(std::function<bool(size_t)> callback);
     virtual bool decodeListStart() = 0;
     virtual bool decodeListEnd() = 0;
+
+    virtual bool decodeBytes(uint8_t *buffer, size_t capacity, size_t &size) = 0;
+
+    template <size_t Capacity>
+    bool decodeBytes(std::array<uint8_t, Capacity> &buffer, size_t &size)
+    {
+        return decodeBytes(buffer.data(), Capacity, size);
+    }
 
     virtual ThingSetEncodedNodeType peekType() = 0;
 
@@ -106,12 +117,22 @@ public:
         return decode(value->data(), value->size());
     }
 
+    /// @brief Decodes into a pointer to a @see ThingSetDecodable value.
+    /// @tparam T The type of the value to be decoded.
+    /// @param value A pointer to the value to be decoded into.
+    /// @return True if decoding succeeded, otherwise false.
+    template <IsDecodable T>
+    bool decode(T *value)
+    {
+        return value->decode(*this);
+    }
+
     /// @brief Decode a map into a pointer to a class or structure.
     /// @tparam T The type of the class or structure to be decoded.
     /// @param value A pointer to the class or structure.
     /// @return True if decoding succeeded, otherwise false.
     template <typename T>
-        requires std::is_class_v<T>
+        requires std::is_class_v<T> && (!IsDecodable<T>)
     bool decode(T *value)
     {
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
