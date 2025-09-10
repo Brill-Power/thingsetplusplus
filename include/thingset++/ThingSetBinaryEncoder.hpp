@@ -89,6 +89,11 @@ public:
     /// @param count The number of pairs in the map.
     /// @return True if encoding succeeded, otherwise false.
     bool encodeMapEnd(const uint32_t &count) override;
+    /// @brief Encode an array of bytes of length @see size.
+    /// @param buffer The array to encode.
+    /// @param size The number of bytes in the array.
+    /// @return True if encoding succeeded, otherwise false.
+    bool encodeBytes(const uint8_t *buffer, const size_t &size) override;
 
 protected:
     bool encodeListSeparator() override;

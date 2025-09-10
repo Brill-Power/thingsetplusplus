@@ -260,6 +260,11 @@ bool ThingSetTextEncoder::encodeListEnd(const uint32_t &)
     return encodeListEnd();
 }
 
+bool ThingSetTextEncoder::encodeBytes(const uint8_t *, const size_t &)
+{
+    return false;
+}
+
 bool ThingSetTextEncoder::encodeListSeparator()
 {
     return append(',');

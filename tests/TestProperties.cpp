@@ -5,6 +5,7 @@
  */
 #include "gtest/gtest.h"
 #include <thingset++/ThingSet.hpp>
+#include "Buffer.hpp"
 
 using namespace ThingSet;
 
@@ -67,4 +68,27 @@ TEST(Properties, ArrayProperty)
 
     ASSERT_EQ(5, encoder.getEncodedLength());
     ASSERT_EQ(0x84, buffer[0]);
+}
+
+TEST(Properties, CustomProperty)
+{
+    ThingSetReadOnlyProperty<Buffer<16>> someBuffer { 0x1001, 0, "someBuffer", { } };
+    auto &b = someBuffer.getValue();
+    b.buffer()[0] = 0x01;
+    b.buffer()[1] = 0x02;
+    b.buffer()[2] = 0x03;
+    b.buffer()[3] = 0x04;
+    b.size() = 4;
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x1001, &node));
+    ASSERT_EQ(0x1001, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    someBuffer.encode(encoder);
+
+    ASSERT_EQ(5, encoder.getEncodedLength());
+    ASSERT_EQ(0x44, buffer[0]);
+    ASSERT_EQ(0x02, buffer[2]);
 }

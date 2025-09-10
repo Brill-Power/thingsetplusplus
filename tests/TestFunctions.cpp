@@ -3,7 +3,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "thingset++/ThingSet.hpp"
+#include <thingset++/ThingSet.hpp>
+#include "Buffer.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;
@@ -80,33 +81,6 @@ TEST(Functions, InvokeGetMap)
     };
     ASSERT_EQ(0, memcmp(response, expected, sizeof(expected)));
 }
-
-template <size_t Capacity>
-class Buffer : ThingSetDecodable
-{
-private:
-    std::array<uint8_t, Capacity> _buffer;
-    size_t _size;
-
-public:
-    Buffer() : _buffer(), _size(0)
-    {}
-
-    std::array<uint8_t, Capacity> &buffer()
-    {
-        return _buffer;
-    }
-
-    size_t size()
-    {
-        return _size;
-    }
-
-    bool decode(ThingSetDecoder &decoder) override
-    {
-        return decoder.decodeBytes(_buffer, _size);
-    }
-};
 
 static uint32_t getLength(Buffer<1024> &buffer)
 {
