@@ -269,6 +269,15 @@ bool ThingSetBinaryEncoder::encodeMapEnd(const uint32_t &count)
     }
 }
 
+bool ThingSetBinaryEncoder::encodeBytes(const uint8_t *buffer, const size_t &size)
+{
+    zcbor_string string = {
+        .value = buffer,
+        .len = size,
+    };
+    return this->ensureState() && zcbor_bstr_encode(this->getState(), &string);
+}
+
 bool ThingSetBinaryEncoder::encodeListSeparator()
 {
     return true;

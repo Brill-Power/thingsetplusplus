@@ -160,6 +160,12 @@ bool ThingSetTextDecoder::decodeListEnd()
     return false;
 }
 
+bool ThingSetTextDecoder::decodeBytes(uint8_t *, size_t, size_t &)
+{
+    // TODO: I guess this would be a base64-encoded string or something
+    return false;
+}
+
 bool ThingSetTextDecoder::decodeMapStart()
 {
     return expectType(JSMN_OBJECT, nullptr);

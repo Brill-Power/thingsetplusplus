@@ -57,6 +57,7 @@ public:
     bool decodeNull() override;
     bool decodeListStart() override;
     bool decodeListEnd() override;
+    bool decodeBytes(uint8_t *buffer, size_t capacity, size_t &size) override;
     bool skip() override;
 
     ThingSetEncodedNodeType peekType() override;

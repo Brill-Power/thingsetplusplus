@@ -15,7 +15,7 @@ add_subdirectory(../googletest googletest)
 add_subdirectory(../ thingset++)
 
 add_executable(testapp)
-include_directories(../include ../zcbor/include ../asio/asio/include)
+include_directories(include ../include ../zcbor/include ../asio/asio/include)
 
 target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestStreamingBinaryEncoder.cpp

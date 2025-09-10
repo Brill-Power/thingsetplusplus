@@ -22,16 +22,16 @@ public:
     virtual bool invoke(ThingSetDecoder &decoder, ThingSetEncoder &encoder) = 0;
 };
 
-template <typename Result, typename... Args>
-static bool invoke(std::function<Result(Args...)> &function, std::tuple<Args...> &arguments,
+template <typename Result, typename... Args, typename... Values>
+static bool invoke(std::function<Result(Args...)> &function, std::tuple<Values...> &arguments,
                    ThingSetEncoder &encoder)
 {
     Result result = std::apply(function, arguments);
     return encoder.encode(result);
 }
 
-template <typename... Args>
-static bool invoke(std::function<void(Args...)> &function, std::tuple<Args...> &arguments,
+template <typename... Args, typename... Values>
+static bool invoke(std::function<void(Args...)> &function, std::tuple<Values...> &arguments,
                    ThingSetEncoder &encoder)
 {
     std::apply(function, arguments);
@@ -90,7 +90,7 @@ private:
     /// @brief A tuple containing ThingSet nodes which represent the parameters to the function.
     _ArgumentTransformer<_ParameterBuilder, sizeof...(Args)>::type _parameters;
     /// @brief The storage into which function arguments are decoded before invocation.
-    std::tuple<Args...> _arguments;
+    std::tuple<std::remove_cvref_t<Args>...> _arguments;
 
 public:
     ThingSetFunction(std::function<Result(Args...)> function)

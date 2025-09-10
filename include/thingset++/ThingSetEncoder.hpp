@@ -19,6 +19,9 @@ namespace ThingSet {
 class ThingSetEncodable;
 class ThingSetNode;
 
+template<typename T>
+concept IsEncodable = std::is_base_of_v<ThingSetEncodable, T>;
+
 /// @brief Encoder base class for ThingSet.
 class ThingSetEncoder
 {
@@ -95,6 +98,14 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     virtual bool encodeMapEnd(const uint32_t &count) = 0;
 
+    virtual bool encodeBytes(const uint8_t *buffer, const size_t &size) = 0;
+
+    template <size_t Capacity>
+    bool encodeBytes(const std::array<uint8_t, Capacity> &buffer, const size_t &size)
+    {
+        return encodeBytes(buffer.data(), size);
+    }
+
     /// @brief Encode a linked list.
     /// @tparam T The type of items in the list.
     /// @param value A reference to the list to be encoded.
@@ -146,7 +157,7 @@ public:
     /// @param value A reference to the value to be encoded.
     /// @return True if encoding succeeded, otherwise false.
     template <typename T>
-        requires std::is_class_v<T>
+        requires std::is_class_v<T> && (!IsEncodable<T>)
     bool encode(const T &value)
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });

@@ -3,7 +3,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "thingset++/ThingSet.hpp"
+#include <thingset++/ThingSet.hpp>
+#include "Buffer.hpp"
 #include "gtest/gtest.h"
 
 using namespace ThingSet;
@@ -78,5 +79,23 @@ TEST(Functions, InvokeGetMap)
         0x65, 0x77, 0x6F, 0x72, 0x6C, 0x64, // world
         0xFA, 0x40, 0x00, 0x00, 0x00        // 2.0
     };
+    ASSERT_EQ(0, memcmp(response, expected, sizeof(expected)));
+}
+
+static uint32_t getLength(Buffer<1024> &buffer)
+{
+    return buffer.size();
+}
+
+ThingSetUserFunction<0x440, 0x0, "xGetLength", uint32_t, Buffer<1024> &> xGetLength(getLength);
+
+TEST(Functions, InvokeFunctionWithDecodableParameter)
+{
+    uint8_t request[] = { 0x81, 0x44, 0x00, 0x01, 0x02, 0x03 };
+    uint8_t response[64];
+    FixedDepthThingSetBinaryDecoder decoder(request, sizeof(request));
+    FixedDepthThingSetBinaryEncoder encoder(response, sizeof(response));
+    ASSERT_TRUE(xGetLength.invoke(decoder, encoder));
+    uint8_t expected[] = { 0x04 }; // function returns length of bytes passed in
     ASSERT_EQ(0, memcmp(response, expected, sizeof(expected)));
 }

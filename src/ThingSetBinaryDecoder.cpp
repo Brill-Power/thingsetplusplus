@@ -149,6 +149,17 @@ bool ThingSetBinaryDecoder::decodeListEnd()
     return zcbor_list_end_decode(getState());
 }
 
+bool ThingSetBinaryDecoder::decodeBytes(uint8_t *buffer, size_t capacity, size_t &size)
+{
+    zcbor_string result;
+    if (zcbor_bstr_decode(getState(), &result) && result.len <= capacity) {
+        memcpy(buffer, result.value, result.len);
+        size = result.len;
+        return true;
+    }
+    return false;
+}
+
 bool ThingSetBinaryDecoder::decodeMapStart()
 {
     return zcbor_map_start_decode(getState());
