@@ -106,6 +106,7 @@ bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
     return true;
 }
 
+#ifdef ENABLE_TEXT_MODE
 ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) :
     _ThingSetRequestContext(request, response),
     _encoder(reinterpret_cast<char *>(response) + 4, responseSize - 4),
@@ -146,5 +147,6 @@ bool ThingSetTextRequestContext::setStatus(const ThingSetStatusCode &status)
     _response[3] = ' ';
     return true;
 }
+#endif // ENABLE_TEXT_MODE
 
 } // namespace ThingSet

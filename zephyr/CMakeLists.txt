@@ -28,4 +28,9 @@ if (DEFINED CONFIG_THINGSET_PLUS_PLUS_BACKEND_SOCKET)
     set(ENABLE_SOCKETS ON)
 endif()
 
+if (DEFINED CONFIG_THINGSET_PLUS_PLUS_PROTOCOL_TEXT)
+    message("ThingSet++ text mode enabled")
+    set(ENABLE_TEXT_MODE ON)
+endif()
+
 add_subdirectory_ifdef(CONFIG_THINGSET_PLUS_PLUS ${THINGSET_BASE}/src build)

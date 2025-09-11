@@ -11,9 +11,12 @@ target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetDecoder.cpp
     ThingSetNode.cpp
     ThingSetParentNode.cpp
-    ThingSetRegistry.cpp
-    ThingSetTextDecoder.cpp
-    ThingSetTextEncoder.cpp)
+    ThingSetRegistry.cpp)
+
+if (ENABLE_TEXT_MODE)
+    target_sources(thingset++ PRIVATE ThingSetTextDecoder.cpp
+        ThingSetTextEncoder.cpp)
+endif()
 
 if(ENABLE_SERVER)
     target_sources(thingset++ PRIVATE ThingSetRequestContext.cpp
