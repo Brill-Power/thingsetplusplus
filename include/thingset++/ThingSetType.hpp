@@ -49,9 +49,34 @@ public:
         "(" + _concatenator::value + ")->(" + ThingSetType<Result>::name + ")";
 };
 
+template <typename T> struct ThingSetType<T *>
+{
+    static constexpr StringLiteral name = ThingSetType<T>::name + "[]";
+};
+
+template <typename T, size_t Size> struct ThingSetType<T[Size]>
+{
+    static constexpr StringLiteral name = ThingSetType<T>::name + "[]";
+};
+
+template <size_t Size> struct ThingSetType<char[Size]>
+{
+    static constexpr StringLiteral name = "string";
+};
+
 template <> struct ThingSetType<void>
 {
     static constexpr StringLiteral name = "";
+};
+
+template <> struct ThingSetType<char>
+{
+    static constexpr StringLiteral name = "string";
+};
+
+template <> struct ThingSetType<const char>
+{
+    static constexpr StringLiteral name = "string";
 };
 
 template <> struct ThingSetType<const char *>
