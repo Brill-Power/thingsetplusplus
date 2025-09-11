@@ -177,6 +177,8 @@ public:
         ThingSetRegistry::unregisterNode(this);
     }
 
+    using ThingSetValue<T *>::operator=;
+
     const std::string_view getName() const override
     {
         return _name;
@@ -219,18 +221,6 @@ public:
     ThingSetAccess getAccess() const override
     {
         return Access;
-    }
-
-    auto &operator=(T &value)
-    {
-        *this->_value = value;
-        return *this;
-    }
-
-    auto &operator=(T &&value)
-    {
-        *this->_value = std::move(value);
-        return *this;
     }
 };
 

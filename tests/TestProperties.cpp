@@ -51,6 +51,27 @@ TEST(Properties, PointerProperty)
     ASSERT_EQ(0xFA, buffer[0]);
 }
 
+TEST(Properties, ConstPointerProperty)
+{
+    const float rf32 = 1.0;
+    ThingSetReadOnlyProperty prf32 { 0x101, 0, "rf32", &rf32 };
+    ASSERT_EQ("f32", prf32.getType());
+    // won't compile as pointer is const
+    // prf32 = 1.5;
+    // ASSERT_EQ(1.5, rf32);
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x101, &node));
+    ASSERT_EQ(0x101, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    prf32.encode(encoder);
+
+    ASSERT_EQ(5, encoder.getEncodedLength());
+    ASSERT_EQ(0xFA, buffer[0]);
+}
+
 TEST(Properties, ArrayProperty)
 {
     ThingSetReadOnlyProperty<std::array<uint32_t, 4>> u32s { 0x301, 0, "u32s", { { 0, 1, 2, 3 } } };
