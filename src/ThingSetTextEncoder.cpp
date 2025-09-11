@@ -44,12 +44,7 @@ bool ThingSetTextEncoder::encode(const float &value)
     return appendFormat((double)value, "%f");
 }
 
-bool ThingSetTextEncoder::encode(float &value)
-{
-    return appendFormat((double)value, "%f");
-}
-
-bool ThingSetTextEncoder::encode(float *value)
+bool ThingSetTextEncoder::encode(const float *value)
 {
     return appendFormat((double)*value, "%f");
 }
@@ -59,12 +54,7 @@ bool ThingSetTextEncoder::encode(const double &value)
     return appendFormat(value, "%f");
 }
 
-bool ThingSetTextEncoder::encode(double &value)
-{
-    return appendFormat(value, "%f");
-}
-
-bool ThingSetTextEncoder::encode(double *value)
+bool ThingSetTextEncoder::encode(const double *value)
 {
     return appendFormat(*value, "%f");
 }
@@ -74,12 +64,7 @@ bool ThingSetTextEncoder::encode(const bool &value)
     return appendFormat(value, "%i");
 }
 
-bool ThingSetTextEncoder::encode(bool &value)
-{
-    return appendFormat(value, "%i");
-}
-
-bool ThingSetTextEncoder::encode(bool *value)
+bool ThingSetTextEncoder::encode(const bool *value)
 {
     return appendFormat(*value, "%i");
 }
@@ -89,12 +74,7 @@ bool ThingSetTextEncoder::encode(const uint8_t &value)
     return appendFormat(value, "%" PRIu8);
 }
 
-bool ThingSetTextEncoder::encode(uint8_t &value)
-{
-    return appendFormat(value, "%" PRIu8);
-}
-
-bool ThingSetTextEncoder::encode(uint8_t *value)
+bool ThingSetTextEncoder::encode(const uint8_t *value)
 {
     return appendFormat(*value, "%" PRIu8);
 }
@@ -104,12 +84,7 @@ bool ThingSetTextEncoder::encode(const uint16_t &value)
     return appendFormat(value, "%" PRIu16);
 }
 
-bool ThingSetTextEncoder::encode(uint16_t &value)
-{
-    return appendFormat(value, "%" PRIu16);
-}
-
-bool ThingSetTextEncoder::encode(uint16_t *value)
+bool ThingSetTextEncoder::encode(const uint16_t *value)
 {
     return appendFormat(*value, "%" PRIu16);
 }
@@ -119,12 +94,7 @@ bool ThingSetTextEncoder::encode(const uint32_t &value)
     return appendFormat(value, "%" PRIu32);
 }
 
-bool ThingSetTextEncoder::encode(uint32_t &value)
-{
-    return appendFormat(value, "%" PRIu32);
-}
-
-bool ThingSetTextEncoder::encode(uint32_t *value)
+bool ThingSetTextEncoder::encode(const uint32_t *value)
 {
     return appendFormat(*value, "%" PRIu32);
 }
@@ -134,12 +104,7 @@ bool ThingSetTextEncoder::encode(const uint64_t &value)
     return appendFormat(value, "%" PRIu64);
 }
 
-bool ThingSetTextEncoder::encode(uint64_t &value)
-{
-    return appendFormat(value, "%" PRIu64);
-}
-
-bool ThingSetTextEncoder::encode(uint64_t *value)
+bool ThingSetTextEncoder::encode(const uint64_t *value)
 {
     return appendFormat(*value, "%" PRIu64);
 }
@@ -149,12 +114,7 @@ bool ThingSetTextEncoder::encode(const int8_t &value)
     return appendFormat(value, "%" PRIi8);
 }
 
-bool ThingSetTextEncoder::encode(int8_t &value)
-{
-    return appendFormat(value, "%" PRIi8);
-}
-
-bool ThingSetTextEncoder::encode(int8_t *value)
+bool ThingSetTextEncoder::encode(const int8_t *value)
 {
     return appendFormat(*value, "%" PRIi8);
 }
@@ -164,12 +124,7 @@ bool ThingSetTextEncoder::encode(const int16_t &value)
     return appendFormat(value, "%" PRIi16);
 }
 
-bool ThingSetTextEncoder::encode(int16_t &value)
-{
-    return appendFormat(value, "%" PRIi16);
-}
-
-bool ThingSetTextEncoder::encode(int16_t *value)
+bool ThingSetTextEncoder::encode(const int16_t *value)
 {
     return appendFormat(*value, "%" PRIi16);
 }
@@ -179,12 +134,7 @@ bool ThingSetTextEncoder::encode(const int32_t &value)
     return appendFormat(value, "%" PRIi32);
 }
 
-bool ThingSetTextEncoder::encode(int32_t &value)
-{
-    return appendFormat(value, "%" PRIi32);
-}
-
-bool ThingSetTextEncoder::encode(int32_t *value)
+bool ThingSetTextEncoder::encode(const int32_t *value)
 {
     return appendFormat(*value, "%" PRIi32);
 }
@@ -194,12 +144,7 @@ bool ThingSetTextEncoder::encode(const int64_t &value)
     return appendFormat(value, "%" PRIi64);
 }
 
-bool ThingSetTextEncoder::encode(int64_t &value)
-{
-    return appendFormat(value, "%" PRIi64);
-}
-
-bool ThingSetTextEncoder::encode(int64_t *value)
+bool ThingSetTextEncoder::encode(const int64_t *value)
 {
     return appendFormat(*value, "%" PRIi64);
 }
