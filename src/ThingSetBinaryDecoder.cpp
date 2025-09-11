@@ -44,10 +44,10 @@ bool ThingSetBinaryDecoder::decode(std::string *value)
     return false;
 }
 
-bool ThingSetBinaryDecoder::decode(char *value)
+bool ThingSetBinaryDecoder::decode(char *value, size_t size)
 {
     zcbor_string zstring;
-    if (zcbor_tstr_decode(this->getState(), &zstring)) {
+    if (zcbor_tstr_decode(this->getState(), &zstring) && zstring.len <= size) {
         strncpy(value, (char *)zstring.value, zstring.len);
         value[zstring.len] = '\0';
         return true;

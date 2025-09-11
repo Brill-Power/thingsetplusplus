@@ -219,7 +219,12 @@ public:
 
     bool encode(ThingSetEncoder &encoder) const override
     {
-        return encoder.encode(_value, Size);
+        if constexpr (std::is_same_v<Element, char>) {
+            // encode strings accordingly
+            return encoder.encode(_value);
+        } else {
+            return encoder.encode(_value, Size);
+        }
     }
 
     bool decode(ThingSetDecoder &decoder) override
@@ -257,45 +262,6 @@ public:
     }
 
     const Element *getValue() const
-    {
-        return _value;
-    }
-};
-
-template <size_t Size>
-class ThingSetValue<char[Size]>
-    : public ThingSetEncodable, public ThingSetDecodable
-{
-protected:
-    char _value[Size];
-
-public:
-    ThingSetValue(const char value[Size])
-    {
-        memcpy(_value, value, Size * sizeof(char));
-    }
-
-    bool encode(ThingSetEncoder &encoder) const override
-    {
-        return encoder.encode(_value);
-    }
-
-    bool decode(ThingSetDecoder &) override
-    {
-        return false;
-    }
-
-    char &operator[](int index)
-    {
-        return index < Size ? _value[index] : nullptr;
-    }
-
-    char *getValue()
-    {
-        return _value;
-    }
-
-    const char *getValue() const
     {
         return _value;
     }

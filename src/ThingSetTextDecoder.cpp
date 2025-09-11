@@ -28,14 +28,18 @@ bool ThingSetTextDecoder::decode(std::string *value)
     return true;
 }
 
-bool ThingSetTextDecoder::decode(char *value)
+bool ThingSetTextDecoder::decode(char *value, size_t size)
 {
     jsmntok *token;
     if (!expectType(JSMN_STRING, &token)) {
         return false;
     }
-    strncpy(value, &_inputBuffer[_bufferElemPtr], (size_t)token->end - (size_t)token->start);
-    return true;
+    size_t length = (size_t)token->end - (size_t)token->start;
+    if (length <= size) {
+        strncpy(value, &_inputBuffer[_bufferElemPtr], length);
+        return true;
+    }
+    return false;
 }
 
 bool ThingSetTextDecoder::decode(float *value)

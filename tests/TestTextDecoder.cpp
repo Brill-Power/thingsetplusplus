@@ -26,14 +26,14 @@ TEST(TextDecoder, DecodeStdString)
     ASSERT_EQ(value, "Hello World");
 }
 
-TEST(TextDecoder, DecodeChar)
+TEST(TextDecoder, DecodeString)
 {
     char buffer[] = "\"F\"";
     DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
-    char value;
-    bool ret = decoder.decode(&value);
+    char value[2];
+    bool ret = decoder.decode(value, sizeof(value));
     ASSERT_TRUE(ret);
-    ASSERT_EQ(value, 'F');
+    ASSERT_STREQ(value, "F");
 }
 
 TEST(TextDecoder, DecodeDouble)
