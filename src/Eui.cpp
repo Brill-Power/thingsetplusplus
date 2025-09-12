@@ -19,12 +19,27 @@
 #include <sys/socket.h>
 #endif
 #endif
+
+// https://stackoverflow.com/questions/809902/64-bit-ntohl-in-c#4410728
+#if defined(__linux__)
+#include <endian.h>
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
+#include <sys/endian.h>
+#elif defined(__OpenBSD__)
+#include <sys/types.h>
+#define be64toh(x) betoh64(x)
+#elif defined(__APPLE__)
+#include <libkern/OSByteOrder.h>
+#define be64toh(x) OSSwapBigToHostInt64(x)
+#endif
+
 #include <net/if_arp.h>
 
 #elif defined(__ZEPHYR__)
 
 #include <zephyr/drivers/hwinfo.h>
 #include <zephyr/sys/crc.h>
+#include <zephyr/net/net_ip.h>
 
 #endif
 
@@ -61,9 +76,7 @@ template <typename Source>
 static void copyMacAddress(const Source &source, const size_t length, uint64_t &target, std::array<uint8_t, 8> &array)
 {
     memcpy(&target, source, length);
-    if constexpr (std::endian::native != std::endian::big) {
-        target = ntohll(target);
-    }
+    target = be64toh(target);
     memcpy(array.data(), source, length);
 }
 
