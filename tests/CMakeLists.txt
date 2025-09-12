@@ -33,7 +33,8 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestBinaryEncodingRecords.cpp
     TestBinaryDecodingRecords.cpp
     TestTextEncodingRecords.cpp
-    TestRequestRewriter.cpp)
+    TestRequestRewriter.cpp
+    TestEui.cpp)
 
 # regrettably exlcude this test until we figure out why Socket server is broken on macOS
 if(NOT APPLE)
