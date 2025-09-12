@@ -90,6 +90,19 @@ ZTEST(ZephyrClientServer, test_name) \
     k_sem_take(&serverCompleted, K_FOREVER); \
 }
 
+ZTEST(ZephyrClientSerpher, test_eui) \
+{
+    std::string string = Eui::getString();
+    auto arr = Eui::getArray();
+    uint64_t t = Eui::getValue();
+    char buffer[128];
+    snprintf(buffer, sizeof(buffer), "%16llX", t);
+    zassert_str_equal(string.c_str(), buffer);
+    snprintf(buffer, sizeof(buffer), "%02X%02X%02X%02X%02X%02X%02X%02X", arr[0], arr[1], arr[2], arr[3], arr[4], arr[5],
+             arr[6], arr[7]);
+    zassert_str_equal(string.c_str(), buffer);
+}
+
 ZCLIENT_SERVER_TEST(test_get_float,
     float tv;
     zassert_true(client.get(0x300, tv));
