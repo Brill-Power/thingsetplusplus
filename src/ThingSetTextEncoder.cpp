@@ -5,7 +5,7 @@
  */
 
 #include "thingset++/ThingSetTextEncoder.hpp"
-#include "inttypes.h"
+#include <inttypes.h>
 
 namespace ThingSet {
 

@@ -11,6 +11,7 @@
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ThingSetFunction.hpp>
 #include <array>
+#include <inttypes.h>
 
 LOG_MODULE_REGISTER(thingsetplusplustest, CONFIG_THINGSET_PLUS_PLUS_LOG_LEVEL);
 
@@ -96,7 +97,7 @@ ZTEST(ZephyrClientServer, test_eui) \
     auto arr = Eui::getArray();
     uint64_t t = Eui::getValue();
     char buffer[128];
-    snprintf(buffer, sizeof(buffer), "%16llX", t);
+    snprintf(buffer, sizeof(buffer), "%16" PRIX64, t);
     zassert_str_equal(string.c_str(), buffer);
     snprintf(buffer, sizeof(buffer), "%02X%02X%02X%02X%02X%02X%02X%02X", arr[0], arr[1], arr[2], arr[3], arr[4], arr[5],
              arr[6], arr[7]);

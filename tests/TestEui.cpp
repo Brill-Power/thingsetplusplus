@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/Eui.hpp>
+#include <inttypes.h>
 
 using namespace ThingSet;
 
@@ -15,7 +16,7 @@ TEST(Eui, AllRepresentationsAreSame)
     auto arr = Eui::getArray();
     uint64_t t = Eui::getValue();
     char buffer[128];
-    snprintf(buffer, sizeof(buffer), "%16llX", t);
+    snprintf(buffer, sizeof(buffer), "%16" PRIX64, t);
     ASSERT_STREQ(string.c_str(), buffer);
     snprintf(buffer, sizeof(buffer), "%02X%02X%02X%02X%02X%02X%02X%02X", arr[0], arr[1], arr[2], arr[3], arr[4], arr[5],
              arr[6], arr[7]);
