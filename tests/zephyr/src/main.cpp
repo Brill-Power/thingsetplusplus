@@ -10,6 +10,7 @@
 #include <thingset++/ThingSetClient.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ThingSetFunction.hpp>
+#include <thingset++/Eui.hpp>
 #include <array>
 #include <inttypes.h>
 
