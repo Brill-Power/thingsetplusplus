@@ -90,7 +90,7 @@ ZTEST(ZephyrClientServer, test_name) \
     k_sem_take(&serverCompleted, K_FOREVER); \
 }
 
-ZTEST(ZephyrClientSerpher, test_eui) \
+ZTEST(ZephyrClientServer, test_eui) \
 {
     std::string string = Eui::getString();
     auto arr = Eui::getArray();
