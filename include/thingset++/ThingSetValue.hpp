@@ -179,14 +179,14 @@ public:
         }
     }
 
-    template <typename V> requires std::is_convertible_v<T, V> && (!std::is_const_v<T>)
+    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
     auto &operator=(const V &value)
     {
         *_value = value;
         return *this;
     }
 
-    template <typename V> requires std::is_convertible_v<T, V> && (!std::is_const_v<T>)
+    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
     auto &operator=(V &&value)
     {
         *_value = std::move(value);
@@ -242,14 +242,14 @@ public:
         return _value[index];
     }
 
-    template <typename V> requires std::is_convertible_v<Element, V> && (!std::is_const_v<Element>)
+    template <typename V> requires std::is_convertible_v<V, Element> && (!std::is_const_v<Element>)
     auto &operator=(const V &value)
     {
         *_value = value;
         return *this;
     }
 
-    template <typename V> requires std::is_convertible_v<Element, V> && (!std::is_const_v<Element>)
+    template <typename V> requires std::is_convertible_v<V, Element> && (!std::is_const_v<Element>)
     auto &operator=(V &&value)
     {
         *_value = std::move(value);
