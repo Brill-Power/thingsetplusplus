@@ -127,6 +127,7 @@ public:
     }
 };
 
+#ifdef ENABLE_TEXT_MODE
 class ThingSetTextRequestContext : public _ThingSetRequestContext<ThingSetTextRequestType>
 {
 private:
@@ -153,5 +154,6 @@ public:
         return 4;
     }
 };
+#endif // ENABLE_TEXT_MODE
 
 } // namespace ThingSet

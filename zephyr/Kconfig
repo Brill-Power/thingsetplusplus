@@ -25,6 +25,10 @@ config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH
 	int "Number of CAN frames that can be stored in the queue"
 	default 12
 
+config THINGSET_PLUS_PLUS_PROTOCOL_TEXT
+	bool "Enable text mode"
+	default true
+
 config THINGSET_PLUS_PLUS_BACKEND_CAN
 	bool "Enable CAN backend"
 	default false
@@ -45,6 +49,7 @@ config THINGSET_PLUS_PLUS_BACKEND_SHELL
 	bool "Enable shell backend"
 	default false
 	select SHELL
+	select THINGSET_PLUS_PLUS_PROTOCOL_TEXT
 
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus

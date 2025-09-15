@@ -47,7 +47,9 @@ private:
 
 protected:
     int handleBinaryRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
+#ifdef ENABLE_TEXT_MODE
     int handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
+#endif // ENABLE_TEXT_MODE
 
     template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset,
               EncodableDecodableNode... Property>
@@ -112,10 +114,12 @@ private:
         {
             return handleBinaryRequest(request, requestLen, response, responseLen);
         }
+#ifdef ENABLE_TEXT_MODE
         else if (request[0] >= (uint8_t)ThingSetTextRequestType::exec && request[0] <= (uint8_t)ThingSetTextRequestType::desire)
         {
             return handleTextRequest(request, requestLen, response, responseLen);
         }
+#endif // ENABLE_TEXT_MODE
         else
         {
             response[0] = ThingSetStatusCode::badRequest;
