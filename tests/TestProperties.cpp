@@ -51,6 +51,27 @@ TEST(Properties, PointerProperty)
     ASSERT_EQ(0xFA, buffer[0]);
 }
 
+TEST(Properties, ConstPointerProperty)
+{
+    const float rf32 = 1.0;
+    ThingSetReadOnlyProperty prf32 { 0x101, 0, "rf32", &rf32 };
+    ASSERT_EQ("f32", prf32.getType());
+    // won't compile as pointer is const
+    // prf32 = 1.5;
+    // ASSERT_EQ(1.5, rf32);
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x101, &node));
+    ASSERT_EQ(0x101, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    prf32.encode(encoder);
+
+    ASSERT_EQ(5, encoder.getEncodedLength());
+    ASSERT_EQ(0xFA, buffer[0]);
+}
+
 TEST(Properties, ArrayProperty)
 {
     ThingSetReadOnlyProperty<std::array<uint32_t, 4>> u32s { 0x301, 0, "u32s", { { 0, 1, 2, 3 } } };
@@ -61,6 +82,25 @@ TEST(Properties, ArrayProperty)
     ThingSetNode *node;
     ASSERT_TRUE(ThingSetRegistry::findById(0x301, &node));
     ASSERT_EQ(0x301, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    u32s.encode(encoder);
+
+    ASSERT_EQ(5, encoder.getEncodedLength());
+    ASSERT_EQ(0x84, buffer[0]);
+}
+
+TEST(Properties, InlineCArrayProperty)
+{
+    ThingSetReadOnlyProperty u32s { 0x302, 0, "u32s", (uint32_t[]){ 0, 1, 2, 3 } };
+    ASSERT_EQ("u32[]", u32s.getType());
+    u32s[0] = 5;
+    ASSERT_EQ(5, u32s[0]);
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x302, &node));
+    ASSERT_EQ(0x302, node->getId());
 
     uint8_t buffer[128];
     FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
@@ -91,4 +131,39 @@ TEST(Properties, CustomProperty)
     ASSERT_EQ(5, encoder.getEncodedLength());
     ASSERT_EQ(0x44, buffer[0]);
     ASSERT_EQ(0x02, buffer[2]);
+}
+
+TEST(Properties, StringConstantProperty)
+{
+    const char* str = "Unchanging";
+    ThingSetReadOnlyProperty strop { 0x1002, 0, "str", str };
+    ASSERT_EQ("string", strop.getType());
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x1002, &node));
+    ASSERT_EQ(0x1002, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    strop.encode(encoder);
+
+    ASSERT_EQ(11, encoder.getEncodedLength());
+    ASSERT_EQ(0x6A, buffer[0]);
+}
+
+TEST(Properties, InlineStringConstantProperty)
+{
+    ThingSetReadOnlyProperty strop { 0x1003, 0, "str", "Unchanging" };
+    ASSERT_EQ("string", strop.getType());
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x1003, &node));
+    ASSERT_EQ(0x1003, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    strop.encode(encoder);
+
+    ASSERT_EQ(11, encoder.getEncodedLength());
+    ASSERT_EQ(0x6A, buffer[0]);
 }

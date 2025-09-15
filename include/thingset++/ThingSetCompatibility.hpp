@@ -132,7 +132,7 @@ struct __PropertyBuilder
     THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, float)
 
 #define THINGSET_ADD_ITEM_STRING(parentId, id, name, pointer, length, access, subsets)                                 \
-    THINGSET_ADD_ITEM(parentId, id, name, pointer, access, subsets, char)
+    ThingSet::ThingSetProperty<char[length], ThingSet::convertAccess<access>::value, uint32_t, subsets> thingset_##id { id, parentId, name, pointer };
 
 #define THINGSET_DEFINE_FLOAT_ARRAY(variableName, numDecimals, arr, usedElements) \
     ThingSet::__ArrayHolder<float> variableName = { .array = arr, .maxElements = sizeof(arr), .numElements = usedElements };

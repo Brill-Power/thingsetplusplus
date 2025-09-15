@@ -39,7 +39,11 @@ public:
 
     bool decode(ThingSetDecoder &decoder) override
     {
-        return decoder.decode(&_value);
+        if constexpr (std::is_const_v<T>) {
+            return false;
+        } else {
+            return decoder.decode(&_value);
+        }
     }
 
     T &getValue()
@@ -168,16 +172,22 @@ public:
 
     bool decode(ThingSetDecoder &decoder) override
     {
-        return decoder.decode(_value);
+        if constexpr (std::is_const_v<T>) {
+            return false;
+        } else {
+            return decoder.decode(_value);
+        }
     }
 
-    auto &operator=(const T &value)
+    template <typename V> requires std::is_convertible_v<T, V> && (!std::is_const_v<T>)
+    auto &operator=(const V &value)
     {
         *_value = value;
         return *this;
     }
 
-    auto &operator=(T &&value)
+    template <typename V> requires std::is_convertible_v<T, V> && (!std::is_const_v<T>)
+    auto &operator=(V &&value)
     {
         *_value = std::move(value);
         return *this;
@@ -189,6 +199,69 @@ public:
     }
 
     const T *getValue() const
+    {
+        return _value;
+    }
+};
+
+template <typename Element, size_t Size>
+class ThingSetValue<Element[Size]>
+    : public ThingSetEncodable, public ThingSetDecodable
+{
+protected:
+    Element _value[Size];
+
+public:
+    ThingSetValue(const Element value[Size])
+    {
+        memcpy(_value, value, Size * sizeof(Element));
+    }
+
+    bool encode(ThingSetEncoder &encoder) const override
+    {
+        if constexpr (std::is_same_v<Element, char>) {
+            // encode strings accordingly
+            return encoder.encode(_value);
+        } else {
+            return encoder.encode(_value, Size);
+        }
+    }
+
+    bool decode(ThingSetDecoder &decoder) override
+    {
+        if constexpr (std::is_const_v<Element>) {
+            return false;
+        } else {
+            return decoder.decode(_value, Size);
+        }
+    }
+
+    Element &operator[](int index)
+    {
+        // TODO: can we do a bounds check here and...do something if out of bounds?
+        return _value[index];
+    }
+
+    template <typename V> requires std::is_convertible_v<Element, V> && (!std::is_const_v<Element>)
+    auto &operator=(const V &value)
+    {
+        *_value = value;
+        return *this;
+    }
+
+    template <typename V> requires std::is_convertible_v<Element, V> && (!std::is_const_v<Element>)
+    auto &operator=(V &&value)
+    {
+        *_value = std::move(value);
+        return *this;
+    }
+
+    Element *getValue()
+    {
+        return _value;
+    }
+
+    const Element *getValue() const
     {
         return _value;
     }

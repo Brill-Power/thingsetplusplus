@@ -42,7 +42,7 @@ protected:
 public:
     using ThingSetDecoder::decode;
     bool decode(std::string *value) override;
-    bool decode(char *value) override;
+    bool decode(char *value, size_t size) override;
     bool decode(float *value) override;
     bool decode(double *value) override;
     bool decode(bool *value) override;

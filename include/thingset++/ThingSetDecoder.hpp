@@ -32,8 +32,7 @@ class ThingSetDecoder
 {
 public:
     virtual bool decode(std::string *value) = 0;
-    /// @todo Figure out how to do bounds checking on this.
-    virtual bool decode(char *value) = 0;
+    virtual bool decode(char *value, size_t size) = 0;
     virtual bool decode(float *value) = 0;
     virtual bool decode(double *value) = 0;
     virtual bool decode(bool *value) = 0;

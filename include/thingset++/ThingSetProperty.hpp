@@ -122,7 +122,7 @@ public:
 
     constexpr const std::string getType() const override
     {
-        return ThingSetType<T>::name.str();
+        return ThingSetType<std::remove_const_t<T>>::name.str();
     }
 
     bool tryCastTo(ThingSetNodeType type, void **target) override
@@ -177,6 +177,8 @@ public:
         ThingSetRegistry::unregisterNode(this);
     }
 
+    using ThingSetValue<T *>::operator=;
+
     const std::string_view getName() const override
     {
         return _name;
@@ -194,7 +196,7 @@ public:
 
     constexpr const std::string getType() const override
     {
-        return ThingSetType<std::remove_pointer_t<T>>::name.str();
+        return ThingSetType<std::remove_cv_t<std::remove_pointer_t<T>>>::name.str();
     }
 
     bool tryCastTo(ThingSetNodeType type, void **target) override
@@ -219,18 +221,6 @@ public:
     ThingSetAccess getAccess() const override
     {
         return Access;
-    }
-
-    auto &operator=(T &value)
-    {
-        *this->_value = value;
-        return *this;
-    }
-
-    auto &operator=(T &&value)
-    {
-        *this->_value = std::move(value);
-        return *this;
     }
 };
 
