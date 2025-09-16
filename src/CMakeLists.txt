@@ -13,25 +13,30 @@ target_sources(thingset++ PRIVATE Eui.cpp
     ThingSetParentNode.cpp
     ThingSetRegistry.cpp)
 
-if (ENABLE_TEXT_MODE)
+if(ENABLE_TEXT_MODE)
+    message("ThingSet++ text mode enabled")
     target_sources(thingset++ PRIVATE ThingSetTextDecoder.cpp
         ThingSetTextEncoder.cpp)
 endif()
 
 if(ENABLE_SERVER)
+    message("ThingSet++ server enabled")
     target_sources(thingset++ PRIVATE ThingSetRequestContext.cpp
         ThingSetServer.cpp)
 endif()
 
 if(ENABLE_CLIENT)
+    message("ThingSet++ client enabled")
     target_sources(thingset++ PRIVATE ThingSetClient.cpp)
 endif()
 
 if(ENABLE_ASIO OR ENABLE_SOCKETS)
+    message("ThingSet++ IP socket backend enabled")
     add_subdirectory(ip)
 endif()
 
-if (ENABLE_CAN OR ENABLE_SOCKETCAN)
+if(ENABLE_CAN OR ENABLE_SOCKETCAN)
+    message("ThingSet++ CAN backend enabled")
     add_subdirectory(can)
 endif()
 

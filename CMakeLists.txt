@@ -16,10 +16,14 @@ if(BSD)
     target_link_libraries(thingset++ Threads::Threads)
 endif()
 
-target_sources(zcbor PRIVATE zcbor/src/zcbor_common.c)
-target_sources(zcbor PRIVATE zcbor/src/zcbor_decode.c)
-target_sources(zcbor PRIVATE zcbor/src/zcbor_encode.c)
-target_sources(zcbor PRIVATE zcbor/src/zcbor_print.c)
+if (ENABLE_TEXT_MODE)
+    add_definitions(-DENABLE_TEXT_MODE)
+endif()
+
+target_sources(zcbor PRIVATE zcbor/src/zcbor_common.c
+    zcbor/src/zcbor_decode.c
+    zcbor/src/zcbor_encode.c
+    zcbor/src/zcbor_print.c)
 include_directories(zcbor/include asio/asio/include)
 target_link_libraries(thingset++ zcbor)
 
