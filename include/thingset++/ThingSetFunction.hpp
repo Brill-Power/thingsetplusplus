@@ -45,7 +45,7 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Values...>
 /// @tparam Access Access control flags.
 /// @tparam Result The return type of the function.
 /// @tparam ...Args The argument types of the function, if any.
-template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, uint16_t FirstArgumentId, typename Result, typename... Args>
 class ThingSetFunction : public IdentifiableThingSetParentNode<Id, ParentId, Name>, public ThingSetInvocable
 {
 private:
@@ -82,7 +82,7 @@ private:
     {
         using Tuple = std::tuple<Args...>;
         using ParameterType = std::tuple_element_t<Index, Tuple>;
-        typedef ThingSetFunctionParameter<Id + 1 + Index, Name + ThingSetType<ParameterType>::name + "_" + to_string_t<1 + Index>(), ParameterType> type;
+        typedef ThingSetFunctionParameter<FirstArgumentId + 0 + Index, Name + ThingSetType<ParameterType>::name + "_" + to_string_t<1 + Index>(), ParameterType> type;
     };
 
     /// @brief The exposed function.
@@ -133,13 +133,13 @@ public:
 };
 
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
-using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Result, Args...>;
+using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Id + 1, Result, Args...>;
 
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
-using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Result, Args...>;
+using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Id + 1, Result, Args...>;
 
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetManufacturerFunction =
-    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Result, Args...>;
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Id + 1, Result, Args...>;
 
 } // namespace ThingSet

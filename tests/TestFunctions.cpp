@@ -31,6 +31,7 @@ ThingSetUserFunction<0x430, 0x0, "xMap", std::map<std::string, float>> xGetMap([
     map.insert_or_assign("world", 2.0f);
     return map;
 });
+ThingSetFunction<0x440, 0x0, "xTestCustom", ThingSetAccess::anyWrite, 0x4401, void, int, float> xTestCustomFunc(test);
 
 TEST(Functions, FunctionTypes)
 {
@@ -52,6 +53,17 @@ TEST(Functions, FunctionParameters)
     ASSERT_TRUE(ThingSetRegistry::findById(0x421, &node));
     ASSERT_EQ(0x420, node->getParentId());
     ASSERT_EQ("xLambdaf32_1", node->getName());
+}
+
+TEST(Functions, FunctionParametersWithCustomId)
+{
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x4401, &node));
+    ASSERT_EQ(0x440, node->getParentId());
+    ASSERT_EQ("xTestCustomi32_1", node->getName());
+    ASSERT_TRUE(ThingSetRegistry::findById(0x4402, &node));
+    ASSERT_EQ(0x440, node->getParentId());
+    ASSERT_EQ("xTestCustomf32_2", node->getName());
 }
 
 TEST(Functions, InvokeLambda)
