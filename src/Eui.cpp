@@ -61,12 +61,24 @@ const std::array<uint8_t, 8> &Eui::getArray()
     return getInstance()._array;
 }
 
+// we have found snprintf temperamental on tinylibc;
+// this lookup table is used by the next function to
+// convert the EUI to a string
+static constexpr char HexLookup[] = {
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+};
+
 const std::string Eui::getString()
 {
     auto &arr = getInstance()._array;
     char str[17];
-    snprintf(str, sizeof(str), "%02X%02X%02X%02X%02X%02X%02X%02X", arr[0], arr[1], arr[2], arr[3], arr[4], arr[5],
-             arr[6], arr[7]);
+    str[16] = '\0';
+    for (int i = 0; i < 8; i++) {
+        uint8_t byte = arr[i];
+        str[(2 * i)] = HexLookup[(byte & 0xf0) >> 4];
+        str[(2 * i) + 1] = HexLookup[(byte & 0xf)];
+    }
     return std::string(str);
 }
 
