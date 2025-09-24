@@ -56,7 +56,7 @@ private:
             const uint8_t *buffer;
             size_t length;
             getBuffer(message, &buffer, &length);
-            if (pos + length < maxSize) {
+            if (pos + length <= maxSize) {
                 memcpy(&this->_buffer.data()[pos], buffer, length);
                 pos += length;
                 _queue.pop();
