@@ -22,6 +22,14 @@ bool ThingSetCanInterface::bind()
     return bind(CanID::minAddress);
 }
 
+bool ThingSetCanInterface::triggerAddressClaim()
+{
+    if (!_isBound) {
+        return false; // Cannot claim address if not bound
+    }
+    return doAddressClaim();
+}
+
 void ThingSetCanInterface::setAddressClaimCallback(std::function<void(const uint8_t *, uint8_t)> callback)
 {
     _addressClaimCallback = callback;

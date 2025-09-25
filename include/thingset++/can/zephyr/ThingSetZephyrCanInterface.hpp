@@ -30,7 +30,9 @@ public:
 
     using ThingSetCanInterface::bind;
     bool bind(uint8_t nodeAddress) override;
-    bool triggerAddressClaim() override;
+
+protected:
+    bool doAddressClaim() override;
 };
 
 /// @brief Encapsulates a ThingSet CAN interface.
@@ -55,7 +57,9 @@ public:
 
     using ThingSetCanInterface::bind;
     bool bind(uint8_t nodeAddress) override;
-    bool triggerAddressClaim() override;
+
+protected:
+    bool doAddressClaim() override;
 
 private:
     static void onAddressDiscoverReceived(const device *dev, can_frame *frame, void *arg);

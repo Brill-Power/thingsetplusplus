@@ -97,7 +97,17 @@ bool ThingSetSocketCanInterface::bind(uint8_t nodeAddress)
     }
 
     _claimer.run(_deviceName, _nodeAddress);
+    _isBound = true;
     return true;
+}
+
+// TODO: figure out what to use for socket arg here
+bool ThingSetSocketCanInterface::doAddressClaim()
+{
+    RawCanSocket socket;
+    socket.bind(_deviceName);
+    socket.setIsFd(true);
+    return tryClaimAddress(_nodeAddress, socket);
 }
 
 } // namespace ThingSet::Can::SocketCan

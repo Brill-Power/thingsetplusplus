@@ -38,11 +38,8 @@ bool ThingSetZephyrCanStubInterface::bind(uint8_t nodeAddress)
     return true;
 }
 
-bool ThingSetZephyrCanStubInterface::triggerAddressClaim()
+bool ThingSetZephyrCanStubInterface::doAddressClaim()
 {
-    if (!_isBound) {
-        return false;
-    }
     return true;
 }
 
@@ -111,12 +108,8 @@ bool ThingSetZephyrCanInterface::claimAddress(uint8_t nodeAddress)
     return can_send(_canDevice, frame.getFrame(), K_MSEC(10), onAddressClaimSent, nullptr) == 0;
 }
 
-bool ThingSetZephyrCanInterface::triggerAddressClaim()
+bool ThingSetZephyrCanInterface::doAddressClaim()
 {
-    if (!_isBound) {
-        LOG_WARN("Cannot trigger address claim: interface not bound to an address");
-        return false;
-    }
     return claimAddress(_nodeAddress);
 }
 
