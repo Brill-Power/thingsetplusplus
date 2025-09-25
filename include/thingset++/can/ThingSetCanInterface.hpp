@@ -15,6 +15,7 @@ class ThingSetCanInterface
 {
 protected:
     uint8_t _nodeAddress;
+    bool _isBound;
     std::function<void(const uint8_t *, uint8_t)> _addressClaimCallback;
 
 public:
@@ -22,6 +23,8 @@ public:
 
     bool bind();
     virtual bool bind(uint8_t nodeAddress) = 0;
+    
+    virtual bool triggerAddressClaim() = 0;
 
     void setAddressClaimCallback(std::function<void(const uint8_t *, uint8_t)> callback);
 };
