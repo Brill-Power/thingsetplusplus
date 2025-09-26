@@ -8,10 +8,12 @@
 #include <cstdint>
 
 #ifdef __ZEPHYR__
+// Use Zephyr Kconfig values
 #define THINGSET_CAN_MIN_ADDRESS CONFIG_THINGSET_CAN_NODE_ADDRESS_MIN
 #define THINGSET_CAN_MAX_ADDRESS CONFIG_THINGSET_CAN_NODE_ADDRESS_MAX
 #else
-// Use CMake-defined values or defaults for SocketCAN
+// Use CMake-defined values (set by target_compile_definitions in CMakeLists.txt)
+// If not building with CMake, fall back to defaults
 #ifndef THINGSET_CAN_MIN_ADDRESS
 #define THINGSET_CAN_MIN_ADDRESS 0x01
 #endif
