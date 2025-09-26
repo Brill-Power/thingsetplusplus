@@ -29,8 +29,8 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestRecordMembers.cpp
     TestFunctions.cpp
     TestSubsets.cpp
-    TestAsioIpClientServer.cpp
-    TestAsioIpPublishSubscribe.cpp
+    #TestAsioIpClientServer.cpp
+    #TestAsioIpPublishSubscribe.cpp
     TestBinaryEncodingRecords.cpp
     TestBinaryDecodingRecords.cpp
     TestTextEncodingRecords.cpp

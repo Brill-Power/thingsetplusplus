@@ -100,7 +100,9 @@ void ThingSetZephyrCanRequestResponseContext::onRequestResponseReceived(net_buf 
         // if a response to a request we sent
         if ((_rxBuffer[0] >= ThingSetStatusCode::created && _rxBuffer[0] <= ThingSetStatusCode::notAGateway) ||
             // or if it is a new request inbound
-            (_rxBuffer[0] >= ThingSetBinaryRequestType::get && _rxBuffer[0] <= ThingSetBinaryRequestType::update)) {
+            // TODO: support text mode (which is not a simple greater/less than)
+            (_rxBuffer[0] >= ThingSetBinaryRequestType::get && _rxBuffer[0] <= ThingSetBinaryRequestType::update) ||
+            _rxBuffer[0] == ThingSetBinaryRequestType::forward) {
             // regardless, dispatch accordingly
             result = _inboundRequestCallback(CanID::create(address.ext_id), _rxBuffer, len, _txBuffer,
                 _txBufferSize);

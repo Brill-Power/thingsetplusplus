@@ -29,7 +29,7 @@ bool ThingSetRequestContext::hasValidEndpoint()
 
 bool ThingSetRequestContext::isToBeForwarded()
 {
-    return _path.has_value() && _path.value().length() > 1 && _path.value()[0] == '/';
+    return isForward() || (_path.has_value() && _path.value().length() > 1 && _path.value()[0] == '/');
 }
 
 bool ThingSetRequestContext::useIds()
@@ -69,35 +69,53 @@ ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, siz
 
 size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
 {
-    if (!tryGetNodeId(nodeId)) {
-        return 0;
-    }
-
-    // first find string in buffer
-    uint8_t *requestEnd = &(*request)[requestLength - 1];
-    uint8_t *nodeIdPathComponentStart = std::search(*request, requestEnd, nodeId.begin(), nodeId.end());
-    if (nodeIdPathComponentStart == requestEnd)
+    if (isForward())
     {
+        // new style; CBOR encoded node ID as string
+        uint8_t *req = *request;
+        if (ZCBOR_MAJOR_TYPE(req[1]) == ZCBOR_MAJOR_TYPE_TSTR) {
+            uint8_t length = ZCBOR_ADDITIONAL(req[1]);
+            // assume less than 24 chars
+            if (length <= ZCBOR_VALUE_IN_HEADER) {
+                nodeId = std::string(&req[2], &req[2] + length);
+                *request = &(*request)[1 + 1 + length]; // request byte plus CBOR header
+                return requestLength - (1 + 1 + length);
+            }
+        }
         return 0;
-    }
+    } else
+    {
+        // old-style node ID in path
+        if (!tryGetNodeId(nodeId)) {
+            return 0;
+        }
 
-    // calculate new start of path as an offset
-    size_t newPathStart = (nodeIdPathComponentStart + nodeId.length() + 1) - *request;
-    // new length is old length less node ID and two slashes
-    size_t newPathLength = path().length() - nodeId.length() - 2;
-    // write new string header
-    // depending on string length need 1 or 2 bytes to
-    if (newPathLength < 25) {
-        (*request)[--newPathStart] = 0x60 | newPathLength;
-    } else {
-        (*request)[--newPathStart] = newPathLength;
-        (*request)[--newPathStart] = 0x78; // i.e. 0x60 | 0x18 (single byte integer follows)
+        // first find string in buffer
+        uint8_t *requestEnd = &(*request)[requestLength - 1];
+        uint8_t *nodeIdPathComponentStart = std::search(*request, requestEnd, nodeId.begin(), nodeId.end());
+        if (nodeIdPathComponentStart == requestEnd)
+        {
+            return 0;
+        }
+
+        // calculate new start of path as an offset
+        size_t newPathStart = (nodeIdPathComponentStart + nodeId.length() + 1) - *request;
+        // new length is old length less node ID and two slashes
+        size_t newPathLength = path().length() - nodeId.length() - 2;
+        // write new string header
+        // depending on string length need 1 or 2 bytes to
+        if (newPathLength < 25) {
+            (*request)[--newPathStart] = 0x60 | newPathLength;
+        } else {
+            (*request)[--newPathStart] = newPathLength;
+            (*request)[--newPathStart] = 0x78; // i.e. 0x60 | 0x18 (single byte integer follows)
+        }
+        // finally, copy verb from first byte
+        (*request)[--newPathStart] = (*request)[0];
+        size_t newLength = requestLength - newPathStart + 1;
+        *request = &(*request)[newPathStart];
+        return newLength;
     }
-    // finally, copy verb from first byte
-    (*request)[--newPathStart] = (*request)[0];
-    size_t newLength = requestLength - newPathStart + 1;
-    *request = &(*request)[newPathStart];
-    return newLength;
 }
 
 bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
@@ -128,16 +146,42 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
 
 size_t ThingSetTextRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
 {
-    if (!tryGetNodeId(nodeId)) {
-        return 0;
-    }
+    if (isForward())
+    {
+        uint8_t *req = *request;
+        size_t i = 1;
+        for (; i < requestLength; i++)
+        {
+            uint8_t c = req[i];
+            if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+            {
+                continue;
+            }
+            else
+            {
+                // have found first non-hex char
+                break;
+            }
+        }
 
-    // assuming ?/deadbeef12345678/Foo, we can take the first byte and
-    // replace the slash after the node ID
-    request[nodeId.length() + 2] = request[0];
-    size_t newLength = requestLength - (nodeId.length() + 2);
-    *request = &(*request)[nodeId.length() + 2];
-    return newLength;
+        nodeId = std::string(&req[1], &req[i]);
+        *request = &(*request)[i];
+        return requestLength - i;
+    }
+    else
+    {
+        if (!tryGetNodeId(nodeId))
+        {
+            return 0;
+        }
+
+        // assuming ?/deadbeef12345678/Foo, we can take the first byte and
+        // replace the slash after the node ID
+        request[nodeId.length() + 2] = request[0];
+        size_t newLength = requestLength - (nodeId.length() + 2);
+        *request = &(*request)[nodeId.length() + 2];
+        return newLength;
+    }
 }
 
 bool ThingSetTextRequestContext::setStatus(const ThingSetStatusCode &status)
