@@ -23,13 +23,8 @@ public:
 
     bool bind();
     virtual bool bind(uint8_t nodeAddress) = 0;
-    
-    bool triggerAddressClaim();
 
     void setAddressClaimCallback(std::function<void(const uint8_t *, uint8_t)> callback);
-
-protected:
-    virtual bool doAddressClaim() = 0;
 };
 
 } // namespace ThingSet::Can

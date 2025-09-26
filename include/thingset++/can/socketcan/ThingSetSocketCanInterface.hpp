@@ -39,9 +39,6 @@ public:
 
     using ThingSetCanInterface::bind;
     bool bind(uint8_t nodeAddress) override;
-
-protected:
-    bool doAddressClaim() override;
 };
 
 } // namespace ThingSet::Can::SocketCan
