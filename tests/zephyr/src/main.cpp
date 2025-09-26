@@ -109,9 +109,17 @@ ZCLIENT_SERVER_TEST(test_update,
 
 static void *testSetup(void)
 {
+    // Not allowed until interface is bound to address
+    zassert_false(clientInterface.claimAddress());
+
     zassert_equal(0, can_set_mode(canDevice, CAN_MODE_LOOPBACK));
     zassert_true(serverInterface.bind(0x01));
     zassert_true(clientInterface.bind(0x02));
+
+    // Now we should be able to do this multiple times
+    zassert_true(clientInterface.claimAddress());
+    zassert_true(clientInterface.claimAddress());
+
     return nullptr;
 }
 
