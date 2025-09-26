@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstdint>
+#include <thingset++/can/CanConfig.hpp>
 #ifndef __ZEPHYR__
 #include <iostream>
 #endif // __ZEPHYR__
@@ -69,9 +70,9 @@ private:
 
 public:
     /// @brief The minimum valid address for a node.
-    static const uint8_t minAddress = 0x01;
+    static const uint8_t minAddress = CanConfig::minAddress;
     /// @brief The maximum valid address for a node.
-    static const uint8_t maxAddress = 0xfd;
+    static const uint8_t maxAddress = CanConfig::maxAddress;
     /// @brief The anonymous node address.
     static const uint8_t anonymousAddress = 0xfe;
     /// @brief The broadcast node address.
