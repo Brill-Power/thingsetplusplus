@@ -15,6 +15,7 @@ class ThingSetCanInterface
 {
 protected:
     uint8_t _nodeAddress;
+    bool _isBound;
     std::function<void(const uint8_t *, uint8_t)> _addressClaimCallback;
 
 public:

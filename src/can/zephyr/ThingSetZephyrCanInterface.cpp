@@ -19,6 +19,7 @@ namespace ThingSet::Can::Zephyr {
 _ThingSetZephyrCanInterface::_ThingSetZephyrCanInterface(const device *const canDevice) : _canDevice(canDevice)
 {
     _nodeAddress = CanID::broadcastAddress;
+    _isBound = false;
 }
 
 const device *const _ThingSetZephyrCanInterface::getDevice()
@@ -33,8 +34,10 @@ ThingSetZephyrCanStubInterface::ThingSetZephyrCanStubInterface(const device *con
 bool ThingSetZephyrCanStubInterface::bind(uint8_t nodeAddress)
 {
     _nodeAddress = nodeAddress;
+    _isBound = true;
     return true;
 }
+
 
 ThingSetZephyrCanInterface::ThingSetZephyrCanInterface(const device *const canDevice)
     : _ThingSetZephyrCanInterface(canDevice)
@@ -99,6 +102,15 @@ bool ThingSetZephyrCanInterface::claimAddress(uint8_t nodeAddress)
     memcpy(frame.getData(), Eui::getArray().data(), Eui::getArray().size());
     frame.setLength(Eui::getArray().size());
     return can_send(_canDevice, frame.getFrame(), K_MSEC(10), onAddressClaimSent, nullptr) == 0;
+}
+
+bool ThingSetZephyrCanInterface::claimAddress()
+{
+    if (!_isBound) {
+        LOG_WARN("Cannot claim address: interface not bound to an address");
+        return false;
+    }
+    return claimAddress(_nodeAddress);
 }
 
 int ThingSetZephyrCanInterface::addFilter(CanID &canId, void (*callback)(const device *, can_frame *, void *))
@@ -188,6 +200,7 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
 
         LOG_INFO("CAN device %s bound to address 0x%x", _canDevice->name, _nodeAddress);
     }
+    _isBound = true;
     return true;
 }
 
