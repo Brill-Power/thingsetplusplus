@@ -95,7 +95,7 @@ void ThingSetZephyrCanRequestResponseContext::onRequestResponseReceived(net_buf 
     bool taken;
     uint8_t *txBuffer;
     if ((taken = (result == 0))) {
-        LOG_INFO("Linearising buffer of length %d into %p", len, _rxBuffer);
+        LOG_DEBUG("Linearising buffer of length %d into %p", len, _rxBuffer);
         len = net_buf_linearize(_rxBuffer, _rxBufferSize, buffer, 0, len);
         // if a response to a request we sent
         if ((_rxBuffer[0] >= ThingSetStatusCode::created && _rxBuffer[0] <= ThingSetStatusCode::notAGateway) ||
@@ -130,7 +130,7 @@ void ThingSetZephyrCanRequestResponseContext::onRequestResponseReceived(net_buf 
                                 IsoTpFastAddress(CanID::create(address.ext_id).getReplyId()), nullptr);
     }
     if (result != 0) {
-        LOG_ERROR("Error %d sending reply to message from 0x%d", result, address.ext_id);
+        LOG_ERROR("Error %d sending reply to message from 0x%x", result, address.ext_id);
     }
     if (taken) {
         k_sem_give(&_lock);
