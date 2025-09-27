@@ -66,6 +66,11 @@ ASIO_TEST(GetFloatByName,
     ASSERT_EQ(24.0f, tv);
 )
 
+ASIO_TEST(GetFunction,
+    int result;
+    ASSERT_FALSE(client.get(0x1000, result));
+)
+
 ASIO_TEST(ExecFunction,
     int result;
     ASSERT_TRUE(client.exec(0x1000, &result, 2, 3));
