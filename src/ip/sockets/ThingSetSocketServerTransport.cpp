@@ -18,6 +18,7 @@
 #define ACCEPT_THREAD_PRIORITY    3
 #define HANDLER_THREAD_STACK_SIZE 4096
 #define HANDLER_THREAD_PRIORITY   2
+#define FCNTL zsock_fcntl
 
 K_THREAD_STACK_DEFINE(acceptThreadStack, ACCEPT_THREAD_STACK_SIZE);
 static struct k_thread acceptThread;
@@ -32,6 +33,7 @@ static struct k_thread handlerThread;
 #include <iostream>
 
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
+#define FCNTL fcntl
 #endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
@@ -129,7 +131,7 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
 void _ThingSetSocketServerTransport::runAcceptor()
 {
-    if (fcntl(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
+    if (FCNTL(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
         LOG_ERROR("Failed to configure socket: %d", errno);
         // this isn't technically a fatal error; it just means we
         // won't get a clean shutdown, because we'll never be able

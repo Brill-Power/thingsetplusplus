@@ -63,6 +63,8 @@ public:
 
 protected:
     bool tryGetNodeId(std::string &nodeId);
+
+    virtual bool isForward() = 0;
 };
 
 template <typename RequestType> requires std::is_enum_v<RequestType>
@@ -97,6 +99,11 @@ public:
 
     bool isExec() override {
         return _requestType == RequestType::exec;
+    }
+
+protected:
+    bool isForward() override {
+        return _requestType == RequestType::forward;
     }
 };
 

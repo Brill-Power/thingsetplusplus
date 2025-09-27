@@ -124,7 +124,7 @@ int _ThingSetServer::handleGet(ThingSetRequestContext &context)
                 }
             }
         }
-        context.encoder().encodeMapEnd();
+        context.encoder().encodeMapEnd(ids.size());
         return context.encoder().getEncodedLength() + context.getHeaderLength();
     }
     context.setStatus(ThingSetStatusCode::unsupportedFormat);
