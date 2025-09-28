@@ -13,18 +13,6 @@ config THINGSET_PLUS_PLUS_CLIENT
 	bool "Enable client"
 	default false
 
-config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE
-	int "Stack size of subscription thread"
-	default 1024
-
-config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY
-	int "Priority of subscription thread"
-	default 5
-
-config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH
-	int "Number of CAN frames that can be stored in the queue"
-	default 12
-
 config THINGSET_PLUS_PLUS_PROTOCOL_TEXT
 	bool "Enable text mode"
 	default true
@@ -37,6 +25,22 @@ config THINGSET_PLUS_PLUS_BACKEND_CAN
 	select ISOTP_FAST
 	select ISOTP_FAST_FIXED_ADDRESSING
 
+if THINGSET_PLUS_PLUS_BACKEND_CAN
+
+config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE
+	int "Stack size of subscription thread"
+	default 1024
+
+config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY
+	int "Priority of subscription thread"
+	default 5
+
+config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH
+	int "Number of CAN frames that can be stored in the queue"
+	default 12
+
+endif
+
 config THINGSET_PLUS_PLUS_BACKEND_SOCKET
 	bool "Enable socket backend"
 	default false
@@ -44,6 +48,26 @@ config THINGSET_PLUS_PLUS_BACKEND_SOCKET
 	select NET_IPV4
 	select NET_TCP
 	select NET_SOCKETS
+
+if THINGSET_PLUS_PLUS_BACKEND_SOCKET
+
+config THINGSET_PLUS_PLUS_SOCKET_ACCEPT_THREAD_STACK_SIZE
+	int "Accept thread stack size"
+	default 1024
+
+config THINGSET_PLUS_PLUS_SOCKET_ACCEPT_THREAD_PRIORITY
+	int "Accept thread priority"
+	default 3
+
+config THINGSET_PLUS_PLUS_SOCKET_HANDLER_THREAD_STACK_SIZE
+	int "Handler thread stack size"
+	default 2048
+
+config THINGSET_PLUS_PLUS_SOCKET_HANDLER_THREAD_PRIORITY
+	int "Handler thread priority"
+	default 2
+
+endif
 
 config THINGSET_PLUS_PLUS_BACKEND_SHELL
 	bool "Enable shell backend"
