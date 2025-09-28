@@ -55,7 +55,7 @@ jobs:
           west build -p -b native_sim/native/64 thingsetplusplus/tests/zephyr/can -T thingset++.ZephyrClientServer
           zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/can -p native_sim/native/64 -v -v
           west build -p -b native_posix/native/64 thingsetplusplus/tests/zephyr/persistence -T thingset++.ZephyrPersistence
-          zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/persistance -p native_posix/native/64 -v -v
+          zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/persistence -p native_posix/native/64 -v -v
 
       - name: Publish Zephyr Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
