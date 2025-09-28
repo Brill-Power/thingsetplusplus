@@ -72,6 +72,19 @@ ASIO_TEST(ExecFunction,
     ASSERT_EQ(5, result);
 )
 
+ASIO_TEST(FetchFunctionParameters,
+    std::vector<int> ids;
+    ASSERT_TRUE(client.fetch(0x1000, ids));
+    ASSERT_EQ(2, ids.size());
+    ASSERT_GE(ids[0], 0x1001);
+    ASSERT_GE(ids[1], 0x1001);
+
+    std::vector<std::string> names;
+    ASSERT_TRUE(client.fetch(std::string("xAddNumber"), names));
+    ASSERT_EQ(2, names.size());
+    ASSERT_STREQ("xAddNumberi32", names[0].substr(0, 13).c_str());
+)
+
 ASIO_TEST(UpdateFloat,
     ASSERT_TRUE(client.update("totalVoltage", 25.0f));
     ASSERT_EQ(25.0, totalVoltage.getValue());

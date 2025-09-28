@@ -78,6 +78,13 @@ public:
         return doRequest(id, ThingSetBinaryRequestType::get, [](auto) { return true; }, &result);
     }
 
+    template <typename Id>
+        requires std::is_integral_v<Id> or std::is_convertible_v<Id, std::string_view>
+    bool fetch(const Id &id, std::vector<Id> &result)
+    {
+        return doRequest(id, ThingSetBinaryRequestType::fetch, [](auto encoder) { return encoder->encodeNull(); }, &result);
+    }
+
     template <typename T> bool update(const std::string &fullyQualifiedName, const T &value)
     {
         size_t index = fullyQualifiedName.find_last_of('/');
@@ -101,7 +108,7 @@ private:
     /// @return True if invocation succeeded, otherwise false.
     template <typename Id, typename T>
         requires std::is_integral_v<Id> or std::is_convertible_v<Id, std::string_view>
-    bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, T *result)
+    bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder *)> encode, T *result)
     {
         uint8_t *responseBuffer;
         size_t responseSize;
@@ -115,7 +122,7 @@ private:
 
     template <typename Id>
         requires std::is_integral_v<Id> or std::is_convertible_v<Id, std::string_view>
-    bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode)
+    bool doRequest(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder *)> encode)
     {
         uint8_t *responseBuffer;
         size_t responseSize;
@@ -124,7 +131,7 @@ private:
 
     template <typename Id>
         requires std::is_integral_v<Id> or std::is_convertible_v<Id, std::string_view>
-    bool doRequestCore(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder*)> encode, uint8_t **responseBuffer, size_t &responseSize)
+    bool doRequestCore(const Id &id, ThingSetBinaryRequestType type, std::function<bool (ThingSetBinaryEncoder *)> encode, uint8_t **responseBuffer, size_t &responseSize)
     {
         _txBuffer[0] = (uint8_t)type;
         FixedDepthThingSetBinaryEncoder encoder(_txBuffer + 1, _txBufferSize - 1);

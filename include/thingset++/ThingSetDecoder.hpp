@@ -68,6 +68,20 @@ public:
     virtual bool skip() = 0;
     bool skipUntil(ThingSetEncodedNodeType sought);
 
+    template <typename T>
+    bool decode(std::vector<T> *list)
+    {
+        return decodeList([&](size_t)
+        {
+            T value;
+            if (this->decode(&value)) {
+                list->push_back(value);
+                return true;
+            }
+            return false;
+        });
+    }
+
     template <typename T, typename U = std::underlying_type_t<T>> requires std::is_enum_v<T>
     bool decode(T *value)
     {
