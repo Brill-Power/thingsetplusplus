@@ -6,6 +6,7 @@
 
 #ifdef CONFIG_THINGSET_PLUS_PLUS_EEPROM
 
+#include "thingset++/ThingSet.hpp"
 #include "thingset++/ThingSetPersistence.hpp"
 #include "thingset++/ThingSetRegistry.hpp"
 #include "thingset++/zephyr/StreamingZephyrEepromThingSetBinaryEncoder.hpp"
@@ -21,7 +22,7 @@ ThingSetPersistence::ThingSetPersistence(const device *device) : _device(device)
 
 bool ThingSetPersistence::load()
 {
-    StreamingZephyrEepromThingSetBinaryDecoder decoder(device, 0);
+    StreamingZephyrEepromThingSetBinaryDecoder decoder(_device, 0);
     return decoder.decodeMap<uint16_t>([&](uint16_t id) {
         ThingSetNode *node;
         if (!ThingSetRegistry::findById(id, &node)) {
@@ -38,27 +39,37 @@ bool ThingSetPersistence::load()
 
 bool ThingSetPersistence::save()
 {
-    StreamingZephyrEepromThingSetBinaryEncoder encoder(device, 0);
+    StreamingZephyrEepromThingSetBinaryEncoder encoder(_device, 0);
     // get count
     size_t count = 0;
     void *target;
-    for (const ThingSetNode *node : ThingSetRegistry::nodesInSubset(Subset::persistence))
+    for (ThingSetNode *node : ThingSetRegistry::nodesInSubset(Subset::persisted))
     {
-        if (child->tryCastTo(ThingSetNodeType::encodable, &target))
+        if (node->tryCastTo(ThingSetNodeType::encodable, &target))
         {
             count++;
         }
     }
-    encoder.encodeMapStart(count);
-    for (const ThingSetNode *node : ThingSetRegistry::nodesInSubset(Subset::persistence))
+    if (!encoder.encodeMapStart(count))
     {
-        if (child->tryCastTo(ThingSetNodeType::encodable, &target))
+        return false;
+    }
+    for (ThingSetNode *node : ThingSetRegistry::nodesInSubset(Subset::persisted))
+    {
+        if (node->tryCastTo(ThingSetNodeType::encodable, &target))
         {
             ThingSetEncodable *encodable = reinterpret_cast<ThingSetEncodable *>(target);
-            encoder.encode(std::make_pair(node->getId(), encodable));
+            if (!encoder.encode(std::make_pair(node->getId(), encodable)))
+            {
+                return false;
+            }
         }
     }
-    encoder.encodeMapEnd(count);
+    if (!encoder.encodeMapEnd(count))
+    {
+        return false;
+    }
+    return encoder.flush();
 }
 
 } // namespace ThingSet

@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <zephyr/device.h>
 
-namespace ThingSet {
+namespace ThingSet::Zephyr {
 
 /// @brief EEPROM header definition, etc.
 class ThingSetEeprom
