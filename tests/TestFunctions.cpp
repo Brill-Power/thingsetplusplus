@@ -32,12 +32,14 @@ ThingSetUserFunction<0x430, 0x0, "xMap", std::map<std::string, float>> xGetMap([
     return map;
 });
 ThingSetFunction<0x440, 0x0, "xTestCustom", ThingSetAccess::anyWrite, 0x4401, void, int, float> xTestCustomFunc(test);
+ThingSetUserFunction<0x450, 0x0, "xString", int, std::string &> xString([](std::string &) { return 0; });
 
 TEST(Functions, FunctionTypes)
 {
     ASSERT_EQ("(i32,f32)->()", xTestFunc.getType());
     ASSERT_EQ("()->()", xVoidVoidFunc.getType());
     ASSERT_EQ("(f32,f32)->(f32)", xFloatLambda.getType());
+    ASSERT_EQ("(string)->(i32)", xString.getType());
 }
 
 TEST(Functions, FunctionParameters)
@@ -53,6 +55,11 @@ TEST(Functions, FunctionParameters)
     ASSERT_TRUE(ThingSetRegistry::findById(0x421, &node));
     ASSERT_EQ(0x420, node->getParentId());
     ASSERT_EQ("xLambdaf32_1", node->getName());
+
+    ASSERT_TRUE(ThingSetRegistry::findById(0x451, &node));
+    ASSERT_EQ(0x450, node->getParentId());
+    ASSERT_EQ("xStringstring_1", node->getName());
+    ASSERT_EQ("string", node->getType());
 }
 
 TEST(Functions, FunctionParametersWithCustomId)

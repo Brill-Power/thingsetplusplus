@@ -58,7 +58,7 @@ private:
 
         const std::string getType() const override
         {
-            return ThingSetType<T>::name.str();
+            return ThingSetType<std::remove_cvref_t<T>>::name.str();
         }
 
         constexpr ThingSetAccess getAccess() const override
@@ -82,7 +82,7 @@ private:
     {
         using Tuple = std::tuple<Args...>;
         using ParameterType = std::tuple_element_t<Index, Tuple>;
-        typedef ThingSetFunctionParameter<FirstArgumentId + 0 + Index, Name + ThingSetType<ParameterType>::name + "_" + to_string_t<1 + Index>(), ParameterType> type;
+        typedef ThingSetFunctionParameter<FirstArgumentId + 0 + Index, Name + ThingSetType<std::remove_cvref_t<ParameterType>>::name + "_" + to_string_t<1 + Index>(), ParameterType> type;
     };
 
     /// @brief The exposed function.
@@ -99,7 +99,7 @@ public:
 
     constexpr const std::string getType() const override
     {
-        return ThingSetType<std::function<Result(Args...)>>::name.str();
+        return ThingSetType<std::function<Result(std::remove_cvref_t<Args>...)>>::name.str();
     }
 
     bool invoke(ThingSetDecoder &decoder, ThingSetEncoder &encoder) override
