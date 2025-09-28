@@ -18,6 +18,7 @@ using namespace ThingSet::Can::Zephyr;
 using namespace ThingSet;
 
 static const struct device *canDevice = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
+static const struct device *eepromDevice = DEVICE_DT_GET(DT_NODELABEL(eeprom1));
 
 std::array<uint8_t, 1024> serverRxBuffer;
 std::array<uint8_t, 1024> serverTxBuffer;
@@ -29,6 +30,8 @@ ThingSetZephyrCanServerTransport serverTransport(serverInterface, serverRxBuffer
 ThingSetZephyrCanClientTransport clientTransport(clientInterface, 0x01, clientRxBuffer, clientTxBuffer);
 
 ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
+
+ThingSetReadWriteProperty<uint32_t, Subset::persisted> identifier { 0x20, 0, "identifier", 1 };
 
 ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
@@ -106,6 +109,15 @@ ZCLIENT_SERVER_TEST(test_update,
     k_sleep(K_MSEC(100)); // `update` is async or something
     zassert_equal(25.0f, totalVoltage.getValue());
 )
+
+ZTEST(ZephyClientServer, test_persistence)
+{
+    ThingSetPersistence persistence(eepromDevice);
+    zassert_true(persistence.save());
+    identifier = 10;
+    zassert_true(persistence.load());
+    zassert_equal(1, identifier.getValue());
+}
 
 static void *testSetup(void)
 {
