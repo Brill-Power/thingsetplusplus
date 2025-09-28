@@ -51,6 +51,30 @@ config THINGSET_PLUS_PLUS_BACKEND_SHELL
 	select SHELL
 	select THINGSET_PLUS_PLUS_PROTOCOL_TEXT
 
+config THINGSET_PLUS_PLUS_EEPROM
+	bool "Enable saving to/loading from EEPROM"
+	default false
+	select EEPROM
+
+if THINGSET_PLUS_PLUS_EEPROM
+
+config THINGSET_PLUS_PLUS_EEPROM_CHUNK_SIZE
+	int "Size of chunked writes to/reads from EEPROM"
+	default 251
+
+config THINGSET_PLUS_PLUS_EEPROM_ACCESS_ATTEMPTS
+	int "Number of times to retry reading from/writing to EEPROM"
+	default 3
+
+config THINGSET_PLUS_PLUS_EEPROM_DATA_VERSION
+	int "Version number of persisted data"
+	range 1 65536
+	default 1
+	help
+	  Increment this if you change the IDs of any persisted objects.
+
+endif
+
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus
 source "../zephyr/subsys/logging/Kconfig.template.log_config"
