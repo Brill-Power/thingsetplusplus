@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 tests:
-  thingset++.ZephyrClientServer:
+  thingset++.ZephyrPersistence:
     integration_platforms:
       - native_posix/native/64
     extra_args: EXTRA_CFLAGS=-Werror
