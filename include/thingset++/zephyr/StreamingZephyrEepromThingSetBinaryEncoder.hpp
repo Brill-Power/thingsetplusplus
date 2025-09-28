@@ -26,11 +26,11 @@ private:
 
 public:
     StreamingZephyrEepromThingSetBinaryEncoder(const device *device, off_t offset) :
-        StreamingThingSetBinaryEncoder(),
+        StreamingThingSetBinaryEncoder<Chunk>(),
         ThingSetEeprom(device, offset + sizeof(EepromHeader)), _initialOffset(offset)
     {
-        zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[0],
-                               _buffer.size(), 1);
+        zcbor_new_encode_state(this->_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &this->_buffer[0],
+                               this->_buffer.size(), 1);
     }
 
     bool write(size_t length, bool flushing) override
@@ -38,7 +38,7 @@ public:
         uint8_t chunk[Chunk];
         int err = 0;
         for (int i = 0; i < CONFIG_THINGSET_PLUS_PLUS_EEPROM_ACCESS_ATTEMPTS; i++) {
-            int err = eeprom_write(_device, _offset, &_buffer[0], length);
+            int err = eeprom_write(_device, _offset, &this->_buffer[0], length);
             if (err) {
                 LOG_WARN("EEPROM write error %d at offset 0x%lx", err, _offset);
                 continue;
@@ -50,7 +50,7 @@ public:
                 continue;
             }
 
-            err = memcmp(&_buffer[0], &chunk[0], length);
+            err = memcmp(&this->_buffer[0], &chunk[0], length);
             if (err) {
                 LOG_WARN("EEPROM data mismatch at offset 0x%lx", _offset);
                 continue;
@@ -64,7 +64,7 @@ public:
             LOG_ERROR("Out of retries, abandoning EEPROM write");
             return false;
         }
-        _crc = crc32_ieee_update(_crc, &_buffer[0], length);
+        _crc = crc32_ieee_update(_crc, &this->_buffer[0], length);
         _offset += length;
         if (flushing) {
             // go back and update header

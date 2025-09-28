@@ -24,7 +24,7 @@ private:
 
 public:
     StreamingZephyrEepromThingSetBinaryDecoder(const device *device, off_t offset) :
-        StreamingThingSetBinaryDecoder<Chunk>(1)
+        StreamingThingSetBinaryDecoder<Chunk>(1),
         ThingSetEeprom(device, offset)
     {
         int result = eeprom_read(device, offset, &_header, sizeof(_header));
@@ -77,9 +77,9 @@ private:
     {
         size_t remaining = _header.data_len - (_offset - _localOffset);
         size_t chunk = MIN(remaining, maxSize);
-        eeprom_read(_device, _offset, &_buffer[pos], chunk);
+        eeprom_read(_device, _offset, &this->_buffer[pos], chunk);
         _offset += chunk;
-        _crc = crc32_ieee_update(_crc, &_buffer[pos], chunk);
+        _crc = crc32_ieee_update(_crc, &this->_buffer[pos], chunk);
         return chunk;
     }
 };
