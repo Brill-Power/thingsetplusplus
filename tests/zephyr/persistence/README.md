@@ -1,13 +1,6 @@
-# Zephyr Client/Server Unit Tests
+# Zephyr Persistence Unit Tests
 
-Tests for Zephyr CAN client and server.
+Tests for Zephyr EEPROM persistence.
 
-Note that the board overlays folder (`overlays`) is so named to hide it from
-the Twister tests that run in CI, where SocketCAN is not available so the loopback
-interface is used instead.
-
-To run the tests using the board overlays, run:
-
-```
-west build -b native_sim/native/64 --extra-dtc-overlay overlays/native_sim_64.overlay -t run
-```
+These target `native_posix(_64)`, not `native_sim(_64)`, because I
+was having some trouble getting the EEPROM emulation to actually work.
