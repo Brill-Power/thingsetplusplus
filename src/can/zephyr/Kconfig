@@ -1,7 +1,7 @@
 # Copyright (c) The ThingSet Project Contributors
 # SPDX-License-Identifier: Apache-2.0
 
-config THINGSET_CAN_FRAME_SEPARATION_TIME
+config THINGSET_PLUS_PLUS_CAN_FRAME_SEPARATION_TIME
 	int "ThingSet CAN minimum frame separation time"
 	range 0 127
 	default 1
@@ -13,7 +13,7 @@ config THINGSET_CAN_FRAME_SEPARATION_TIME
 	  protocol of request/response messages and as a delay between individual
 	  frames of multi-frame reports.
 
-config THINGSET_CAN_REPORT_SEND_TIMEOUT
+config THINGSET_PLUS_PLUS_CAN_REPORT_SEND_TIMEOUT
 	int "ThingSet CAN report send timeout"
 	range 0 100
 	default 30
@@ -21,7 +21,7 @@ config THINGSET_CAN_REPORT_SEND_TIMEOUT
 	  Timeout in milliseconds to wait for a report frame to be successfully
 	  submitted to the CAN TX FIFO.
 
-config THINGSET_CAN_NODE_ADDRESS_MIN
+config THINGSET_PLUS_PLUS_CAN_NODE_ADDRESS_MIN
 	hex "ThingSet CAN minimum node address"
 	range 0x01 0xFD
 	default 0x01
@@ -29,7 +29,7 @@ config THINGSET_CAN_NODE_ADDRESS_MIN
 	  Minimum valid address for a ThingSet CAN node.
 	  Valid range is 0x01-0xFD.
 
-config THINGSET_CAN_NODE_ADDRESS_MAX
+config THINGSET_PLUS_PLUS_CAN_NODE_ADDRESS_MAX
 	hex "ThingSet CAN maximum node address"
 	range 0x01 0xFD
 	default 0xFD

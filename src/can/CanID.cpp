@@ -55,72 +55,72 @@ CanID &CanID::setMask(const uint32_t value)
 
 uint8_t CanID::getSource() const
 {
-    return (_id & sourceMask) >> THINGSET_CAN_ID_POSITION_SOURCE;
+    return (_id & sourceMask) >> THINGSET_PLUS_PLUS_CAN_ID_POSITION_SOURCE;
 }
 
 CanID &CanID::setSource(const uint8_t value)
 {
-    _id = (_id & ~sourceMask) | ((value << THINGSET_CAN_ID_POSITION_SOURCE) & sourceMask);
+    _id = (_id & ~sourceMask) | ((value << THINGSET_PLUS_PLUS_CAN_ID_POSITION_SOURCE) & sourceMask);
     _mask |= sourceMask;
     return *this;
 }
 
 uint8_t CanID::getTarget() const
 {
-    return (_id & targetMask) >> THINGSET_CAN_ID_POSITION_TARGET;
+    return (_id & targetMask) >> THINGSET_PLUS_PLUS_CAN_ID_POSITION_TARGET;
 }
 
 CanID &CanID::setTarget(const uint8_t value)
 {
-    _id = (_id & ~targetMask) | ((value << THINGSET_CAN_ID_POSITION_TARGET) & targetMask);
+    _id = (_id & ~targetMask) | ((value << THINGSET_PLUS_PLUS_CAN_ID_POSITION_TARGET) & targetMask);
     _mask |= targetMask;
     return *this;
 }
 
 uint16_t CanID::getDataID() const
 {
-    return (_id & dataIdMask) >> THINGSET_CAN_ID_POSITION_DATA_ID;
+    return (_id & dataIdMask) >> THINGSET_PLUS_PLUS_CAN_ID_POSITION_DATA_ID;
 }
 
 CanID &CanID::setDataID(const uint16_t value)
 {
-    _id = (_id & ~dataIdMask) | ((value << THINGSET_CAN_ID_POSITION_DATA_ID) & dataIdMask);
+    _id = (_id & ~dataIdMask) | ((value << THINGSET_PLUS_PLUS_CAN_ID_POSITION_DATA_ID) & dataIdMask);
     _mask |= dataIdMask;
     return *this;
 }
 
 uint8_t CanID::getSequenceNumber() const
 {
-    return (_id & sequenceNumberMask) >> THINGSET_CAN_ID_POSITION_SEQ_NO;
+    return (_id & sequenceNumberMask) >> THINGSET_PLUS_PLUS_CAN_ID_POSITION_SEQ_NO;
 }
 
 CanID &CanID::setSequenceNumber(const uint8_t value)
 {
-    _id = (_id & ~sequenceNumberMask) | ((value << THINGSET_CAN_ID_POSITION_SEQ_NO) & sequenceNumberMask);
+    _id = (_id & ~sequenceNumberMask) | ((value << THINGSET_PLUS_PLUS_CAN_ID_POSITION_SEQ_NO) & sequenceNumberMask);
     _mask |= sequenceNumberMask;
     return *this;
 }
 
 uint8_t CanID::getMessageNumber() const
 {
-    return (_id & messageNumberMask) >> THINGSET_CAN_ID_POSITION_MSG_NO;
+    return (_id & messageNumberMask) >> THINGSET_PLUS_PLUS_CAN_ID_POSITION_MSG_NO;
 }
 
 CanID &CanID::setMessageNumber(const uint8_t value)
 {
-    _id = (_id & ~messageNumberMask) | ((value << THINGSET_CAN_ID_POSITION_MSG_NO) & messageNumberMask);
+    _id = (_id & ~messageNumberMask) | ((value << THINGSET_PLUS_PLUS_CAN_ID_POSITION_MSG_NO) & messageNumberMask);
     _mask |= messageNumberMask;
     return *this;
 }
 
 uint8_t CanID::getBridge() const
 {
-    return (_id & bridgeMask) >> THINGSET_CAN_ID_POSITION_BRIDGE;
+    return (_id & bridgeMask) >> THINGSET_PLUS_PLUS_CAN_ID_POSITION_BRIDGE;
 }
 
 CanID &CanID::setBridge(const uint8_t value)
 {
-    _id = (_id & ~bridgeMask) | ((value << THINGSET_CAN_ID_POSITION_BRIDGE) & bridgeMask);
+    _id = (_id & ~bridgeMask) | ((value << THINGSET_PLUS_PLUS_CAN_ID_POSITION_BRIDGE) & bridgeMask);
     _mask |= bridgeMask;
     return *this;
 }

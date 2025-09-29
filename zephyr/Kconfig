@@ -39,6 +39,8 @@ config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH
 	int "Number of CAN frames that can be stored in the queue"
 	default 12
 
+rsource "../src/can/zephyr/Kconfig"
+
 endif
 
 config THINGSET_PLUS_PLUS_BACKEND_SOCKET
@@ -102,7 +104,5 @@ endif
 module = THINGSET_PLUS_PLUS
 module-str = thingsetplusplus
 source "../zephyr/subsys/logging/Kconfig.template.log_config"
-
-rsource "../src/can/zephyr/Kconfig"
 
 endif

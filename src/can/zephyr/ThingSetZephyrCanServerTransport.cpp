@@ -30,7 +30,7 @@ bool ThingSetZephyrCanServerTransport::doPublish(const Can::CanID &id, uint8_t *
     frame.setLength(length);
     frame.setFd(true);
     int result =
-        can_send(_requestResponseContext.getInterface().getDevice(), frame.getFrame(), K_MSEC(CONFIG_THINGSET_CAN_REPORT_SEND_TIMEOUT), nullptr, nullptr);
+        can_send(_requestResponseContext.getInterface().getDevice(), frame.getFrame(), K_MSEC(CONFIG_THINGSET_PLUS_PLUS_CAN_REPORT_SEND_TIMEOUT), nullptr, nullptr);
     return result == 0;
 }
 

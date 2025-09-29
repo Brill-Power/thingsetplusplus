@@ -11,15 +11,15 @@
 #include <iostream>
 #endif // __ZEPHYR__
 
-#define THINGSET_CAN_ID_POSITION_SOURCE   0
-#define THINGSET_CAN_ID_POSITION_TARGET   8
-#define THINGSET_CAN_ID_POSITION_DATA_ID  8
-#define THINGSET_CAN_ID_POSITION_SEQ_NO   8
-#define THINGSET_CAN_ID_POSITION_MF_TYPE  12
-#define THINGSET_CAN_ID_POSITION_MSG_NO   14
-#define THINGSET_CAN_ID_POSITION_BRIDGE   16
-#define THINGSET_CAN_ID_POSITION_TYPE     24
-#define THINGSET_CAN_ID_POSITION_PRIORITY 26
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_SOURCE   0
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_TARGET   8
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_DATA_ID  8
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_SEQ_NO   8
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_MF_TYPE  12
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_MSG_NO   14
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_BRIDGE   16
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_TYPE     24
+#define THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY 26
 
 namespace ThingSet::Can {
 
@@ -27,38 +27,38 @@ namespace ThingSet::Can {
 enum MessageType
 {
     /// @brief Request-response. Uses ISO-TP.
-    requestResponse = 0x0 << THINGSET_CAN_ID_POSITION_TYPE,
+    requestResponse = 0x0 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_TYPE,
     /// @brief Report spread over multiple frames.
-    multiFrameReport = 0x1 << THINGSET_CAN_ID_POSITION_TYPE,
+    multiFrameReport = 0x1 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_TYPE,
     /// @brief Single frame report, also known as a control message.
-    singleFrameReport = 0x2 << THINGSET_CAN_ID_POSITION_TYPE,
+    singleFrameReport = 0x2 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_TYPE,
     /// @brief Network management messages (address claims, etc.).
-    network = 0x3 << THINGSET_CAN_ID_POSITION_TYPE,
+    network = 0x3 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_TYPE,
 };
 
 /// @brief Specifies the sub-type of a multi-frame report.
 enum MultiFrameMessageType
 {
     /// @brief The first frame in a multi-frame report.
-    first = 0x0 << THINGSET_CAN_ID_POSITION_MF_TYPE,
+    first = 0x0 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_MF_TYPE,
     /// @brief A frame that is neither the first nor the last in a multi-frame report.
-    consecutive = 0x1 << THINGSET_CAN_ID_POSITION_MF_TYPE,
+    consecutive = 0x1 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_MF_TYPE,
     /// @brief The last frame in a multi-frame report.
-    last = 0x2 << THINGSET_CAN_ID_POSITION_MF_TYPE,
+    last = 0x2 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_MF_TYPE,
     /// @brief A multi-frame report-type message that fits inside a single frame.
-    single = 0x3 << THINGSET_CAN_ID_POSITION_MF_TYPE,
+    single = 0x3 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_MF_TYPE,
 };
 
 /// @brief Specifies the priority of a message.
 enum MessagePriority
 {
-    controlEmergency = 0x0 << THINGSET_CAN_ID_POSITION_PRIORITY,
-    controlHigh = 0x2 << THINGSET_CAN_ID_POSITION_PRIORITY,
-    controlLow = 0x3 << THINGSET_CAN_ID_POSITION_PRIORITY,
-    networkManagement = 0x4 << THINGSET_CAN_ID_POSITION_PRIORITY,
-    reportHigh = 0x5 << THINGSET_CAN_ID_POSITION_PRIORITY,
-    channel = 0x6 << THINGSET_CAN_ID_POSITION_PRIORITY,
-    reportLow = 0x7 << THINGSET_CAN_ID_POSITION_PRIORITY
+    controlEmergency = 0x0 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY,
+    controlHigh = 0x2 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY,
+    controlLow = 0x3 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY,
+    networkManagement = 0x4 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY,
+    reportHigh = 0x5 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY,
+    channel = 0x6 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY,
+    reportLow = 0x7 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY
 };
 
 /// @brief Encapsulates a CAN ID as used by ThingSet.
@@ -81,15 +81,15 @@ public:
     static const uint8_t defaultBridge = 0x00;
 
 private:
-    static const uint32_t sourceMask = 0xff << THINGSET_CAN_ID_POSITION_SOURCE;
-    static const uint32_t targetMask = 0xff << THINGSET_CAN_ID_POSITION_TARGET;
-    static const uint32_t dataIdMask = 0xffff << THINGSET_CAN_ID_POSITION_DATA_ID;
-    static const uint32_t sequenceNumberMask = 0xf << THINGSET_CAN_ID_POSITION_SEQ_NO;
-    static const uint32_t multiFrameTypeMask = 0x3 << THINGSET_CAN_ID_POSITION_MF_TYPE;
-    static const uint32_t messageNumberMask = 0x3 << THINGSET_CAN_ID_POSITION_MSG_NO;
-    static const uint32_t bridgeMask = 0xff << THINGSET_CAN_ID_POSITION_BRIDGE;
-    static const uint32_t messageTypeMask = 0x3 << THINGSET_CAN_ID_POSITION_TYPE;
-    static const uint32_t messagePriorityMask = 0x7 << THINGSET_CAN_ID_POSITION_PRIORITY;
+    static const uint32_t sourceMask = 0xff << THINGSET_PLUS_PLUS_CAN_ID_POSITION_SOURCE;
+    static const uint32_t targetMask = 0xff << THINGSET_PLUS_PLUS_CAN_ID_POSITION_TARGET;
+    static const uint32_t dataIdMask = 0xffff << THINGSET_PLUS_PLUS_CAN_ID_POSITION_DATA_ID;
+    static const uint32_t sequenceNumberMask = 0xf << THINGSET_PLUS_PLUS_CAN_ID_POSITION_SEQ_NO;
+    static const uint32_t multiFrameTypeMask = 0x3 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_MF_TYPE;
+    static const uint32_t messageNumberMask = 0x3 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_MSG_NO;
+    static const uint32_t bridgeMask = 0xff << THINGSET_PLUS_PLUS_CAN_ID_POSITION_BRIDGE;
+    static const uint32_t messageTypeMask = 0x3 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_TYPE;
+    static const uint32_t messagePriorityMask = 0x7 << THINGSET_PLUS_PLUS_CAN_ID_POSITION_PRIORITY;
 
 public:
     CanID();

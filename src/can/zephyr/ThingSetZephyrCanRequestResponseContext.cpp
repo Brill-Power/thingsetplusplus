@@ -28,7 +28,7 @@ struct IsoTpFastAddress : public isotp_fast_addr {
 
 const isotp_fast_opts ThingSetZephyrCanRequestResponseContext::flowControlOptions = {
     .bs = 8, /* block size */
-    .stmin = CONFIG_THINGSET_CAN_FRAME_SEPARATION_TIME,
+    .stmin = CONFIG_THINGSET_PLUS_PLUS_CAN_FRAME_SEPARATION_TIME,
 #ifdef CONFIG_CAN_FD_MODE
     .flags = ISOTP_MSG_FDF,
 #endif
