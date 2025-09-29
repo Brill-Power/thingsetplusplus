@@ -68,7 +68,7 @@ config THINGSET_PLUS_PLUS_EEPROM_ACCESS_ATTEMPTS
 
 config THINGSET_PLUS_PLUS_EEPROM_DATA_VERSION
 	int "Version number of persisted data"
-	range 1 65536
+	range 1 65535
 	default 1
 	help
 	  Increment this if you change the IDs of any persisted objects.
