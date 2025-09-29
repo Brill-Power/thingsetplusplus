@@ -232,7 +232,7 @@ void _ThingSetSocketServerTransport::runHandler()
                         setBlocking(clientSocketHandle, true);
                         int sent;
                         for (uint8_t *txB = txBuf; txLen; txLen -= sent) {
-                            sent = send(clientSocketHandle, txBuf, txLen, 0);
+                            sent = send(clientSocketHandle, txB, txLen, 0);
                             if (sent < 0) {
                                 LOG_ERROR("Send to %x failed with error %d", addr.sin_addr.s_addr, errno);
                                 break;
