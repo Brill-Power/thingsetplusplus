@@ -1,0 +1,5 @@
+/ {
+	chosen {
+		thingset,eeprom = &eeprom0;
+	};
+};

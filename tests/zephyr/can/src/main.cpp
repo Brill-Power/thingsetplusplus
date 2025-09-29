@@ -30,6 +30,8 @@ ThingSetZephyrCanClientTransport clientTransport(clientInterface, 0x01, clientRx
 
 ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
+ThingSetReadWriteProperty<uint32_t, Subset::persisted> identifier { 0x20, 0, "identifier", 1 };
+
 ThingSetUserFunction<0x1000, 0x0, "xAddNumber", int, int, int> doSomething([](auto x, auto y) { return x + y; });
 
 k_thread serverThread;

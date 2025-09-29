@@ -41,6 +41,7 @@ if(ENABLE_CAN OR ENABLE_SOCKETCAN)
 endif()
 
 if(ENABLE_ZEPHYR)
-    target_sources(thingset++ PRIVATE ZephyrLogRegistration.cpp)
+    target_sources(thingset++ PRIVATE ThingSetPersistence.cpp
+        ZephyrLogRegistration.cpp)
     add_subdirectory(zephyr)
 endif()
