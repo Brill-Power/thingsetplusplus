@@ -5,6 +5,7 @@
  */
 
 #include "thingset++/ThingSetRequestContext.hpp"
+#include "thingset++/internal/logging.hpp"
 
 namespace ThingSet {
 
@@ -80,6 +81,9 @@ size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLe
                 nodeId = std::string(&req[2], &req[2] + length);
                 *request = &(*request)[1 + 1 + length]; // request byte plus CBOR header
                 return requestLength - (1 + 1 + length);
+            } else {
+                LOG_WARN("Invalid request; node ID too long.");
+                return 0;
             }
         }
         return 0;
@@ -104,7 +108,7 @@ size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLe
         size_t newPathLength = path().length() - nodeId.length() - 2;
         // write new string header
         // depending on string length need 1 or 2 bytes to
-        if (newPathLength < 25) {
+        if (newPathLength <= ZCBOR_VALUE_IN_HEADER) {
             (*request)[--newPathStart] = 0x60 | newPathLength;
         } else {
             (*request)[--newPathStart] = newPathLength;
