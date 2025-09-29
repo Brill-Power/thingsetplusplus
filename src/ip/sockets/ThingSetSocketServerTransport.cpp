@@ -178,7 +178,7 @@ void _ThingSetSocketServerTransport::runAcceptor()
 
 static void setBlocking(int fd, bool val)
 {
-	int fl, res;
+	int fl;
 
 	fl = FCNTL(fd, F_GETFL, 0);
     __ASSERT(fl != -1, "fcntl(F_GETFL): %d", errno);
@@ -189,7 +189,7 @@ static void setBlocking(int fd, bool val)
 		fl |= O_NONBLOCK;
 	}
 
-	res = FCNTL(fd, F_SETFL, fl);
+	FCNTL(fd, F_SETFL, fl);
     __ASSERT(fl != -1, "fcntl(F_SETFL): %d", errno);
 }
 
