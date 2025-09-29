@@ -970,7 +970,7 @@ int isotp_fast_bind(struct isotp_fast_ctx *ctx, const struct device *can_dev,
     prepare_filter(&filter, rx_addr.ext_id, opts);
     ctx->filter_id = can_add_rx_filter(ctx->can_dev, can_rx_callback, ctx, &filter);
 
-    LOG_INF("Successfully bound to %x:%x", filter.id, filter.mask);
+    LOG_DBG("Successfully bound to %x:%x", filter.id, filter.mask);
 
     return ISOTP_N_OK;
 }

@@ -14,15 +14,12 @@
 #include <zephyr/kernel.h>
 #include <zephyr/posix/fcntl.h>
 
-#define ACCEPT_THREAD_STACK_SIZE  1024
-#define ACCEPT_THREAD_PRIORITY    3
-#define HANDLER_THREAD_STACK_SIZE 4096
-#define HANDLER_THREAD_PRIORITY   2
+#define FCNTL zsock_fcntl
 
-K_THREAD_STACK_DEFINE(acceptThreadStack, ACCEPT_THREAD_STACK_SIZE);
+K_THREAD_STACK_DEFINE(acceptThreadStack, CONFIG_THINGSET_PLUS_PLUS_SOCKET_ACCEPT_THREAD_STACK_SIZE);
 static struct k_thread acceptThread;
 
-K_THREAD_STACK_DEFINE(handlerThreadStack, HANDLER_THREAD_STACK_SIZE);
+K_THREAD_STACK_DEFINE(handlerThreadStack, CONFIG_THINGSET_PLUS_PLUS_SOCKET_HANDLER_THREAD_STACK_SIZE);
 static struct k_thread handlerThread;
 #else
 #include "thingset++/ip/InterfaceInfo.hpp"
@@ -32,6 +29,7 @@ static struct k_thread handlerThread;
 #include <iostream>
 
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
+#define FCNTL fcntl
 #endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
@@ -129,7 +127,7 @@ bool _ThingSetSocketServerTransport::publish(uint8_t *buffer, size_t len)
 
 void _ThingSetSocketServerTransport::runAcceptor()
 {
-    if (fcntl(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
+    if (FCNTL(_listenSocketHandle, F_SETFL, O_NONBLOCK) != 0)  {
         LOG_ERROR("Failed to configure socket: %d", errno);
         // this isn't technically a fatal error; it just means we
         // won't get a clean shutdown, because we'll never be able
@@ -178,6 +176,23 @@ void _ThingSetSocketServerTransport::runAcceptor()
     LOG_INFO("Shut down acceptor thread");
 }
 
+static void setBlocking(int fd, bool val)
+{
+	int fl, res;
+
+	fl = FCNTL(fd, F_GETFL, 0);
+    __ASSERT(fl != -1, "fcntl(F_GETFL): %d", errno);
+
+	if (val) {
+		fl &= ~O_NONBLOCK;
+	} else {
+		fl |= O_NONBLOCK;
+	}
+
+	res = FCNTL(fd, F_SETFL, fl);
+    __ASSERT(fl != -1, "fcntl(F_SETFL): %d", errno);
+}
+
 void _ThingSetSocketServerTransport::runHandler()
 {
     while (_runHandler) {
@@ -214,7 +229,17 @@ void _ThingSetSocketServerTransport::runHandler()
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
                     int txLen = _callback(addr, rxBuf, rxLen, txBuf, sizeof(txBuf));
                     if (txLen > 0) {
-                        send(clientSocketHandle, txBuf, txLen, 0);
+                        setBlocking(clientSocketHandle, true);
+                        int sent;
+                        for (uint8_t *txB = txBuf; txLen; txLen -= sent) {
+                            sent = send(clientSocketHandle, txB, txLen, 0);
+                            if (sent < 0) {
+                                LOG_ERROR("Send to %x failed with error %d", addr.sin_addr.s_addr, errno);
+                                break;
+                            }
+                            txB += sent;
+                        }
+                        setBlocking(clientSocketHandle, false);
                     }
                 }
             }
@@ -243,10 +268,10 @@ ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : _T
 void ThingSetSocketServerTransport::startThreads()
 {
     _handlerThreadId = k_thread_create(&handlerThread, handlerThreadStack, K_THREAD_STACK_SIZEOF(handlerThreadStack),
-                                       runHandler, this, NULL, NULL, HANDLER_THREAD_PRIORITY, 0, K_NO_WAIT);
+                                       runHandler, this, NULL, NULL, CONFIG_THINGSET_PLUS_PLUS_SOCKET_HANDLER_THREAD_PRIORITY, 0, K_NO_WAIT);
 
     _acceptorThreadId = k_thread_create(&acceptThread, acceptThreadStack, K_THREAD_STACK_SIZEOF(acceptThreadStack),
-                                        runAcceptor, this, NULL, NULL, ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
+                                        runAcceptor, this, NULL, NULL, CONFIG_THINGSET_PLUS_PLUS_SOCKET_ACCEPT_THREAD_PRIORITY, 0, K_NO_WAIT);
 }
 
 void ThingSetSocketServerTransport::runAcceptor(void *p1, void *, void *)

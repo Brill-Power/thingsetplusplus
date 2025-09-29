@@ -17,7 +17,7 @@ if(BSD)
 endif()
 
 if (ENABLE_TEXT_MODE)
-    add_definitions(-DENABLE_TEXT_MODE)
+    target_compile_definitions(thingset++ PUBLIC ENABLE_TEXT_MODE)
 endif()
 
 target_sources(zcbor PRIVATE zcbor/src/zcbor_common.c

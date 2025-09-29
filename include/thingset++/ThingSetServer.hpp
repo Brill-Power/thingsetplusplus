@@ -110,7 +110,8 @@ public:
 private:
     int requestCallback(Identifier &, uint8_t *request, size_t requestLen, uint8_t *response, size_t responseLen)
     {
-        if (request[0] >= ThingSetBinaryRequestType::get && request[0] <= ThingSetBinaryRequestType::report)
+        if ((request[0] >= ThingSetBinaryRequestType::get && request[0] <= ThingSetBinaryRequestType::update)
+        || request[0] == ThingSetBinaryRequestType::forward)
         {
             return handleBinaryRequest(request, requestLen, response, responseLen);
         }
