@@ -2,6 +2,11 @@ target_sources(thingset++ PRIVATE
     SocketEndpoint.cpp
 )
 
+if(ENABLE_ZEPHYR)
+    target_sources(thingset++ PRIVATE
+        NetworkManagement.cpp)
+endif()
+
 if(ENABLE_CLIENT)
     target_sources(thingset++ PRIVATE
         ThingSetSocketClientTransport.cpp

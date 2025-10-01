@@ -44,10 +44,6 @@ private:
     int _listenSocketHandle;
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
 
-    #ifdef __ZEPHYR__
-    void wait_for_network_ready(void);
-    #endif // #ifdef __ZEPHYR__
-
 protected:
     bool _runHandler;
     bool _runAcceptor;
@@ -55,9 +51,9 @@ protected:
     _ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet);
     void updateAddresses(const std::pair<in_addr, in_addr> &ipAddressAndSubnet);
 
-    #ifdef __ZEPHYR__
+#ifdef __ZEPHYR__
     std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface);
-    #endif // #ifdef __ZEPHYR__
+#endif // #ifdef __ZEPHYR__
     std::pair<in_addr, in_addr> getIpAndSubnetForInterface(const std::string &interface);
 
 public:

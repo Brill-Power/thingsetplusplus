@@ -69,6 +69,10 @@ config THINGSET_PLUS_PLUS_SOCKET_HANDLER_THREAD_PRIORITY
 	int "Handler thread priority"
 	default 2
 
+config THINGSET_PLUS_PLUS_NET_RDY_TIMEOUT
+	int "Timeout period in seconds when waiting for network to come up at boot"
+	default 60
+
 endif
 
 config THINGSET_PLUS_PLUS_BACKEND_SHELL
