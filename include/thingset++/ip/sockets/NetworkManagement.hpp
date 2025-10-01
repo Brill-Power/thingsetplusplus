@@ -18,7 +18,7 @@ namespace ThingSet::Ip::Sockets {
  *
  * This works for both DHCP and static IP configurations.
  */
-void wait_for_network_ready(void);
+void waitForNetworkReady(void);
 
 } // namespace ThingSet::Ip::Sockets
 

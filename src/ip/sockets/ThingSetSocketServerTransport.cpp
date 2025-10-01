@@ -93,7 +93,7 @@ bool _ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoi
 {
 #if defined(__ZEPHYR__)
     // Ensure network is ready (should already be done by SYS_INIT in NetworkInit.cpp)
-    wait_for_network_ready();
+    waitForNetworkReady();
 
     // Update addresses with the current IP
     net_if *iface = net_if_get_default();

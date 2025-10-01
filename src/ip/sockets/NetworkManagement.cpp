@@ -14,41 +14,41 @@
 
 namespace ThingSet::Ip::Sockets {
 
-static K_SEM_DEFINE(network_ready_sem, 0, 1);
-static struct net_mgmt_event_callback network_mgmt_cb;
-static bool network_ready = false;
+static K_SEM_DEFINE(networkReady_sem, 0, 1);
+static struct net_mgmt_event_callback networkMgmtCb;
+static bool networkReady = false;
 
-static void network_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event,
+static void networkEventHandler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event,
                                    struct net_if *iface)
 {
     if (mgmt_event == NET_EVENT_IPV4_ADDR_ADD) {
         LOG_INFO("IPV4 address added");
-        network_ready = true;
-        k_sem_give(&network_ready_sem);
+        networkReady = true;
+        k_sem_give(&networkReady_sem);
     }
 }
 
-static int network_callback_init(void)
+static int networkCallbackInit(void)
 {
-    net_mgmt_init_event_callback(&network_mgmt_cb, network_event_handler,
+    net_mgmt_init_event_callback(&networkMgmtCb, networkEventHandler,
                                  NET_EVENT_IPV4_ADDR_ADD);
-    net_mgmt_add_event_callback(&network_mgmt_cb);
+    net_mgmt_add_event_callback(&networkMgmtCb);
 
     return 0;
 }
 
-SYS_INIT(network_callback_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
+SYS_INIT(networkCallbackInit, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
 
-void wait_for_network_ready(void)
+void waitForNetworkReady(void)
 {
-    if (network_ready) {
+    if (networkReady) {
         return;
     }
 
     net_if *iface = net_if_get_default();
     if (!iface) {
         LOG_WARN("No default network interface found");
-        network_ready = true;
+        networkReady = true;
         return;
     }
 
@@ -57,18 +57,18 @@ void wait_for_network_ready(void)
         for (int i = 0; i < NET_IF_MAX_IPV4_ADDR; i++) {
             if (ipConfig->unicast[i].ipv4.addr_state == NET_ADDR_PREFERRED) {
                 LOG_INFO("Network already connected");
-                network_ready = true;
+                networkReady = true;
                 return;
             }
         }
     }
 
     LOG_INFO("Waiting for network connectivity...");
-    if (k_sem_take(&network_ready_sem, K_SECONDS(CONFIG_THINGSET_PLUS_PLUS_NET_RDY_TIMEOUT)) == 0) {
+    if (k_sem_take(&networkReady_sem, K_SECONDS(CONFIG_THINGSET_PLUS_PLUS_NET_RDY_TIMEOUT)) == 0) {
         LOG_INFO("Network connectivity established");
     } else {
         LOG_WARN("Network connectivity timeout, proceeding anyway");
-        network_ready = true;
+        networkReady = true;
     }
 }
 
