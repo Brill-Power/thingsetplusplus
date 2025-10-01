@@ -13,6 +13,8 @@
 #include "thingset++/ip/sockets/ZephyrStubs.h"
 #include <zephyr/kernel.h>
 #include <zephyr/posix/fcntl.h>
+#include <zephyr/net/net_event.h>
+#include <zephyr/net/net_mgmt.h>
 
 #define FCNTL zsock_fcntl
 
@@ -40,8 +42,7 @@ _ThingSetSocketServerTransport::PollDescriptor::PollDescriptor()
     events = POLLIN;
 }
 
-_ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
-    : _publishSocketHandle(-1), _listenSocketHandle(-1), _runHandler(true), _runAcceptor(true)
+void _ThingSetSocketServerTransport::updateAddresses(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
 {
     // calculate broadcast address
     _broadcastAddress.sin_family = AF_INET;
@@ -55,6 +56,17 @@ _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<i
     _publishAddress.sin_family = AF_INET;
     _publishAddress.sin_port = 0;
 
+    // local address of listener
+    _listenAddress.sin_addr = ipAddressAndSubnet.first;
+    _listenAddress.sin_family = AF_INET;
+    _listenAddress.sin_port = htons(9001);
+}
+
+_ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
+    : _publishSocketHandle(-1), _listenSocketHandle(-1), _runHandler(true), _runAcceptor(true)
+{
+    updateAddresses(ipAddressAndSubnet);
+
     _publishSocketHandle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     __ASSERT(_publishSocketHandle >= 0, "Failed to create publish socket: %d", errno);
 
@@ -65,11 +77,6 @@ _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<i
     ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_BROADCAST, &optionValue, sizeof(optionValue));
     __ASSERT(ret == 0, "Failed to configure publish socket: %d", errno);
 #endif
-
-    // local address of listener
-    _listenAddress.sin_addr = ipAddressAndSubnet.first;
-    _listenAddress.sin_family = AF_INET;
-    _listenAddress.sin_port = htons(9001);
 
     _listenSocketHandle = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     __ASSERT(_listenSocketHandle >= 0, "Failed to create listen socket: %d", errno);
@@ -85,11 +92,32 @@ _ThingSetSocketServerTransport::~_ThingSetSocketServerTransport()
 
 bool _ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
+#if defined(__ZEPHYR__)
+    net_if *iface = net_if_get_default();
+    if (iface) {
+#if defined(CONFIG_NET_DHCPV4)
+        // Wait for network to be ready before binding
+        this->wait_for_network_ready();
+#endif // #if defined(CONFIG_NET_DHCPV4)
+        // Update addresses with the current IP (either DHCP or static)
+        updateAddresses(_ThingSetSocketServerTransport::getIpAndSubnetForInterface(iface));
+    }
+#endif // #if defined(__ZEPHYR__)
+
+    char ip_str[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &_publishAddress.sin_addr, ip_str, sizeof(ip_str));
+    LOG_INFO("Binding publish socket to %s:%d", ip_str, ntohs(_publishAddress.sin_port));
+
     if (bind(_publishSocketHandle, (struct sockaddr *)&_publishAddress, sizeof(_publishAddress))) {
+        LOG_ERROR("Failed to bind publish socket: %d", errno);
         return false;
     }
 
+    inet_ntop(AF_INET, &_listenAddress.sin_addr, ip_str, sizeof(ip_str));
+    LOG_INFO("Binding listen socket to %s:%d", ip_str, ntohs(_listenAddress.sin_port));
+
     if (bind(_listenSocketHandle, (struct sockaddr *)&_listenAddress, sizeof(_listenAddress))) {
+        LOG_ERROR("Failed to bind listen socket: %d", errno);
         return false;
     }
 
@@ -250,7 +278,82 @@ void _ThingSetSocketServerTransport::runHandler()
 }
 
 #ifdef __ZEPHYR__
-static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
+#if defined(CONFIG_NET_DHCPV4)
+static K_SEM_DEFINE(dhcp_ready_sem, 0, 1);
+static K_SEM_DEFINE(network_ready_sem, 0, 1);
+static struct net_mgmt_event_callback dhcp_mgmt_cb;
+
+K_THREAD_STACK_DEFINE(dhcp_wait_thread_stack, 1024);
+static struct k_thread dhcp_wait_thread_data;
+
+static void dhcp_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event,
+                                struct net_if *iface)
+{
+    if (mgmt_event == NET_EVENT_IPV4_DHCP_BOUND) {
+        k_sem_give(&dhcp_ready_sem);
+    }
+}
+
+static void dhcp_wait_thread_fn(void *p1, void *p2, void *p3)
+{
+    net_if *iface = net_if_get_default();
+    if (!iface) {
+        LOG_WARN("No default network interface found");
+        k_sem_give(&network_ready_sem);
+        return;
+    }
+
+    // Check if interface already has a valid address
+    net_if_ipv4 *ipConfig;
+    if (net_if_config_ipv4_get(iface, &ipConfig) == 0 && ipConfig) {
+        bool has_valid_address = false;
+        for (int i = 0; i < NET_IF_MAX_IPV4_ADDR; i++) {
+            if (ipConfig->unicast[i].ipv4.addr_state == NET_ADDR_PREFERRED) {
+                has_valid_address = true;
+                break;
+            }
+        }
+
+        if (has_valid_address) {
+            LOG_INFO("Network address already configured");
+            k_sem_give(&network_ready_sem);
+            return;
+        }
+    }
+
+    LOG_INFO("Waiting for DHCP address...");
+    if (k_sem_take(&dhcp_ready_sem, K_SECONDS(60)) == 0) {
+        LOG_INFO("DHCP address acquired");
+    } else {
+        LOG_WARN("DHCP timeout, proceeding with current configuration");
+    }
+
+    k_sem_give(&network_ready_sem);
+}
+
+static void start_dhcp_wait_thread(void)
+{
+    static bool thread_started = false;
+    if (!thread_started) {
+        net_mgmt_init_event_callback(&dhcp_mgmt_cb, dhcp_event_handler, NET_EVENT_IPV4_DHCP_BOUND);
+        net_mgmt_add_event_callback(&dhcp_mgmt_cb);
+
+        k_thread_create(&dhcp_wait_thread_data, dhcp_wait_thread_stack,
+                        K_THREAD_STACK_SIZEOF(dhcp_wait_thread_stack),
+                        dhcp_wait_thread_fn, NULL, NULL, NULL,
+                        K_PRIO_COOP(7), 0, K_NO_WAIT);
+        k_thread_name_set(&dhcp_wait_thread_data, "dhcp_wait");
+        thread_started = true;
+    }
+}
+
+void _ThingSetSocketServerTransport::wait_for_network_ready(void)
+{
+    k_sem_take(&network_ready_sem, K_FOREVER);
+}
+#endif // defined(CONFIG_NET_DHCPV4)
+
+std::pair<in_addr, in_addr> _ThingSetSocketServerTransport::getIpAndSubnetForInterface(net_if *iface)
 {
     // find IP address associated with interface
     net_if_ipv4 *ipConfig;
@@ -262,8 +365,12 @@ static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
 ThingSetSocketServerTransport::ThingSetSocketServerTransport() : ThingSetSocketServerTransport(net_if_get_default())
 {}
 
-ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(iface))
-{}
+ThingSetSocketServerTransport::ThingSetSocketServerTransport(net_if *iface) : _ThingSetSocketServerTransport(_ThingSetSocketServerTransport::getIpAndSubnetForInterface(iface))
+{
+#if defined(CONFIG_NET_DHCPV4)
+    start_dhcp_wait_thread();
+#endif
+}
 
 void ThingSetSocketServerTransport::startThreads()
 {
@@ -297,7 +404,7 @@ static std::pair<in_addr, in_addr> getLocalIpAndSubnet()
     return std::make_pair(ipAddress, subnet);
 }
 
-static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(const std::string &interface)
+std::pair<in_addr, in_addr> _ThingSetSocketServerTransport::getIpAndSubnetForInterface(const std::string &interface)
 {
     in_addr address;
     in_addr subnet;
@@ -308,7 +415,7 @@ static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(const std::string 
 ThingSetSocketServerTransport::ThingSetSocketServerTransport() : _ThingSetSocketServerTransport(getLocalIpAndSubnet())
 {}
 
-ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::string &interface) : _ThingSetSocketServerTransport(getIpAndSubnetForInterface(interface))
+ThingSetSocketServerTransport::ThingSetSocketServerTransport(const std::string &interface) : _ThingSetSocketServerTransport(_ThingSetSocketServerTransport::getIpAndSubnetForInterface(interface))
 {}
 
 ThingSetSocketServerTransport::~ThingSetSocketServerTransport()
