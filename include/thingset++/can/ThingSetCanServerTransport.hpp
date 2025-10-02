@@ -34,30 +34,21 @@ public:
 
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
 
-    template <EncodableNode... Property>
-    bool sendControl(Property &...properties)
+    template <typename T>
+    bool sendControl(uint16_t id, T value)
     {
+        static CanID canId = CanID()
+            .setSource(getInterface().getNodeAddress())
+            .setDataID(id)
+            .setMessageType(MessageType::singleFrameReport)
+            .setMessagePriority(MessagePriority::reportLow);
+
         static uint8_t buffer[CAN_MAX_DLEN];
 
-        ([&]() {
-            FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
+        FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
+        encoder.encode(value);
 
-            if (!encoder.encode(properties)) {
-                return false;
-            }
-
-            CanID canId = CanID()
-                .setSource(getInterface().getNodeAddress())
-                .setDataID(properties.getId())
-                .setMessageType(MessageType::singleFrameReport)
-                .setMessagePriority(MessagePriority::reportLow);
-
-            if (!doPublish(canId, buffer, encoder.getEncodedLength())) {
-                return false;;
-            }
-        }(), ...);
-
-        return true;
+        return doPublish(canId, buffer, encoder.getEncodedLength());
     }
 
     template <EncodableNode... Property>
