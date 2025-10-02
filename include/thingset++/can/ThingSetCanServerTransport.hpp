@@ -12,6 +12,9 @@
 
 namespace ThingSet::Can {
 
+template <typename T>
+concept EncodableNode = std::is_base_of_v<ThingSet::ThingSetNode, T> && std::is_base_of_v<ThingSet::ThingSetEncodable, T>;
+
 class ThingSetCanServerTransport : public ThingSetServerTransport<CanID, THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE, StreamingCanThingSetBinaryEncoder>
 {
 protected:
@@ -45,6 +48,34 @@ public:
         encoder.encode(value);
 
         return doPublish(canId, buffer, encoder.getEncodedLength());
+    }
+
+    template <EncodableNode... Property>
+    bool sendControl(Property &...properties)
+    {
+        bool allSucceeded = true;
+        static uint8_t buffer[CAN_MAX_DLEN];
+
+        ([&]() {
+            FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
+
+            if (!encoder.encode(properties)) {
+                allSucceeded = false;
+                return;
+            }
+
+            CanID canId = CanID()
+                .setSource(getInterface().getNodeAddress())
+                .setDataID(properties.getId())
+                .setMessageType(MessageType::singleFrameReport)
+                .setMessagePriority(MessagePriority::reportLow);
+
+            if (!doPublish(canId, buffer, encoder.getEncodedLength())) {
+                allSucceeded = false;
+            }
+        }(), ...);
+
+        return allSucceeded;
     }
 };
 
