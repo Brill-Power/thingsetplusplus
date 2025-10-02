@@ -53,15 +53,13 @@ public:
     template <EncodableNode... Property>
     bool sendControl(Property &...properties)
     {
-        bool allSucceeded = true;
         static uint8_t buffer[CAN_MAX_DLEN];
 
         ([&]() {
             FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
 
             if (!encoder.encode(properties)) {
-                allSucceeded = false;
-                return;
+                return false;
             }
 
             CanID canId = CanID()
@@ -71,11 +69,11 @@ public:
                 .setMessagePriority(MessagePriority::reportLow);
 
             if (!doPublish(canId, buffer, encoder.getEncodedLength())) {
-                allSucceeded = false;
+                return false;;
             }
         }(), ...);
 
-        return allSucceeded;
+        return true;
     }
 };
 
