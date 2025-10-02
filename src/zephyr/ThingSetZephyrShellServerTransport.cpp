@@ -14,9 +14,9 @@ namespace ThingSet::Zephyr {
 ThingSetZephyrShellServerTransport::ThingSetZephyrShellServerTransport()
 {}
 
-StreamingZephyrShellThingSetBinaryEncoder ThingSetZephyrShellServerTransport::getPublishingEncoder()
+StreamingZephyrShellThingSetBinaryEncoder ThingSetZephyrShellServerTransport::getPublishingEncoder(bool enhanced)
 {
-    return StreamingZephyrShellThingSetBinaryEncoder();
+    return StreamingZephyrShellThingSetBinaryEncoder(enhanced);
 }
 
 bool ThingSetZephyrShellServerTransport::listen(std::function<int(const EmptyIdentifier &, uint8_t *, size_t, uint8_t *, size_t)> callback)

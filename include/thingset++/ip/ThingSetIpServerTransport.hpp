@@ -22,8 +22,8 @@ protected:
     {}
 
 public:
-    StreamingUdpThingSetBinaryEncoder<Identifier> getPublishingEncoder() override {
-        return StreamingUdpThingSetBinaryEncoder<Identifier>(*this);
+    StreamingUdpThingSetBinaryEncoder<Identifier> getPublishingEncoder(bool enhanced) override {
+        return StreamingUdpThingSetBinaryEncoder<Identifier>(*this, enhanced);
     }
 
     /// @brief Publish a request using a broadcast mechanism appropriate to the underlying

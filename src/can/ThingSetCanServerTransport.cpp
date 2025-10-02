@@ -15,9 +15,9 @@ uint8_t ThingSetCanServerTransport::getNodeAddress()
     return getInterface().getNodeAddress();
 }
 
-StreamingCanThingSetBinaryEncoder ThingSetCanServerTransport::getPublishingEncoder()
+StreamingCanThingSetBinaryEncoder ThingSetCanServerTransport::getPublishingEncoder(bool enhanced)
 {
-    return StreamingCanThingSetBinaryEncoder(*this);
+    return StreamingCanThingSetBinaryEncoder(*this, enhanced);
 }
 
 bool ThingSetCanServerTransport::publish(CanID &id, uint8_t *buffer, size_t length)

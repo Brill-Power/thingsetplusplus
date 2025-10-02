@@ -8,7 +8,7 @@
 
 namespace ThingSet::Zephyr {
 
-StreamingZephyrShellThingSetBinaryEncoder::StreamingZephyrShellThingSetBinaryEncoder()
+StreamingZephyrShellThingSetBinaryEncoder::StreamingZephyrShellThingSetBinaryEncoder(bool enhanced)
 {}
 
 bool StreamingZephyrShellThingSetBinaryEncoder::write(size_t length, bool)

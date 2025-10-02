@@ -27,6 +27,7 @@ enum struct ThingSetBinaryRequestType : uint8_t
     /// @brief Forward a request to another node
     forward = 0x1c,
     desire = 0x1d,
+    enhancedReport = 0x1e,
     report = 0x1f
 };
 

@@ -26,7 +26,7 @@ public:
     /// @return True.
     virtual bool listen(std::function<int(const Identifier &, uint8_t *, size_t, uint8_t *, size_t)> callback) = 0;
 
-    virtual Encoder getPublishingEncoder() = 0;
+    virtual Encoder getPublishingEncoder(bool enhanced) = 0;
 };
 
 } // namespace ThingSet

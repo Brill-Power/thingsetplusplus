@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "thingset++/Eui.hpp"
 #include "thingset++/StringLiteral.hpp"
 #include "thingset++/ThingSetProperty.hpp"
 #include "thingset++/ThingSetRequestContext.hpp"
@@ -96,8 +97,21 @@ public:
     /// @return True if publishing succeeded.
     template <EncodableNode... Property> bool publish(Property &...properties)
     {
-        Encoder encoder = _transport.getPublishingEncoder();
+        Encoder encoder = _transport.getPublishingEncoder(false);
         if (!encoder.encode(0) || // fake subset ID
+            !encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
+            || !encoder.encodeMapEnd())
+        {
+            return false;
+        }
+        return encoder.flush();
+    }
+
+    template <EncodableDecodableNode... Property> bool publishEnhanced(Property &...properties)
+    {
+        Encoder encoder = _transport.getPublishingEncoder(true);
+        if (!encoder.encode(0) || // fake subset ID
+            !encoder.encode(ThingSet::Eui::getValue()) ||
             !encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
             || !encoder.encodeMapEnd())
         {

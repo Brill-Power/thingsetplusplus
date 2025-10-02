@@ -16,7 +16,7 @@ class ThingSetZephyrShellServerTransport;
 class StreamingZephyrShellThingSetBinaryEncoder : public StreamingThingSetBinaryEncoder<CONFIG_SHELL_CMD_BUFF_SIZE>
 {
 public:
-    StreamingZephyrShellThingSetBinaryEncoder();
+    StreamingZephyrShellThingSetBinaryEncoder(bool enhanced);
 
 protected:
     bool write(size_t length, bool) override;

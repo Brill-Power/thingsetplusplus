@@ -24,7 +24,7 @@ private:
     ThingSetZephyrShellServerTransport(ThingSetZephyrShellServerTransport &&) = delete;
 
 public:
-    StreamingZephyrShellThingSetBinaryEncoder getPublishingEncoder() override;
+    StreamingZephyrShellThingSetBinaryEncoder getPublishingEncoder(bool enhanced) override;
     bool listen(std::function<int(const EmptyIdentifier &, uint8_t *, size_t, uint8_t *, size_t)> callback) override;
 
     static int _onShellCommandExecuted(const shell *shell, size_t argc, char **argv);
