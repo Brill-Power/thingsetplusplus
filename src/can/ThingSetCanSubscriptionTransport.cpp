@@ -11,4 +11,8 @@ const CanID _ThingSetCanSubscriptionTransport::subscriptionFilter = CanID().setM
     .setMessagePriority(MessagePriority::reportHigh)
     .setMask(CanID().setMessageType(MessageType::multiFrameReport).getMask() | MessagePriority::reportHigh); // override calculated mask
 
+const CanID _ThingSetCanSubscriptionTransport::singleFrameReportFilter = CanID().setMessageType(MessageType::singleFrameReport)
+    .setMessagePriority(MessagePriority::reportLow)
+    .setMask(CanID().setMessageType(MessageType::singleFrameReport).getMask() | MessagePriority::reportLow); // override calculated mask
+
 }

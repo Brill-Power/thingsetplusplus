@@ -55,11 +55,11 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runL
     self->runListener();
 }
 
-bool ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::run(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
+bool ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::run(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback, bool singleFrame)
 {
     const can_filter canFilter = {
-        .id = subscriptionFilter,
-        .mask = subscriptionFilter.getMask(),
+        .id = (singleFrame) ? singleFrameReportFilter : subscriptionFilter,
+        .mask = ((singleFrame) ? singleFrameReportFilter : subscriptionFilter).getMask(),
         .flags = CAN_FILTER_IDE,
     };
     _filterId = can_add_rx_filter(_canDevice, onPublicationFrameReceived, this, &canFilter);
@@ -70,7 +70,12 @@ bool ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::run(
 
 bool ThingSetZephyrCanSubscriptionTransport::subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
 {
-    return _listener.run(callback);
+    return _listener.run(callback, false);
+}
+
+bool ThingSetZephyrCanSubscriptionTransport::subscribeSingleFrame(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
+{
+    return _listener.run(callback, true);
 }
 
 ThingSetCanInterface &ThingSetZephyrCanSubscriptionTransport::getInterface()

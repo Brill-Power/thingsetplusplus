@@ -29,7 +29,7 @@ private:
         ZephyrCanSubscriptionListener(const device *const canDevice);
         ~ZephyrCanSubscriptionListener();
 
-        bool run(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback);
+        bool run(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback, bool singleFrame);
 
     private:
         static void runListener(void *param1, void *, void *);
@@ -47,6 +47,7 @@ public:
     ThingSetZephyrCanSubscriptionTransport(ThingSetZephyrCanInterface &canInterface);
 
     bool subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) override;
+    bool subscribeSingleFrame(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback);
 
 protected:
     ThingSetCanInterface &getInterface() override;

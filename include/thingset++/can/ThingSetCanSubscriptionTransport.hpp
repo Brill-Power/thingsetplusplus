@@ -24,6 +24,7 @@ class _ThingSetCanSubscriptionTransport
 {
 protected:
     static const CanID subscriptionFilter;
+    static const CanID singleFrameReportFilter;
 };
 
 template <typename Frame>
