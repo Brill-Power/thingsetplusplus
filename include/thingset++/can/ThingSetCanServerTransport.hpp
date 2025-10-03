@@ -13,9 +13,6 @@
 
 namespace ThingSet::Can {
 
-template <typename T>
-concept EncodableNode = std::is_base_of_v<ThingSet::ThingSetNode, T> && std::is_base_of_v<ThingSet::ThingSetEncodable, T>;
-
 class ThingSetCanServerTransport : public ThingSetServerTransport<CanID, THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE, StreamingCanThingSetBinaryEncoder>
 {
 protected:
@@ -33,23 +30,6 @@ public:
     StreamingCanThingSetBinaryEncoder getPublishingEncoder(bool enhanced) override;
 
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
-
-    template <typename T>
-    bool sendControl(uint16_t id, T value)
-    {
-        static CanID canId = CanID()
-            .setSource(getInterface().getNodeAddress())
-            .setDataID(id)
-            .setMessageType(MessageType::singleFrameReport)
-            .setMessagePriority(MessagePriority::reportLow);
-
-        static uint8_t buffer[CAN_MAX_DLEN];
-
-        FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
-        encoder.encode(value);
-
-        return doPublish(canId, buffer, encoder.getEncodedLength());
-    }
 
     template <EncodableNode... Property>
     bool sendControl(Property &...properties)
