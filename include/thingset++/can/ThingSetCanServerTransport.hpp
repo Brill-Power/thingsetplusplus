@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "thingset++/ThingSetServer.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
 #include "thingset++/can/CanID.hpp"
 #include "thingset++/can/ThingSetCanInterface.hpp"
@@ -29,6 +30,32 @@ public:
     StreamingCanThingSetBinaryEncoder getPublishingEncoder() override;
 
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
+
+    template <EncodableNode... Property>
+    bool sendControl(Property &...properties)
+    {
+        static uint8_t buffer[CAN_MAX_DLEN];
+
+        ([&]() {
+            FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
+
+            if (!encoder.encode(properties)) {
+                return false;
+            }
+
+            CanID canId = CanID()
+                .setSource(getInterface().getNodeAddress())
+                .setDataID(properties.getId())
+                .setMessageType(MessageType::singleFrameReport)
+                .setMessagePriority(MessagePriority::reportLow);
+
+            if (!doPublish(canId, buffer, encoder.getEncodedLength())) {
+                return false;;
+            }
+        }(), ...);
+
+        return true;
+    }
 };
 
 } // namespace ThingSet::Can
