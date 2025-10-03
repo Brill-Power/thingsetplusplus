@@ -107,11 +107,11 @@ public:
         return encoder.flush();
     }
 
-    template <EncodableDecodableNode... Property> bool publishEnhanced(Property &...properties)
+    template <EncodableDecodableNode... Property> bool publish(uint64_t eui, Property &...properties)
     {
         Encoder encoder = _transport.getPublishingEncoder(true);
         if (!encoder.encode(0) || // fake subset ID
-            !encoder.encode(ThingSet::Eui::getValue()) ||
+            !encoder.encode(eui) ||
             !encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
             || !encoder.encodeMapEnd())
         {
