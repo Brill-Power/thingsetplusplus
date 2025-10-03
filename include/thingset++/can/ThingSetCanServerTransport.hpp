@@ -5,15 +5,13 @@
  */
 #pragma once
 
+#include "thingset++/ThingSetServer.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
 #include "thingset++/can/CanID.hpp"
 #include "thingset++/can/ThingSetCanInterface.hpp"
 #include "thingset++/can/StreamingCanThingSetBinaryEncoder.hpp"
 
 namespace ThingSet::Can {
-
-template <typename T>
-concept EncodableNode = std::is_base_of_v<ThingSet::ThingSetNode, T> && std::is_base_of_v<ThingSet::ThingSetEncodable, T>;
 
 class ThingSetCanServerTransport : public ThingSetServerTransport<CanID, THINGSET_STREAMING_ENCODER_CAN_MSG_SIZE, StreamingCanThingSetBinaryEncoder>
 {

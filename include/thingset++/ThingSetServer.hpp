@@ -16,8 +16,7 @@ namespace ThingSet {
 
 /// Specifies a type which is probably a ThingSet property.
 template <typename T>
-concept EncodableDecodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_base_of_v<ThingSetEncodable, T>
-                                 && std::is_base_of_v<ThingSetDecodable, T>;
+concept EncodableNode = std::is_base_of_v<ThingSetNode, T> && std::is_base_of_v<ThingSetEncodable, T>;
 
 class ThingSetForwarder
 {
@@ -52,7 +51,7 @@ protected:
 #endif // ENABLE_TEXT_MODE
 
     template <typename T, ThingSetAccess Access, typename SubsetType, SubsetType Subset,
-              EncodableDecodableNode... Property>
+              EncodableNode... Property>
     bool encode(ThingSetEncoder &encoder, ThingSetProperty<T, Access, SubsetType, Subset> &property,
                 Property &...properties)
     {
@@ -95,7 +94,7 @@ public:
     /// @tparam ...Property The types of the properties.
     /// @param ...properties The properties to publish.
     /// @return True if publishing succeeded.
-    template <EncodableDecodableNode... Property> bool publish(Property &...properties)
+    template <EncodableNode... Property> bool publish(Property &...properties)
     {
         Encoder encoder = _transport.getPublishingEncoder();
         if (!encoder.encode(0) || // fake subset ID
