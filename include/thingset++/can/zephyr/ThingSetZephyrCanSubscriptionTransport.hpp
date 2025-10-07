@@ -15,11 +15,11 @@
 namespace ThingSet::Can::Zephyr {
 
 template <template<typename Frame> typename Base>
-    //requires std::is_base_of_v<_ThingSetCanSubscriptionTransport, Base> && std::is_base_of_v<ThingSetSubscriptionTransport<CanID>, Base>
+    requires std::is_base_of_v<_ThingSetCanSubscriptionTransport, Base<CanFrame>> && std::is_base_of_v<ThingSetSubscriptionTransport<CanID>, Base<CanFrame>>
 class _ThingSetZephyrCanSubscriptionTransport : public Base<CanFrame>
 {
 protected:
-    class _ZephyrCanSubscriptionListener : protected SubscriptionListener
+    class _ZephyrCanSubscriptionListener
     {
     private:
         const device *const _canDevice;
@@ -96,7 +96,7 @@ protected:
 class ThingSetZephyrCanSubscriptionTransport : public _ThingSetZephyrCanSubscriptionTransport<ThingSetCanSubscriptionTransport>
 {
 private:
-    class ZephyrCanSubscriptionListener : public _ZephyrCanSubscriptionListener
+    class ZephyrCanSubscriptionListener : public _ZephyrCanSubscriptionListener, public SubscriptionListener
     {
     public:
         ZephyrCanSubscriptionListener(const device *const canDevice);
