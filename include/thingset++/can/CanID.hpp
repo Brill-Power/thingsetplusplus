@@ -119,8 +119,8 @@ public:
     /// @return The modified CAN ID.
     CanID &setTarget(const uint8_t value);
 
-    uint16_t getDataID() const;
-    CanID &setDataID(const uint16_t value);
+    uint16_t getDataId() const;
+    CanID &setDataId(const uint16_t value);
 
     uint8_t getSequenceNumber() const;
     CanID &setSequenceNumber(const uint8_t value);

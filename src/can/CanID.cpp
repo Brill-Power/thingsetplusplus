@@ -77,12 +77,12 @@ CanID &CanID::setTarget(const uint8_t value)
     return *this;
 }
 
-uint16_t CanID::getDataID() const
+uint16_t CanID::getDataId() const
 {
     return (_id & dataIdMask) >> THINGSET_PLUS_PLUS_CAN_ID_POSITION_DATA_ID;
 }
 
-CanID &CanID::setDataID(const uint16_t value)
+CanID &CanID::setDataId(const uint16_t value)
 {
     _id = (_id & ~dataIdMask) | ((value << THINGSET_PLUS_PLUS_CAN_ID_POSITION_DATA_ID) & dataIdMask);
     _mask |= dataIdMask;

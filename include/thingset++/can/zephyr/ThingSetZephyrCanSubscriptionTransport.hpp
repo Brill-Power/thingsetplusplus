@@ -119,6 +119,23 @@ public:
 
 class ThingSetZephyrCanControlSubscriptionTransport : public _ThingSetZephyrCanSubscriptionTransport<ThingSetCanControlSubscriptionTransport>
 {
+private:
+    class ZephyrCanSubscriptionListener : public _ZephyrCanSubscriptionListener
+    {
+    public:
+        ZephyrCanSubscriptionListener(const device *const canDevice);
+
+    protected:
+        void runListener() override;
+        const CanID &getCanIdForFilter() const override;
+    };
+
+    ZephyrCanSubscriptionListener _listener;
+
+public:
+    ThingSetZephyrCanControlSubscriptionTransport(ThingSetZephyrCanInterface &canInterface);
+
+    bool subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) override;
 };
 
 } // namespace ThingSet::Can::Zephyr

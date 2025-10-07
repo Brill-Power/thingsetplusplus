@@ -7,11 +7,11 @@
 
 namespace ThingSet::Can {
 
-const CanID _ThingSetCanSubscriptionTransport::subscriptionFilter = CanID().setMessageType(MessageType::multiFrameReport)
+const CanID _ThingSetCanSubscriptionTransport::reportFilter = CanID().setMessageType(MessageType::multiFrameReport)
     .setMessagePriority(MessagePriority::reportHigh)
     .setMask(CanID().setMessageType(MessageType::multiFrameReport).getMask() | MessagePriority::reportHigh); // override calculated mask
 
-const CanID _ThingSetCanSubscriptionTransport::singleFrameReportFilter = CanID().setMessageType(MessageType::singleFrameReport)
+const CanID _ThingSetCanSubscriptionTransport::controlFilter = CanID().setMessageType(MessageType::singleFrameReport)
     .setMessagePriority(MessagePriority::reportLow);
 
 }

@@ -23,8 +23,8 @@ MultiFrameMessageType getMessageType(const Frame &message)
 class _ThingSetCanSubscriptionTransport
 {
 protected:
-    static const CanID subscriptionFilter;
-    static const CanID singleFrameReportFilter;
+    static const CanID reportFilter;
+    static const CanID controlFilter;
 
 protected:
     virtual ThingSetCanInterface &getInterface() = 0;
