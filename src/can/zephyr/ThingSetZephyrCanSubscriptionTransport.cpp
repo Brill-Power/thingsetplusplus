@@ -37,7 +37,7 @@ const CanID &ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListen
     return reportFilter;
 }
 
-ThingSetZephyrCanControlSubscriptionTransport::ThingSetZephyrCanSubscriptionTransport(ThingSetZephyrCanInterface &canInterface) : _ThingSetZephyrCanSubscriptionTransport<ThingSetCanControlSubscriptionTransport>(canInterface), _listener(canInterface.getDevice())
+ThingSetZephyrCanControlSubscriptionTransport::ThingSetZephyrCanControlSubscriptionTransport(ThingSetZephyrCanInterface &canInterface) : _ThingSetZephyrCanSubscriptionTransport<ThingSetCanControlSubscriptionTransport>(canInterface), _listener(canInterface.getDevice())
 {}
 
 ThingSetZephyrCanControlSubscriptionTransport::ZephyrCanSubscriptionListener::ZephyrCanSubscriptionListener(const device *const canDevice) : _ZephyrCanSubscriptionListener(canDevice)
@@ -49,7 +49,7 @@ void ThingSetZephyrCanControlSubscriptionTransport::ZephyrCanSubscriptionListene
     const size_t MAP_HEADER_SIZE = 1;
     const size_t ITEM_ID_MAX_SIZE = 3;
     const size_t SUBSET_SIZE = 1;
-    std::array<uint8_t, CANFD_MAX_DLEN + SUBSET_SIZE + MAP_HEADER_SIZE + ITEM_ID_MAX_SIZE> buffer;
+    std::array<uint8_t, CAN_MAX_DLEN + SUBSET_SIZE + MAP_HEADER_SIZE + ITEM_ID_MAX_SIZE> buffer;
     buffer[0] = 0x0; // dummy subset
     while (true)
     {
