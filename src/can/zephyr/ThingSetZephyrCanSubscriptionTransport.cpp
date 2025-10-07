@@ -73,7 +73,7 @@ void ThingSetZephyrCanControlSubscriptionTransport::ZephyrCanSubscriptionListene
             i += 2;
         }
         memcpy(&buffer[i], frame.getData(), frame.getLength());
-        FixedDepthThingSetBinaryDecoder<4> decoder(buffer);
+        FixedDepthThingSetBinaryDecoder<4> decoder(buffer, 2);
         _callback(frame.getId(), decoder);
     }
 }
