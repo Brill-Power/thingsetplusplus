@@ -51,13 +51,13 @@ void ThingSetZephyrCanControlSubscriptionTransport::ZephyrCanSubscriptionListene
     const size_t SUBSET_SIZE = 1;
     std::array<uint8_t, CAN_MAX_DLEN + SUBSET_SIZE + MAP_HEADER_SIZE + ITEM_ID_MAX_SIZE> buffer;
     buffer[0] = 0x0; // dummy subset
+    buffer[1] = 0xA1; // map with one entry
     while (true)
     {
         can_frame rawFrame = _frameQueue.pop();
         CanFrame frame(rawFrame);
         uint16_t itemId = frame.getId().getDataId();
-        size_t i = 1;
-        buffer[i++] = 0xA1; // map with one entry
+        size_t i = 2;
         if (itemId <= ZCBOR_VALUE_IN_HEADER) {
             buffer[i++] = itemId;
         }
