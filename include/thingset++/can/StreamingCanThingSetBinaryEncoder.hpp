@@ -29,7 +29,7 @@ private:
     uint8_t _sequenceNumber;
 
 public:
-    StreamingCanThingSetBinaryEncoder(ThingSetCanServerTransport &transport);
+    StreamingCanThingSetBinaryEncoder(ThingSetCanServerTransport &transport, bool enhanced);
 
 protected:
     bool write(size_t length, bool flushing) override;

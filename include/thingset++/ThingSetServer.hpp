@@ -5,12 +5,17 @@
  */
 #pragma once
 
+#include "thingset++/Eui.hpp"
 #include "thingset++/StringLiteral.hpp"
 #include "thingset++/ThingSetProperty.hpp"
 #include "thingset++/ThingSetRequestContext.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
 #include "thingset++/ThingSetStatus.hpp"
 #include "thingset++/internal/logging.hpp"
+
+#ifndef CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING
+#define CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING false
+#endif // #ifndef CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING
 
 namespace ThingSet {
 
@@ -96,9 +101,19 @@ public:
     /// @return True if publishing succeeded.
     template <EncodableNode... Property> bool publish(Property &...properties)
     {
-        Encoder encoder = _transport.getPublishingEncoder();
-        if (!encoder.encode(0) || // fake subset ID
-            !encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
+        Encoder encoder = _transport.getPublishingEncoder(CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING);
+
+        if (!encoder.encode(0)) { // fake subset ID
+            return false;
+        }
+
+        if (CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING) {
+            if (!encoder.encode(ThingSet::Eui::getValue())) {
+                return false;
+            }
+        }
+
+        if (!encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
             || !encoder.encodeMapEnd())
         {
             return false;

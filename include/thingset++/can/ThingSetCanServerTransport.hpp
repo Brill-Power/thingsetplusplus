@@ -27,7 +27,7 @@ protected:
 public:
     uint8_t getNodeAddress();
 
-    StreamingCanThingSetBinaryEncoder getPublishingEncoder() override;
+    StreamingCanThingSetBinaryEncoder getPublishingEncoder(bool enhanced) override;
 
     bool publish(Can::CanID &id, uint8_t *buffer, size_t length);
 

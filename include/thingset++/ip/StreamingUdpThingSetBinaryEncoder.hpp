@@ -23,10 +23,10 @@ private:
     uint8_t _sequenceNumber;
 
 public:
-    StreamingUdpThingSetBinaryEncoder(ThingSetIpServerTransport<Identifier> &transport) : _transport(transport), _sequenceNumber(0)
+    StreamingUdpThingSetBinaryEncoder(ThingSetIpServerTransport<Identifier> &transport, bool enhanced) : _transport(transport), _sequenceNumber(0)
     {
-        _buffer[2] = (uint8_t)ThingSetBinaryRequestType::report;
-        zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[3], _buffer.size() - 3, 2);
+        _buffer[2] = (uint8_t)((enhanced) ? ThingSetBinaryRequestType::enhancedReport : ThingSetBinaryRequestType::report);
+        zcbor_new_encode_state(_state, BINARY_ENCODER_DEFAULT_MAX_DEPTH, &_buffer[3], _buffer.size() - 3, (enhanced) ? 3 : 2);
     }
 
 protected:
