@@ -22,7 +22,6 @@ private:
         const device *const _canDevice;
         int _filterId;
         ThingSet::Zephyr::MessageQueue<can_frame, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH> _frameQueue;
-        ThingSet::Zephyr::MessageQueue<can_frame, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH> _controlQueue;
         k_thread _thread;
         std::function<void(const CanID &, ThingSetBinaryDecoder &)> _callback;
 
@@ -33,13 +32,11 @@ private:
         bool run(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback, bool singleFrame);
 
     private:
-        static void runListener(void *param1, void *param2, void *);
-        void runListener(ThingSet::Zephyr::MessageQueue<can_frame, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH> &_queue);
+        static void runListener(void *param1, void *, void *);
+        void runListener();
 
         static void onPublicationFrameReceived(const device *canDevice, can_frame *frame, void *userData);
         void onPublicationFrameReceived(can_frame *frame);
-        static void onControlFrameReceived(const device *canDevice, can_frame *frame, void *userData);
-        void onControlFrameReceived(can_frame *frame);
 
     };
 
