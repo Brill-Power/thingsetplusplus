@@ -23,8 +23,8 @@ private:
         int _filterId;
         ThingSet::Zephyr::MessageQueue<can_frame, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH> _frameQueue;
         k_thread _thread;
-        K_THREAD_STACK_MEMBER(threadStack, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE);
         std::function<void(const CanID &, ThingSetBinaryDecoder &)> _callback;
+        K_KERNEL_STACK_MEMBER(threadStack, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE);
 
     public:
         ZephyrCanSubscriptionListener(const device *const canDevice);
