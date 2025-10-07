@@ -8,32 +8,11 @@
 
 namespace ThingSet::Can::Zephyr {
 
-ThingSetZephyrCanSubscriptionTransport::ThingSetZephyrCanSubscriptionTransport(ThingSetZephyrCanInterface &canInterface) : _canInterface(canInterface), _listener(canInterface.getDevice())
+ThingSetZephyrCanSubscriptionTransport::ThingSetZephyrCanSubscriptionTransport(ThingSetZephyrCanInterface &canInterface) : _ThingSetZephyrCanSubscriptionTransport<ThingSetCanSubscriptionTransport>(canInterface), _listener(canInterface.getDevice())
 {}
 
-ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::ZephyrCanSubscriptionListener(const device *const canDevice) : _canDevice(canDevice), _filterId(-1)
+ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::ZephyrCanSubscriptionListener(const device *const canDevice) : _ZephyrCanSubscriptionListener(canDevice)
 {
-}
-
-ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::~ZephyrCanSubscriptionListener()
-{
-    if (_filterId >= 0) {
-        can_remove_rx_filter(_canDevice, _filterId);
-    }
-}
-
-void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::onPublicationFrameReceived(can_frame *frame)
-{
-    if (!_frameQueue.push(*frame))
-    {
-        LOG_ERROR("Failed to push frame to queue");
-    }
-}
-
-void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::onPublicationFrameReceived(const device *canDevice, can_frame *frame, void *userData)
-{
-    auto self = (ZephyrCanSubscriptionListener *)userData;
-    self->onPublicationFrameReceived(frame);
 }
 
 void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runListener()
@@ -47,38 +26,9 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runL
     }
 }
 
-void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runListener(void *param1, void *, void *)
+const CanID &ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::getCanIdForFilter() const
 {
-    auto self = (ZephyrCanSubscriptionListener *)param1;
-    self->runListener();
-}
-
-bool ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::run(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback, bool singleFrame)
-{
-    const can_filter canFilter = {
-        .id = (singleFrame) ? singleFrameReportFilter : subscriptionFilter,
-        .mask = ((singleFrame) ? singleFrameReportFilter : subscriptionFilter).getMask(),
-        .flags = CAN_FILTER_IDE,
-    };
-    _filterId = can_add_rx_filter(_canDevice, onPublicationFrameReceived, this, &canFilter);
-    _callback = callback;
-    k_thread_create(&_thread, this->threadStack, K_THREAD_STACK_SIZEOF(this->threadStack), runListener, this, nullptr, nullptr, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY, 0, K_NO_WAIT);
-    return true;
-}
-
-bool ThingSetZephyrCanSubscriptionTransport::subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
-{
-    return _listener.run(callback, false);
-}
-
-bool ThingSetZephyrCanSubscriptionTransport::subscribeSingleFrame(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
-{
-    return _listener.run(callback, true);
-}
-
-ThingSetCanInterface &ThingSetZephyrCanSubscriptionTransport::getInterface()
-{
-    return _canInterface;
+    return subscriptionFilter;
 }
 
 } // namespace ThingSet::Can::Zephyr

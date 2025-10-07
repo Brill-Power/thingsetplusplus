@@ -13,7 +13,7 @@
 
 namespace ThingSet {
 
-/// @brief Interface for client subscription transports.
+/// @brief Interface for all client subscription transports.
 /// @tparam Identifier Type of client identifier
 template <typename Identifier>
 class ThingSetSubscriptionTransport
@@ -26,6 +26,8 @@ public:
     virtual bool subscribe(std::function<void(const Identifier &, ThingSetBinaryDecoder &)> callback) = 0;
 };
 
+/// @brief Interface for client subscription transports receiving multi-frame reports.
+/// @tparam Identifier Type of client identifier
 template <typename Identifier, typename T>
 concept SubscriptionTransport = std::is_base_of_v<ThingSetSubscriptionTransport<Identifier>, T>;
 
