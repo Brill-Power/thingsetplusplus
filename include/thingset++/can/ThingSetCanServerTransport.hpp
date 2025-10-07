@@ -45,7 +45,7 @@ public:
 
             CanID canId = CanID()
                 .setSource(getInterface().getNodeAddress())
-                .setDataID(properties.getId())
+                .setDataId(properties.getId())
                 .setMessageType(MessageType::singleFrameReport)
                 .setMessagePriority(MessagePriority::reportLow);
 

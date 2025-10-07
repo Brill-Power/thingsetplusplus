@@ -23,7 +23,7 @@ bool ThingSetSocketCanSubscriptionTransport::subscribe(std::function<void(const 
 bool ThingSetSocketCanSubscriptionTransport::SocketCanSubscriptionListener::run(const std::string &deviceName, std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
 {
     _socket.setIsFd(true);
-    _socket.setFilter(subscriptionFilter);
+    _socket.setFilter(reportFilter);
     if (!_socket.bind(deviceName)) {
         // throw?
         return false;

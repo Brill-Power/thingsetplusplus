@@ -13,7 +13,7 @@
 
 namespace ThingSet::Ip::Async {
 
-class ThingSetAsyncSocketSubscriptionTransport : public ThingSetSubscriptionTransport<asio::ip::udp::endpoint>
+class ThingSetAsyncSocketSubscriptionTransport : public ThingSetMultiFrameSubscriptionTransport<asio::ip::udp::endpoint>
 {
 private:
     asio::io_context &_ioContext;
