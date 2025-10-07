@@ -13,17 +13,6 @@
 #include "thingset++/ThingSetStatus.hpp"
 #include "thingset++/internal/logging.hpp"
 
-#ifdef __ZEPHYR__
-#ifndef CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING
-#define CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING false
-#endif // #ifndef CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING
-#define THINGSET_ENHANCED_REPORTING CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING
-#else
-#ifndef THINGSET_ENHANCED_REPORTING
-#define THINGSET_ENHANCED_REPORTING false
-#endif // #ifndef THINGSET_ENHANCED_REPORTING
-#endif // #ifdef __ZEPHYR__
-
 namespace ThingSet {
 
 /// Specifies a type which is probably a ThingSet property.
@@ -108,13 +97,18 @@ public:
     /// @return True if publishing succeeded.
     template <EncodableNode... Property> bool publish(Property &...properties)
     {
-        Encoder encoder = _transport.getPublishingEncoder(THINGSET_ENHANCED_REPORTING);
+        #ifdef ENABLE_ENHANCED_REPORTING
+        bool enhanced = true;
+        #else
+        bool enhanced = false;
+        #endif
+        Encoder encoder = _transport.getPublishingEncoder(enhanced);
 
         if (!encoder.encode(0)) { // fake subset ID
             return false;
         }
 
-        if (THINGSET_ENHANCED_REPORTING) {
+        if (enhanced) {
             if (!encoder.encode(ThingSet::Eui::getValue())) {
                 return false;
             }
