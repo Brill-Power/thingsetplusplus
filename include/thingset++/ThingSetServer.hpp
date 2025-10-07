@@ -97,11 +97,11 @@ public:
     /// @return True if publishing succeeded.
     template <EncodableNode... Property> bool publish(Property &...properties)
     {
-        #ifdef ENABLE_ENHANCED_REPORTING
+#ifdef ENABLE_ENHANCED_REPORTING
         bool enhanced = true;
-        #else
+#else
         bool enhanced = false;
-        #endif
+#endif
         Encoder encoder = _transport.getPublishingEncoder(enhanced);
 
         if (!encoder.encode(0)) { // fake subset ID
