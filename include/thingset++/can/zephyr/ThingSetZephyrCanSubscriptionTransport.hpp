@@ -13,7 +13,7 @@
 
 namespace ThingSet::Can::Zephyr {
 
-template <template<Frame> typename Base>
+template <template<typename Frame> typename Base>
     requires std::is_base_of_v<_ThingSetCanSubscriptionTransport, Base> && std::is_base_of_v<ThingSetSubscriptionTransport<CanID>, Base>
 class _ThingSetZephyrCanSubscriptionTransport : public Base<CanFrame>
 {
