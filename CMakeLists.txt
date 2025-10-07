@@ -20,6 +20,10 @@ if (ENABLE_TEXT_MODE)
     target_compile_definitions(thingset++ PUBLIC ENABLE_TEXT_MODE)
 endif()
 
+if (ENABLE_ENHANCED_REPORTING)
+    target_compile_definitions(thingset++ PUBLIC ENABLE_ENHANCED_REPORTING)
+endif()
+
 target_sources(zcbor PRIVATE zcbor/src/zcbor_common.c
     zcbor/src/zcbor_decode.c
     zcbor/src/zcbor_encode.c

@@ -27,6 +27,11 @@ if (DEFINED CONFIG_THINGSET_PLUS_PLUS_PROTOCOL_TEXT)
     add_definitions(-DENABLE_TEXT_MODE)
 endif()
 
+if (DEFINED CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING)
+    set(ENABLE_ENHANCED_REPORTING ON)
+    add_definitions(-DENABLE_ENHANCED_REPORTING)
+endif()
+
 zephyr_include_directories(${THINGSET_BASE}/include)
 
 add_subdirectory_ifdef(CONFIG_THINGSET_PLUS_PLUS ${THINGSET_BASE}/src build)
