@@ -18,7 +18,7 @@
 namespace ThingSet::Ip::Sockets {
 
 /// @brief Subscription transport for sockets.
-class _ThingSetSocketSubscriptionTransport : public ThingSetSubscriptionTransport<SocketEndpoint>
+class _ThingSetSocketSubscriptionTransport : public ThingSetMultiFrameSubscriptionTransport<SocketEndpoint>
 {
 private:
     sockaddr_in _listenAddress;
