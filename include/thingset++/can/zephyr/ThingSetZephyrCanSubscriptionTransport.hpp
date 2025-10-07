@@ -25,11 +25,11 @@ protected:
         const device *const _canDevice;
         int _filterId;
         k_thread _thread;
-        K_KERNEL_STACK_MEMBER(_threadStack, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE);
 
     protected:
         ThingSet::Zephyr::MessageQueue<can_frame, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_QUEUE_DEPTH> _frameQueue;
         std::function<void(const CanID &, ThingSetBinaryDecoder &)> _callback;
+        K_KERNEL_STACK_MEMBER(_threadStack, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE);
 
     public:
         _ZephyrCanSubscriptionListener(const device *const canDevice) : _canDevice(canDevice), _filterId(-1)
@@ -52,7 +52,8 @@ protected:
             };
             _filterId = can_add_rx_filter(_canDevice, onPublicationFrameReceived, this, &canFilter);
             _callback = callback;
-            k_thread_create(&_thread, this->threadStack, K_THREAD_STACK_SIZEOF(this->threadStack), runListener, this, nullptr, nullptr, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY, 0, K_NO_WAIT);
+            k_thread_create(&_thread, this->_threadStack, K_THREAD_STACK_SIZEOF(this->_threadStack), runListener,
+                this, nullptr, nullptr, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY, 0, K_NO_WAIT);
             return true;
         }
 
