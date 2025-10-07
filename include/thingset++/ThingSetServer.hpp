@@ -13,6 +13,10 @@
 #include "thingset++/ThingSetStatus.hpp"
 #include "thingset++/internal/logging.hpp"
 
+#ifndef CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING
+#define CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING false
+#endif // #ifndef CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING
+
 namespace ThingSet {
 
 /// Specifies a type which is probably a ThingSet property.
@@ -97,22 +101,19 @@ public:
     /// @return True if publishing succeeded.
     template <EncodableNode... Property> bool publish(Property &...properties)
     {
-        Encoder encoder = _transport.getPublishingEncoder(false);
-        if (!encoder.encode(0) || // fake subset ID
-            !encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
-            || !encoder.encodeMapEnd())
-        {
+        Encoder encoder = _transport.getPublishingEncoder(CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING);
+
+        if (!encoder.encode(0)) { // fake subset ID
             return false;
         }
-        return encoder.flush();
-    }
 
-    template <EncodableNode... Property> bool publish(uint64_t eui, Property &...properties)
-    {
-        Encoder encoder = _transport.getPublishingEncoder(true);
-        if (!encoder.encode(0) || // fake subset ID
-            !encoder.encode(eui) ||
-            !encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
+        if (CONFIG_THINGSET_PLUS_PLUS_ENHANCED_REPORTING) {
+            if (!encoder.encode(ThingSet::Eui::getValue())) {
+                return false;
+            }
+        }
+
+        if (!encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
             || !encoder.encodeMapEnd())
         {
             return false;

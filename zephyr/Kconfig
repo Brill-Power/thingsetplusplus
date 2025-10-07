@@ -17,6 +17,13 @@ config THINGSET_PLUS_PLUS_PROTOCOL_TEXT
 	bool "Enable text mode"
 	default true
 
+config THINGSET_PLUS_PLUS_ENHANCED_REPORTING
+	bool "Enable enhanced reporting"
+	default false
+	help
+		Automatically encode device EUI at start of payload and use a
+		dedicated request type (0x1E) to denote this format
+
 config THINGSET_PLUS_PLUS_BACKEND_CAN
 	bool "Enable CAN backend"
 	default false
