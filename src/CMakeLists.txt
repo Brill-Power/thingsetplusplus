@@ -45,3 +45,17 @@ if(ENABLE_ZEPHYR)
         ZephyrLogRegistration.cpp)
     add_subdirectory(zephyr)
 endif()
+
+if(NOT ENABLE_ZEPHYR)
+    if(NOT DEFINED THINGSET_ENHANCED_REPORTING)
+        set(THINGSET_ENHANCED_REPORTING false)
+    endif()
+
+    if(THINGSET_ENHANCED_REPORTING)
+        message("ThingSet++ enhanced reporting enabled")
+    endif()
+
+    target_compile_definitions(thingset++ PUBLIC
+        THINGSET_ENHANCED_REPORTING=${THINGSET_ENHANCED_REPORTING}
+    )
+endif()
