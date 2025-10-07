@@ -9,12 +9,13 @@
 #include "thingset++/can/zephyr/ThingSetZephyrCanInterface.hpp"
 #include "thingset++/can/zephyr/CanFrame.hpp"
 #include "thingset++/zephyr/MessageQueue.hpp"
+#include "thingset++/internal/logging.hpp"
 #include <functional>
 
 namespace ThingSet::Can::Zephyr {
 
 template <template<typename Frame> typename Base>
-    requires std::is_base_of_v<_ThingSetCanSubscriptionTransport, Base> && std::is_base_of_v<ThingSetSubscriptionTransport<CanID>, Base>
+    //requires std::is_base_of_v<_ThingSetCanSubscriptionTransport, Base> && std::is_base_of_v<ThingSetSubscriptionTransport<CanID>, Base>
 class _ThingSetZephyrCanSubscriptionTransport : public Base<CanFrame>
 {
 protected:
@@ -85,11 +86,6 @@ public:
     _ThingSetZephyrCanSubscriptionTransport(ThingSetZephyrCanInterface &canInterface) : _canInterface(canInterface)
     {}
 
-    bool subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) override
-    {
-        return _listener.run(callback);
-    }
-
 protected:
     ThingSetCanInterface &getInterface() override
     {
@@ -114,6 +110,8 @@ private:
 
 public:
     ThingSetZephyrCanSubscriptionTransport(ThingSetZephyrCanInterface &canInterface);
+
+    bool subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback) override;
 };
 
 class ThingSetZephyrCanControlSubscriptionTransport : public _ThingSetZephyrCanSubscriptionTransport<ThingSetCanControlSubscriptionTransport>

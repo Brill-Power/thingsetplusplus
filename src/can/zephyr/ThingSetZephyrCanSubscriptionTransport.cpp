@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/ThingSetZephyrCanSubscriptionTransport.hpp"
-#include "thingset++/internal/logging.hpp"
 
 namespace ThingSet::Can::Zephyr {
 
@@ -24,6 +23,11 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::runL
         CanFrame frame(rawFrame);
         handle(frame, frame.getId(), frame.getId().getSource(), decodersByNodeAddress, _callback);
     }
+}
+
+bool ThingSetZephyrCanSubscriptionTransport::subscribe(std::function<void(const CanID &, ThingSetBinaryDecoder &)> callback)
+{
+    return _listener.run(callback);
 }
 
 const CanID &ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::getCanIdForFilter() const
