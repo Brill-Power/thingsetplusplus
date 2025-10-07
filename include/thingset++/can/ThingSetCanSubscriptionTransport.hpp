@@ -17,6 +17,9 @@ template <typename Frame, typename T = Frame::native_type, unsigned Size = Frame
     requires std::is_base_of_v<AbstractCanFrame<Frame, T, Size>, Frame>
 MultiFrameMessageType getMessageType(const Frame &message)
 {
+    if (message.getId().getMessageType() == MessageType::singleFrameReport) {
+        return MultiFrameMessageType::single;
+    }
     return message.getId().getMultiFrameMessageType();
 }
 

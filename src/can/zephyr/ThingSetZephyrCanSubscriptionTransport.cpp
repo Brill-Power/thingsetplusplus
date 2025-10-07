@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "thingset++/can/zephyr/ThingSetZephyrCanSubscriptionTransport.hpp"
+#include "thingset++/internal/logging.hpp"
 
 namespace ThingSet::Can::Zephyr {
-
-// not sure what to do with this at the moment
-static K_THREAD_STACK_DEFINE(threadStack, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE);
 
 ThingSetZephyrCanSubscriptionTransport::ThingSetZephyrCanSubscriptionTransport(ThingSetZephyrCanInterface &canInterface) : _canInterface(canInterface), _listener(canInterface.getDevice())
 {}
@@ -28,7 +26,7 @@ void ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::onPu
 {
     if (!_frameQueue.push(*frame))
     {
-        // now what?
+        LOG_ERROR("Failed to push frame to queue");
     }
 }
 
@@ -64,7 +62,7 @@ bool ThingSetZephyrCanSubscriptionTransport::ZephyrCanSubscriptionListener::run(
     };
     _filterId = can_add_rx_filter(_canDevice, onPublicationFrameReceived, this, &canFilter);
     _callback = callback;
-    k_thread_create(&_thread, threadStack, K_THREAD_STACK_SIZEOF(threadStack), runListener, this, nullptr, nullptr, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY, 0, K_NO_WAIT);
+    k_thread_create(&_thread, this->threadStack, K_THREAD_STACK_SIZEOF(this->threadStack), runListener, this, nullptr, nullptr, CONFIG_THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY, 0, K_NO_WAIT);
     return true;
 }
 
