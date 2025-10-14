@@ -23,14 +23,21 @@ MultiFrameMessageType getMessageType(const Frame &message)
 class _ThingSetCanSubscriptionTransport
 {
 protected:
-    static const CanID subscriptionFilter;
+    static const CanID reportFilter;
+    static const CanID controlFilter;
+
+protected:
+    virtual ThingSetCanInterface &getInterface() = 0;
 };
 
 template <typename Frame>
-class ThingSetCanSubscriptionTransport : public _ThingSetCanSubscriptionTransport, public ThingSetSubscriptionTransport<CanID>
+class ThingSetCanSubscriptionTransport : public _ThingSetCanSubscriptionTransport, public ThingSetMultiFrameSubscriptionTransport<CanID>
 {
-protected:
-    virtual ThingSetCanInterface &getInterface() = 0;
+};
+
+template <typename Frame>
+class ThingSetCanControlSubscriptionTransport : public _ThingSetCanSubscriptionTransport, public ThingSetSubscriptionTransport<CanID>
+{
 };
 
 } // namespace ThingSet::Can
