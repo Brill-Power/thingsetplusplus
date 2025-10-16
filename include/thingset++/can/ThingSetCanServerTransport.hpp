@@ -36,7 +36,7 @@ public:
     {
         static uint8_t buffer[CAN_MAX_DLEN];
 
-        ([&]() {
+        return (([&]() {
             FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
 
             if (!encoder.encode(properties)) {
@@ -49,12 +49,8 @@ public:
                 .setMessageType(MessageType::singleFrameReport)
                 .setMessagePriority(MessagePriority::reportLow);
 
-            if (!doPublish(canId, buffer, encoder.getEncodedLength())) {
-                return false;;
-            }
-        }(), ...);
-
-        return true;
+            return doPublish(canId, buffer, encoder.getEncodedLength());
+        }()) && ...);
     }
 };
 
