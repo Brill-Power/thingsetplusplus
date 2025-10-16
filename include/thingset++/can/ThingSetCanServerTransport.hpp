@@ -52,6 +52,8 @@ public:
             if (!doPublish(canId, buffer, encoder.getEncodedLength())) {
                 return false;;
             }
+
+            return true;
         }(), ...);
 
         return true;
