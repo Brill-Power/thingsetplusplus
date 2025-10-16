@@ -49,11 +49,7 @@ public:
                 .setMessageType(MessageType::singleFrameReport)
                 .setMessagePriority(MessagePriority::reportLow);
 
-            if (!doPublish(canId, buffer, encoder.getEncodedLength())) {
-                return false;;
-            }
-
-            return true;
+            return doPublish(canId, buffer, encoder.getEncodedLength());
         }()) && ...);
     }
 };
