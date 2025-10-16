@@ -36,7 +36,7 @@ public:
     {
         static uint8_t buffer[CAN_MAX_DLEN];
 
-        ([&]() {
+        return (([&]() {
             FixedDepthThingSetBinaryEncoder encoder(buffer, CAN_MAX_DLEN);
 
             if (!encoder.encode(properties)) {
@@ -54,9 +54,7 @@ public:
             }
 
             return true;
-        }(), ...);
-
-        return true;
+        }()) && ...);
     }
 };
 
