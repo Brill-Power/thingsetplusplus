@@ -59,7 +59,7 @@ _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<i
     __ASSERT(_publishSocketHandle >= 0, "Failed to create publish socket: %d", errno);
 
     int optionValue = 1;
-    int ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue));
+    [[maybe_unused]] int ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue));
     __ASSERT(ret == 0, "Failed to configure publish socket: %d", errno);
 #ifndef __ZEPHYR__
     ret = setsockopt(_publishSocketHandle, SOL_SOCKET, SO_BROADCAST, &optionValue, sizeof(optionValue));
@@ -254,7 +254,7 @@ static std::pair<in_addr, in_addr> getIpAndSubnetForInterface(net_if *iface)
 {
     // find IP address associated with interface
     net_if_ipv4 *ipConfig;
-    int ret = net_if_config_ipv4_get(iface, &ipConfig);
+    [[maybe_unused]] int ret = net_if_config_ipv4_get(iface, &ipConfig);
     __ASSERT(ret == 0, "Failed to get interface IP information: %d", ret);
     return std::make_pair(ipConfig->unicast->ipv4.address.in_addr, ipConfig->unicast->netmask);
 }
