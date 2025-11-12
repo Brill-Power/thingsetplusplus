@@ -38,10 +38,18 @@ bool ThingSetZephyrCanStubInterface::bind(uint8_t nodeAddress)
     return true;
 }
 
+void ThingSetZephyrCanInterface::addressClaimWorkHandler(k_work *work)
+{
+    AddressClaimWorkItem *item = CONTAINER_OF(work, AddressClaimWorkItem, work);
+    ThingSetZephyrCanInterface *self = item->instance;
+    self->claimAddress(self->_nodeAddress);
+}
 
 ThingSetZephyrCanInterface::ThingSetZephyrCanInterface(const device *const canDevice)
     : _ThingSetZephyrCanInterface(canDevice)
 {
+    k_work_init(&_addressClaimWork.work, addressClaimWorkHandler);
+    _addressClaimWork.instance = this;
 }
 
 ThingSetZephyrCanInterface::~ThingSetZephyrCanInterface()
@@ -77,14 +85,14 @@ void ThingSetZephyrCanInterface::onAnyAddressDiscoverReceived(const device *dev,
     auto canId = CanID::create(frame->id);
     if (self->_nodeAddress == canId.getSource()) {
         /* received a discovery frame for an address we are already in the process of claiming */
-        self->claimAddress(self->_nodeAddress);
+        k_work_submit(&self->_addressClaimWork.work);
     }
 }
 
 void ThingSetZephyrCanInterface::onAddressDiscoverReceived(const device *dev, can_frame *frame, void *arg)
 {
     ThingSetZephyrCanInterface *self = (ThingSetZephyrCanInterface *)arg;
-    self->claimAddress(self->_nodeAddress);
+    k_work_submit(&self->_addressClaimWork.work);
 }
 
 static void onAddressClaimSent(const device *dev, int error, void *arg)

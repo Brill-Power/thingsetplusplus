@@ -42,6 +42,12 @@ private:
         discoverMessageSent = 0x02,
     };
 
+    struct AddressClaimWorkItem {
+        k_work work;
+        ThingSetZephyrCanInterface *instance;
+    };
+
+    AddressClaimWorkItem _addressClaimWork;
     k_event _events;
     int _claimFilterId;
     int _discoverFilterId;
@@ -57,6 +63,7 @@ public:
     bool claimAddress();
 
 private:
+    static void addressClaimWorkHandler(k_work *work);
     static void onAddressDiscoverReceived(const device *dev, can_frame *frame, void *arg);
     static void onAnyAddressDiscoverReceived(const device *dev, can_frame *frame, void *arg);
     static void onAddressClaimReceived(const device *dev, can_frame *frame, void *arg);
