@@ -16,6 +16,10 @@ if(BSD)
     target_link_libraries(thingset++ Threads::Threads)
 endif()
 
+if (ENABLE_GATEWAY)
+    target_compile_definitions(thingset++ PUBLIC ENABLE_GATEWAY)
+endif()
+
 if (ENABLE_TEXT_MODE)
     target_compile_definitions(thingset++ PUBLIC ENABLE_TEXT_MODE)
 endif()
