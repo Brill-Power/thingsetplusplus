@@ -70,6 +70,7 @@ ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, siz
 
 size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
 {
+#ifdef ENABLE_GATEWAY
     if (isForward())
     {
         // new style; CBOR encoded node ID as string
@@ -87,7 +88,8 @@ size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLe
             }
         }
         return 0;
-    } else
+    }
+    else
     {
         // old-style node ID in path
         if (!tryGetNodeId(nodeId)) {
@@ -120,6 +122,9 @@ size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLe
         *request = &(*request)[newPathStart];
         return newLength;
     }
+#else
+    return 0;
+#endif // ENABLE_GATEWAY
 }
 
 bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
@@ -150,6 +155,7 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
 
 size_t ThingSetTextRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
 {
+#ifdef ENABLE_GATEWAY
     if (isForward())
     {
         uint8_t *req = *request;
@@ -186,6 +192,9 @@ size_t ThingSetTextRequestContext::rewrite(uint8_t **request, size_t requestLeng
         *request = &(*request)[nodeId.length() + 2];
         return newLength;
     }
+#else
+    return 0;
+#endif // ENABLE_GATEWAY
 }
 
 bool ThingSetTextRequestContext::setStatus(const ThingSetStatusCode &status)

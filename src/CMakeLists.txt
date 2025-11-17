@@ -25,6 +25,10 @@ if(ENABLE_SERVER)
         ThingSetServer.cpp)
 endif()
 
+if(ENABLE_GATEWAY)
+    message("ThingSet++ gateway enabled")
+endif()
+
 if(ENABLE_CLIENT)
     message("ThingSet++ client enabled")
     target_sources(thingset++ PRIVATE ThingSetClient.cpp)

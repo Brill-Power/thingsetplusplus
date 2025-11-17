@@ -9,6 +9,16 @@ config THINGSET_PLUS_PLUS_SERVER
 	bool "Enable server"
 	default false
 
+if THINGSET_PLUS_PLUS_SERVER
+
+config THINGSET_PLUS_PLUS_GATEWAY
+	bool "Enable gateway"
+	help
+		Enable gateway mode in server
+	default false
+
+endif
+
 config THINGSET_PLUS_PLUS_CLIENT
 	bool "Enable client"
 	default false
