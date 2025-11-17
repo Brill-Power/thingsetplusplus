@@ -68,7 +68,7 @@ ThingSetBinaryRequestContext::ThingSetBinaryRequestContext(uint8_t *request, siz
     }
 }
 
-size_t ThingSetBinaryRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
+size_t ThingSetBinaryRequestContext::rewrite([[maybe_unused]] uint8_t **request, [[maybe_unused]] size_t requestLength, [[maybe_unused]] std::string &nodeId)
 {
 #ifdef ENABLE_GATEWAY
     if (isForward())
@@ -153,7 +153,7 @@ ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t 
     }
 }
 
-size_t ThingSetTextRequestContext::rewrite(uint8_t **request, size_t requestLength, std::string &nodeId)
+size_t ThingSetTextRequestContext::rewrite([[maybe_unused]] uint8_t **request, [[maybe_unused]] size_t requestLength, [[maybe_unused]] std::string &nodeId)
 {
 #ifdef ENABLE_GATEWAY
     if (isForward())
