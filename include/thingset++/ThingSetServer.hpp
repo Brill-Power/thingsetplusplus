@@ -104,14 +104,14 @@ public:
 #endif
         Encoder encoder = _transport.getPublishingEncoder(enhanced);
 
-        if (!encoder.encode(0)) { // fake subset ID
-            return false;
-        }
-
         if (enhanced) {
             if (!encoder.encode(ThingSet::Eui::getValue())) {
                 return false;
             }
+        }
+
+        if (!encoder.encode(0)) { // fake subset ID
+            return false;
         }
 
         if (!encoder.encodeMapStart(sizeof...(properties)) || !encode(encoder, properties...)
