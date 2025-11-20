@@ -153,7 +153,15 @@ public:
     bool encode(const T &value)
     {
         auto bound = internal::bind_to_tuple(value, [](auto &x) { return std::addressof(x); });
-        auto count = std::tuple_size_v<decltype(bound)>;
+        size_t count = 0;
+        for_each_element(bound, [&count]<typename P>(P &) {
+            // only try to encode fields that are ThingSet properties; just
+            // skip everything else
+            if constexpr (std::is_convertible_v<P, const ThingSetEncodable *> and
+                std::is_convertible_v<P, const ThingSetNode *>) {
+                count++;
+            }
+        });
         if (!encodeMapStart(count)) {
             return false;
         }
