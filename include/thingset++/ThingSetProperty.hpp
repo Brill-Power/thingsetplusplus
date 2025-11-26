@@ -122,7 +122,7 @@ public:
 
     constexpr const std::string getType() const override
     {
-        return ThingSetType<std::remove_const_t<T>>::name.str();
+        return ThingSetType<std::remove_cvref_t<T>>::name.str();
     }
 
     bool tryCastTo(ThingSetNodeType type, void **target) override

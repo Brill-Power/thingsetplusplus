@@ -96,6 +96,106 @@ public:
     }
 };
 
+template <typename T>
+class ThingSetValue<T &>
+    : public ThingSetEncodable, public ThingSetDecodable
+{
+protected:
+    T &_value;
+
+public:
+    ThingSetValue(T &value) : _value(value)
+    {}
+
+    bool encode(ThingSetEncoder &encoder) const override
+    {
+        return encoder.encode(_value);
+    }
+
+    bool decode(ThingSetDecoder &decoder) override
+    {
+        if constexpr (std::is_const_v<T>) {
+            return false;
+        } else {
+            return decoder.decode(&_value);
+        }
+    }
+
+    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
+    auto &operator=(const V &value)
+    {
+        _value = value;
+        return *this;
+    }
+
+    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
+    auto &operator=(V &&value)
+    {
+        _value = std::move(value);
+        return *this;
+    }
+
+    T *getValue()
+    {
+        return &_value;
+    }
+
+    const T *getValue() const
+    {
+        return &_value;
+    }
+};
+
+template <typename T>
+class ThingSetValue<T *>
+    : public ThingSetEncodable, public ThingSetDecodable
+{
+protected:
+    T *_value;
+
+public:
+    ThingSetValue(T *value) : _value(value)
+    {}
+
+    bool encode(ThingSetEncoder &encoder) const override
+    {
+        return encoder.encode(_value);
+    }
+
+    bool decode(ThingSetDecoder &decoder) override
+    {
+        if constexpr (std::is_const_v<T>) {
+            return false;
+        } else {
+            return decoder.decode(_value);
+        }
+    }
+
+    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
+    auto &operator=(const V &value)
+    {
+        *_value = value;
+        return *this;
+    }
+
+    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
+    auto &operator=(V &&value)
+    {
+        *_value = std::move(value);
+        return *this;
+    }
+
+    T *getValue()
+    {
+        return _value;
+    }
+
+    const T *getValue() const
+    {
+        return _value;
+    }
+};
+
 template <typename Element, std::size_t Size>
 class ThingSetValue<std::array<Element, Size>>
     : public ThingSetEncodable, public ThingSetDecodable
@@ -154,15 +254,15 @@ public:
     }
 };
 
-template <typename T>
-class ThingSetValue<T *>
+template <typename Element, std::size_t Size>
+class ThingSetValue<std::array<Element, Size> &>
     : public ThingSetEncodable, public ThingSetDecodable
 {
 protected:
-    T *_value;
+    std::array<Element, Size> &_value;
 
 public:
-    ThingSetValue(T *value) : _value(value)
+    ThingSetValue(std::array<Element, Size> &value) : _value(value)
     {}
 
     bool encode(ThingSetEncoder &encoder) const override
@@ -172,35 +272,39 @@ public:
 
     bool decode(ThingSetDecoder &decoder) override
     {
-        if constexpr (std::is_const_v<T>) {
-            return false;
-        } else {
-            return decoder.decode(_value);
-        }
+        return decoder.decode(&_value);
     }
 
-    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
-    auto &operator=(const V &value)
-    {
-        *_value = value;
-        return *this;
-    }
-
-    template <typename V> requires std::is_convertible_v<V, T> && (!std::is_const_v<T>)
-    auto &operator=(V &&value)
-    {
-        *_value = std::move(value);
-        return *this;
-    }
-
-    T *getValue()
+    std::array<Element, Size> &getValue()
     {
         return _value;
     }
 
-    const T *getValue() const
+    const std::array<Element, Size> &getValue() const
     {
         return _value;
+    }
+
+    Element &operator[](int index)
+    {
+        return _value[index];
+    }
+
+    auto &operator=(const std::array<Element, Size> &value)
+    {
+        _value = value;
+        return *this;
+    }
+
+    auto &operator=(std::array<Element, Size> &&value)
+    {
+        _value = std::move(value);
+        return *this;
+    }
+
+    std::size_t size() const
+    {
+        return _value.size();
     }
 };
 

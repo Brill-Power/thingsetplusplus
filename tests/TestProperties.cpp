@@ -31,6 +31,26 @@ TEST(Properties, SimpleProperty)
     ASSERT_EQ(0xFA, buffer[0]);
 }
 
+TEST(Properties, ReferenceProperty)
+{
+    float rf32 = 1.0;
+    ThingSetReadOnlyProperty<float &> prf32 { 0x101, 0, "rf32", rf32 };
+    ASSERT_EQ("f32", prf32.getType());
+    prf32 = 1.5;
+    ASSERT_EQ(1.5, rf32);
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x101, &node));
+    ASSERT_EQ(0x101, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    prf32.encode(encoder);
+
+    ASSERT_EQ(5, encoder.getEncodedLength());
+    ASSERT_EQ(0xFA, buffer[0]);
+}
+
 TEST(Properties, PointerProperty)
 {
     float rf32 = 1.0;
@@ -86,6 +106,27 @@ TEST(Properties, ArrayProperty)
     uint8_t buffer[128];
     FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
     u32s.encode(encoder);
+
+    ASSERT_EQ(5, encoder.getEncodedLength());
+    ASSERT_EQ(0x84, buffer[0]);
+}
+
+
+TEST(Properties, ReferenceToArrayProperty)
+{
+    std::array<uint32_t, 4> u32s { 0, 1, 2, 3};
+    ThingSetReadOnlyProperty<std::array<uint32_t, 4> &> pu32s { 0x301, 0, "u32s", u32s };
+    ASSERT_EQ("u32[]", pu32s.getType());
+    u32s[0] = 5;
+    ASSERT_EQ(5, u32s[0]);
+
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x301, &node));
+    ASSERT_EQ(0x301, node->getId());
+
+    uint8_t buffer[128];
+    FixedDepthThingSetBinaryEncoder encoder(buffer, sizeof(buffer));
+    pu32s.encode(encoder);
 
     ASSERT_EQ(5, encoder.getEncodedLength());
     ASSERT_EQ(0x84, buffer[0]);
