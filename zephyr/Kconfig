@@ -38,6 +38,10 @@ config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_STACK_SIZE
 	int "Stack size of subscription thread"
 	default 1024
 
+config THINGSET_PLUS_PLUS_CAN_CLIENT_RX_BUFFER_SIZE
+	int "Size of receive buffer in client"
+	default 1024
+
 config THINGSET_PLUS_PLUS_CAN_SUBSCRIPTION_THREAD_PRIORITY
 	int "Priority of subscription thread"
 	default 5

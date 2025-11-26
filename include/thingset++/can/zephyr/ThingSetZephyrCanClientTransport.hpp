@@ -18,7 +18,7 @@ private:
     k_msgq _responseQueue;
     struct ResponseMessage
     {
-        char buffer[1024];
+        char buffer[CONFIG_THINGSET_PLUS_PLUS_CAN_CLIENT_RX_BUFFER_SIZE];
         size_t length;
     };
     std::array<char, sizeof(ResponseMessage)> _responseQueueBuffer;
