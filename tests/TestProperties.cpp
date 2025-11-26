@@ -34,7 +34,7 @@ TEST(Properties, SimpleProperty)
 TEST(Properties, ReferenceProperty)
 {
     float rf32 = 1.0;
-    ThingSetReadOnlyProperty<float &> prf32 { 0x101, 0, "rf32", rf32 };
+    ThingSetReadOnlyReferenceProperty<float> prf32 { 0x101, 0, "rf32", rf32 };
     ASSERT_EQ("f32", prf32.getType());
     prf32 = 1.5;
     ASSERT_EQ(1.5, rf32);
@@ -115,7 +115,7 @@ TEST(Properties, ArrayProperty)
 TEST(Properties, ReferenceToArrayProperty)
 {
     std::array<uint32_t, 4> u32s { 0, 1, 2, 3};
-    ThingSetReadOnlyProperty<std::array<uint32_t, 4> &> pu32s { 0x301, 0, "u32s", u32s };
+    ThingSetReadOnlyReferenceProperty<std::array<uint32_t, 4>> pu32s { 0x301, 0, "u32s", u32s };
     ASSERT_EQ("u32[]", pu32s.getType());
     u32s[0] = 5;
     ASSERT_EQ(5, u32s[0]);

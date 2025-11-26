@@ -349,6 +349,14 @@ public:
 template <typename T, Subset S = (Subset)0>
 using ThingSetReadOnlyProperty = ThingSetProperty<T, ThingSetAccess::anyRead, Subset, S>;
 
+/// @brief A ThingSet property that can be read by anyone, whose value is stored elsewhere.
+/// @tparam T The type of the value stored by the field this property refers to.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
+template <typename T, Subset S = (Subset)0>
+using ThingSetReadOnlyReferenceProperty = ThingSetReadOnlyProperty<T &, S>;
+
 /// @brief A ThingSet property that can be read and written by anyone.
 /// @tparam T The type of the value stored by this property.
 /// @tparam Id The unique ID of the property.
@@ -356,6 +364,14 @@ using ThingSetReadOnlyProperty = ThingSetProperty<T, ThingSetAccess::anyRead, Su
 /// @tparam Name The human-readable name of the property.
 template <typename T, Subset S = (Subset)0>
 using ThingSetReadWriteProperty = ThingSetProperty<T, ThingSetAccess::anyReadWrite, Subset, S>;
+
+/// @brief A ThingSet property that can be read and written by anyone, whose value is stored elsewhere.
+/// @tparam T The type of the value stored by the field this property refers to.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
+template <typename T, Subset S = (Subset)0>
+using ThingSetReadWriteReferenceProperty = ThingSetReadWriteProperty<T &, S>;
 
 /// @brief A ThingSet property that can be read by anyone but only written by advanced users.
 /// @tparam T The type of the value stored by this property.
@@ -366,6 +382,14 @@ template <typename T, Subset S = (Subset)0>
 using ThingSetReadAdvancedWriteProperty =
     ThingSetProperty<T, ThingSetAccess::anyRead | ThingSetAccess::expertWrite, Subset, S>;
 
+/// @brief A ThingSet property that can be read by anyone but only written by advanced users, whose value is stored elsewhere.
+/// @tparam T The type of the value stored by the field this property refers to.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
+template <typename T, Subset S = (Subset)0>
+using ThingSetReadAdvancedWriteReferenceProperty = ThingSetReadAdvancedWriteProperty<T &, S>;
+
 /// @brief A ThingSet property that can be read by anyone but only written by the manufacturer.
 /// @tparam T The type of the value stored by this property.
 /// @tparam Id The unique ID of the property.
@@ -374,5 +398,13 @@ using ThingSetReadAdvancedWriteProperty =
 template <typename T, Subset S = (Subset)0>
 using ThingSetReadManufacturerWriteProperty =
     ThingSetProperty<T, ThingSetAccess::anyRead | ThingSetAccess::manufacturerWrite, Subset, S>;
+
+/// @brief A ThingSet property that can be read by anyone but only written by the manufacturer, whose value is stored elsewhere.
+/// @tparam T The type of the value stored by the field this property refers to.
+/// @tparam Id The unique ID of the property.
+/// @tparam ParentId The ID of the parent container of this property.
+/// @tparam Name The human-readable name of the property.
+template <typename T, Subset S = (Subset)0>
+using ThingSetReadManufacturerWriteReferenceProperty = ThingSetReadManufacturerWriteProperty<T &, S>;
 
 } // namespace ThingSet
