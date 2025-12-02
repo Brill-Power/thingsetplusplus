@@ -21,7 +21,22 @@
 #include <arpa/inet.h>
 #endif // __ZEPHYR__
 
-#define THINGSET_SERVER_MAX_CLIENTS               8
+#ifdef __ZEPHYR__
+// Use Zephyr Kconfig values
+#define THINGSET_PLUS_PLUS_SOCKET_SERVER_TX_BUFFER_SIZE CONFIG_THINGSET_PLUS_PLUS_SOCKET_SERVER_TX_BUFFER_SIZE
+#define THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE CONFIG_THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE
+#else
+// Use CMake-defined values (set by target_compile_definitions in CMakeLists.txt)
+// If not building with CMake, fall back to defaults
+#ifndef THINGSET_PLUS_PLUS_SOCKET_SERVER_TX_BUFFER_SIZE
+#define THINGSET_PLUS_PLUS_SOCKET_SERVER_TX_BUFFER_SIZE 1024
+#endif
+#ifndef THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE
+#define THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE 1024
+#endif
+#endif // #ifdef __ZEPHYR__
+
+#define THINGSET_SERVER_MAX_CLIENTS 8
 
 namespace ThingSet::Ip::Sockets {
 
@@ -43,6 +58,8 @@ private:
     int _publishSocketHandle;
     int _listenSocketHandle;
     std::function<int(const SocketEndpoint &, uint8_t *, size_t, uint8_t *, size_t)> _callback;
+    uint8_t _rxBuf[THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE];
+    uint8_t _txBuf[THINGSET_PLUS_PLUS_SOCKET_SERVER_TX_BUFFER_SIZE];
 
 protected:
     bool _runHandler;

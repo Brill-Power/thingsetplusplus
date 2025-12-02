@@ -210,10 +210,8 @@ void _ThingSetSocketServerTransport::runHandler()
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (_socketDescriptors[i].revents & POLLIN) {
                 int clientSocketHandle = _socketDescriptors[i].fd;
-                uint8_t rxBuf[1024];
-                uint8_t txBuf[1024];
 
-                int rxLen = recv(clientSocketHandle, rxBuf, sizeof(rxBuf), 0);
+                int rxLen = recv(clientSocketHandle, _rxBuf, sizeof(_rxBuf), 0);
 
                 if (rxLen < 0) {
                     LOG_ERROR("Receive error: %d", errno);
@@ -227,11 +225,11 @@ void _ThingSetSocketServerTransport::runHandler()
                 }
                 else {
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
-                    int txLen = _callback(addr, rxBuf, rxLen, txBuf, sizeof(txBuf));
+                    int txLen = _callback(addr, _rxBuf, rxLen, _txBuf, sizeof(_txBuf));
                     if (txLen > 0) {
                         setBlocking(clientSocketHandle, true);
                         int sent;
-                        for (uint8_t *txB = txBuf; txLen; txLen -= sent) {
+                        for (uint8_t *txB = _txBuf; txLen; txLen -= sent) {
                             sent = send(clientSocketHandle, txB, txLen, 0);
                             if (sent < 0) {
                                 LOG_ERROR("Send to %x failed with error %d", addr.sin_addr.s_addr, errno);
