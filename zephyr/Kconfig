@@ -80,6 +80,8 @@ config THINGSET_PLUS_PLUS_SOCKET_HANDLER_THREAD_PRIORITY
 	int "Handler thread priority"
 	default 2
 
+rsource "../src/ip/sockets/zephyr/Kconfig"
+
 endif
 
 config THINGSET_PLUS_PLUS_BACKEND_SHELL

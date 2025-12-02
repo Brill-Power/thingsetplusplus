@@ -24,6 +24,10 @@ int ThingSetZephyrCanClientTransport::read(uint8_t *buffer, size_t len)
     int result = k_msgq_get(&_responseQueue, &message, K_SECONDS(1));
     if (result == 0)
     {
+        if (message.length > len) {
+            return -ENOMEM;
+        }
+
         memcpy(buffer, message.buffer, message.length);
         return message.length;
     }

@@ -1,0 +1,10 @@
+# Copyright (c) The ThingSet Project Contributors
+# SPDX-License-Identifier: Apache-2.0
+
+config THINGSET_PLUS_PLUS_SOCKET_SERVER_TX_BUFFER_SIZE
+	int "Transmission buffer size in bytes for socket server"
+	default 1024
+
+config THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE
+	int "Receive buffer size in bytes for socket server"
+	default 1024
