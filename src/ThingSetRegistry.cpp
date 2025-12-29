@@ -7,6 +7,7 @@
 #include "thingset++/ThingSetRegistry.hpp"
 #include "thingset++/ThingSetParentNode.hpp"
 #include "thingset++/internal/logging.hpp"
+#include <cassert>
 
 namespace ThingSet {
 
@@ -45,7 +46,16 @@ void ThingSetRegistry::registerNode(ThingSetNode *node)
 {
     LOG_DEBUG("Registering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::instance().registerOrUnregisterNode(
-        node, [](auto &l, auto *n) { l.push_back(n); }, [](auto *p, auto *n) { return p->addChild(n); });
+        node, [](auto &l, auto *n) {
+            for (const auto &en : l) {
+                if (en->getId() == n->getId()) {
+                    LOG_ERROR("Cannot register node %s (0x%x) as it already exists (under name %s)", n->getName().data(), n->getId(), en->getId());
+                    assert(en->getId() == n->getId());
+                    return;
+                }
+            }
+            l.push_back(n);
+        }, [](auto *p, auto *n) { return p->addChild(n); });
     void *target;
     if (node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
         ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
