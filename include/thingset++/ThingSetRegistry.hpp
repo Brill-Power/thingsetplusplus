@@ -95,6 +95,7 @@ public:
     /// @param node When the method returns, contains a pointer to the node if it was found.
     /// @return True if the node was found, otherwise false.
     static bool findById(const unsigned id, ThingSetNode **node);
+    static bool findById(const unsigned id, const unsigned parentId, ThingSetNode **node);
     static bool findParentById(const unsigned id, ThingSetParentNode **parent);
 
     FlatteningIterator<NodeMap::iterator> begin();
@@ -120,6 +121,7 @@ private:
     void registerOrUnregisterNode(ThingSetNode *node,
                                   std::function<void(NodeList &, ThingSetNode *)> nodeListAction,
                                   std::function<bool(ThingSetParentNode *, ThingSetNode *)> parentNodeAction);
+    static bool findByIdInNodeList(NodeList list, const unsigned id, ThingSetNode **node);
 };
 
 } // namespace ThingSet

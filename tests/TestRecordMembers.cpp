@@ -40,21 +40,21 @@ TEST(RecordMembers, FindRecordByName)
 TEST(RecordMembers, FindValueRecordMemberById)
 {
     ThingSetNode *node;
-    ASSERT_TRUE(ThingSetRegistry::findById(0x501, &node));
+    ASSERT_TRUE(ThingSetRegistry::findById(0x501, 0x500, &node));
     ASSERT_EQ("voltage", node->getName());
 }
 
 TEST(RecordMembers, FindArrayRecordMemberById)
 {
     ThingSetNode *node;
-    ASSERT_TRUE(ThingSetRegistry::findById(0x510, &node));
+    ASSERT_TRUE(ThingSetRegistry::findById(0x510, 0x500, &node));
     ASSERT_EQ("cells", node->getName());
 }
 
 TEST(RecordMembers, ArrayRecordMemberHasChildren)
 {
     ThingSetNode *node;
-    ASSERT_TRUE(ThingSetRegistry::findById(0x510, &node));
+    ASSERT_TRUE(ThingSetRegistry::findById(0x510, 0x500, &node));
     void *target;
     ASSERT_TRUE(node->tryCastTo(ThingSetNodeType::hasChildren, &target));
     ThingSetParentNode &parent = *reinterpret_cast<ThingSetParentNode *>(target);
