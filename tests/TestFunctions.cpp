@@ -106,7 +106,7 @@ static uint32_t getLength(Buffer<1024> &buffer)
     return buffer.size();
 }
 
-ThingSetUserFunction<0x440, 0x0, "xGetLength", uint32_t, Buffer<1024> &> xGetLength(getLength);
+ThingSetUserFunction<0x460, 0x0, "xGetLength", uint32_t, Buffer<1024> &> xGetLength(getLength);
 
 TEST(Functions, InvokeFunctionWithDecodableParameter)
 {
