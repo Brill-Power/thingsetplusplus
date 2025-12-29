@@ -49,7 +49,7 @@ void ThingSetRegistry::registerNode(ThingSetNode *node)
         node, [](auto &l, auto *n) {
             for (const auto &en : l) {
                 if (en->getId() == n->getId()) {
-                    LOG_ERROR("Cannot register node %s (0x%x) as it already exists (under name %s)", n->getName().data(), n->getId(), en->getId());
+                    LOG_ERROR("Cannot register node %s (0x%x) as it already exists (under name %s)", n->getName().data(), n->getId(), en->getName().data());
                     assert(en->getId() == n->getId());
                     return;
                 }
