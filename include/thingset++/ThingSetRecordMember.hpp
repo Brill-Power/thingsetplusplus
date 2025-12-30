@@ -53,6 +53,12 @@ private:
         {
             return Access;
         }
+
+        bool tryCastTo(ThingSetNodeType type, void **) override
+        {
+            // stub method so that node registration can detect record members
+            return type == ThingSetNodeType::recordMember;
+        }
     };
 
     static ThingSetNode *proxy()
@@ -176,6 +182,11 @@ private:
         constexpr ThingSetAccess getAccess() const override
         {
             return Access;
+        }
+
+        bool tryCastTo(ThingSetNodeType type, void **) override
+        {
+            return type == ThingSetNodeType::recordMember;
         }
     };
 
@@ -309,6 +320,11 @@ private:
         bool invokeCallback(ThingSetNode *, ThingSetCallbackReason) const override
         {
             return true;
+        }
+
+        bool tryCastTo(ThingSetNodeType type, void **target) override
+        {
+            return type == ThingSetNodeType::recordMember || ThingSetParentNode::tryCastTo(type, target);
         }
     };
 

@@ -23,6 +23,7 @@ enum ThingSetNodeType
     function = 64 | hasChildren,
     group = 128 | hasChildren,
     record = 256 | hasChildren | requestHandler,
+    recordMember = 512 | value
 };
 
 class ThingSetRegistry;

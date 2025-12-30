@@ -302,6 +302,8 @@ public:
             case ThingSetNodeType::requestHandler:
                 *target = static_cast<ThingSetCustomRequestHandler *>(this);
                 return true;
+            case ThingSetNodeType::record:
+                return true;
             default:
                 return ThingSetParentNode::tryCastTo(type, target);
         }

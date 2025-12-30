@@ -11,6 +11,12 @@
 
 namespace ThingSet {
 
+static uint32_t calculateId(const uint16_t &id, const uint16_t &parentId)
+{
+    uint32_t offset = (parentId % 255) * 0x10000;
+    return offset + id + 1; // ensure never in same bucket as original
+}
+
 ThingSetRegistry::ThingSetRegistry()
 {
     // manually register the root node
@@ -34,6 +40,9 @@ void ThingSetRegistry::registerOrUnregisterNode(
     std::function<bool(ThingSetParentNode *, ThingSetNode *)> parentNodeAction)
 {
     unsigned id = node->getId();
+    if (node->tryCastTo(ThingSetNodeType::recordMember, nullptr)) {
+        id = calculateId(id, node->getParentId());
+    }
     NodeList &list = _nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
     nodeListAction(list, node);
     ThingSetParentNode *parent;
@@ -97,9 +106,8 @@ bool ThingSetRegistry::findByName(const std::string &name, ThingSetNode **node, 
     return instance()._rootNode.findByName(name, node, index);
 }
 
-bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)
+bool ThingSetRegistry::findByIdInNodeList(NodeList list, const unsigned id, ThingSetNode **node)
 {
-    NodeList list = instance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
     for (ThingSetNode *n : list) {
         if (n && (n->getId() == id)) {
             *node = n;
@@ -107,6 +115,24 @@ bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)
         }
     }
     return false;
+}
+
+bool ThingSetRegistry::findById(const unsigned id, const unsigned parentId, ThingSetNode **node)
+{
+    ThingSetParentNode *parent;
+    if (findParentById(parentId, &parent) && parent->tryCastTo(ThingSetNodeType::record, nullptr))
+    {
+        uint32_t fakeId = calculateId(id, parentId);
+        NodeList list = instance()._nodeMap[fakeId % NODE_MAP_LOOKUP_BUCKETS];
+        return findByIdInNodeList(list, id, node);
+    }
+    return false;
+}
+
+bool ThingSetRegistry::findById(const unsigned id, ThingSetNode **node)
+{
+    NodeList list = instance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
+    return findByIdInNodeList(list, id, node);
 }
 
 FlatteningIterator<ThingSetRegistry::NodeMap::iterator> ThingSetRegistry::begin()
