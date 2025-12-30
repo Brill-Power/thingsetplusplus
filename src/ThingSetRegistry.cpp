@@ -13,7 +13,7 @@ namespace ThingSet {
 
 static uint32_t calculateId(const uint16_t &id, const uint16_t &parentId)
 {
-    uint32_t offset = (parentId % 255) * 0xFFFF;
+    uint32_t offset = (parentId % 255) * 0x10000;
     return offset + id + 1; // ensure never in same bucket as original
 }
 
