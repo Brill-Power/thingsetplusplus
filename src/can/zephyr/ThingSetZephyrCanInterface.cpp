@@ -172,7 +172,7 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
             if (event & AddressClaimEvent::alreadyUsed) {
                 /* try again with new random node_addr between 0x01 and 0xFD */
                 uint8_t oldNodeAddress = _nodeAddress;
-                _nodeAddress = CanID::minAddress + sys_rand32_get() % (CanID::maxAddress - CanID::minAddress);
+                _nodeAddress = CanID::minAddress + sys_rand32_get() % ((CanID::maxAddress + 1) - CanID::minAddress);
                 LOG_WARN("Node addr 0x%.2X already in use, trying 0x%.2X", oldNodeAddress, _nodeAddress);
             }
             else {
