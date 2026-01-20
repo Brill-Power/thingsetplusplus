@@ -104,7 +104,7 @@ public:
         ThingSetNode *baseNode = nullptr;
         NodeList list = instance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
 
-        if (!findByIdInNodeList(list, id, &baseNode)) {
+        if (!findById(id, &baseNode)) {
             return false;
         }
 
