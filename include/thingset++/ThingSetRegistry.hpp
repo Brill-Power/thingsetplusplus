@@ -97,10 +97,10 @@ public:
     static bool findById(const unsigned id, ThingSetNode **node);
     static bool findById(const unsigned id, const unsigned parentId, ThingSetNode **node);
 
-    template <typename T> static bool findById(const unsigned id, T **node)
+    template <typename T>
+        requires std::derived_from<T, ThingSetNode>
+    static bool findById(const unsigned id, T **node)
     {
-        static_assert(std::is_base_of<ThingSetNode, T>::value, "T must be derived from ThingSetNode");
-
         ThingSetNode *baseNode = nullptr;
         NodeList list = instance()._nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
 
