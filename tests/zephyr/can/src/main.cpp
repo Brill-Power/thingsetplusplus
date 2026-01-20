@@ -77,8 +77,8 @@ ZTEST(ZephyrClientServer, test_name) \
     k_sem_init(&clientCompleted, 0, 1); \
 \
     createAndRunServer(); \
-
-    k_sem_take(&serverStarted, K_FOREVER);
+\
+    k_sem_take(&serverStarted, K_FOREVER); \
 \
     createAndRunClient([](auto, auto, auto) \
     { \
