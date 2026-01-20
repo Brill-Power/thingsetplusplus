@@ -120,7 +120,7 @@ ZCLIENT_SERVER_TEST(test_update,
     LOG_INF("result.code: 0x%x", result.code());
     zassert_equal(ThingSetStatusCode::changed, result.code());
     k_sleep(K_MSEC(100)); // `update` is async or something
-    zassert_equal(25.0f, totalVoltage.getValue(), "value was not updated");
+    zassert_equal(25.0f, totalVoltage.getValue());
 )
 
 static void *testSetup(void)
