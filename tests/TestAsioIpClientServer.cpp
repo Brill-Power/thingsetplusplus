@@ -66,6 +66,16 @@ ASIO_TEST(GetFloatByName,
     ASSERT_EQ(24.0f, tv);
 )
 
+ASIO_TEST(NotFoundById,
+    float tv;
+    ASSERT_FALSE(client.get(0x1300, tv));
+)
+
+ASIO_TEST(NotFoundByName,
+    float tv;
+    ASSERT_FALSE(client.get("notTotalVoltage", tv));
+)
+
 ASIO_TEST(GetFunction,
     int result;
     ASSERT_FALSE(client.get(0x1000, result));
@@ -90,7 +100,20 @@ ASIO_TEST(FetchFunctionParameters,
     ASSERT_STREQ("xAddNumberi32", names[0].substr(0, 13).c_str());
 )
 
-ASIO_TEST(UpdateFloat,
+ASIO_TEST(UpdateFloatByName,
     ASSERT_TRUE(client.update("totalVoltage", 25.0f));
     ASSERT_EQ(25.0, totalVoltage.getValue());
+)
+
+ASIO_TEST(UpdateFloatById,
+    ASSERT_TRUE(client.update(0x300, 26.0f));
+    ASSERT_EQ(26.0, totalVoltage.getValue());
+)
+
+ASIO_TEST(CannotUpdateFunctionByName,
+    ASSERT_FALSE(client.update("xAddNumber", 26.0f));
+)
+
+ASIO_TEST(CannotUpdateFunctionById,
+    ASSERT_FALSE(client.update(0x1000, 26.0f));
 )

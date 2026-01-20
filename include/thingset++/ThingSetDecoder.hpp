@@ -149,12 +149,8 @@ public:
     bool decode(T *value)
     {
         auto bound = internal::bind_to_tuple(*value, [](auto &x) { return std::addressof(x); });
-        if (!decodeMapStart()) {
-            return false;
-        }
-        std::optional<uint32_t> id;
-        std::optional<std::string> name;
-        while (decodeKey(id, name)) {
+        return decodeMap([&bound, this](auto id, auto name)
+        {
             if (id.has_value()) {
                 if (!switchDecode(id.value(), []<typename P>(){ return P::id; }, bound)) {
                     if (!skip()) {
@@ -170,8 +166,8 @@ public:
             } else {
                 return false;
             }
-        }
-        return decodeMapEnd();
+            return true;
+        });
     }
 
     /// @brief Decodes a map by iterating over its keys and invoking a callback for each key.
@@ -191,6 +187,26 @@ public:
                 return false;
             }
             if (!callback(key)) {
+                return false;
+            }
+        }
+        return decodeMapEnd();
+    }
+
+    /// @brief Decodes a map by iterating over its keys and invoking a callback for each key, where the key may
+    /// be an integer or a string.
+    /// @param callback The callback to be invoked each time a key is decoded. This callback should decode the value and
+    /// return true, or fail and return false.
+    /// @return True if decoding succeeded, otherwise false.
+    bool decodeMap(std::function<bool(std::optional<std::uint32_t>, std::optional<std::string>)> callback)
+    {
+        if (!decodeMapStart()) {
+            return false;
+        }
+        std::optional<uint32_t> id;
+        std::optional<std::string> name;
+        while (decodeKey(id, name)) {
+            if (!callback(id, name)) {
                 return false;
             }
         }

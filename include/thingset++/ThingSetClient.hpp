@@ -85,6 +85,18 @@ public:
         return doRequest(id, ThingSetBinaryRequestType::fetch, [](auto encoder) { return encoder->encodeNull(); }, &result);
     }
 
+    template <typename T>
+    bool update(const uint16_t &id, const T &value)
+    {
+        // use root node as parent ID for ID-based updates
+        return doRequest(0, ThingSetBinaryRequestType::update, [&](auto encoder) {
+            return encoder->encodeMapStart() &&
+                encoder->encode(id) &&
+                encoder->encode(value) &&
+                encoder->encodeMapEnd();
+        });
+    }
+
     template <typename T> bool update(const std::string &fullyQualifiedName, const T &value)
     {
         size_t index = fullyQualifiedName.find_last_of('/');
