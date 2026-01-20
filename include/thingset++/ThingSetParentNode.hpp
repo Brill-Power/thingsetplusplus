@@ -43,6 +43,11 @@ public:
 
     bool tryCastTo(ThingSetNodeType type, void **target) override;
 
+    /// @brief Find a node by name.
+    /// @param name The name of the node sought.
+    /// @param node When the method returns, contains a pointer to the node if it was found.
+    /// @param index When the method returns, contains the array index if relevant.
+    /// @return True if the node was found, otherwise false.
     virtual bool findByName(const std::string &name, ThingSetNode **node, size_t *index);
 
     virtual bool invokeCallback(ThingSetNode *node, ThingSetCallbackReason reason) const = 0;

@@ -200,13 +200,8 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
     context.setStatus(ThingSetStatusCode::changed);
     context.encoder().encodePreamble();
-    if (context.decoder().decodeMap<std::string>([&](auto &key) {
-        ThingSetNode *child;
-        size_t index;
-        if (!parent->findByName(key, &child, &index)) {
-            context.setStatus(ThingSetStatusCode::notFound);
-            return false;
-        }
+
+    auto handleNodeUpdate = [&](ThingSetNode *child) {
         if ((child->getAccess() & _access) == ThingSetAccess::none) {
             context.setStatus(ThingSetStatusCode::forbidden);
             return false;
@@ -224,14 +219,39 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
             context.setStatus(ThingSetStatusCode::badRequest);
             return false;
         }
-        // for now we ignore the return value here; what would returning false here mean?
         parent->invokeCallback(child, ThingSetCallbackReason::didWrite);
         return true;
+    };
+
+    if (context.decoder().decodeMap([&](auto id, auto name)
+    {
+        ThingSetNode *child = nullptr;
+        if (id.has_value()) {
+            // just look up in root registry by ID, ignoring parent that got us here
+            // (it's probably the root node anyway)
+            if (!ThingSetRegistry::findById(id.value(), &child)) {
+                context.setStatus(ThingSetStatusCode::notFound);
+                return false;
+            }
+        }
+        else if (name.has_value()) {
+            // find node by name by iterating over a parent node's children
+            size_t index;
+            if (!parent->findByName(name.value(), &child, &index)) {
+                context.setStatus(ThingSetStatusCode::notFound);
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+        return handleNodeUpdate(child);
     }))
     {
         context.encoder().encodePreamble();
         return context.encoder().getEncodedLength() + context.getHeaderLength();
     }
+
     // just the error code
     return context.getHeaderLength();
 }
