@@ -94,7 +94,8 @@ ZTEST(ZephyrClientServer, test_name) \
 
 ZCLIENT_SERVER_TEST(test_get_float,
     float tv;
-    zassert_true(client.get(0x300, tv));
+    auto result = client.get(0x300, tv);
+    zassert_true(result.success());
 )
 
 ZCLIENT_SERVER_TEST(test_exec_function,
