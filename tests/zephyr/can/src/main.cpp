@@ -19,15 +19,6 @@ using namespace ThingSet;
 
 static const struct device *canDevice = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
 
-std::array<uint8_t, 1024> serverRxBuffer;
-std::array<uint8_t, 1024> serverTxBuffer;
-std::array<uint8_t, 1024> clientRxBuffer;
-std::array<uint8_t, 1024> clientTxBuffer;
-ThingSetZephyrCanInterface serverInterface(canDevice);
-ThingSetZephyrCanInterface clientInterface(canDevice);
-ThingSetZephyrCanServerTransport serverTransport(serverInterface, serverRxBuffer, serverTxBuffer);
-ThingSetZephyrCanClientTransport clientTransport(clientInterface, 0x01, clientRxBuffer, clientTxBuffer);
-
 ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
 
 ThingSetReadWriteProperty<uint32_t, Subset::persisted> identifier { 0x20, 0, "identifier", 1 };
@@ -46,6 +37,11 @@ k_sem clientCompleted;
 
 static void runServer(void *, void *, void *)
 {
+    std::array<uint8_t, 1024> serverRxBuffer;
+    std::array<uint8_t, 1024> serverTxBuffer;
+    ThingSetZephyrCanInterface serverInterface(canDevice);
+    ThingSetZephyrCanServerTransport serverTransport(serverInterface, serverRxBuffer, serverTxBuffer);
+
     LOG_INF("Server starting up");
     auto server = ThingSetServerBuilder::build(serverTransport);
     server.listen();
@@ -82,6 +78,11 @@ ZTEST(ZephyrClientServer, test_name) \
 \
     createAndRunClient([](auto, auto, auto) \
     { \
+        std::array<uint8_t, 1024> clientRxBuffer; \
+        std::array<uint8_t, 1024> clientTxBuffer; \
+        ThingSetZephyrCanInterface clientInterface(canDevice); \
+        ThingSetZephyrCanClientTransport clientTransport(clientInterface, 0x01, clientRxBuffer, clientTxBuffer); \
+\
         LOG_INF("Creating client"); \
         std::array<uint8_t, 1024> localRxBuffer; \
         std::array<uint8_t, 1024> localTxBuffer; \
