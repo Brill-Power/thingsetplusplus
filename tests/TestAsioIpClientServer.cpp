@@ -107,12 +107,16 @@ ASIO_TEST(FetchFunctionParameters,
 )
 
 ASIO_TEST(UpdateFloatByName,
-    ASSERT_TRUE(client.update("totalVoltage", 25.0f));
+    auto result = client.update("totalVoltage", 25.0f);
+    ASSERT_TRUE(result);
+    ASSERT_EQ(ThingSetStatusCode::changed, result.code());
     ASSERT_EQ(25.0, totalVoltage.getValue());
 )
 
 ASIO_TEST(UpdateFloatById,
-    ASSERT_TRUE(client.update(0x300, 26.0f));
+    auto result = client.update(0x300, 26.0f);
+    ASSERT_TRUE(result);
+    ASSERT_EQ(ThingSetStatusCode::changed, result.code());
     ASSERT_EQ(26.0, totalVoltage.getValue());
 )
 

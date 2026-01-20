@@ -96,20 +96,21 @@ ZCLIENT_SERVER_TEST(test_get_float,
     float tv;
     auto result = client.get(0x300, tv);
     zassert_true(result.success());
+    zassert_equal(ThingSetStatusCode::content, result.code());
 )
 
 ZCLIENT_SERVER_TEST(test_exec_function,
     int value;
     auto result = client.exec(0x1000, &value, 2, 3);
-    zassert_true(result.success(), "result.success was false");
-    zassert_equal(ThingSetStatusCode::changed, result.code(), "result.code was not changed");
-    zassert_equal(5, value, "value was incorrect");
+    zassert_true(result.success());
+    zassert_equal(ThingSetStatusCode::changed, result.code());
+    zassert_equal(5, value);
 )
 
 ZCLIENT_SERVER_TEST(test_update,
     auto result = client.update("totalVoltage", 25.0f);
-    zassert_true(result.success(), "result.success was false");
-    zassert_equal(ThingSetStatusCode::changed, result.code(), "result.code was not changed");
+    zassert_true(result.success());
+    zassert_equal(ThingSetStatusCode::changed, result.code());
     k_sleep(K_MSEC(100)); // `update` is async or something
     zassert_equal(25.0f, totalVoltage.getValue(), "value was not updated");
 )
