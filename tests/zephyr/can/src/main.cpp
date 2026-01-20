@@ -40,14 +40,16 @@ K_THREAD_STACK_DEFINE(serverStack, CONFIG_ARCH_POSIX_RECOMMENDED_STACK_SIZE);
 k_thread clientThread;
 K_THREAD_STACK_DEFINE(clientStack, CONFIG_ARCH_POSIX_RECOMMENDED_STACK_SIZE);
 
-k_sem clientCompleted;
+k_sem serverStarted;
 k_sem serverCompleted;
+k_sem clientCompleted;
 
 static void runServer(void *, void *, void *)
 {
     LOG_INF("Server starting up");
     auto server = ThingSetServerBuilder::build(serverTransport);
     server.listen();
+    k_sem_give(&serverStarted);
     k_sem_take(&clientCompleted, K_FOREVER);
     LOG_INF("Server shutting down");
     k_sem_give(&serverCompleted);
@@ -70,10 +72,13 @@ static k_tid_t createAndRunClient(k_thread_entry_t runner)
 #define ZCLIENT_SERVER_TEST(test_name, Body) \
 ZTEST(ZephyrClientServer, test_name) \
 { \
-    k_sem_init(&clientCompleted, 0, 1); \
+    k_sem_init(&serverStarted, 0, 1); \
     k_sem_init(&serverCompleted, 0, 1); \
+    k_sem_init(&clientCompleted, 0, 1); \
 \
     createAndRunServer(); \
+
+    k_sem_take(&serverStarted, K_FOREVER);
 \
     createAndRunClient([](auto, auto, auto) \
     { \
