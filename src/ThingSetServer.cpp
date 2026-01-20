@@ -200,13 +200,8 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
     context.setStatus(ThingSetStatusCode::changed);
     context.encoder().encodePreamble();
-    if (context.decoder().decodeMap<std::string>([&](auto &key) {
-        ThingSetNode *child;
-        size_t index;
-        if (!parent->findByName(key, &child, &index)) {
-            context.setStatus(ThingSetStatusCode::notFound);
-            return false;
-        }
+
+    auto processChild = [&](ThingSetNode *child) {
         if ((child->getAccess() & _access) == ThingSetAccess::none) {
             context.setStatus(ThingSetStatusCode::forbidden);
             return false;
@@ -224,10 +219,39 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
             context.setStatus(ThingSetStatusCode::badRequest);
             return false;
         }
-        // for now we ignore the return value here; what would returning false here mean?
         parent->invokeCallback(child, ThingSetCallbackReason::didWrite);
         return true;
-    }))
+    };
+
+    bool success;
+    if (context.useIds()) {
+        success = context.decoder().decodeMap<uint32_t>([&](uint32_t &key) {
+            ThingSetNode *child = nullptr;
+            for (ThingSetNode *c : *parent) {
+                if (c->getId() == key) {
+                    child = c;
+                    break;
+                }
+            }
+            if (!child) {
+                context.setStatus(ThingSetStatusCode::notFound);
+                return false;
+            }
+            return processChild(child);
+        });
+    } else {
+        success = context.decoder().decodeMap<std::string>([&](auto &key) {
+            ThingSetNode *child;
+            size_t index;
+            if (!parent->findByName(key, &child, &index)) {
+                context.setStatus(ThingSetStatusCode::notFound);
+                return false;
+            }
+            return processChild(child);
+        });
+    }
+
+    if (success)
     {
         context.encoder().encodePreamble();
         return context.encoder().getEncodedLength() + context.getHeaderLength();
