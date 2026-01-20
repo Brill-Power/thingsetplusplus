@@ -40,8 +40,7 @@ static void onRequestResponseSent(int result, isotp_fast_addr addr, void *arg);
 
 ThingSetZephyrCanRequestResponseContext::~ThingSetZephyrCanRequestResponseContext()
 {
-    // TODO: check if bound
-    isotp_fast_unbind(&_requestResponseContext);
+    unbindIfNecessary();
 }
 
 ThingSetZephyrCanInterface &ThingSetZephyrCanRequestResponseContext::getInterface()
@@ -54,8 +53,16 @@ bool ThingSetZephyrCanRequestResponseContext::bind(std::function<int(const CanID
     return bind(CanID::broadcastAddress, callback);
 }
 
+void ThingSetZephyrCanRequestResponseContext::unbindIfNecessary()
+{
+    if (_requestResponseContext.filter_id > -1) {
+        isotp_fast_unbind(&_requestResponseContext);
+    }
+}
+
 bool ThingSetZephyrCanRequestResponseContext::bind(uint8_t otherNodeAddress, std::function<int(const CanID &, uint8_t *, size_t, uint8_t *, size_t)> callback)
 {
+    unbindIfNecessary();
     auto canId = CanID()
                       .setMessageType(MessageType::requestResponse)
                       .setMessagePriority(MessagePriority::channel)
