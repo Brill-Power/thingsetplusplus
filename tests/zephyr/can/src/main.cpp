@@ -173,7 +173,7 @@ ZTEST(ZephyrClientServer, test_publish_subscribe)
         });
         k_sem_give(&clientStarted);
         k_sem_take(&publicationReceived, K_FOREVER);
-        ASSERT_TRUE(messageReceived);
+        zassert_true(messageReceived);
         k_sem_give(&clientCompleted);
     });
 
