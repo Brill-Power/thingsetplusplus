@@ -27,7 +27,7 @@ endif()
 
 if(ENABLE_CLIENT)
     message("ThingSet++ client enabled")
-    target_sources(thingset++ PRIVATE ThingSetClient.cpp)
+    target_sources(thingset++ PRIVATE ThingSetClient.cpp ThingSetResult.cpp)
 endif()
 
 if(ENABLE_ASIO OR ENABLE_SOCKETS)

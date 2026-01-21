@@ -20,11 +20,11 @@ bool ThingSetClient::connect()
     return _transport.connect();
 }
 
-bool ThingSetClient::read(uint8_t **responseBuffer, size_t &responseSize)
+ThingSetResult ThingSetClient::read(uint8_t **responseBuffer, size_t &responseSize)
 {
     responseSize = _transport.read(_rxBuffer, _rxBufferSize);
     if (responseSize == 0) {
-        return false;
+        return ThingSetResult(ThingSetStatusCode::internalServerError);
     }
 
 #ifdef DEBUG_LOGGING
@@ -38,25 +38,21 @@ bool ThingSetClient::read(uint8_t **responseBuffer, size_t &responseSize)
     printf("\n");
 #endif
 
-    switch (_rxBuffer[0]) {
-        case ThingSetStatusCode::content:
-        case ThingSetStatusCode::changed:
-        case ThingSetStatusCode::deleted:
-            break;
-        default:
-            return false;
+    ThingSetResult result = ThingSetResult((ThingSetStatusCode)_rxBuffer[0]);
+    if (!result) {
+        return result;
     }
 
     // first value is always a CBOR null
     if (_rxBuffer[1] != 0xF6) {
-        return false;
+        return ThingSetResult(ThingSetStatusCode::internalServerError);
     }
 
     // return size having accounted for response code and null
     responseSize -= 2;
     *responseBuffer = &_rxBuffer[2];
 
-    return true;
+    return result;
 }
 
 } // namespace ThingSet

@@ -40,14 +40,16 @@ K_THREAD_STACK_DEFINE(serverStack, CONFIG_ARCH_POSIX_RECOMMENDED_STACK_SIZE);
 k_thread clientThread;
 K_THREAD_STACK_DEFINE(clientStack, CONFIG_ARCH_POSIX_RECOMMENDED_STACK_SIZE);
 
-k_sem clientCompleted;
+k_sem serverStarted;
 k_sem serverCompleted;
+k_sem clientCompleted;
 
 static void runServer(void *, void *, void *)
 {
     LOG_INF("Server starting up");
     auto server = ThingSetServerBuilder::build(serverTransport);
     server.listen();
+    k_sem_give(&serverStarted);
     k_sem_take(&clientCompleted, K_FOREVER);
     LOG_INF("Server shutting down");
     k_sem_give(&serverCompleted);
@@ -70,10 +72,13 @@ static k_tid_t createAndRunClient(k_thread_entry_t runner)
 #define ZCLIENT_SERVER_TEST(test_name, Body) \
 ZTEST(ZephyrClientServer, test_name) \
 { \
-    k_sem_init(&clientCompleted, 0, 1); \
+    k_sem_init(&serverStarted, 0, 1); \
     k_sem_init(&serverCompleted, 0, 1); \
+    k_sem_init(&clientCompleted, 0, 1); \
 \
     createAndRunServer(); \
+\
+    k_sem_take(&serverStarted, K_FOREVER); \
 \
     createAndRunClient([](auto, auto, auto) \
     { \
@@ -94,17 +99,26 @@ ZTEST(ZephyrClientServer, test_name) \
 
 ZCLIENT_SERVER_TEST(test_get_float,
     float tv;
-    zassert_true(client.get(0x300, tv));
+    auto result = client.get(0x300, tv);
+    zassert_true(result.success());
+    LOG_INF("result.code: 0x%x", result.code());
+    zassert_equal(ThingSetStatusCode::content, result.code());
 )
 
 ZCLIENT_SERVER_TEST(test_exec_function,
-    int result;
-    zassert_true(client.exec(0x1000, &result, 2, 3));
-    zassert_equal(5, result);
+    int value;
+    auto result = client.exec(0x1000, &value, 2, 3);
+    zassert_true(result.success());
+    LOG_INF("result.code: 0x%x", result.code());
+    zassert_equal(ThingSetStatusCode::changed, result.code());
+    zassert_equal(5, value);
 )
 
 ZCLIENT_SERVER_TEST(test_update,
-    zassert_true(client.update("totalVoltage", 25.0f));
+    auto result = client.update("totalVoltage", 25.0f);
+    zassert_true(result.success());
+    LOG_INF("result.code: 0x%x", result.code());
+    zassert_equal(ThingSetStatusCode::changed, result.code());
     k_sleep(K_MSEC(100)); // `update` is async or something
     zassert_equal(25.0f, totalVoltage.getValue());
 )

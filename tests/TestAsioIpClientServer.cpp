@@ -68,12 +68,16 @@ ASIO_TEST(GetFloatByName,
 
 ASIO_TEST(NotFoundById,
     float tv;
-    ASSERT_FALSE(client.get(0x1300, tv));
+    auto result = client.get(0x1300, tv);
+    ASSERT_FALSE(result);
+    ASSERT_EQ(ThingSetStatusCode::notFound, result.code());
 )
 
 ASIO_TEST(NotFoundByName,
     float tv;
-    ASSERT_FALSE(client.get("notTotalVoltage", tv));
+    auto result = client.get("notTotalVoltage", tv);
+    ASSERT_FALSE(result);
+    ASSERT_EQ(ThingSetStatusCode::notFound, result.code());
 )
 
 ASIO_TEST(GetFunction,
@@ -82,9 +86,11 @@ ASIO_TEST(GetFunction,
 )
 
 ASIO_TEST(ExecFunction,
-    int result;
-    ASSERT_TRUE(client.exec(0x1000, &result, 2, 3));
-    ASSERT_EQ(5, result);
+    int value;
+    auto result = client.exec(0x1000, &value, 2, 3);
+    ASSERT_TRUE(result);
+    ASSERT_EQ(ThingSetStatusCode::changed, result.code());
+    ASSERT_EQ(5, value);
 )
 
 ASIO_TEST(FetchFunctionParameters,
@@ -101,19 +107,27 @@ ASIO_TEST(FetchFunctionParameters,
 )
 
 ASIO_TEST(UpdateFloatByName,
-    ASSERT_TRUE(client.update("totalVoltage", 25.0f));
+    auto result = client.update("totalVoltage", 25.0f);
+    ASSERT_TRUE(result);
+    ASSERT_EQ(ThingSetStatusCode::changed, result.code());
     ASSERT_EQ(25.0, totalVoltage.getValue());
 )
 
 ASIO_TEST(UpdateFloatById,
-    ASSERT_TRUE(client.update(0x300, 26.0f));
+    auto result = client.update(0x300, 26.0f);
+    ASSERT_TRUE(result);
+    ASSERT_EQ(ThingSetStatusCode::changed, result.code());
     ASSERT_EQ(26.0, totalVoltage.getValue());
 )
 
 ASIO_TEST(CannotUpdateFunctionByName,
-    ASSERT_FALSE(client.update("xAddNumber", 26.0f));
+    auto result = client.update("xAddNumber", 26.0f);
+    ASSERT_FALSE(result);
+    ASSERT_EQ(ThingSetStatusCode::badRequest, result.code());
 )
 
 ASIO_TEST(CannotUpdateFunctionById,
-    ASSERT_FALSE(client.update(0x1000, 26.0f));
+    auto result = client.update(0x1000, 26.0f);
+    ASSERT_FALSE(result);
+    ASSERT_EQ(ThingSetStatusCode::badRequest, result.code());
 )
