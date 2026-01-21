@@ -174,9 +174,9 @@ ZTEST(ZephyrClientServer, test_publish_subscribe)
             }
         });
         k_sem_give(&clientStarted);
-        LOG_INF("Waiting for report")
+        LOG_INF("Waiting for report");
         k_sem_take(&publicationReceived, K_FOREVER);
-        LOG_INF("Report received")
+        LOG_INF("Report received");
         zassert_true(messageReceived);
         k_sem_give(&clientCompleted);
     });
