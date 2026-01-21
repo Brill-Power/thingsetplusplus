@@ -9,6 +9,7 @@
 #include <thingset++/can/zephyr/ThingSetZephyrCanServerTransport.hpp>
 #include <thingset++/can/zephyr/ThingSetZephyrCanSubscriptionTransport.hpp>
 #include <thingset++/ThingSetClient.hpp>
+#include <thingset++/ThingSetListener.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ThingSetFunction.hpp>
 #include <array>
@@ -162,16 +163,11 @@ ZTEST(ZephyrClientServer, test_publish_subscribe)
         k_sem_init(&publicationReceived, 0, 1);
         bool messageReceived = false;
         ThingSetZephyrCanSubscriptionTransport subscriptionTransport(clientInterface);
-        subscriptionTransport.subscribe([&](const ThingSet::Can::CanID &canId, ThingSet::ThingSetBinaryDecoder &decoder)
+        auto listener = ThingSetListenerBuilder::build(subscriptionTransport);
+        listener.subscribe([&](const ThingSet::Can::CanID &canId, uint16_t &id)
         {
             messageReceived = true;
-            if (decoder.decodeMap([&](auto id, auto name)
-            {
-                LOG_INF("Key %x", id.value());
-                return decoder.skip();
-            })) {
-                k_sem_give(&publicationReceived);
-            }
+            k_sem_give(&publicationReceived);
         });
         k_sem_give(&clientStarted);
         LOG_INF("Waiting for report");
