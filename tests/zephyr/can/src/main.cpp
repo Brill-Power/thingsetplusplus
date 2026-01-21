@@ -139,7 +139,9 @@ ZTEST(ZephyrClientServer, test_publish_subscribe)
         server.listen();
         k_sem_give(&serverStarted);
         k_sem_take(&clientStarted, K_FOREVER);
+        LOG_INF("Publishing");
         server.publish(identifier, totalVoltage);
+        LOG_INF("Published; waiting for client");
         k_sem_take(&clientCompleted, K_FOREVER);
         LOG_INF("Server shutting down");
         k_sem_give(&serverCompleted);
@@ -172,7 +174,9 @@ ZTEST(ZephyrClientServer, test_publish_subscribe)
             }
         });
         k_sem_give(&clientStarted);
+        LOG_INF("Waiting for report")
         k_sem_take(&publicationReceived, K_FOREVER);
+        LOG_INF("Report received")
         zassert_true(messageReceived);
         k_sem_give(&clientCompleted);
     });
