@@ -159,7 +159,7 @@ ZTEST(ZephyrClientServer, test_publish_subscribe)
         k_sem publicationReceived;
         k_sem_init(&publicationReceived, 0, 1);
         ThingSetZephyrCanSubscriptionTransport subscriptionTransport(clientInterface);
-        subscriptionTransport.subscribe([&](auto canId, auto decoder)
+        subscriptionTransport.subscribe([&](const ThingSet::Can::CanID &canId, ThingSet::ThingSetBinaryDecoder &decoder)
         {
             // if (decoder.decodeMap([&](auto id, auto name)
             // {
