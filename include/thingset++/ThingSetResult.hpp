@@ -12,10 +12,10 @@ namespace ThingSet {
 class ThingSetResult
 {
 private:
-    ThingSetStatusCode _code;
+    const ThingSetStatusCode _code;
 
 public:
-    ThingSetResult(ThingSetStatusCode code);
+    ThingSetResult(const ThingSetStatusCode code);
 
     bool success() const;
     ThingSetStatusCode code() const;
