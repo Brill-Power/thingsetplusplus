@@ -57,6 +57,7 @@ void ThingSetZephyrCanRequestResponseContext::unbindIfNecessary()
 {
     if (_requestResponseContext.filter_id > -1) {
         isotp_fast_unbind(&_requestResponseContext);
+        _requestResponseContext.filter_id = 1;
     }
 }
 
