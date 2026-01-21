@@ -7,6 +7,7 @@
 
 #include <thingset++/can/zephyr/ThingSetZephyrCanClientTransport.hpp>
 #include <thingset++/can/zephyr/ThingSetZephyrCanServerTransport.hpp>
+#include <thingset++/can/zephyr/ThingSetZephyrCanSubscriptionTransport.hpp>
 #include <thingset++/ThingSetClient.hpp>
 #include <thingset++/ThingSetServer.hpp>
 #include <thingset++/ThingSetFunction.hpp>
