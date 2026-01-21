@@ -158,20 +158,22 @@ ZTEST(ZephyrClientServer, test_publish_subscribe)
 
         k_sem publicationReceived;
         k_sem_init(&publicationReceived, 0, 1);
+        bool messageReceived = false;
         ThingSetZephyrCanSubscriptionTransport subscriptionTransport(clientInterface);
         subscriptionTransport.subscribe([&](const ThingSet::Can::CanID &canId, ThingSet::ThingSetBinaryDecoder &decoder)
         {
-            // if (decoder.decodeMap([&](auto id, auto name)
-            // {
-            //     LOG_INF("Key %x", id.value());
-            //     return decoder.skip();
-            // })) {
+            messageReceived = true;
+            if (decoder.decodeMap([&](auto id, auto name)
+            {
+                LOG_INF("Key %x", id.value());
+                return decoder.skip();
+            })) {
                 k_sem_give(&publicationReceived);
-            //}
+            }
         });
         k_sem_give(&clientStarted);
         k_sem_take(&publicationReceived, K_FOREVER);
-
+        ASSERT_TRUE(messageReceived);
         k_sem_give(&clientCompleted);
     });
 
