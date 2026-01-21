@@ -42,6 +42,7 @@ K_THREAD_STACK_DEFINE(clientStack, CONFIG_ARCH_POSIX_RECOMMENDED_STACK_SIZE);
 
 k_sem serverStarted;
 k_sem serverCompleted;
+k_sem clientStarted;
 k_sem clientCompleted;
 
 static void runServer(void *, void *, void *)
@@ -58,9 +59,9 @@ static void runServer(void *, void *, void *)
 #define CREATE_AND_RUN(thread, stack, function) \
     k_thread_create(&thread, stack, K_THREAD_STACK_SIZEOF(stack), function, NULL, NULL, NULL, 2, 0, K_NO_WAIT);
 
-static k_tid_t createAndRunServer()
+static k_tid_t createAndRunServer(k_thread_entry_t runner)
 {
-    return CREATE_AND_RUN(serverThread, serverStack, runServer);
+    return CREATE_AND_RUN(serverThread, serverStack, runner);
 }
 
 static k_tid_t createAndRunClient(k_thread_entry_t runner)
@@ -76,7 +77,7 @@ ZTEST(ZephyrClientServer, test_name) \
     k_sem_init(&serverCompleted, 0, 1); \
     k_sem_init(&clientCompleted, 0, 1); \
 \
-    createAndRunServer(); \
+    createAndRunServer(runServer); \
 \
     k_sem_take(&serverStarted, K_FOREVER); \
 \
@@ -122,6 +123,59 @@ ZCLIENT_SERVER_TEST(test_update,
     k_sleep(K_MSEC(100)); // `update` is async or something
     zassert_equal(25.0f, totalVoltage.getValue());
 )
+
+ZTEST(ZephyrClientServer, test_publish_subscribe)
+{
+    k_sem_init(&serverStarted, 0, 1);
+    k_sem_init(&serverCompleted, 0, 1);
+    k_sem_init(&clientStarted, 0, 1);
+    k_sem_init(&clientCompleted, 0, 1);
+
+    createAndRunServer([](auto, auto, auto)
+    {
+        LOG_INF("Server starting up");
+        auto server = ThingSetServerBuilder::build(serverTransport);
+        server.listen();
+        k_sem_give(&serverStarted);
+        k_sem_take(&clientStarted, K_FOREVER);
+        server.publish(identifier, totalVoltage);
+        k_sem_take(&clientCompleted, K_FOREVER);
+        LOG_INF("Server shutting down");
+        k_sem_give(&serverCompleted);
+    });
+
+    k_sem_take(&serverStarted, K_FOREVER);
+
+    createAndRunClient([](auto, auto, auto)
+    {
+        LOG_INF("Creating client");
+        std::array<uint8_t, 1024> localRxBuffer;
+        std::array<uint8_t, 1024> localTxBuffer;
+        ThingSetClient client(clientTransport, localRxBuffer, localTxBuffer);
+        zassert_true(client.connect());
+        LOG_INF("Client connected");
+
+        k_sem publicationReceived;
+        k_sem_init(&publicationReceived, 0, 1);
+        ThingSetZephyrCanSubscriptionTransport subscriptionTransport(clientInterface);
+        subscriptionTransport.subscribe([&](auto canId, auto decoder)
+        {
+            if (decoder.decodeMap([&](auto id, auto name)
+            {
+                LOG_INF("Key %x", id.value());
+                return decoder.skip();
+            })) {
+                k_sem_give(&publicationReceived);
+            }
+        });
+        k_sem_give(&clientStarted);
+        k_sem_take(&publicationReceived, K_FOREVER);
+
+        k_sem_give(&clientCompleted);
+    });
+
+    k_sem_take(&serverCompleted, K_FOREVER);
+}
 
 static void *testSetup(void)
 {
