@@ -12,6 +12,8 @@ extern "C" {
 #include <canbus/isotp_fast.h>
 }
 
+#define THINGSET_PLUS_PLUS_ZEPHYR_CAN_FILTER_ID_NONE -1
+
 namespace ThingSet::Can::Zephyr {
 
 class ThingSetZephyrCanInterface;
@@ -33,7 +35,7 @@ public:
         std::array<uint8_t, TxSize> &txBuffer) : _canInterface(canInterface), _rxBuffer(rxBuffer.data()), _rxBufferSize(RxSize),
         _txBuffer(txBuffer.data()), _txBufferSize(TxSize)
     {
-        _requestResponseContext.filter_id = -1;
+        _requestResponseContext.filter_id = THINGSET_PLUS_PLUS_ZEPHYR_CAN_FILTER_ID_NONE;
         k_sem_init(&_lock, 1, 1);
     }
     ~ThingSetZephyrCanRequestResponseContext();

@@ -55,9 +55,9 @@ bool ThingSetZephyrCanRequestResponseContext::bind(std::function<int(const CanID
 
 void ThingSetZephyrCanRequestResponseContext::unbindIfNecessary()
 {
-    if (_requestResponseContext.filter_id > -1) {
+    if (_requestResponseContext.filter_id > THINGSET_PLUS_PLUS_ZEPHYR_CAN_FILTER_ID_NONE) {
         isotp_fast_unbind(&_requestResponseContext);
-        _requestResponseContext.filter_id = 1;
+        _requestResponseContext.filter_id = THINGSET_PLUS_PLUS_ZEPHYR_CAN_FILTER_ID_NONE;
     }
 }
 
