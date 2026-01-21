@@ -52,6 +52,7 @@ static void runServer(void *, void *, void *)
     LOG_INF("Server starting up");
     auto server = ThingSetServerBuilder::build(serverTransport);
     server.listen();
+    LOG_INF("Server started up");
     k_sem_give(&serverStarted);
     k_sem_take(&clientCompleted, K_FOREVER);
     LOG_INF("Server shutting down");
