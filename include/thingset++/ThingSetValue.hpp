@@ -61,6 +61,11 @@ public:
         return _value;
     }
 
+    operator const T &() const
+    {
+        return _value;
+    }
+
     T *operator&()
     {
         return &_value;
