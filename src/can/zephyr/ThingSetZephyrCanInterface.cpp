@@ -207,9 +207,10 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
         }
 
         LOG_INFO("CAN device %s bound to address 0x%x", _canDevice->name, _nodeAddress);
+        _isBound = true;
     }
-    _isBound = true;
-    return true;
+
+    return _isBound;
 }
 
 } // namespace ThingSet::Can::Zephyr
