@@ -21,7 +21,11 @@ Both text (JSON) and binary (CBOR) encodings are supported.
 ### Server
 
 The basic building blocks are properties, functions and groups. Each has an ID, a parent, a name
-and a value of a certain type. For example, a basic property is declared thus:
+and a value of a certain type.
+
+#### Properties
+
+A basic property is declared thus:
 
 ```c++
 ThingSetReadWriteProperty<float> voltage { 0x300, 0, "voltage" };
@@ -65,6 +69,8 @@ struct ModuleRecord
 ```
 
 As in C ThingSet, the above will be serialised as a map, with either integer ID or string name keys.
+
+#### Functions
 
 Functions are declared thus:
 
