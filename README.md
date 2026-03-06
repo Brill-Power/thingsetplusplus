@@ -145,5 +145,5 @@ deserialisation support can be added to custom types.
 
 ## Examples and Tests
 
-See the `examples` folder for some samples of the code in action. The unit tests also give an
+See the [examples](examples) folder for some samples of the code in action. The [unit tests](tests) also give an
 idea of what can be done.
