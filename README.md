@@ -70,6 +70,9 @@ struct ModuleRecord
 
 As in C ThingSet, the above will be serialised as a map, with either integer ID or string name keys.
 
+(* There is no direct equivalent of a single structure being a value in C ThingSet, which may cause
+compatibility problems.)
+
 #### Functions
 
 Functions are declared thus:
@@ -98,9 +101,6 @@ ThingSetSocketServerTransport transport;
 auto server = ThingSetServerBuilder::build(transport);
 server.listen();
 ```
-
-(* There is no direct equivalent of a single structure being a value in C ThingSet, which may cause
-compatibility problems.)
 
 ### Client
 
