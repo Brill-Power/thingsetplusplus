@@ -53,8 +53,8 @@ public:
             }
             currentLength = _state->payload - &_buffer[headerSize];
         }
-        size_t remainder = _buffer.size() - currentLength;
-        memset(&_buffer[currentLength], 0, remainder);
+        size_t remainder = _buffer.size() - headerSize - currentLength;
+        memset(&_buffer[headerSize + currentLength], 0, remainder);
         bool result = write(currentLength, true);
         _exportedLength += currentLength;
         return result;
