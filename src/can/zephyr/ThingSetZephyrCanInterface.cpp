@@ -62,6 +62,11 @@ void ThingSetZephyrCanInterface::onAddressClaimReceived(const device *dev, can_f
 {
     ThingSetZephyrCanInterface *self = (ThingSetZephyrCanInterface *)arg;
     auto canId = CanID::create(frame->id);
+
+    if (memcmp(frame->data, Eui::getArray().data(), Eui::getArray().size()) == 0) {
+        return;
+    }
+
     if (self->_nodeAddress == canId.getSource()) {
         k_event_post(&self->_events, AddressClaimEvent::alreadyUsed);
     }
