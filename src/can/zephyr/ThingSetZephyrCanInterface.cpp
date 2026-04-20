@@ -62,6 +62,11 @@ void ThingSetZephyrCanInterface::onAddressClaimReceived(const device *dev, can_f
 {
     ThingSetZephyrCanInterface *self = (ThingSetZephyrCanInterface *)arg;
     auto canId = CanID::create(frame->id);
+
+    if (memcmp(frame->data, Eui::getArray().data(), Eui::getArray().size()) == 0) {
+        return;
+    }
+
     if (self->_nodeAddress == canId.getSource()) {
         k_event_post(&self->_events, AddressClaimEvent::alreadyUsed);
     }
@@ -83,7 +88,7 @@ void ThingSetZephyrCanInterface::onAnyAddressDiscoverReceived(const device *dev,
 {
     ThingSetZephyrCanInterface *self = (ThingSetZephyrCanInterface *)arg;
     auto canId = CanID::create(frame->id);
-    if (self->_nodeAddress == canId.getSource()) {
+    if (self->_nodeAddress == canId.getTarget()) {
         /* received a discovery frame for an address we are already in the process of claiming */
         k_work_submit(&self->_addressClaimWork.work);
     }
@@ -174,6 +179,7 @@ bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
                 uint8_t oldNodeAddress = _nodeAddress;
                 _nodeAddress = CanID::minAddress + sys_rand32_get() % ((CanID::maxAddress + 1) - CanID::minAddress);
                 LOG_WARN("Node addr 0x%.2X already in use, trying 0x%.2X", oldNodeAddress, _nodeAddress);
+                k_sleep(K_MSEC(100));
             }
             else {
                 can_bus_err_cnt err_cnt_before;
