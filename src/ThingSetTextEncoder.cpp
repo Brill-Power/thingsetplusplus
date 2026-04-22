@@ -7,6 +7,14 @@
 #include "thingset++/ThingSetTextEncoder.hpp"
 #include <inttypes.h>
 
+#ifndef CONFIG_THINGSET_PLUS_PLUS_TEXT_FLOAT_PRECISION
+#define CONFIG_THINGSET_PLUS_PLUS_TEXT_FLOAT_PRECISION 6
+#endif
+
+#define TS_PP_STR_(x)    #x
+#define TS_PP_STR(x)     TS_PP_STR_(x)
+#define TS_FLOAT_FORMAT  "%." TS_PP_STR(CONFIG_THINGSET_PLUS_PLUS_TEXT_FLOAT_PRECISION) "f"
+
 namespace ThingSet {
 
 bool ThingSetTextEncoder::encode(const std::string_view &value)
@@ -41,22 +49,22 @@ bool ThingSetTextEncoder::encode(char *value)
 
 bool ThingSetTextEncoder::encode(const float &value)
 {
-    return appendFormat((double)value, "%f");
+    return appendFormat((double)value, TS_FLOAT_FORMAT);
 }
 
 bool ThingSetTextEncoder::encode(const float *value)
 {
-    return appendFormat((double)*value, "%f");
+    return appendFormat((double)*value, TS_FLOAT_FORMAT);
 }
 
 bool ThingSetTextEncoder::encode(const double &value)
 {
-    return appendFormat(value, "%f");
+    return appendFormat(value, TS_FLOAT_FORMAT);
 }
 
 bool ThingSetTextEncoder::encode(const double *value)
 {
-    return appendFormat(*value, "%f");
+    return appendFormat(*value, TS_FLOAT_FORMAT);
 }
 
 bool ThingSetTextEncoder::encode(const bool &value)
