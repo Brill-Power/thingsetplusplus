@@ -21,7 +21,7 @@ config THINGSET_PLUS_PLUS_TEXT_FLOAT_PRECISION
 	int "Decimal places for floats/doubles in text-mode output"
 	depends on THINGSET_PLUS_PLUS_PROTOCOL_TEXT
 	range 0 17
-	default 3
+	default 6
 	help
 		Number of digits after the decimal point when encoding floats
 		and doubles via the text-mode encoder
