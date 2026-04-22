@@ -92,6 +92,32 @@ static void copyMacAddress(const Source &source, const size_t length, uint64_t &
     memcpy(array.data(), source, length);
 }
 
+/// @brief Reads THINGSET_EUI from the environment and decodes it as a 16-char
+/// hex string. Used to give distinct EUIs to co-hosted simulator instances
+/// that would otherwise share the host's MAC address.
+/// @param target A reference to a uint64_t that will receive the decoded EUI.
+/// @param array A reference to an array that will receive the EUI as 8 bytes
+/// in big-endian order (MSB first).
+/// @return True if THINGSET_EUI was set and parsed as a complete hex string;
+/// false if unset, empty, or contained non-hex characters.
+static bool getEuiFromEnv(uint64_t &target, std::array<uint8_t, 8> &array)
+{
+    const char *env = std::getenv("THINGSET_EUI");
+    if (env == nullptr) {
+        return false;
+    }
+    char *end = nullptr;
+    uint64_t value = std::strtoull(env, &end, 16);
+    if (end == env || *end != '\0') {                                                                                                                                                                             
+        return false;
+    }
+    target = value;
+    for (int i = 0; i < 8; i++) {
+        array[i] = (value >> ((7 - i) * 8)) & 0xff;
+    }
+    return true;
+}
+
 /// @brief Gets the MAC address from the first Ethernet interface found on the system.
 /// @param t A reference to an array that will contain the MAC address.
 /// @return True if an Ethernet interface was found.
@@ -140,7 +166,9 @@ static bool getEthernetMacAddress(uint64_t &target, std::array<uint8_t, 8> &arra
 
 Eui::Eui()
 {
-    getEthernetMacAddress(_value, _array);
+    if (!getEuiFromEnv(_value, _array)) {
+        getEthernetMacAddress(_value, _array);
+    }
 }
 
 #elif defined(__ZEPHYR__)

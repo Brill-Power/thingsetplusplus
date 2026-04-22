@@ -26,6 +26,15 @@ config THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX
 		When non-zero, arrays longer than this value are truncated in
 		text-mode output: the first N elements are rendered followed by
 		a literal "..." marker
+    
+config THINGSET_PLUS_PLUS_TEXT_FLOAT_PRECISION
+	int "Decimal places for floats/doubles in text-mode output"
+	depends on THINGSET_PLUS_PLUS_PROTOCOL_TEXT
+	range 0 17
+	default 6
+	help
+		Number of digits after the decimal point when encoding floats
+		and doubles via the text-mode encoder
 
 config THINGSET_PLUS_PLUS_ENHANCED_REPORTING
 	bool "Enable enhanced reporting"
