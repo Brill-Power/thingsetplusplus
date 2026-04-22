@@ -35,6 +35,7 @@ public:
     }
 
     using ThingSetEncoder::encode;
+
     bool encode(const std::string_view &value) override;
     bool encode(std::string_view &value) override;
     bool encode(const std::string &value) override;
@@ -103,6 +104,8 @@ protected:
     bool encodeListSeparator() override;
     bool encodeKeyValuePairSeparator() override;
     bool encodeKeysAsIds() const override;
+    size_t renderedListLength(const size_t &size) override;
+    bool encodeTruncationMarker() override;
 
 private:
     /// @brief Determine the length of the value as a string

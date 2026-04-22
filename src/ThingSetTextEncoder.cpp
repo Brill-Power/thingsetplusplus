@@ -225,4 +225,22 @@ bool ThingSetTextEncoder::encodeKeysAsIds() const
     return false;
 }
 
+size_t ThingSetTextEncoder::renderedListLength(const size_t &size)
+{
+#if defined(CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX) && CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX > 0
+    // Only truncate when this array is nested inside a bigger response.
+    // If _depth == 0 the array IS the response (direct query, e.g. ?cellVoltages)
+    // and the user wants to see it in full
+    if (_depth > 0 && size > (size_t)CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX) {
+        return CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX;
+    }
+#endif
+    return size;
+}
+
+bool ThingSetTextEncoder::encodeTruncationMarker()
+{
+    return encode("...");
+}
+
 } // namespace ThingSet

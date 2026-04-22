@@ -211,9 +211,14 @@ public:
 
     template <typename T> bool encode(const T *value, const size_t &size)
     {
+        const size_t n = renderedListLength(size);
         bool result = encodeListStart(size);
-        for (size_t i = 0; i < size; i++) {
+        for (size_t i = 0; i < n; i++) {
             result &= this->encode(value[i]) && this->encodeListSeparator();
+        }
+        if (n < size) {
+            // Trailing separator is stripped by encodeListEnd()
+            result &= encodeTruncationMarker() && this->encodeListSeparator();
         }
         return result && encodeListEnd(size);
     }
@@ -228,6 +233,22 @@ protected:
     virtual bool encodeListSeparator() = 0;
     virtual bool encodeKeyValuePairSeparator() = 0;
     virtual bool encodeKeysAsIds() const = 0;
+
+    /// @brief Hook for encoders that want to render fewer elements than an
+    /// array actually contains (e.g. for human-facing text output). Return the
+    /// number of elements to actually emit; values less than `size` cause the
+    /// truncation marker to be appended after the loop
+    virtual size_t renderedListLength(const size_t &size)
+    {
+        return size;
+    }
+
+    /// @brief Hook for encoders to append a truncation marker element (e.g. a
+    /// `"..."` string) when @ref renderedListLength clamps the emitted count
+    virtual bool encodeTruncationMarker()
+    {
+        return true;
+    }
 
 private:
     inline bool encodeAndShift()
