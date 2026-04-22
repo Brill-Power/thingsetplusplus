@@ -224,10 +224,23 @@ public:
         return encodeListStart(count) && encodeAndShift(args...) && encodeListEnd(count);
     }
 
+    /// @brief Whether this encoder emits map keys as numeric IDs (true, as in
+    /// binary formats) or as names (false, as in text/JSON). Exposed publicly
+    /// so that composite encodable implementations (e.g. ThingSetGroup) can
+    /// choose the right key form when emitting nested maps
+    virtual bool encodeKeysAsIds() const = 0;
+
+    /// @brief Hook that lets encoders request groups be rendered as a skeleton
+    /// (sub-groups only, leaf values suppressed) when they appear nested
+    /// inside a larger response
+    virtual bool renderGroupAsSkeleton() const
+    {
+        return false;
+    }
+
 protected:
     virtual bool encodeListSeparator() = 0;
     virtual bool encodeKeyValuePairSeparator() = 0;
-    virtual bool encodeKeysAsIds() const = 0;
 
 private:
     inline bool encodeAndShift()

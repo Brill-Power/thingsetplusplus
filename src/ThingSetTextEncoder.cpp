@@ -173,7 +173,12 @@ bool ThingSetTextEncoder::encodeMapStart(const uint32_t &)
 bool ThingSetTextEncoder::encodeMapEnd()
 {
     _depth--;
-    _responsePosition--;
+    // Every key-value pair is emitted with a trailing separator, so strip it
+    // here, but only if the last character actually is one. An empty map has
+    // no separator and we'd otherwise eat the opening '{'
+    if (_responsePosition > 0 && _responseBuffer[_responsePosition - 1] == ',') {
+        _responsePosition--;
+    }
     return append('}');
 }
 
@@ -196,7 +201,10 @@ bool ThingSetTextEncoder::encodeListStart(const uint32_t &)
 bool ThingSetTextEncoder::encodeListEnd()
 {
     _depth--;
-    _responsePosition--;
+    // As with encodeMapEnd: only strip the trailing separator if one exists
+    if (_responsePosition > 0 && _responseBuffer[_responsePosition - 1] == ',') {
+        _responsePosition--;
+    }
     return append(']');
 }
 
@@ -223,6 +231,19 @@ bool ThingSetTextEncoder::encodeKeyValuePairSeparator()
 bool ThingSetTextEncoder::encodeKeysAsIds() const
 {
     return false;
+}
+
+bool ThingSetTextEncoder::renderGroupAsSkeleton() const
+{
+#if defined(CONFIG_THINGSET_PLUS_PLUS_TEXT_GROUP_SKELETON) && CONFIG_THINGSET_PLUS_PLUS_TEXT_GROUP_SKELETON
+    // Only skeletonise when this group is nested inside something else. A
+    // direct query (e.g. `?SomeGroup`) enters encode() at depth 0 and renders
+    // full content; children of that group that are themselves groups are
+    // rendered at depth >= 1 and fall into the skeleton branch
+    return _depth > 0;
+#else
+    return false;
+#endif
 }
 
 } // namespace ThingSet

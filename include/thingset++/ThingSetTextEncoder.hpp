@@ -99,10 +99,12 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     bool encodeBytes(const uint8_t *buffer, const size_t &size) override;
 
+    bool encodeKeysAsIds() const override;
+    bool renderGroupAsSkeleton() const override;
+
 protected:
     bool encodeListSeparator() override;
     bool encodeKeyValuePairSeparator() override;
-    bool encodeKeysAsIds() const override;
 
 private:
     /// @brief Determine the length of the value as a string
