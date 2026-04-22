@@ -416,6 +416,59 @@ TEST(TextEncoder, EncodeList)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
+/// Fixed-limit encoder used to exercise renderedListLength/encodeTruncationMarker
+/// without relying on a compile-time CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX.
+/// Always caps lists at `_limit` elements; callers can also opt out of the
+/// top-level "don't truncate direct queries" behaviour by preset-ing _depth > 0.
+class TruncatingTextEncoder : public ThingSetTextEncoder
+{
+public:
+    size_t _limit;
+    using ThingSetTextEncoder::ThingSetTextEncoder;
+    TruncatingTextEncoder(char *buffer, size_t size, size_t limit) : ThingSetTextEncoder(buffer, size), _limit(limit) {}
+protected:
+    size_t renderedListLength(const size_t &size) override
+    {
+        return size > _limit ? _limit : size;
+    }
+    bool encodeTruncationMarker() override
+    {
+        return encode("...");
+    }
+};
+
+TEST(TextEncoder, TruncatesLongArrayWithMarker)
+{
+    char buffer[TEXT_ENCODER_BUFFER_SIZE];
+    TruncatingTextEncoder encoder(buffer, sizeof(buffer), /*limit=*/3);
+    std::array<int, 8> i = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    encoder.encode(i);
+    const char *expected = "[1,2,3,\"...\"]";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, ArrayAtLimitIsNotTruncated)
+{
+    char buffer[TEXT_ENCODER_BUFFER_SIZE];
+    TruncatingTextEncoder encoder(buffer, sizeof(buffer), /*limit=*/3);
+    std::array<int, 3> i = { 1, 2, 3 };
+    encoder.encode(i);
+    const char *expected = "[1,2,3]";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, BaseEncoderDoesNotTruncate)
+{
+    // Default ThingSetTextEncoder's renderedListLength returns size unchanged
+    // when CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX isn't defined (or is 0),
+    // so long arrays render in full.
+    SETUP(TEXT_ENCODER_BUFFER_SIZE)
+    std::array<int, 6> i = { 1, 2, 3, 4, 5, 6 };
+    encoder.encode(i);
+    const char *expected = "[1,2,3,4,5,6]";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
 TEST(TextEncoder, TestBoundaryEncode)
 {
     SETUP(1) // make buffer of size 1 to ensure value cannot fit
