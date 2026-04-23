@@ -248,7 +248,10 @@ size_t ThingSetTextEncoder::renderedListLength(const size_t &size)
 
 bool ThingSetTextEncoder::encodeTruncationMarker()
 {
-    return encode("...");
+    // Emit the ellipsis bare (no surrounding quotes). The truncated output is
+    // no longer strict JSON, but this encoder's truncation mode is a
+    // human-facing shell convenience — readability wins over parser-friendliness.
+    return append('.') && append('.') && append('.');
 }
 
 } // namespace ThingSet

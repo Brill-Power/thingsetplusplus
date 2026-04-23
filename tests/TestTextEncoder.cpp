@@ -431,10 +431,6 @@ protected:
     {
         return size > _limit ? _limit : size;
     }
-    bool encodeTruncationMarker() override
-    {
-        return encode("...");
-    }
 };
 
 TEST(TextEncoder, TruncatesLongArrayWithMarker)
@@ -443,7 +439,7 @@ TEST(TextEncoder, TruncatesLongArrayWithMarker)
     TruncatingTextEncoder encoder(buffer, sizeof(buffer), /*limit=*/3);
     std::array<int, 8> i = { 1, 2, 3, 4, 5, 6, 7, 8 };
     encoder.encode(i);
-    const char *expected = "[1,2,3,\"...\"]";
+    const char *expected = "[1,2,3,...]";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
