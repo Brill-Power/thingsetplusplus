@@ -129,9 +129,11 @@ bool ThingSetBinaryRequestContext::setStatus(const ThingSetStatusCode &status)
 }
 
 #ifdef ENABLE_TEXT_MODE
-ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize) :
+ThingSetTextRequestContext::ThingSetTextRequestContext(uint8_t *request, size_t requestLen,
+                                                       uint8_t *response, size_t responseSize,
+                                                       TextEncoderOptions opts) :
     _ThingSetRequestContext(request, response),
-    _encoder(reinterpret_cast<char *>(response) + 4, responseSize - 4),
+    _encoder(reinterpret_cast<char *>(response) + 4, responseSize - 4, opts),
     _decoder(reinterpret_cast<char *>(request) + 1, requestLen - 1)
 {
     // find first space, if any

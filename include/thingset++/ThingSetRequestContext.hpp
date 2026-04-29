@@ -142,7 +142,9 @@ private:
     DefaultFixedSizeThingSetTextDecoder _decoder;
 
 public:
-    ThingSetTextRequestContext(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize);
+    ThingSetTextRequestContext(uint8_t *request, size_t requestLen,
+                               uint8_t *response, size_t responseSize,
+                               TextEncoderOptions opts = TextEncoderOptions::none);
 
     inline ThingSetEncoder &encoder() override {
         return _encoder;

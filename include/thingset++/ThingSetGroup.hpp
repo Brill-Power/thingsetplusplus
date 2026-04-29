@@ -59,26 +59,25 @@ public:
 
     /// @brief Emit the group's encodable children as a nested map. This lets
     /// groups appear as values in their parent's rendering (e.g. `?` at root
-    /// now returns `{"GroupA":{...},"GroupB":{...},...}` instead of skipping
-    /// groups entirely). Nesting recurses naturally because encodable children
-    /// that are themselves groups dispatch to this same override
+    /// returns `{"GroupA":{...},"GroupB":{...},...}` instead of skipping
+    /// groups entirely)
     ///
-    /// If the encoder requests skeleton rendering (see
-    /// ThingSetEncoder::renderGroupAsSkeleton), only child groups are emitted;
+    /// If the encoder requests outline rendering (see
+    /// ThingSetEncoder::renderGroupAsOutline), only child groups are emitted;
     /// leaf values (properties, records, arrays) are suppressed
     bool encode(ThingSetEncoder &encoder) const override
     {
         // const_cast: ThingSetParentNode::begin/end are non-const, but we only
         // read the child list here
         auto *self = const_cast<ThingSetGroup *>(this);
-        const bool skeleton = encoder.renderGroupAsSkeleton();
+        const bool outline = encoder.renderGroupAsOutline();
         void *target;
 
         auto shouldInclude = [&](ThingSetNode *child) {
             if (!child->tryCastTo(ThingSetNodeType::encodable, &target)) {
                 return false;
             }
-            if (skeleton && !child->tryCastTo(ThingSetNodeType::group, &target)) {
+            if (outline && !child->tryCastTo(ThingSetNodeType::group, &target)) {
                 return false;
             }
             return true;

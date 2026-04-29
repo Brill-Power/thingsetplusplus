@@ -448,21 +448,7 @@ TEST(TextEncoder, EncodeEmptyList)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
-// Test double with a toggleable renderGroupAsSkeleton hook so we can exercise
-// the filtering logic in ThingSetGroup::encode without needing the CONFIG flag
-// (which would require a separate test binary).
-class SkeletonToggleTextEncoder : public ThingSetTextEncoder
-{
-public:
-    bool skeleton = false;
-    using ThingSetTextEncoder::ThingSetTextEncoder;
-    bool renderGroupAsSkeleton() const override
-    {
-        return skeleton;
-    }
-};
-
-TEST(TextEncoder, GroupEncodesFullWhenNotSkeleton)
+TEST(TextEncoder, GroupEncodesFullByDefault)
 {
     // IDs 0xA000+ chosen to avoid collisions with other tests.
     ThingSetGroup<0xA000, 0, "topG"> top;
@@ -470,51 +456,63 @@ TEST(TextEncoder, GroupEncodesFullWhenNotSkeleton)
     leaf = 42;
 
     char buffer[128];
-    SkeletonToggleTextEncoder encoder(buffer, sizeof(buffer));
-    encoder.skeleton = false;
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer));  // default: TextEncoderOptions::none
 
     top.encode(encoder);
     const char *expected = "{\"leaf\":42}";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
-TEST(TextEncoder, GroupEncodesSkeletonOmitsLeaves)
+TEST(TextEncoder, OutlineOnlyAppliesToNestedGroups)
 {
-    // Top group holds a leaf property and a sub-group. Skeleton mode should
-    // drop the leaf and keep the sub-group.
-    ThingSetGroup<0xA010, 0, "topG"> top;
-    ThingSetReadOnlyProperty<int> leaf{ 0xA011, 0xA010, "leaf" };
+    ThingSetGroup<0xA010, 0, "outer"> outer;
+    ThingSetReadOnlyProperty<int> outerLeaf{ 0xA011, 0xA010, "ol" };
     ThingSetGroup<0xA012, 0xA010, "sub"> sub;
-    leaf = 99;
+    ThingSetReadOnlyProperty<int> subLeaf{ 0xA013, 0xA012, "sl" };
+    ThingSetGroup<0xA014, 0xA012, "leaf2"> deeper;
+    outerLeaf = 1;
+    subLeaf = 2;
 
     char buffer[128];
-    SkeletonToggleTextEncoder encoder(buffer, sizeof(buffer));
-    encoder.skeleton = true;
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::outlineGroups);
 
-    top.encode(encoder);
-    const char *expected = "{\"sub\":{}}";
+    outer.encode(encoder);
+    const char *expected = "{\"ol\":1,\"sub\":{\"leaf2\":{}}}";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
-TEST(TextEncoder, GroupSkeletonRecurses)
+TEST(TextEncoder, OutlineRecursesThroughNestedGroups)
 {
-    // Three-deep group chain with a leaf at each level. Skeleton should drop
-    // all leaves but preserve the group nesting structure.
     ThingSetGroup<0xA020, 0, "L0"> l0;
     ThingSetReadOnlyProperty<int> leaf0{ 0xA021, 0xA020, "x" };
     ThingSetGroup<0xA022, 0xA020, "L1"> l1;
     ThingSetReadOnlyProperty<int> leaf1{ 0xA023, 0xA022, "x" };
     ThingSetGroup<0xA024, 0xA022, "L2"> l2;
     ThingSetReadOnlyProperty<int> leaf2{ 0xA025, 0xA024, "x" };
+    ThingSetGroup<0xA026, 0xA024, "L3"> l3;
     leaf0 = 0;
     leaf1 = 0;
     leaf2 = 0;
 
     char buffer[256];
-    SkeletonToggleTextEncoder encoder(buffer, sizeof(buffer));
-    encoder.skeleton = true;
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::outlineGroups);
 
     l0.encode(encoder);
-    const char *expected = "{\"L1\":{\"L2\":{}}}";
+    const char *expected = "{\"x\":0,\"L1\":{\"L2\":{\"L3\":{}}}}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, DisplayFriendlyImpliesOutline)
+{
+    ThingSetGroup<0xA030, 0, "outer"> outer;
+    ThingSetGroup<0xA031, 0xA030, "sub"> sub;
+    ThingSetReadOnlyProperty<int> subLeaf{ 0xA032, 0xA031, "sl" };
+    subLeaf = 7;
+
+    char buffer[128];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::displayFriendly);
+
+    outer.encode(encoder);
+    const char *expected = "{\"sub\":{}}";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }

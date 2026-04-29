@@ -22,6 +22,38 @@ class ThingSetNode;
 template<typename T>
 concept IsEncodable = std::is_base_of_v<ThingSetEncodable, T>;
 
+enum class TextEncoderOptions : uint32_t
+{
+    none             = 0,
+    /// Truncate long arrays nested inside a larger response, replacing
+    /// the omitted tail with "..." (see ThingSetTextEncoder::renderedListLength).
+    abbreviateArrays = 1U << 0,
+    /// When a group is nested inside a larger response, emit only its
+    /// child groups (structure) and suppress leaf values. A direct
+    /// query against the group itself still renders fully
+    outlineGroups    = 1U << 1,
+
+    displayFriendly  = abbreviateArrays | outlineGroups,
+};
+
+constexpr TextEncoderOptions operator|(TextEncoderOptions a, TextEncoderOptions b)
+{
+    return static_cast<TextEncoderOptions>(
+        static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+}
+
+constexpr TextEncoderOptions operator&(TextEncoderOptions a, TextEncoderOptions b)
+{
+    return static_cast<TextEncoderOptions>(
+        static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+}
+
+/// @brief True if any of the bits in ``flag`` are set in ``value``.
+constexpr bool any(TextEncoderOptions value, TextEncoderOptions flag)
+{
+    return static_cast<uint32_t>(value & flag) != 0;
+}
+
 /// @brief Encoder base class for ThingSet.
 class ThingSetEncoder
 {
@@ -230,10 +262,10 @@ public:
     /// choose the right key form when emitting nested maps
     virtual bool encodeKeysAsIds() const = 0;
 
-    /// @brief Hook that lets encoders request groups be rendered as a skeleton
-    /// (sub-groups only, leaf values suppressed) when they appear nested
-    /// inside a larger response
-    virtual bool renderGroupAsSkeleton() const
+    /// @brief Hook that lets encoders request groups be rendered as an
+    /// outline (sub-groups only, leaf values suppressed) when they appear
+    /// nested inside a larger response
+    virtual bool renderGroupAsOutline() const
     {
         return false;
     }

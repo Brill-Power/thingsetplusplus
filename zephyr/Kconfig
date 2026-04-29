@@ -17,17 +17,6 @@ config THINGSET_PLUS_PLUS_PROTOCOL_TEXT
 	bool "Enable text mode"
 	default true
 
-config THINGSET_PLUS_PLUS_TEXT_GROUP_SKELETON
-	bool "Render nested groups as skeleton in text mode"
-	depends on THINGSET_PLUS_PLUS_PROTOCOL_TEXT
-	default n
-	help
-		When enabled, groups that appear nested inside a larger text-mode
-		response are rendered as a skeleton: only their own sub-groups
-		are emitted, and leaf values (properties, records, arrays) are
-		skipped. Direct queries (e.g. `?SomeGroup`) still render the group's
-		full content at the top level
-    
 config THINGSET_PLUS_PLUS_TEXT_FLOAT_PRECISION
 	int "Decimal places for floats/doubles in text-mode output"
 	depends on THINGSET_PLUS_PLUS_PROTOCOL_TEXT

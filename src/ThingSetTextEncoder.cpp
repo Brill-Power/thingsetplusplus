@@ -241,17 +241,9 @@ bool ThingSetTextEncoder::encodeKeysAsIds() const
     return false;
 }
 
-bool ThingSetTextEncoder::renderGroupAsSkeleton() const
+bool ThingSetTextEncoder::renderGroupAsOutline() const
 {
-#if defined(CONFIG_THINGSET_PLUS_PLUS_TEXT_GROUP_SKELETON) && CONFIG_THINGSET_PLUS_PLUS_TEXT_GROUP_SKELETON
-    // Only skeletonise when this group is nested inside something else. A
-    // direct query (e.g. `?SomeGroup`) enters encode() at depth 0 and renders
-    // full content; children of that group that are themselves groups are
-    // rendered at depth >= 1 and fall into the skeleton branch
-    return _depth > 0;
-#else
-    return false;
-#endif
+    return any(_opts, TextEncoderOptions::outlineGroups) && _depth > 0;
 }
 
 } // namespace ThingSet
