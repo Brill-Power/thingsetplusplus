@@ -181,7 +181,12 @@ bool ThingSetTextEncoder::encodeMapStart(const uint32_t &)
 bool ThingSetTextEncoder::encodeMapEnd()
 {
     _depth--;
-    _responsePosition--;
+    // Every key-value pair is emitted with a trailing separator, so strip it
+    // here, but only if the last character actually is one. An empty map has
+    // no separator and we'd otherwise eat the opening '{'
+    if (_responsePosition > 0 && _responseBuffer[_responsePosition - 1] == ',') {
+        _responsePosition--;
+    }
     return append('}');
 }
 
@@ -204,7 +209,10 @@ bool ThingSetTextEncoder::encodeListStart(const uint32_t &)
 bool ThingSetTextEncoder::encodeListEnd()
 {
     _depth--;
-    _responsePosition--;
+    // As with encodeMapEnd: only strip the trailing separator if one exists
+    if (_responsePosition > 0 && _responseBuffer[_responsePosition - 1] == ',') {
+        _responsePosition--;
+    }
     return append(']');
 }
 
@@ -231,6 +239,11 @@ bool ThingSetTextEncoder::encodeKeyValuePairSeparator()
 bool ThingSetTextEncoder::encodeKeysAsIds() const
 {
     return false;
+}
+
+bool ThingSetTextEncoder::renderGroupAsOutline() const
+{
+    return any(_opts, TextEncoderOptions::outlineGroups) && _depth > 0;
 }
 
 } // namespace ThingSet

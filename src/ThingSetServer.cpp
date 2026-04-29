@@ -30,7 +30,7 @@ int _ThingSetServer::handleBinaryRequest(uint8_t *request, size_t requestLen, ui
 #ifdef ENABLE_TEXT_MODE
 int _ThingSetServer::handleTextRequest(uint8_t *request, size_t requestLen, uint8_t *response, size_t responseSize)
 {
-    ThingSetTextRequestContext context(request, requestLen, response, responseSize);
+    ThingSetTextRequestContext context(request, requestLen, response, responseSize, _textOpts);
     return handleRequest(context, request, requestLen, response, responseSize);
 }
 #endif // ENABLE_TEXT_MODE

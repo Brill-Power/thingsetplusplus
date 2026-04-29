@@ -3,6 +3,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "thingset++/ThingSet.hpp"
+#include "thingset++/ThingSetGroup.hpp"
+#include "thingset++/ThingSetProperty.hpp"
 #include "thingset++/ThingSetTextEncoder.hpp"
 #include "gtest/gtest.h"
 
@@ -421,5 +424,95 @@ TEST(TextEncoder, TestBoundaryEncode)
     SETUP(1) // make buffer of size 1 to ensure value cannot fit
     encoder.encode(1.23f);
     const char *expected = "";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+// Empty containers previously produced broken output (encodeMapEnd/encodeListEnd
+// unconditionally stripped the character before the closing brace, eating the
+// opening brace when no trailing separator existed). These two tests lock in the fix.
+TEST(TextEncoder, EncodeEmptyMap)
+{
+    SETUP(TEXT_ENCODER_BUFFER_SIZE)
+    encoder.encodeMapStart(0);
+    encoder.encodeMapEnd(0);
+    const char *expected = "{}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, EncodeEmptyList)
+{
+    SETUP(TEXT_ENCODER_BUFFER_SIZE)
+    encoder.encodeListStart(0);
+    encoder.encodeListEnd(0);
+    const char *expected = "[]";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, GroupEncodesFullByDefault)
+{
+    // IDs 0xA000+ chosen to avoid collisions with other tests.
+    ThingSetGroup<0xA000, 0, "topG"> top;
+    ThingSetReadOnlyProperty<int> leaf{ 0xA001, 0xA000, "leaf" };
+    leaf = 42;
+
+    char buffer[128];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer));  // default: TextEncoderOptions::none
+
+    top.encode(encoder);
+    const char *expected = "{\"leaf\":42}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, OutlineOnlyAppliesToNestedGroups)
+{
+    ThingSetGroup<0xA010, 0, "outer"> outer;
+    ThingSetReadOnlyProperty<int> outerLeaf{ 0xA011, 0xA010, "ol" };
+    ThingSetGroup<0xA012, 0xA010, "sub"> sub;
+    ThingSetReadOnlyProperty<int> subLeaf{ 0xA013, 0xA012, "sl" };
+    ThingSetGroup<0xA014, 0xA012, "leaf2"> deeper;
+    outerLeaf = 1;
+    subLeaf = 2;
+
+    char buffer[128];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::outlineGroups);
+
+    outer.encode(encoder);
+    const char *expected = "{\"ol\":1,\"sub\":{\"leaf2\":{}}}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, OutlineRecursesThroughNestedGroups)
+{
+    ThingSetGroup<0xA020, 0, "L0"> l0;
+    ThingSetReadOnlyProperty<int> leaf0{ 0xA021, 0xA020, "x" };
+    ThingSetGroup<0xA022, 0xA020, "L1"> l1;
+    ThingSetReadOnlyProperty<int> leaf1{ 0xA023, 0xA022, "x" };
+    ThingSetGroup<0xA024, 0xA022, "L2"> l2;
+    ThingSetReadOnlyProperty<int> leaf2{ 0xA025, 0xA024, "x" };
+    ThingSetGroup<0xA026, 0xA024, "L3"> l3;
+    leaf0 = 0;
+    leaf1 = 0;
+    leaf2 = 0;
+
+    char buffer[256];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::outlineGroups);
+
+    l0.encode(encoder);
+    const char *expected = "{\"x\":0,\"L1\":{\"L2\":{\"L3\":{}}}}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, DisplayFriendlyImpliesOutline)
+{
+    ThingSetGroup<0xA030, 0, "outer"> outer;
+    ThingSetGroup<0xA031, 0xA030, "sub"> sub;
+    ThingSetReadOnlyProperty<int> subLeaf{ 0xA032, 0xA031, "sl" };
+    subLeaf = 7;
+
+    char buffer[128];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::displayFriendly);
+
+    outer.encode(encoder);
+    const char *expected = "{\"sub\":{}}";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }

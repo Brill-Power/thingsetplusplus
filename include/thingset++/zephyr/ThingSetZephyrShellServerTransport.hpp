@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include "thingset++/ThingSetEncoder.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
 #include "thingset++/zephyr/StreamingZephyrShellThingSetBinaryEncoder.hpp"
 #include <array>
@@ -32,5 +33,11 @@ public:
 private:
     int onShellCommandExecuted(const shell *shell, size_t argc, char **argv);
 };
+
+/// @brief Set the text-mode rendering options. Call this before the first
+/// ``thingset`` shell command. The shell server is built on first
+/// request and snapshots this value once at init
+void setShellTextOptions(TextEncoderOptions opts);
+TextEncoderOptions getShellTextOptions();
 
 } // namespace ThingSet::Zephyr

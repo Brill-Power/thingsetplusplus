@@ -25,6 +25,18 @@ bool ThingSetZephyrShellServerTransport::listen(std::function<int(const EmptyIde
     return true;
 }
 
+static TextEncoderOptions s_shellTextOpts = TextEncoderOptions::none;
+
+void setShellTextOptions(TextEncoderOptions opts)
+{
+    s_shellTextOpts = opts;
+}
+
+TextEncoderOptions getShellTextOptions()
+{
+    return s_shellTextOpts;
+}
+
 int ThingSetZephyrShellServerTransport::_onShellCommandExecuted(const shell *shell, size_t argc, char **argv)
 {
     static ThingSetZephyrShellServerTransport transport;
@@ -32,6 +44,7 @@ int ThingSetZephyrShellServerTransport::_onShellCommandExecuted(const shell *she
     static bool initialised = false;
     if (!initialised)
     {
+        server.setTextOptions(s_shellTextOpts);
         server.listen();
         initialised = true;
     }

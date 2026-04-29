@@ -30,12 +30,20 @@ class _ThingSetServer
 private:
     ThingSetAccess _access;
     ThingSetForwarder *_forwarder;
+#ifdef ENABLE_TEXT_MODE
+    TextEncoderOptions _textOpts = TextEncoderOptions::none;
+#endif // ENABLE_TEXT_MODE
 
 protected:
     _ThingSetServer(ThingSetForwarder *forwarder);
 
 public:
     virtual bool listen() = 0;
+
+#ifdef ENABLE_TEXT_MODE
+    void setTextOptions(TextEncoderOptions opts) { _textOpts = opts; }
+    TextEncoderOptions getTextOptions() const { return _textOpts; }
+#endif // ENABLE_TEXT_MODE
 
 private:
     int handleGet(ThingSetRequestContext &context);

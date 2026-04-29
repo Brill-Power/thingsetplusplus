@@ -20,14 +20,22 @@ private: // todo repeated label?
     size_t _responseSize;
     size_t _responsePosition;
     uint8_t _depth;
+    TextEncoderOptions _opts;
 
 public:
     template <size_t Size>
-    ThingSetTextEncoder(std::array<char, Size> buffer) : ThingSetTextEncoder(buffer.data(), buffer.size())
+    ThingSetTextEncoder(std::array<char, Size> buffer,
+                        TextEncoderOptions opts = TextEncoderOptions::none)
+        : ThingSetTextEncoder(buffer.data(), buffer.size(), opts)
     {}
-    ThingSetTextEncoder(char *buffer, size_t size)
-        : _responseBuffer(buffer), _responseSize(size), _responsePosition(0), _depth(0)
+    ThingSetTextEncoder(char *buffer, size_t size,
+                        TextEncoderOptions opts = TextEncoderOptions::none)
+        : _responseBuffer(buffer), _responseSize(size), _responsePosition(0),
+          _depth(0), _opts(opts)
     {}
+
+    void setOptions(TextEncoderOptions opts) { _opts = opts; }
+    TextEncoderOptions getOptions() const { return _opts; }
 
     size_t getEncodedLength() const override
     {
@@ -99,10 +107,12 @@ public:
     /// @return True if encoding succeeded, otherwise false.
     bool encodeBytes(const uint8_t *buffer, const size_t &size) override;
 
+    bool encodeKeysAsIds() const override;
+    bool renderGroupAsOutline() const override;
+
 protected:
     bool encodeListSeparator() override;
     bool encodeKeyValuePairSeparator() override;
-    bool encodeKeysAsIds() const override;
 
 private:
     /// @brief Determine the length of the value as a string
