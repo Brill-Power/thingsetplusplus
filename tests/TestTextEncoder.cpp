@@ -419,6 +419,72 @@ TEST(TextEncoder, EncodeList)
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
+namespace {
+template <size_t N>
+void encode_nested_array(ThingSetTextEncoder &encoder, const std::array<int, N> &arr)
+{
+    encoder.encodeMapStart(1);
+    encoder.encode(std::make_pair(std::string_view{"a"}, arr));
+    encoder.encodeMapEnd(1);
+}
+} // namespace
+
+TEST(TextEncoder, AbbreviateTruncatesNestedArray)
+{
+    char buffer[TEXT_ENCODER_BUFFER_SIZE];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::abbreviateArrays);
+    std::array<int, 8> arr{ 1, 2, 3, 4, 5, 6, 7, 8 };
+    encode_nested_array(encoder, arr);
+    const char *expected = "{\"a\":[1,2,3,...]}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, AbbreviateLeavesShortArrayAlone)
+{
+    char buffer[TEXT_ENCODER_BUFFER_SIZE];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::abbreviateArrays);
+    std::array<int, 3> arr{ 1, 2, 3 };
+    encode_nested_array(encoder, arr);
+    const char *expected = "{\"a\":[1,2,3]}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, NoAbbreviateMeansNoTruncation)
+{
+    char buffer[TEXT_ENCODER_BUFFER_SIZE];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer));  // default: none
+    std::array<int, 8> arr{ 1, 2, 3, 4, 5, 6, 7, 8 };
+    encode_nested_array(encoder, arr);
+    const char *expected = "{\"a\":[1,2,3,4,5,6,7,8]}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, AbbreviateDoesNotTruncateTopLevelArray)
+{
+    char buffer[TEXT_ENCODER_BUFFER_SIZE];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::abbreviateArrays);
+    std::array<int, 8> arr{ 1, 2, 3, 4, 5, 6, 7, 8 };
+    encoder.encode(arr);
+    const char *expected = "[1,2,3,4,5,6,7,8]";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
+TEST(TextEncoder, DisplayFriendlyTruncatesAndOutlines)
+{
+    ThingSetGroup<0xA040, 0, "outer"> outer;
+    ThingSetReadOnlyProperty<int> outerLeaf{ 0xA041, 0xA040, "ol" };
+    ThingSetGroup<0xA042, 0xA040, "sub"> sub;
+    ThingSetReadOnlyProperty<int> subLeaf{ 0xA043, 0xA042, "sl" };
+    outerLeaf = 1;
+    subLeaf = 2;
+
+    char buffer[256];
+    ThingSetTextEncoder encoder(buffer, sizeof(buffer), TextEncoderOptions::displayFriendly);
+    outer.encode(encoder);
+    const char *expected = "{\"ol\":1,\"sub\":{}}";
+    ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
+}
+
 TEST(TextEncoder, TestBoundaryEncode)
 {
     SETUP(1) // make buffer of size 1 to ensure value cannot fit

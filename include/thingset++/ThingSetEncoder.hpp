@@ -243,9 +243,13 @@ public:
 
     template <typename T> bool encode(const T *value, const size_t &size)
     {
+        const size_t rendered = renderedListLength(size);
         bool result = encodeListStart(size);
-        for (size_t i = 0; i < size; i++) {
+        for (size_t i = 0; i < rendered; i++) {
             result &= this->encode(value[i]) && this->encodeListSeparator();
+        }
+        if (rendered < size) {
+            result &= encodeTruncationMarker() && this->encodeListSeparator();
         }
         return result && encodeListEnd(size);
     }
@@ -268,6 +272,23 @@ public:
     virtual bool renderGroupAsOutline() const
     {
         return false;
+    }
+
+    /// @brief Hook for encoders that want to render fewer elements than an
+    /// array actually contains (e.g. text mode with abbreviateArrays).
+    /// Return the number of elements to actually emit; values less than
+    /// ``size`` cause a truncation marker to be appended after the loop
+    virtual size_t renderedListLength(const size_t &size)
+    {
+        return size;
+    }
+
+    /// @brief Hook for encoders to append a truncation marker after a
+    /// truncated array. Default succeeds without writing anything; the
+    /// text encoder writes ``...`` so the abbreviation is human-visible
+    virtual bool encodeTruncationMarker()
+    {
+        return true;
     }
 
 protected:

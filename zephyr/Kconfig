@@ -26,6 +26,18 @@ config THINGSET_PLUS_PLUS_TEXT_FLOAT_PRECISION
 		Number of digits after the decimal point when encoding floats
 		and doubles via the text-mode encoder
 
+config THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX
+	int "Max array elements to render in text mode (0 = unlimited)"
+	depends on THINGSET_PLUS_PLUS_PROTOCOL_TEXT
+	range 0 65535
+	default 0
+	help
+		Threshold used by the abbreviateArrays text rendering option.
+		When that option is set on the encoder and an array nested
+		inside a larger response is longer than this value, the first
+		N elements are rendered followed by a literal "..." marker.
+		Zero disables abbreviation regardless of the runtime option
+
 config THINGSET_PLUS_PLUS_ENHANCED_REPORTING
 	bool "Enable enhanced reporting"
 	default false

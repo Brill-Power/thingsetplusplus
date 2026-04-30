@@ -45,4 +45,7 @@ endif()
 target_link_libraries(testapp PRIVATE thingset++)
 target_link_libraries(testapp PRIVATE gtest_main)
 
+target_compile_definitions(testapp PRIVATE CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX=3)
+target_compile_definitions(thingset++ PRIVATE CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX=3)
+
 enable_testing()
