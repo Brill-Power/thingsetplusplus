@@ -246,4 +246,21 @@ bool ThingSetTextEncoder::renderGroupAsOutline() const
     return any(_opts, TextEncoderOptions::outlineGroups) && _depth > 0;
 }
 
+size_t ThingSetTextEncoder::renderedListLength(const size_t &size)
+{
+#if defined(CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX) && CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX > 0
+    if (any(_opts, TextEncoderOptions::abbreviateArrays)
+        && _depth > 0
+        && size > (size_t)CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX) {
+        return CONFIG_THINGSET_PLUS_PLUS_TEXT_ARRAY_MAX;
+    }
+#endif
+    return size;
+}
+
+bool ThingSetTextEncoder::encodeTruncationMarker()
+{
+    return append('.') && append('.') && append('.');
+}
+
 } // namespace ThingSet

@@ -109,6 +109,8 @@ public:
 
     bool encodeKeysAsIds() const override;
     bool renderGroupAsOutline() const override;
+    size_t renderedListLength(const size_t &size) override;
+    bool encodeTruncationMarker() override;
 
 protected:
     bool encodeListSeparator() override;
