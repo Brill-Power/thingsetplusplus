@@ -134,8 +134,16 @@ bool ThingSetRegistry::findById(const unsigned id, const unsigned parentId, Thin
     if (findParentById(parentId, &parent) && parent->tryCastTo(ThingSetNodeType::record, nullptr))
     {
         uint32_t fakeId = calculateId(id, parentId);
-        NodeList list = instance()._nodeMap[fakeId % NODE_MAP_LOOKUP_BUCKETS];
-        return findByIdInNodeList(list, id, node);
+        NodeList &list = instance()._nodeMap[fakeId % NODE_MAP_LOOKUP_BUCKETS];
+        // Multiple record-member proxies can share a bucket when they share a
+        // raw id under different parents. Filter by parent id too so the
+        // caller gets the proxy they asked for
+        for (ThingSetNode *n : list) {
+            if (n && n->getId() == id && n->getParentId() == parentId) {
+                *node = n;
+                return true;
+            }
+        }
     }
     return false;
 }

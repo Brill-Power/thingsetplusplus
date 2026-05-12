@@ -27,6 +27,7 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
     TestIntrusiveLinkedList.cpp
     TestProperties.cpp
     TestRecordMembers.cpp
+    TestRecordMemberNamespaces.cpp
     TestFunctions.cpp
     TestSubsets.cpp
     TestAsioIpClientServer.cpp
