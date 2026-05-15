@@ -17,6 +17,18 @@ static uint32_t calculateId(const uint16_t &id, const uint16_t &parentId)
     return offset + id + 1; // ensure never in same bucket as original
 }
 
+// Effective identity of a node within the registry: raw id for normal nodes,
+// parent-scoped id for record members. Two nodes are duplicates iff their
+// effective ids match
+static uint32_t effectiveId(ThingSetNode *node)
+{
+    uint32_t id = node->getId();
+    if (node->tryCastTo(ThingSetNodeType::recordMember, nullptr)) {
+        id = calculateId(id, node->getParentId());
+    }
+    return id;
+}
+
 ThingSetRegistry::ThingSetRegistry()
 {
     // manually register the root node
@@ -39,10 +51,7 @@ void ThingSetRegistry::registerOrUnregisterNode(
     ThingSetNode *node, std::function<void(NodeList &, ThingSetNode *)> nodeListAction,
     std::function<bool(ThingSetParentNode *, ThingSetNode *)> parentNodeAction)
 {
-    unsigned id = node->getId();
-    if (node->tryCastTo(ThingSetNodeType::recordMember, nullptr)) {
-        id = calculateId(id, node->getParentId());
-    }
+    uint32_t id = effectiveId(node);
     NodeList &list = _nodeMap[id % NODE_MAP_LOOKUP_BUCKETS];
     nodeListAction(list, node);
     ThingSetParentNode *parent;
@@ -56,10 +65,12 @@ void ThingSetRegistry::registerNode(ThingSetNode *node)
     LOG_DEBUG("Registering node %s (0x%x)", node->getName().data(), node->getId());
     ThingSetRegistry::instance().registerOrUnregisterNode(
         node, [](auto &l, auto *n) {
+            uint32_t nEff = effectiveId(n);
             for (const auto &en : l) {
-                if (en->getId() == n->getId()) {
-                    LOG_ERROR("Cannot register node %s (0x%x) as it already exists (under name %s)", n->getName().data(), n->getId(), en->getName().data());
-                    assert(en->getId() != n->getId());
+                if (effectiveId(en) == nEff) {
+                    LOG_ERROR("Cannot register node %s (0x%x under parent 0x%x) as it already exists (under name %s)",
+                              n->getName().data(), n->getId(), n->getParentId(), en->getName().data());
+                    assert(effectiveId(en) != nEff);
                     return;
                 }
             }
@@ -123,8 +134,16 @@ bool ThingSetRegistry::findById(const unsigned id, const unsigned parentId, Thin
     if (findParentById(parentId, &parent) && parent->tryCastTo(ThingSetNodeType::record, nullptr))
     {
         uint32_t fakeId = calculateId(id, parentId);
-        NodeList list = instance()._nodeMap[fakeId % NODE_MAP_LOOKUP_BUCKETS];
-        return findByIdInNodeList(list, id, node);
+        NodeList &list = instance()._nodeMap[fakeId % NODE_MAP_LOOKUP_BUCKETS];
+        // Multiple record-member proxies can share a bucket when they share a
+        // raw id under different parents. Filter by parent id too so the
+        // caller gets the proxy they asked for
+        for (ThingSetNode *n : list) {
+            if (n && n->getId() == id && n->getParentId() == parentId) {
+                *node = n;
+                return true;
+            }
+        }
     }
     return false;
 }
