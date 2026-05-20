@@ -8,6 +8,7 @@
 #include "thingset++/Eui.hpp"
 #include "thingset++/StringLiteral.hpp"
 #include "thingset++/ThingSetProperty.hpp"
+#include "thingset++/ThingSetRegistry.hpp"
 #include "thingset++/ThingSetRequestContext.hpp"
 #include "thingset++/ThingSetServerTransport.hpp"
 #include "thingset++/ThingSetStatus.hpp"
@@ -127,6 +128,60 @@ public:
         {
             return false;
         }
+        return encoder.flush();
+    }
+
+    /// @brief Broadcasts every property tagged with the given subset as a single report.
+    /// @tparam SubsetType Type of the subset enum.
+    /// @param subset The subset to publish. All registered nodes whose subset mask
+    ///        contains every bit of subset are included.
+    /// @return True if publishing succeeded.
+    template <typename SubsetType>
+        requires std::is_enum_v<SubsetType>
+    bool publish(SubsetType subset)
+    {
+#ifdef ENABLE_ENHANCED_REPORTING
+        bool enhanced = true;
+#else
+        bool enhanced = false;
+#endif
+        Encoder encoder = _transport.getPublishingEncoder(enhanced);
+
+        if (enhanced) {
+            if (!encoder.encode(ThingSet::Eui::getValue())) {
+                return false;
+            }
+        }
+
+        if (!encoder.encode(0)) {
+            return false;
+        }
+
+        size_t count = 0;
+        for (auto *n : ThingSetRegistry::nodesInSubset(subset)) {
+            (void)n;
+            ++count;
+        }
+
+        if (!encoder.encodeMapStart(count)) {
+            return false;
+        }
+
+        for (ThingSetNode *node : ThingSetRegistry::nodesInSubset(subset)) {
+            void *target = nullptr;
+            if (!node->tryCastTo(ThingSetNodeType::encodable, &target)) {
+                return false;
+            }
+            auto *encodable = reinterpret_cast<ThingSetEncodable *>(target);
+            if (!encoder.encode(node->getId()) || !encodable->encode(encoder)) {
+                return false;
+            }
+        }
+
+        if (!encoder.encodeMapEnd()) {
+            return false;
+        }
+
         return encoder.flush();
     }
 
