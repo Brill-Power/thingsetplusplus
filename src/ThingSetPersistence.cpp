@@ -23,6 +23,18 @@ ThingSetPersistence::ThingSetPersistence(const device *device) : _device(device)
 bool ThingSetPersistence::load()
 {
     StreamingZephyrEepromThingSetBinaryDecoder decoder(_device, 0);
+
+    if (decoder.isEmpty()) {
+        return false;
+    }
+
+    if (decoder.getVersion() != CONFIG_THINGSET_PLUS_PLUS_EEPROM_DATA_VERSION) {
+        LOG_WARN("EEPROM data version %d does not match expected version %d, "
+                 "keeping default values",
+                 decoder.getVersion(), CONFIG_THINGSET_PLUS_PLUS_EEPROM_DATA_VERSION);
+        return false;
+    }
+
     return decoder.decodeMap<uint16_t>([&](uint16_t id) {
         ThingSetNode *node;
         if (!ThingSetRegistry::findById(id, &node)) {
@@ -34,7 +46,7 @@ bool ThingSetPersistence::load()
             return decodable->decode(decoder);
         }
         return false;
-    });
+    }) && decoder.verify();
 }
 
 bool ThingSetPersistence::save()
