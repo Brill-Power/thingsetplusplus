@@ -202,7 +202,7 @@ int _ThingSetServer::handleUpdate(ThingSetRequestContext &context)
     context.encoder().encodePreamble();
 
     auto handleNodeUpdate = [&](ThingSetNode *child) {
-        if ((child->getAccess() & _access) == ThingSetAccess::none) {
+        if ((child->getAccess() & _access & ThingSetAccess::anyWrite) == ThingSetAccess::none) {
             context.setStatus(ThingSetStatusCode::forbidden);
             return false;
         }
