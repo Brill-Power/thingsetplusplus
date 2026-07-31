@@ -38,16 +38,39 @@ static bool invoke(std::function<void(Args...)> &function, std::tuple<Values...>
     return encoder.encodeNull();
 }
 
+/// @brief Carries optional human-friendly names for a function's parameters.
+/// Pass as the ParamNames argument of ThingSetFunction (or use one of the
+/// ThingSetNamed*Function aliases). An empty list means every parameter
+/// name is auto-generated from the function name, argument type and
+/// position (e.g. "xOnu16_1"); a non-empty list must name every argument.
+/// Names travel in the node metadata
+template <StringLiteral... Names>
+struct ThingSetParameterNames
+{
+    static constexpr size_t count = sizeof...(Names);
+
+    template <size_t Index>
+    static constexpr auto get()
+    {
+        return std::get<Index>(std::tuple{ Names... });
+    }
+};
+
 /// @brief Represents an executable function.
 /// @tparam Id The unique integer ID of the ThingSet node.
 /// @tparam ParentId The integer ID of the parent node.
 /// @tparam Name The name of the node.
 /// @tparam Access Access control flags.
+/// @tparam ParamNames A ThingSetParameterNames<...> naming each argument,
+/// or ThingSetParameterNames<> to auto-generate names.
 /// @tparam Result The return type of the function.
 /// @tparam ...Args The argument types of the function, if any.
-template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, uint16_t FirstArgumentId, typename Result, typename... Args>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, uint16_t FirstArgumentId, typename ParamNames, typename Result, typename... Args>
 class ThingSetFunction : public IdentifiableThingSetParentNode<Id, ParentId, Name>, public ThingSetInvocable
 {
+    static_assert(ParamNames::count == 0 || ParamNames::count == sizeof...(Args),
+                  "ThingSetParameterNames must either be empty or name every argument");
+
 private:
     template <uint16_t ChildId, StringLiteral ArgName, typename T>
     class ThingSetFunctionParameter : public IdentifiableThingSetNode<ChildId, Id, ArgName>
@@ -82,7 +105,18 @@ private:
     {
         using Tuple = std::tuple<Args...>;
         using ParameterType = std::tuple_element_t<Index, Tuple>;
-        typedef ThingSetFunctionParameter<FirstArgumentId + 0 + Index, Name + ThingSetType<std::remove_cvref_t<ParameterType>>::name + "_" + to_string_t<1 + Index>(), ParameterType> type;
+
+        static constexpr auto argName()
+        {
+            if constexpr (ParamNames::count != 0) {
+                return ParamNames::template get<Index>();
+            }
+            else {
+                return Name + ThingSetType<std::remove_cvref_t<ParameterType>>::name + "_" + to_string_t<1 + Index>();
+            }
+        }
+
+        typedef ThingSetFunctionParameter<FirstArgumentId + 0 + Index, argName(), ParameterType> type;
     };
 
     /// @brief The exposed function.
@@ -133,13 +167,31 @@ public:
 };
 
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
-using ThingSetUserFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Id + 1, Result, Args...>;
+using ThingSetUserFunction =
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Id + 1, ThingSetParameterNames<>, Result, Args...>;
 
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
-using ThingSetAdvancedFunction = ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Id + 1, Result, Args...>;
+using ThingSetAdvancedFunction =
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Id + 1, ThingSetParameterNames<>, Result, Args...>;
 
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename Result, typename... Args>
 using ThingSetManufacturerFunction =
-    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Id + 1, Result, Args...>;
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Id + 1, ThingSetParameterNames<>, Result,
+                     Args...>;
+
+// Named variants: identical to the above but with human-friendly parameter
+// names, e.g.
+//   ThingSetNamedUserFunction<0x710, 0x07, "xOn", ThingSetParameterNames<"uSwitchMode">, int, uint16_t>
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename ParamNames, typename Result, typename... Args>
+using ThingSetNamedUserFunction =
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::anyWrite, Id + 1, ParamNames, Result, Args...>;
+
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename ParamNames, typename Result, typename... Args>
+using ThingSetNamedAdvancedFunction =
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::expertWrite, Id + 1, ParamNames, Result, Args...>;
+
+template <uint16_t Id, uint16_t ParentId, StringLiteral Name, typename ParamNames, typename Result, typename... Args>
+using ThingSetNamedManufacturerFunction =
+    ThingSetFunction<Id, ParentId, Name, ThingSetAccess::manufacturerWrite, Id + 1, ParamNames, Result, Args...>;
 
 } // namespace ThingSet
