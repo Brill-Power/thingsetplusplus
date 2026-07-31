@@ -31,8 +31,12 @@ ThingSetUserFunction<0x430, 0x0, "xMap", std::map<std::string, float>> xGetMap([
     map.insert_or_assign("world", 2.0f);
     return map;
 });
-ThingSetFunction<0x440, 0x0, "xTestCustom", ThingSetAccess::anyWrite, 0x4401, void, int, float> xTestCustomFunc(test);
+ThingSetFunction<0x440, 0x0, "xTestCustom", ThingSetAccess::anyWrite, 0x4401, ThingSetParameterNames<>, void, int,
+                 float>
+    xTestCustomFunc(test);
 ThingSetUserFunction<0x450, 0x0, "xString", int, std::string &> xString([](std::string &) { return 0; });
+ThingSetNamedUserFunction<0x470, 0x0, "xNamed", ThingSetParameterNames<"uAlpha", "uBeta">, int, uint16_t, float>
+    xNamed([](uint16_t, float) { return 0; });
 
 TEST(Functions, FunctionTypes)
 {
@@ -60,6 +64,21 @@ TEST(Functions, FunctionParameters)
     ASSERT_EQ(0x450, node->getParentId());
     ASSERT_EQ("xStringstring_1", node->getName());
     ASSERT_EQ("string", node->getType());
+}
+
+TEST(Functions, NamedFunctionParameters)
+{
+    ThingSetNode *node;
+    ASSERT_TRUE(ThingSetRegistry::findById(0x471, &node));
+    ASSERT_EQ(0x470, node->getParentId());
+    ASSERT_EQ("uAlpha", node->getName());
+    ASSERT_EQ("u16", node->getType());
+    ASSERT_TRUE(ThingSetRegistry::findById(0x472, &node));
+    ASSERT_EQ(0x470, node->getParentId());
+    ASSERT_EQ("uBeta", node->getName());
+    ASSERT_EQ("f32", node->getType());
+    // Names are metadata only: the function's type signature is unchanged.
+    ASSERT_EQ("(u16,f32)->(i32)", xNamed.getType());
 }
 
 TEST(Functions, FunctionParametersWithCustomId)
