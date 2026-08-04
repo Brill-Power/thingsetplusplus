@@ -113,6 +113,14 @@ struct isotp_fast_opts
     uint8_t stmin;
     uint8_t flags;
     enum isotp_fast_addressing_mode addressing_mode;
+    /**
+     * Optional override for the RX filter mask installed by
+     * @ref isotp_fast_bind. 0 means the default mask for the addressing
+     * mode is used. Use this e.g. to additionally match the sender address
+     * so that concurrent contexts bound to different peers on one interface
+     * do not receive each other's traffic
+     */
+    uint32_t rx_mask;
 };
 
 /**

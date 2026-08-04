@@ -49,6 +49,7 @@ private:
 
     AddressClaimWorkItem _addressClaimWork;
     k_event _events;
+    k_mutex _bindLock;
     int _claimFilterId;
     int _discoverFilterId;
 

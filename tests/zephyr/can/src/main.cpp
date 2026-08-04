@@ -151,6 +151,35 @@ ZCLIENT_SERVER_TEST(test_client_lifecycle_absent_node,
     zassert_equal(5, value);
 )
 
+/* Response cross-talk: RR client filters historically masked out the source
+ * address, so every client on a shared interface matched every peer's
+ * responses (first-match-wins on real hardware silently starved the loser).
+ * A client bound to a silent peer must not observe responses addressed to
+ * another client. */
+ZCLIENT_SERVER_TEST(test_no_response_crosstalk_between_clients,
+    std::array<uint8_t, 64> transportRx;
+    std::array<uint8_t, 64> transportTx;
+    std::array<uint8_t, 64> silentClientRx;
+    std::array<uint8_t, 64> silentClientTx;
+    ThingSetZephyrCanClientTransport silentTransport(clientInterface, 0x55, transportRx,
+                                                     transportTx);
+    ThingSetClient silentClient(silentTransport, silentClientRx, silentClientTx);
+    zassert_true(silentClient.connect());
+
+    /* a full exchange with the real server crosses the bus */
+    int value;
+    auto result = client.exec(0x1000, &value, 2, 3);
+    zassert_true(result.success());
+    zassert_equal(5, value);
+
+    /* the silent-peer client must not have captured that response: its own
+     * request must time out rather than return the stray reply */
+    int sum;
+    auto silentResult = silentClient.exec(0x1000, &sum, 1, 2);
+    zassert_false(silentResult.success(),
+                  "client bound to a silent peer must not see another client's response");
+)
+
 /* connect() historically could not fail: isotp_fast_bind ignored the result
  * of can_add_rx_filter, so a full filter table was reported as a successful
  * bind and every subsequent exchange timed out. Exhaust the controller's RX

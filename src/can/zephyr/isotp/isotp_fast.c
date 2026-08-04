@@ -960,7 +960,7 @@ static inline void prepare_filter(struct can_filter *filter, uint32_t rx_addr,
 #endif
     }
 #endif /* CONFIG_ISOTP_FAST_CUSTOM_ADDRESSING */
-    filter->mask = mask;
+    filter->mask = opts->rx_mask != 0 ? opts->rx_mask : mask;
     filter->flags = CAN_FILTER_IDE;
 }
 
