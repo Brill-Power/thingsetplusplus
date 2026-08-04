@@ -66,11 +66,9 @@ struct ThingSetParameterNames
 /// @tparam Result The return type of the function.
 /// @tparam ...Args The argument types of the function, if any.
 template <uint16_t Id, uint16_t ParentId, StringLiteral Name, ThingSetAccess Access, uint16_t FirstArgumentId, typename ParamNames, typename Result, typename... Args>
+    requires (ParamNames::count == 0 || ParamNames::count == sizeof...(Args))
 class ThingSetFunction : public IdentifiableThingSetParentNode<Id, ParentId, Name>, public ThingSetInvocable
 {
-    static_assert(ParamNames::count == 0 || ParamNames::count == sizeof...(Args),
-                  "ThingSetParameterNames must either be empty or name every argument");
-
 private:
     template <uint16_t ChildId, StringLiteral ArgName, typename T>
     class ThingSetFunctionParameter : public IdentifiableThingSetNode<ChildId, Id, ArgName>
