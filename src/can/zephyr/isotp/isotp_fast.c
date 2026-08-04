@@ -85,6 +85,7 @@ static int get_send_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr tx_ad
         context->stmin = ctx->opts->stmin;
         context->state = ISOTP_TX_SEND_FF;
         context->error = 0;
+        atomic_clear(&context->pending_cb);
         k_sem_init(&context->sem, 0, 1);
         k_work_init(&context->work, send_work_handler);
         k_timer_init(&context->timer, send_timeout_handler, NULL);
@@ -173,6 +174,7 @@ static int get_recv_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_addr rx_ad
         context->state = ISOTP_RX_STATE_WAIT_FF_SF;
         context->rx_addr = rx_addr;
         context->error = 0;
+        atomic_clear(&context->pending_cb);
     #ifdef ISOTP_FAST_RECEIVE_QUEUE
         k_msgq_init(&context->recv_queue, context->recv_queue_pool, sizeof(struct net_buf *),
                     CONFIG_ISOTP_FAST_RX_MAX_PACKET_COUNT);
@@ -276,6 +278,8 @@ static void receive_can_tx(const struct device *dev, int error, void *arg)
 
     ARG_UNUSED(dev);
 
+    atomic_dec(&rctx->pending_cb);
+
     if (error != 0) {
         LOG_ERR("Error sending FC frame (%d)", error);
         receive_report_error(rctx, ISOTP_N_ERROR);
@@ -304,8 +308,11 @@ static void receive_send_fc(struct isotp_fast_recv_ctx *rctx, uint8_t fs)
     payload_len = data - frame.data;
     frame.dlc = can_bytes_to_dlc(payload_len);
 
+    atomic_inc(&rctx->pending_cb);
     ret = can_send(rctx->ctx->can_dev, &frame, K_MSEC(ISOTP_A_TIMEOUT_MS), receive_can_tx, rctx);
     if (ret) {
+        /* the completion callback never fires for a frame that was not queued */
+        atomic_dec(&rctx->pending_cb);
         LOG_ERR("Can't send FC, (%d)", ret);
         receive_report_error(rctx, ISOTP_N_TIMEOUT_A);
         receive_state_machine(rctx);
@@ -738,6 +745,7 @@ static void send_can_tx_callback(const struct device *dev, int error, void *arg)
 
     ARG_UNUSED(dev);
 
+    atomic_dec(&sctx->pending_cb);
     sctx->backlog--;
     k_sem_give(&sctx->sem);
 
@@ -783,8 +791,13 @@ static inline int send_ff(struct isotp_fast_send_ctx *sctx)
     sctx->rem_len -= size;
     sctx->data += size;
     frame.dlc = can_bytes_to_dlc(CAN_MAX_DLEN);
+    atomic_inc(&sctx->pending_cb);
     ret = can_send(sctx->ctx->can_dev, &frame, K_MSEC(ISOTP_A_TIMEOUT_MS), send_can_tx_callback,
                    sctx);
+    if (ret != 0) {
+        /* the completion callback never fires for a frame that was not queued */
+        atomic_dec(&sctx->pending_cb);
+    }
     return ret;
 }
 
@@ -806,12 +819,17 @@ static inline int send_cf(struct isotp_fast_send_ctx *sctx)
     sctx->data += len;
 
     frame.dlc = can_bytes_to_dlc(len + index);
+    atomic_inc(&sctx->pending_cb);
     ret = can_send(sctx->ctx->can_dev, &frame, K_MSEC(ISOTP_A_TIMEOUT_MS), send_can_tx_callback,
                    sctx);
     if (ret == 0) {
         sctx->sn++;
         sctx->bs--;
         sctx->backlog++;
+    }
+    else {
+        /* the completion callback never fires for a frame that was not queued */
+        atomic_dec(&sctx->pending_cb);
     }
 
     ret = ret ? ret : sctx->rem_len;
@@ -993,10 +1011,73 @@ static void free_recv_await_ctx(struct isotp_fast_ctx *ctx, struct isotp_fast_re
 }
 #endif
 
+static void orphan_sent_callback(int result, struct isotp_fast_addr addr, void *arg)
+{
+    ARG_UNUSED(result);
+    ARG_UNUSED(addr);
+    ARG_UNUSED(arg);
+}
+
+static void orphan_recv_callback(struct net_buf *buffer, int rem_len, struct isotp_fast_addr addr,
+                                 void *arg)
+{
+    ARG_UNUSED(buffer);
+    ARG_UNUSED(rem_len);
+    ARG_UNUSED(addr);
+    ARG_UNUSED(arg);
+}
+
+static const struct isotp_fast_opts orphanage_opts = {
+    .bs = 0,
+    .stmin = 0,
+    .flags = 0,
+};
+
+static struct isotp_fast_ctx orphanage = {
+    .isotp_send_ctx_list = SYS_SLIST_STATIC_INIT(&orphanage.isotp_send_ctx_list),
+    .isotp_recv_ctx_list = SYS_SLIST_STATIC_INIT(&orphanage.isotp_recv_ctx_list),
+    .can_dev = NULL,
+    .filter_id = -1,
+    .opts = &orphanage_opts,
+    .recv_callback = orphan_recv_callback,
+    .recv_cb_arg = NULL,
+    .recv_error_callback = NULL,
+    .sent_callback = orphan_sent_callback,
+};
+
+static void orphan_send_ctx(struct isotp_fast_ctx *owner, struct isotp_fast_send_ctx *sctx)
+{
+    LOG_WRN("Orphaning send context %x (outstanding CAN callback)", sctx->tx_addr.ext_id);
+    sys_slist_find_and_remove(&owner->isotp_send_ctx_list, &sctx->node);
+    /* any later work run takes the TX_ERR path, which frees the context */
+    send_report_error(sctx, ISOTP_N_ERROR);
+    sctx->cb_arg = NULL;
+    sctx->ctx = &orphanage;
+    sys_slist_append(&orphanage.isotp_send_ctx_list, &sctx->node);
+}
+
+static void orphan_recv_ctx(struct isotp_fast_ctx *owner, struct isotp_fast_recv_ctx *rctx)
+{
+    LOG_WRN("Orphaning receive context %x (outstanding CAN callback)", rctx->rx_addr.ext_id);
+    sys_slist_find_and_remove(&owner->isotp_recv_ctx_list, &rctx->node);
+    /* no state machine case handles UNBOUND: the context is inert */
+    rctx->state = ISOTP_RX_STATE_UNBOUND;
+    rctx->ctx = &orphanage;
+    sys_slist_append(&orphanage.isotp_recv_ctx_list, &rctx->node);
+}
+
+/*
+ * Must be called from thread context, and not from the system work queue:
+ * it cancels the contexts' work items synchronously
+ */
 int isotp_fast_unbind(struct isotp_fast_ctx *ctx)
 {
+    struct k_work_sync sync;
+
+    /* stop accepting new inbound frames before tearing anything down */
     if (ctx->filter_id >= 0 && ctx->can_dev) {
         can_remove_rx_filter(ctx->can_dev, ctx->filter_id);
+        ctx->filter_id = -1;
     }
 
 #ifdef CONFIG_ISOTP_FAST_BLOCKING_RECEIVE
@@ -1007,6 +1088,40 @@ int isotp_fast_unbind(struct isotp_fast_ctx *ctx)
         free_recv_await_ctx(ctx, actx);
     }
 #endif
+
+    struct isotp_fast_recv_ctx *rctx;
+    struct isotp_fast_recv_ctx *rnext;
+    SYS_SLIST_FOR_EACH_CONTAINER_SAFE(&ctx->isotp_recv_ctx_list, rctx, rnext, node)
+    {
+        k_timer_stop(&rctx->timer);
+        k_work_cancel_sync(&rctx->work, &sync);
+        if (atomic_get(&rctx->pending_cb) == 0) {
+            /* a callback that fired before the check can only have submitted
+             * work; cancel once more now that no further callback can fire */
+            k_work_cancel_sync(&rctx->work, &sync);
+            free_recv_ctx(rctx);
+        }
+        else {
+            orphan_recv_ctx(ctx, rctx);
+        }
+    }
+
+    struct isotp_fast_send_ctx *sctx;
+    struct isotp_fast_send_ctx *snext;
+    SYS_SLIST_FOR_EACH_CONTAINER_SAFE(&ctx->isotp_send_ctx_list, sctx, snext, node)
+    {
+        k_timer_stop(&sctx->timer);
+        k_work_cancel_sync(&sctx->work, &sync);
+        if (atomic_get(&sctx->pending_cb) == 0) {
+            k_work_cancel_sync(&sctx->work, &sync);
+            ctx->sent_callback(ISOTP_N_ERROR, sctx->tx_addr, sctx->cb_arg);
+            free_send_ctx(sctx);
+        }
+        else {
+            orphan_send_ctx(ctx, sctx);
+        }
+    }
+
     return ISOTP_N_OK;
 }
 
@@ -1121,6 +1236,7 @@ int isotp_fast_recv(struct isotp_fast_ctx *ctx, struct can_filter sender, uint8_
 static void isotp_fast_sent_single_cb(const struct device *dev, int error, void *arg)
 {
     struct isotp_fast_send_ctx *ctx = arg;
+    atomic_dec(&ctx->pending_cb);
     ctx->ctx->sent_callback(error, ctx->tx_addr, ctx->cb_arg);
     free_send_ctx(ctx);
 }
@@ -1151,7 +1267,16 @@ int isotp_fast_send(struct isotp_fast_ctx *ctx, const uint8_t *data, size_t len,
             return ISOTP_NO_NET_BUF_LEFT;
         }
         context->cb_arg = cb_arg;
+        atomic_inc(&context->pending_cb);
         ret = can_send(ctx->can_dev, &frame, K_MSEC(ISOTP_A_TIMEOUT_MS), isotp_fast_sent_single_cb, context);
+        if (ret != 0) {
+            /* The completion callback (which normally frees the context)
+             * never fires for a frame that was not queued */
+            atomic_dec(&context->pending_cb);
+            if (context->state == ISOTP_TX_SEND_FF && atomic_get(&context->pending_cb) == 0) {
+                free_send_ctx(context);
+            }
+        }
         return ret;
     }
     else {

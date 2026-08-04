@@ -69,7 +69,8 @@ static k_tid_t createAndRunClient(k_thread_entry_t runner)
 }
 
 // name needs to be this to make stupid twister check pass
-#define ZCLIENT_SERVER_TEST(test_name, Body) \
+// variadic so test bodies may contain top-level commas (e.g. template args)
+#define ZCLIENT_SERVER_TEST(test_name, ...) \
 ZTEST(ZephyrClientServer, test_name) \
 { \
     k_sem_init(&serverStarted, 0, 1); \
@@ -89,7 +90,7 @@ ZTEST(ZephyrClientServer, test_name) \
         zassert_true(client.connect()); \
         LOG_INF("Client connected"); \
 \
-        Body \
+        __VA_ARGS__ \
 \
         k_sem_give(&clientCompleted); \
     }); \
@@ -121,6 +122,33 @@ ZCLIENT_SERVER_TEST(test_update,
     zassert_equal(ThingSetStatusCode::changed, result.code());
     k_sleep(K_MSEC(100)); // `update` is async or something
     zassert_equal(25.0f, totalVoltage.getValue());
+)
+
+/* Transport lifecycle: repeatedly create a client to a node that never
+ * answers, let the request time out, and destroy the transport. Historically
+ * in-flight context handling could leak send contexts from a 4-deep slab and
+ * left timers/work items pointing at destroyed (stack-allocated) transports.
+ * Six cycles (> slab depth) surface a reintroduced leak as ISOTP_NO_CTX_LEFT,
+ * and the final exchange proves the shared client still works. */
+ZCLIENT_SERVER_TEST(test_client_lifecycle_absent_node,
+    for (int i = 0; i < 6; i++) {
+        std::array<uint8_t, 64> transportRx;
+        std::array<uint8_t, 64> transportTx;
+        std::array<uint8_t, 64> absentClientRx;
+        std::array<uint8_t, 64> absentClientTx;
+        ThingSetZephyrCanClientTransport absentTransport(clientInterface, 0x55, transportRx,
+                                                         transportTx);
+        ThingSetClient absentClient(absentTransport, absentClientRx, absentClientTx);
+        zassert_true(absentClient.connect());
+        int sum;
+        auto absentResult = absentClient.exec(0x1000, &sum, 1, 2);
+        zassert_false(absentResult.success(), "exec to an absent node must not succeed");
+    }
+
+    int value;
+    auto result = client.exec(0x1000, &value, 2, 3);
+    zassert_true(result.success(), "shared client must still work after lifecycle churn");
+    zassert_equal(5, value);
 )
 
 /* connect() historically could not fail: isotp_fast_bind ignored the result
