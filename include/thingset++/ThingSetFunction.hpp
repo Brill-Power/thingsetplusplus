@@ -49,10 +49,24 @@ struct ThingSetParameterNames
 {
     static constexpr size_t count = sizeof...(Names);
 
-    template <size_t Index>
+    template <StringLiteral Name, size_t Index, typename ParameterType>
     static constexpr auto get()
     {
         return std::get<Index>(std::tuple{ Names... });
+    }
+};
+
+/// @brief Empty specialisation of ThingSetParameterNames for the
+/// default case which auto-generates parameter names.
+template <>
+struct ThingSetParameterNames<>
+{
+    static constexpr size_t count = 0;
+
+    template <StringLiteral Name, size_t Index, typename ParameterType>
+    static constexpr auto get()
+    {
+        return Name + ThingSetType<std::remove_cvref_t<ParameterType>>::name + "_" + to_string_t<1 + Index>();
     }
 };
 
@@ -106,12 +120,7 @@ private:
 
         static constexpr auto argName()
         {
-            if constexpr (ParamNames::count != 0) {
-                return ParamNames::template get<Index>();
-            }
-            else {
-                return Name + ThingSetType<std::remove_cvref_t<ParameterType>>::name + "_" + to_string_t<1 + Index>();
-            }
+            return ParamNames::template get<Name, Index, ParameterType>();
         }
 
         typedef ThingSetFunctionParameter<FirstArgumentId + 0 + Index, argName(), ParameterType> type;
