@@ -72,9 +72,15 @@ bool ThingSetZephyrCanRequestResponseContext::bind(uint8_t otherNodeAddress, std
         canId.setSource(otherNodeAddress);
     }
     _inboundRequestCallback = callback;
-    return isotp_fast_bind(&_requestResponseContext, _canInterface.getDevice(), IsoTpFastAddress(canId),
-                           &ThingSetZephyrCanRequestResponseContext::flowControlOptions, onRequestResponseReceived,
-                           this, onRequestResponseError, onRequestResponseSent) == 0;
+    int result = isotp_fast_bind(&_requestResponseContext, _canInterface.getDevice(), IsoTpFastAddress(canId),
+                                 &ThingSetZephyrCanRequestResponseContext::flowControlOptions,
+                                 onRequestResponseReceived, this, onRequestResponseError, onRequestResponseSent);
+    if (result != 0) {
+        LOG_ERROR("Failed to bind request/response context for node 0x%x (err %d)", otherNodeAddress, result);
+        _requestResponseContext.filter_id = THINGSET_PLUS_PLUS_ZEPHYR_CAN_FILTER_ID_NONE;
+        return false;
+    }
+    return true;
 }
 
 bool ThingSetZephyrCanRequestResponseContext::send(const uint8_t otherNodeAddress, uint8_t *buffer, size_t len)

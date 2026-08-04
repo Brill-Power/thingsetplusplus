@@ -123,6 +123,43 @@ ZCLIENT_SERVER_TEST(test_update,
     zassert_equal(25.0f, totalVoltage.getValue());
 )
 
+/* connect() historically could not fail: isotp_fast_bind ignored the result
+ * of can_add_rx_filter, so a full filter table was reported as a successful
+ * bind and every subsequent exchange timed out. Exhaust the controller's RX
+ * filters and check that connect() now fails -- and recovers once filters
+ * are freed. */
+ZTEST(ZephyrClientServer, test_connect_fails_when_filters_exhausted)
+{
+    struct can_filter filter = {
+        .id = 0x100,
+        .mask = CAN_EXT_ID_MASK,
+        .flags = CAN_FILTER_IDE,
+    };
+    int filterIds[128];
+    int count = 0;
+
+    while (count < (int)ARRAY_SIZE(filterIds)) {
+        int id = can_add_rx_filter(
+            canDevice, [](const struct device *, struct can_frame *, void *) {}, nullptr, &filter);
+        if (id < 0) {
+            break;
+        }
+        filterIds[count++] = id;
+    }
+    zassert_true(count < (int)ARRAY_SIZE(filterIds), "expected to exhaust CAN RX filters");
+
+    std::array<uint8_t, 64> rxBuffer;
+    std::array<uint8_t, 64> txBuffer;
+    ThingSetZephyrCanClientTransport transport(clientInterface, 0x01, rxBuffer, txBuffer);
+    zassert_false(transport.connect(), "connect() must fail with no free RX filters");
+
+    for (int i = 0; i < count; i++) {
+        can_remove_rx_filter(canDevice, filterIds[i]);
+    }
+
+    zassert_true(transport.connect(), "connect() must succeed again once filters are free");
+}
+
 static void *testSetup(void)
 {
     // Not allowed until interface is bound to address

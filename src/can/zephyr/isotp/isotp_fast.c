@@ -969,6 +969,13 @@ int isotp_fast_bind(struct isotp_fast_ctx *ctx, const struct device *can_dev,
     struct can_filter filter;
     prepare_filter(&filter, rx_addr.ext_id, opts);
     ctx->filter_id = can_add_rx_filter(ctx->can_dev, can_rx_callback, ctx, &filter);
+    if (ctx->filter_id < 0) {
+        /* Without this check a full filter table used to be reported as a
+         * successful bind, and every subsequent exchange timed out */
+        LOG_ERR("Failed to add RX filter for %x:%x (err %d)", filter.id, filter.mask,
+                ctx->filter_id);
+        return ISOTP_NO_FREE_FILTER;
+    }
 
     LOG_DBG("Successfully bound to %x:%x", filter.id, filter.mask);
 
