@@ -22,13 +22,17 @@ bool ThingSetClient::connect()
 
 ThingSetResult ThingSetClient::read(uint8_t **responseBuffer, size_t &responseSize)
 {
-    responseSize = _transport.read(_rxBuffer, _rxBufferSize);
-    if (responseSize == 0) {
-        return ThingSetResult(ThingSetStatusCode::internalServerError);
+    responseSize = 0;
+
+    int received = _transport.read(_rxBuffer, _rxBufferSize);
+    if (received <= 0) {
+        // No response (0) or a transport error such as a receive timeout
+        // (negative errno). The rx buffer may still hold a previous response
+        return ThingSetResult(ThingSetStatusCode::gatewayTimeout);
     }
 
 #ifdef DEBUG_LOGGING
-    for (size_t i = 0; i < responseSize; i++)
+    for (int i = 0; i < received; i++)
     {
         if (i > 0 && i % 16 == 0) {
             printf("\n");
@@ -43,13 +47,13 @@ ThingSetResult ThingSetClient::read(uint8_t **responseBuffer, size_t &responseSi
         return result;
     }
 
-    // first value is always a CBOR null
-    if (_rxBuffer[1] != 0xF6) {
+    // a successful response carries at least the status code plus a CBOR null
+    if (received < 2 || _rxBuffer[1] != 0xF6) {
         return ThingSetResult(ThingSetStatusCode::internalServerError);
     }
 
     // return size having accounted for response code and null
-    responseSize -= 2;
+    responseSize = (size_t)received - 2;
     *responseBuffer = &_rxBuffer[2];
 
     return result;
