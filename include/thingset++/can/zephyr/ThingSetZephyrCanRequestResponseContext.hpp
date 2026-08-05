@@ -52,6 +52,7 @@ private:
     static void onRequestResponseReceived(net_buf *buffer, int remainingLength, isotp_fast_addr address, void *arg);
     void onRequestResponseReceived(net_buf *buffer, int remainingLength, isotp_fast_addr address);
     static const isotp_fast_opts flowControlOptions;
+    static const isotp_fast_opts peerFlowControlOptions;
 };
 
 } // namespace ThingSet::Can::Zephyr

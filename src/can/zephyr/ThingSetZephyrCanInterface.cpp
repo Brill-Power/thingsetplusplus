@@ -50,6 +50,7 @@ ThingSetZephyrCanInterface::ThingSetZephyrCanInterface(const device *const canDe
 {
     k_work_init(&_addressClaimWork.work, addressClaimWorkHandler);
     _addressClaimWork.instance = this;
+    k_mutex_init(&_bindLock);
 }
 
 ThingSetZephyrCanInterface::~ThingSetZephyrCanInterface()
@@ -141,8 +142,27 @@ int ThingSetZephyrCanInterface::addFilter(CanID &canId, void (*callback)(const d
     return can_add_rx_filter(_canDevice, callback, this, &filter);
 }
 
+namespace {
+struct MutexGuard
+{
+    k_mutex &_mutex;
+
+    explicit MutexGuard(k_mutex &mutex) : _mutex(mutex)
+    {
+        k_mutex_lock(&_mutex, K_FOREVER);
+    }
+
+    ~MutexGuard()
+    {
+        k_mutex_unlock(&_mutex);
+    }
+};
+} // namespace
+
 bool ThingSetZephyrCanInterface::bind(uint8_t nodeAddress)
 {
+    MutexGuard guard(_bindLock);
+
     if (_nodeAddress == CanID::broadcastAddress) {
         _nodeAddress = nodeAddress;
         LOG_INFO("Starting address claim for CAN interface %s", _canDevice->name);

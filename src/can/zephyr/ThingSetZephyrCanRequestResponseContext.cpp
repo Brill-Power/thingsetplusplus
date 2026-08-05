@@ -35,6 +35,16 @@ const isotp_fast_opts ThingSetZephyrCanRequestResponseContext::flowControlOption
     .addressing_mode = ISOTP_FAST_ADDRESSING_MODE_FIXED,
 };
 
+const isotp_fast_opts ThingSetZephyrCanRequestResponseContext::peerFlowControlOptions = {
+    .bs = 8,
+    .stmin = CONFIG_THINGSET_PLUS_PLUS_CAN_FRAME_SEPARATION_TIME,
+#ifdef CONFIG_CAN_FD_MODE
+    .flags = ISOTP_MSG_FDF,
+#endif
+    .addressing_mode = ISOTP_FAST_ADDRESSING_MODE_FIXED,
+    .rx_mask = ISOTP_FIXED_ADDR_RX_MASK | ISOTP_FIXED_ADDR_SA_MASK,
+};
+
 static void onRequestResponseError(int8_t error, isotp_fast_addr addr, void *arg);
 static void onRequestResponseSent(int result, isotp_fast_addr addr, void *arg);
 
@@ -68,13 +78,22 @@ bool ThingSetZephyrCanRequestResponseContext::bind(uint8_t otherNodeAddress, std
                       .setMessageType(MessageType::requestResponse)
                       .setMessagePriority(MessagePriority::channel)
                       .setTarget(_canInterface.getNodeAddress());
+    const isotp_fast_opts *options = &ThingSetZephyrCanRequestResponseContext::flowControlOptions;
     if (otherNodeAddress != CanID::broadcastAddress) {
         canId.setSource(otherNodeAddress);
+        /* bound to one peer: only accept traffic from that peer */
+        options = &ThingSetZephyrCanRequestResponseContext::peerFlowControlOptions;
     }
     _inboundRequestCallback = callback;
-    return isotp_fast_bind(&_requestResponseContext, _canInterface.getDevice(), IsoTpFastAddress(canId),
-                           &ThingSetZephyrCanRequestResponseContext::flowControlOptions, onRequestResponseReceived,
-                           this, onRequestResponseError, onRequestResponseSent) == 0;
+    int result = isotp_fast_bind(&_requestResponseContext, _canInterface.getDevice(), IsoTpFastAddress(canId),
+                                 options, onRequestResponseReceived, this, onRequestResponseError,
+                                 onRequestResponseSent);
+    if (result != 0) {
+        LOG_ERROR("Failed to bind request/response context for node 0x%x (err %d)", otherNodeAddress, result);
+        _requestResponseContext.filter_id = THINGSET_PLUS_PLUS_ZEPHYR_CAN_FILTER_ID_NONE;
+        return false;
+    }
+    return true;
 }
 
 bool ThingSetZephyrCanRequestResponseContext::send(const uint8_t otherNodeAddress, uint8_t *buffer, size_t len)

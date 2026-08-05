@@ -69,7 +69,8 @@ static k_tid_t createAndRunClient(k_thread_entry_t runner)
 }
 
 // name needs to be this to make stupid twister check pass
-#define ZCLIENT_SERVER_TEST(test_name, Body) \
+// variadic so test bodies may contain top-level commas (e.g. template args)
+#define ZCLIENT_SERVER_TEST(test_name, ...) \
 ZTEST(ZephyrClientServer, test_name) \
 { \
     k_sem_init(&serverStarted, 0, 1); \
@@ -89,7 +90,7 @@ ZTEST(ZephyrClientServer, test_name) \
         zassert_true(client.connect()); \
         LOG_INF("Client connected"); \
 \
-        Body \
+        __VA_ARGS__ \
 \
         k_sem_give(&clientCompleted); \
     }); \
@@ -122,6 +123,99 @@ ZCLIENT_SERVER_TEST(test_update,
     k_sleep(K_MSEC(100)); // `update` is async or something
     zassert_equal(25.0f, totalVoltage.getValue());
 )
+
+/* Transport lifecycle: repeatedly create a client to a node that never
+ * answers, let the request time out, and destroy the transport. Historically
+ * in-flight context handling could leak send contexts from a 4-deep slab and
+ * left timers/work items pointing at destroyed (stack-allocated) transports.
+ * Six cycles (> slab depth) surface a reintroduced leak as ISOTP_NO_CTX_LEFT,
+ * and the final exchange proves the shared client still works. */
+ZCLIENT_SERVER_TEST(test_client_lifecycle_absent_node,
+    for (int i = 0; i < 6; i++) {
+        std::array<uint8_t, 64> transportRx;
+        std::array<uint8_t, 64> transportTx;
+        std::array<uint8_t, 64> absentClientRx;
+        std::array<uint8_t, 64> absentClientTx;
+        ThingSetZephyrCanClientTransport absentTransport(clientInterface, 0x55, transportRx,
+                                                         transportTx);
+        ThingSetClient absentClient(absentTransport, absentClientRx, absentClientTx);
+        zassert_true(absentClient.connect());
+        int sum;
+        auto absentResult = absentClient.exec(0x1000, &sum, 1, 2);
+        zassert_false(absentResult.success(), "exec to an absent node must not succeed");
+    }
+
+    int value;
+    auto result = client.exec(0x1000, &value, 2, 3);
+    zassert_true(result.success(), "shared client must still work after lifecycle churn");
+    zassert_equal(5, value);
+)
+
+/* Response cross-talk: RR client filters historically masked out the source
+ * address, so every client on a shared interface matched every peer's
+ * responses (first-match-wins on real hardware silently starved the loser).
+ * A client bound to a silent peer must not observe responses addressed to
+ * another client. */
+ZCLIENT_SERVER_TEST(test_no_response_crosstalk_between_clients,
+    std::array<uint8_t, 64> transportRx;
+    std::array<uint8_t, 64> transportTx;
+    std::array<uint8_t, 64> silentClientRx;
+    std::array<uint8_t, 64> silentClientTx;
+    ThingSetZephyrCanClientTransport silentTransport(clientInterface, 0x55, transportRx,
+                                                     transportTx);
+    ThingSetClient silentClient(silentTransport, silentClientRx, silentClientTx);
+    zassert_true(silentClient.connect());
+
+    /* a full exchange with the real server crosses the bus */
+    int value;
+    auto result = client.exec(0x1000, &value, 2, 3);
+    zassert_true(result.success());
+    zassert_equal(5, value);
+
+    /* the silent-peer client must not have captured that response: its own
+     * request must time out rather than return the stray reply */
+    int sum;
+    auto silentResult = silentClient.exec(0x1000, &sum, 1, 2);
+    zassert_false(silentResult.success(),
+                  "client bound to a silent peer must not see another client's response");
+)
+
+/* connect() historically could not fail: isotp_fast_bind ignored the result
+ * of can_add_rx_filter, so a full filter table was reported as a successful
+ * bind and every subsequent exchange timed out. Exhaust the controller's RX
+ * filters and check that connect() now fails -- and recovers once filters
+ * are freed. */
+ZTEST(ZephyrClientServer, test_connect_fails_when_filters_exhausted)
+{
+    struct can_filter filter = {
+        .id = 0x100,
+        .mask = CAN_EXT_ID_MASK,
+        .flags = CAN_FILTER_IDE,
+    };
+    int filterIds[128];
+    int count = 0;
+
+    while (count < (int)ARRAY_SIZE(filterIds)) {
+        int id = can_add_rx_filter(
+            canDevice, [](const struct device *, struct can_frame *, void *) {}, nullptr, &filter);
+        if (id < 0) {
+            break;
+        }
+        filterIds[count++] = id;
+    }
+    zassert_true(count < (int)ARRAY_SIZE(filterIds), "expected to exhaust CAN RX filters");
+
+    std::array<uint8_t, 64> rxBuffer;
+    std::array<uint8_t, 64> txBuffer;
+    ThingSetZephyrCanClientTransport transport(clientInterface, 0x01, rxBuffer, txBuffer);
+    zassert_false(transport.connect(), "connect() must fail with no free RX filters");
+
+    for (int i = 0; i < count; i++) {
+        can_remove_rx_filter(canDevice, filterIds[i]);
+    }
+
+    zassert_true(transport.connect(), "connect() must succeed again once filters are free");
+}
 
 static void *testSetup(void)
 {

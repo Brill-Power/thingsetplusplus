@@ -6,6 +6,7 @@
 
 #include "isotp_internal.h"
 #include <canbus/isotp_fast.h>
+#include <zephyr/sys/atomic.h>
 #include <zephyr/sys/slist.h>
 
 #ifdef CONFIG_ISOTP_FAST_PER_FRAME_DISPATCH
@@ -47,6 +48,13 @@ struct isotp_fast_send_ctx
     uint8_t sn : 4; /**< sequence number; overflows at 4 bits per spec */
     uint8_t backlog;
     uint8_t stmin;
+    /**
+     * Number of outstanding can_send() completion callbacks that hold a
+     * pointer to this context. A queued CAN frame cannot be cancelled, so a
+     * context must not be freed while this is non-zero (see
+     * @ref isotp_fast_unbind)
+     */
+    atomic_t pending_cb;
 };
 
 /**
@@ -75,6 +83,12 @@ struct isotp_fast_recv_ctx
 #ifdef ISOTP_FAST_RECEIVE_QUEUE
     bool pending;
 #endif
+    /**
+     * Number of outstanding can_send() completion callbacks (flow control
+     * frames) that hold a pointer to this context; see
+     * @ref isotp_fast_send_ctx.pending_cb
+     */
+    atomic_t pending_cb;
 };
 
 #ifdef CONFIG_ISOTP_FAST_BLOCKING_RECEIVE
