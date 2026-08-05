@@ -9,6 +9,9 @@
 
 namespace ThingSet {
 
+static constexpr uint8_t cborNull = 0xF6;
+static constexpr size_t responseHeaderSize = 2; /* status code + CBOR null */
+
 ThingSetClient::ThingSetClient(ThingSetClientTransport &transport, uint8_t *rxBuffer, size_t rxBufferSize,
                                          uint8_t *txBuffer, size_t txBufferSize)
     : _transport(transport), _rxBuffer(rxBuffer), _rxBufferSize(rxBufferSize), _txBuffer(txBuffer),
@@ -48,13 +51,13 @@ ThingSetResult ThingSetClient::read(uint8_t **responseBuffer, size_t &responseSi
     }
 
     // a successful response carries at least the status code plus a CBOR null
-    if (received < 2 || _rxBuffer[1] != 0xF6) {
+    if ((size_t)received < responseHeaderSize || _rxBuffer[1] != cborNull) {
         return ThingSetResult(ThingSetStatusCode::internalServerError);
     }
 
     // return size having accounted for response code and null
-    responseSize = (size_t)received - 2;
-    *responseBuffer = &_rxBuffer[2];
+    responseSize = (size_t)received - responseHeaderSize;
+    *responseBuffer = &_rxBuffer[responseHeaderSize];
 
     return result;
 }
