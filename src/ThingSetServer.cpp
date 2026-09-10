@@ -96,6 +96,9 @@ int _ThingSetServer::handleGet(ThingSetRequestContext &context)
         if (encodable->encode(context.encoder())) {
             return context.encoder().getEncodedLength() + context.getHeaderLength();
         }
+        // encoding fails when the value does not fit in the response buffer; reply 0xAD
+        context.setStatus(ThingSetStatusCode::requestTooLarge);
+        return context.getHeaderLength();
     }
     else if (context.node->tryCastTo(ThingSetNodeType::hasChildren, &target)) {
         ThingSetParentNode *parent = reinterpret_cast<ThingSetParentNode *>(target);
@@ -108,24 +111,32 @@ int _ThingSetServer::handleGet(ThingSetRequestContext &context)
                 ids.push_back(child->getId());
             }
         }
-        context.encoder().encodeMapStart(ids.size());
+        bool encoded = context.encoder().encodeMapStart(ids.size());
         for (ThingSetNode *child : *parent)
         {
+            if (!encoded)
+            {
+                break;
+            }
             if (child->tryCastTo(ThingSetNodeType::encodable, &target))
             {
                 ThingSetEncodable *encodable = reinterpret_cast<ThingSetEncodable *>(target);
                 if (context.useIds())
                 {
-                    context.encoder().encode(std::make_pair(child->getId(), encodable));
+                    encoded = context.encoder().encode(std::make_pair(child->getId(), encodable));
                 }
                 else
                 {
-                    context.encoder().encode(std::make_pair(child->getName(), encodable));
+                    encoded = context.encoder().encode(std::make_pair(child->getName(), encodable));
                 }
             }
         }
-        context.encoder().encodeMapEnd(ids.size());
-        return context.encoder().getEncodedLength() + context.getHeaderLength();
+        if (encoded && context.encoder().encodeMapEnd(ids.size()))
+        {
+            return context.encoder().getEncodedLength() + context.getHeaderLength();
+        }
+        context.setStatus(ThingSetStatusCode::requestTooLarge);
+        return context.getHeaderLength();
     }
     context.setStatus(ThingSetStatusCode::unsupportedFormat);
     return context.getHeaderLength();
