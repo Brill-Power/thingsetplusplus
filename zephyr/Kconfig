@@ -137,11 +137,7 @@ config THINGSET_PLUS_PLUS_EEPROM_SKIP_UNRECOGNISED
 	bool "Skip unrecognised persisted values"
 	default n
 	help
-	  If enabled, a persisted value whose ID is not present in the
-	  registry, or whose node is not decodable, is logged and skipped,
-	  and loading continues with the remaining values. If disabled,
-	  such a value causes the whole load to fail, leaving every object
-	  at its default value.
+	  If enabled, skips IDs that are not recognised in EEPROM rather than aborting
 
 endif
 
