@@ -38,14 +38,16 @@ bool ThingSetPersistence::load()
     return decoder.decodeMap<uint16_t>([&](uint16_t id) {
         ThingSetNode *node;
         if (!ThingSetRegistry::findById(id, &node)) {
-            return false;
+            LOG_WARN("Ignoring unknown persisted value 0x%x", id);
+            return decoder.skip();
         }
         void *target;
         if (node->tryCastTo(ThingSetNodeType::decodable, &target)) {
             ThingSetBinaryDecodable *decodable = reinterpret_cast<ThingSetBinaryDecodable *>(target);
             return decodable->decode(decoder);
         }
-        return false;
+        LOG_WARN("Ignoring persisted value 0x%x as it is not decodable", id);
+        return decoder.skip();
     }) && decoder.verify();
 }
 
