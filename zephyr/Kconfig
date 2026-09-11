@@ -133,6 +133,12 @@ config THINGSET_PLUS_PLUS_EEPROM_DATA_VERSION
 	help
 	  Increment this if you change the IDs of any persisted objects.
 
+config THINGSET_PLUS_PLUS_EEPROM_SKIP_UNRECOGNISED
+	bool "Skip unrecognised persisted values"
+	default n
+	help
+	  If enabled, skips IDs that are not recognised in EEPROM rather than aborting
+
 endif
 
 module = THINGSET_PLUS_PLUS
