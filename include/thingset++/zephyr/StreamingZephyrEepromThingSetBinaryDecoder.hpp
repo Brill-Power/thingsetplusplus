@@ -36,6 +36,10 @@ public:
             // fill the buffer for the initial read
             read(0, Chunk * 2);
         }
+        else {
+            LOG_ERROR("Streaming EEPROM load: header read failed (%d); keeping default values",
+                      result);
+        }
     }
 
     bool verify()
@@ -77,7 +81,12 @@ private:
     {
         size_t remaining = _header.data_len - (_offset - _localOffset);
         size_t chunk = MIN(remaining, maxSize);
-        eeprom_read(_device, _offset, &this->_buffer[pos], chunk);
+        int result = eeprom_read(_device, _offset, &this->_buffer[pos], chunk);
+        if (result != 0) {
+            LOG_ERROR("Streaming EEPROM load: read of %u bytes at offset 0x%0x failed (%d); "
+                      "decoded data beyond this point is unreliable",
+                      (unsigned)chunk, (int)_offset, result);
+        }
         _offset += chunk;
         _crc = crc32_ieee_update(_crc, &this->_buffer[pos], chunk);
         return chunk;

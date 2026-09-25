@@ -35,30 +35,68 @@ bool ThingSetPersistence::load()
         return false;
     }
 
-    return decoder.decodeMap<uint16_t>([&](uint16_t id) {
-        ThingSetNode *node;
+    unsigned decoded = 0;
+    unsigned lastId = 0;
+    bool entryFailed = false;
+
+    bool mapDecoded = decoder.decodeMap<uint16_t>([&](uint16_t id) {
+        ThingSetNode *node = nullptr;
+        void *target;
+        bool ok;
         if (!ThingSetRegistry::findById(id, &node)) {
 #ifdef CONFIG_THINGSET_PLUS_PLUS_EEPROM_SKIP_UNRECOGNISED
             LOG_WARN("Ignoring unknown persisted value 0x%x", id);
-            return decoder.skip();
+            ok = decoder.skip();
 #else
             LOG_WARN("Unknown persisted value 0x%x, abandoning load", id);
-            return false;
+            ok = false;
 #endif
         }
-        void *target;
-        if (node->tryCastTo(ThingSetNodeType::decodable, &target)) {
-            ThingSetBinaryDecodable *decodable = reinterpret_cast<ThingSetBinaryDecodable *>(target);
-            return decodable->decode(decoder);
+        else if (node->tryCastTo(ThingSetNodeType::decodable, &target)) {
+            ok = reinterpret_cast<ThingSetBinaryDecodable *>(target)->decode(decoder);
         }
+        else {
 #ifdef CONFIG_THINGSET_PLUS_PLUS_EEPROM_SKIP_UNRECOGNISED
-        LOG_WARN("Ignoring persisted value 0x%x as it is not decodable", id);
-        return decoder.skip();
+            LOG_WARN("Ignoring persisted value 0x%x as it is not decodable", id);
+            ok = decoder.skip();
 #else
-        LOG_WARN("Persisted value 0x%x is not decodable, abandoning load", id);
-        return false;
+            LOG_WARN("Persisted value 0x%x is not decodable, abandoning load", id);
+            ok = false;
 #endif
-    }) && decoder.verify();
+        }
+        if (!ok) {
+            LOG_ERROR("Persisted value 0x%x (%s, type %s) failed after %u entries "
+                      "(last good 0x%x), abandoning load",
+                      id, node ? node->getName().data() : "not in registry",
+                      node ? node->getType().c_str() : "unknown", decoded, lastId);
+            entryFailed = true;
+            return false;
+        }
+        decoded++;
+        lastId = id;
+        return true;
+    });
+
+    if (!mapDecoded) {
+        if (!entryFailed) {
+            LOG_ERROR("Persisted map could not be decoded after %u entries (last good 0x%x); "
+                      "bad map header, key, or unterminated map",
+                      decoded, lastId);
+        }
+        LOG_WARN("Persistence load abandoned after %u entries; values not yet decoded keep "
+                 "their defaults",
+                 decoded);
+        return false;
+    }
+
+    if (!decoder.verify()) {
+        LOG_WARN("Persisted data failed its CRC check; the %u decoded values were still applied",
+                 decoded);
+        return false;
+    }
+
+    LOG_INFO("Persistence load complete: %u values restored", decoded);
+    return true;
 }
 
 bool ThingSetPersistence::save()
