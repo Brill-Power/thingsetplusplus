@@ -24,9 +24,11 @@ private:
     std::function<bool(ThingSetNode *, ThingSetCallbackReason)> _callback;
 
 public:
-    ThingSetGroup() : ThingSetGroup(defaultCallback){};
+    ThingSetGroup() : ThingSetGroup(defaultCallback)
+    {}
     ThingSetGroup(std::function<bool(ThingSetNode *, ThingSetCallbackReason)> callback)
-        : IdentifiableThingSetParentNode<Id, ParentId, Name>(), _callback(callback){};
+        : IdentifiableThingSetParentNode<Id, ParentId, Name>(), _callback(callback)
+    {}
 
     constexpr const std::string getType() const override
     {

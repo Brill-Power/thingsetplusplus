@@ -1,3 +1,9 @@
+# Nothing to build when the module is disabled; creating the library anyway makes
+# Zephyr warn about a library with no sources.
+if(NOT CONFIG_THINGSET_PLUS_PLUS)
+    return()
+endif()
+
 zephyr_library_named("thingset++")
 
 set(CMAKE_CXX_STANDARD 20)

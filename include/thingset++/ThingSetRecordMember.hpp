@@ -414,13 +414,13 @@ public:
         return Access;
     }
 
-    bool findByName(const std::string &name, ThingSetNode **node, size_t *index) override
+    bool findByName(const std::string &childName, ThingSetNode **node, size_t *index) override
     {
-        bool foundChild = ThingSetParentNode::findByName(name, node, index);
+        bool foundChild = ThingSetParentNode::findByName(childName, node, index);
         // atoi is useless - it returns 0 on failure - so we check that the string actually
         // contains a number before trying to parse it
-        if (name.c_str()[0] >= '0' && name.c_str()[0] <= '9') {
-            *index = std::atoi(name.c_str());
+        if (childName.c_str()[0] >= '0' && childName.c_str()[0] <= '9') {
+            *index = std::atoi(childName.c_str());
             return true;
         }
 

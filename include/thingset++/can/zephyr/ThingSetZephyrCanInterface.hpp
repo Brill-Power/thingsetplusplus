@@ -20,7 +20,7 @@ protected:
     _ThingSetZephyrCanInterface(const device *const canDevice);
 
 public:
-    const device *const getDevice();
+    const device *getDevice();
 };
 
 class ThingSetZephyrCanStubInterface : public _ThingSetZephyrCanInterface

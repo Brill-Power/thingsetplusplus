@@ -86,11 +86,12 @@ private:
     ThingSetServerTransport<Identifier, Size, Encoder> &_transport;
 
 public:
-    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport) : ThingSetServer(transport, nullptr)
+    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &serverTransport)
+        : ThingSetServer(serverTransport, nullptr)
     {}
 
-    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &transport, ThingSetForwarder *forwarder)
-        : _ThingSetServer(forwarder), _transport(transport)
+    ThingSetServer(ThingSetServerTransport<Identifier, Size, Encoder> &serverTransport, ThingSetForwarder *forwarder)
+        : _ThingSetServer(forwarder), _transport(serverTransport)
     {}
 
     bool listen() override

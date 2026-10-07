@@ -18,10 +18,10 @@ struct IsoTpFastAddress : public isotp_fast_addr {
 
     IsoTpFastAddress &setId(const CanID &id)
     {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnarrowing"
-        ext_id = id.getId();
-#pragma GCC diagnostic pop
+        /* ext_id is a 29-bit field and a CAN identifier is at most 29 bits, so the mask
+         * is lossless; it exists to make that explicit to the compiler 
+         */
+        ext_id = id.getId() & CAN_EXT_ID_MASK;
         return *this;
     }
 };
