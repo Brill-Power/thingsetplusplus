@@ -22,7 +22,7 @@ _ThingSetZephyrCanInterface::_ThingSetZephyrCanInterface(const device *const can
     _isBound = false;
 }
 
-const device *const _ThingSetZephyrCanInterface::getDevice()
+const device *_ThingSetZephyrCanInterface::getDevice()
 {
     return _canDevice;
 }

@@ -27,9 +27,10 @@ public:
     ThingSetZephyrCanClientTransport(ThingSetZephyrCanClientTransport &&) = delete;
     ThingSetZephyrCanClientTransport(const ThingSetZephyrCanClientTransport &) = delete;
     template <size_t RxSize, size_t TxSize>
-    ThingSetZephyrCanClientTransport(ThingSetZephyrCanInterface &canInterface, uint8_t targetNodeAddress,
-        std::array<uint8_t, RxSize> &rxBuffer, std::array<uint8_t, TxSize> &txBuffer) : ThingSetCanClientTransport(targetNodeAddress),
-        _requestResponseContext(canInterface, rxBuffer, txBuffer)
+    ThingSetZephyrCanClientTransport(ThingSetZephyrCanInterface &zephyrCanInterface, uint8_t targetNodeAddress,
+                                     std::array<uint8_t, RxSize> &rxStorage, std::array<uint8_t, TxSize> &txStorage)
+        : ThingSetCanClientTransport(targetNodeAddress),
+          _requestResponseContext(zephyrCanInterface, rxStorage, txStorage)
     {
         k_msgq_init(&_responseQueue, _responseQueueBuffer.data(), sizeof(ResponseMessage), 1);
     }

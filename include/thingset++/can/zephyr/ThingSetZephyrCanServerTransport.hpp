@@ -21,9 +21,9 @@ public:
     ThingSetZephyrCanServerTransport(const ThingSetZephyrCanServerTransport &) = delete;
 
     template <size_t RxSize, size_t TxSize>
-    ThingSetZephyrCanServerTransport(ThingSetZephyrCanInterface &canInterface, std::array<uint8_t, RxSize> &rxBuffer,
-        std::array<uint8_t, TxSize> &txBuffer) : ThingSetCanServerTransport(),
-        _requestResponseContext(canInterface, rxBuffer, txBuffer)
+    ThingSetZephyrCanServerTransport(ThingSetZephyrCanInterface &zephyrCanInterface,
+                                     std::array<uint8_t, RxSize> &rxStorage, std::array<uint8_t, TxSize> &txStorage)
+        : ThingSetCanServerTransport(), _requestResponseContext(zephyrCanInterface, rxStorage, txStorage)
     {}
     ~ThingSetZephyrCanServerTransport();
 

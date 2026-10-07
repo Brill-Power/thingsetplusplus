@@ -96,7 +96,7 @@ public:
     template <class U, typename std::enable_if<std::is_convertible_v<U, T>, bool>::type = true>
     auto &operator=(const U &value)
     {
-        _value = value;
+        _value = static_cast<T>(value);
         return *this;
     }
 };

@@ -77,7 +77,7 @@ public:
         Element *operator*() const
         {
             // https://github.com/boostorg/intrusive/blob/master/include/boost/intrusive/detail/parent_from_member.hpp
-            Element *const container = 0;
+            Element *const container = nullptr;
             const char *const member = static_cast<const char*>(static_cast<const void*>(&(container->*Member)));
             std::ptrdiff_t offset = member - static_cast<const char*>(static_cast<const void*>(container));
             return std::launder(reinterpret_cast<Element *>(reinterpret_cast<std::size_t>(_node) - static_cast<std::size_t>(offset)));
