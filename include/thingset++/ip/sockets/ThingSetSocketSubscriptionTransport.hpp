@@ -7,6 +7,7 @@
 
 #include "thingset++/ip/sockets/SocketEndpoint.hpp"
 #include "thingset++/ThingSetSubscriptionTransport.hpp"
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #ifdef __ZEPHYR__
@@ -26,6 +27,9 @@ private:
     std::function<void(const SocketEndpoint &, ThingSetBinaryDecoder &)> _callback;
 
 protected:
+    /// Cleared to make the listener thread exit; it checks this between polls
+    std::atomic<bool> _runListener;
+
     _ThingSetSocketSubscriptionTransport();
     ~_ThingSetSocketSubscriptionTransport();
 
@@ -49,6 +53,9 @@ protected:
 #else
 private:
     std::thread _listenerThread;
+
+public:
+    ~ThingSetSocketSubscriptionTransport();
 
 protected:
     void startThread() override;

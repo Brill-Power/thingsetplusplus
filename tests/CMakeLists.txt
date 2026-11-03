@@ -42,7 +42,7 @@ target_sources(testapp PRIVATE TestBinaryEncoder.cpp
 
 # regrettably exlcude this test until we figure out why Socket server is broken on macOS
 if(NOT APPLE)
-    target_sources(testapp PRIVATE TestSocketIpClientServer.cpp)
+    target_sources(testapp PRIVATE TestSocketIpClientServer.cpp TestSocketIpPublishSubscribe.cpp)
 endif()
 
 target_link_libraries(testapp PRIVATE thingset++)

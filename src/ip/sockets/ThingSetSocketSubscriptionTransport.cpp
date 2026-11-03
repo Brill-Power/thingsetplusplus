@@ -12,6 +12,7 @@
 #ifdef __ZEPHYR__
 #include <assert.h>
 #include <zephyr/kernel.h>
+#include <zephyr/posix/poll.h>
 
 #define SUBSCRIBE_THREAD_STACK_SIZE 1024
 #define SUBSCRIBE_THREAD_PRIORITY   2
@@ -19,6 +20,7 @@
 K_THREAD_STACK_DEFINE(subscribe_thread_stack, SUBSCRIBE_THREAD_STACK_SIZE);
 static struct k_thread subscribe_thread;
 #else
+#include <poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #define __ASSERT(test, fmt, ...) { if (!(test)) { throw std::invalid_argument(fmt); } }
@@ -26,7 +28,7 @@ static struct k_thread subscribe_thread;
 
 namespace ThingSet::Ip::Sockets {
 
-_ThingSetSocketSubscriptionTransport::_ThingSetSocketSubscriptionTransport() : _listenSocketHandle(-1)
+_ThingSetSocketSubscriptionTransport::_ThingSetSocketSubscriptionTransport() : _listenSocketHandle(-1), _runListener(true)
 {
     _listenAddress.sin_addr.s_addr = 0x0;
     _listenAddress.sin_family = AF_INET;
@@ -63,11 +65,22 @@ bool _ThingSetSocketSubscriptionTransport::subscribe(std::function<void(const So
 void _ThingSetSocketSubscriptionTransport::runListener()
 {
     std::map<decltype(_listenAddress.sin_addr.s_addr), StreamingUdpThingSetBinaryDecoder>  decodersBySender;
-    for (;;) {
+    pollfd listenPoll {};
+    listenPoll.fd = _listenSocketHandle;
+    listenPoll.events = POLLIN;
+    while (_runListener) {
+        // time out regularly so that a request to stop is noticed
+        if (poll(&listenPoll, 1, 10) <= 0) {
+            continue;
+        }
         SocketEndpoint sourceAddress;
         socklen_t sourceAddressSize = sizeof(sourceAddress);
         Frame frame;
-        frame.length = recvfrom(_listenSocketHandle, frame.buffer, THINGSET_STREAMING_MSG_SIZE, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
+        ssize_t received = recvfrom(_listenSocketHandle, frame.buffer, THINGSET_STREAMING_MSG_SIZE, 0, (sockaddr *)&sourceAddress, &sourceAddressSize);
+        if (received <= 0) {
+            continue;
+        }
+        frame.length = received;
         SubscriptionListener::handle(frame, sourceAddress, sourceAddress.sin_addr.s_addr, decodersBySender, _callback);
     }
 }
@@ -87,6 +100,15 @@ void ThingSetSocketSubscriptionTransport::startThread()
 
 }
 #else
+ThingSetSocketSubscriptionTransport::~ThingSetSocketSubscriptionTransport()
+{
+    // stop and join before the base class closes the socket the thread is reading
+    _runListener = false;
+    if (_listenerThread.joinable()) {
+        _listenerThread.join();
+    }
+}
+
 void ThingSetSocketSubscriptionTransport::startThread()
 {
     _listenerThread = std::thread([&]()
