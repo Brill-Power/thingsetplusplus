@@ -64,7 +64,8 @@ _ThingSetSocketServerTransport::PollDescriptor::PollDescriptor()
 }
 
 _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<in_addr, in_addr> &ipAddressAndSubnet)
-    : _publishSocketHandle(-1), _listenSocketHandle(-1), _runHandler(true), _runAcceptor(true)
+    : _pendingHead(0), _pendingTail(0), _clientCount(0), _publishSocketHandle(-1), _listenSocketHandle(-1),
+      _runHandler(true), _runAcceptor(true)
 {
     // calculate broadcast address
     _broadcastAddress.sin_family = AF_INET;
@@ -193,21 +194,22 @@ void _ThingSetSocketServerTransport::runAcceptor()
 
         //std::cout << "Connection from " << clientAddr << std::endl;
 
-        bool assigned = false;
-        for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
-            if (_socketDescriptors[i].fd == -1) {
-                _socketDescriptors[i].fd = client_sock;
-                LOG_DEBUG("Assigned slot %d to socket %d", i, _socketDescriptors[i].fd);
-                assigned = true;
-                break;
-            }
-        }
-        if (!assigned) {
+        if (_clientCount.load(std::memory_order_acquire) >= THINGSET_SERVER_MAX_CLIENTS) {
             // Every slot is taken, previously the accepted socket was dropped but
             // now we refuse it properly
             LOG_WARN("No free client slot (%d in use); refusing connection", THINGSET_SERVER_MAX_CLIENTS);
             close(client_sock);
+            continue;
         }
+        _clientCount.fetch_add(1, std::memory_order_acq_rel);
+        if (!enqueuePendingSocket(client_sock)) {
+            // cannot happen because the ring has a spare entry over the slot count
+            _clientCount.fetch_sub(1, std::memory_order_acq_rel);
+            LOG_ERROR("Pending socket queue full; dropping connection");
+            close(client_sock);
+            continue;
+        }
+        LOG_DEBUG("Queued socket %d for the handler", client_sock);
     }
 
     LOG_INFO("Shut down acceptor thread");
@@ -230,9 +232,52 @@ static void setBlocking(int fd, bool val)
     __ASSERT(fl != -1, "fcntl(F_SETFL): %d", errno);
 }
 
+bool _ThingSetSocketServerTransport::enqueuePendingSocket(int sock)
+{
+    size_t tail = _pendingTail.load(std::memory_order_relaxed);
+    size_t next = (tail + 1) % _pendingSockets.size();
+    if (next == _pendingHead.load(std::memory_order_acquire)) {
+        return false;
+    }
+    _pendingSockets[tail] = sock;
+    _pendingTail.store(next, std::memory_order_release);
+    return true;
+}
+
+void _ThingSetSocketServerTransport::adoptPendingSockets()
+{
+    size_t head = _pendingHead.load(std::memory_order_relaxed);
+    while (head != _pendingTail.load(std::memory_order_acquire)) {
+        int sock = _pendingSockets[head];
+        head = (head + 1) % _pendingSockets.size();
+        _pendingHead.store(head, std::memory_order_release);
+
+        bool assigned = false;
+        for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
+            if (_socketDescriptors[i].fd == -1) {
+                // Never block the handler on a client - poll() decides what is readable
+                setBlocking(sock, false);
+                _socketDescriptors[i].fd = sock;
+                _socketDescriptors[i].revents = 0;
+                LOG_DEBUG("Assigned slot %d to socket %d", i, sock);
+                assigned = true;
+                break;
+            }
+        }
+        if (!assigned) {
+            // shouldn't happen because the acceptor bounds the count by the slot count
+            LOG_ERROR("No free client slot for queued socket %d; closing", sock);
+            close(sock);
+            _clientCount.fetch_sub(1, std::memory_order_acq_rel);
+        }
+    }
+}
+
 void _ThingSetSocketServerTransport::runHandler()
 {
     while (_runHandler) {
+        adoptPendingSockets();
+
         int ret = poll(_socketDescriptors.data(), _socketDescriptors.size(), 10);
 
         if (ret < 0) {
@@ -304,6 +349,7 @@ void _ThingSetSocketServerTransport::releaseSlot(size_t slot)
     close(_socketDescriptors[slot].fd);
     _socketDescriptors[slot].fd = -1;
     _socketDescriptors[slot].revents = 0;
+    _clientCount.fetch_sub(1, std::memory_order_acq_rel);
 }
 
 #ifdef __ZEPHYR__

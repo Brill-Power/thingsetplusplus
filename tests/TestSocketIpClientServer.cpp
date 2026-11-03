@@ -118,6 +118,46 @@ TEST(SocketIpClientServer, RefusesConnectionWhenAllSlotsTaken)
     }
 }
 
+/// A client taking over a slot that was freed while the others stay idle
+/// must be served, and the handler must keep serving afterwards. (On the
+/// HMCU this stalled: the acceptor wrote the new fd into the poll set while
+/// the handler was inside poll(), and the handler then blocked in recv() on
+/// an idle client until that client went away.)
+TEST(SocketIpClientServer, ServesClientInReusedSlotWhileOthersIdle)
+{
+    ThingSetReadWriteProperty<float> totalVoltage { 0x300, 0, "totalVoltage", 24.0f };
+    ThingSetSocketServerTransport serverTransport;
+    auto server = ThingSetServerBuilder::build(serverTransport);
+    ASSERT_TRUE(server.listen());
+    std::this_thread::sleep_for(std::chrono::milliseconds(125));
+
+    std::array<int, THINGSET_SERVER_MAX_CLIENTS> held;
+    for (auto &sock : held) {
+        sock = connectRaw();
+        ASSERT_GE(sock, 0);
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // the first client goes away without ever sending anything
+    close(held[0]);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    for (int round = 0; round < 3; round++) {
+        ThingSetSocketClientTransport clientTransport("127.0.0.1");
+        auto client = ThingSetClient(clientTransport, rxBuffer, txBuffer);
+        ASSERT_TRUE(client.connect());
+        float tv = 0;
+        ASSERT_TRUE(client.get(0x300, tv)) << "round " << round;
+        ASSERT_EQ(24.0f, tv);
+        // client transport closes on destruction, freeing the slot again
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    for (size_t i = 1; i < held.size(); i++) {
+        close(held[i]);
+    }
+}
+
 /// The listening socket carries keep-alive, which accepted sockets inherit.
 TEST(SocketIpClientServer, ListenerHasKeepAliveConfigured)
 {
