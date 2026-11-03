@@ -24,6 +24,7 @@ static struct k_thread handlerThread;
 #else
 #include "thingset++/ip/InterfaceInfo.hpp"
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
@@ -33,6 +34,28 @@ static struct k_thread handlerThread;
 #endif // __ZEPHYR__
 
 namespace ThingSet::Ip::Sockets {
+
+#if THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
+static void configureKeepAlive(int sock)
+{
+    int enable = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable)) != 0) {
+        LOG_WARN("Failed to enable TCP keep-alive: %d", errno);
+        return;
+    }
+#if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+    int idle = THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_IDLE;
+    int interval = THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_INTERVAL;
+    int count = THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_COUNT;
+    if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &idle, sizeof(idle)) != 0
+        || setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(interval)) != 0
+        || setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &count, sizeof(count)) != 0)
+    {
+        LOG_WARN("Failed to configure TCP keep-alive timing (using stack defaults): %d", errno);
+    }
+#endif
+}
+#endif // THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
 
 _ThingSetSocketServerTransport::PollDescriptor::PollDescriptor()
 {
@@ -73,6 +96,8 @@ _ThingSetSocketServerTransport::_ThingSetSocketServerTransport(const std::pair<i
 
     _listenSocketHandle = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     __ASSERT(_listenSocketHandle >= 0, "Failed to create listen socket: %d", errno);
+    ret = setsockopt(_listenSocketHandle, SOL_SOCKET, SO_REUSEADDR, &optionValue, sizeof(optionValue));
+    __ASSERT(ret == 0, "Failed to configure listen socket: %d", errno);
 }
 
 _ThingSetSocketServerTransport::~_ThingSetSocketServerTransport()
@@ -92,6 +117,10 @@ bool _ThingSetSocketServerTransport::listen(std::function<int(const SocketEndpoi
     if (bind(_listenSocketHandle, (struct sockaddr *)&_listenAddress, sizeof(_listenAddress))) {
         return false;
     }
+
+#if THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
+    configureKeepAlive(_listenSocketHandle);
+#endif
 
     _callback = callback;
     startThreads();
@@ -164,12 +193,20 @@ void _ThingSetSocketServerTransport::runAcceptor()
 
         //std::cout << "Connection from " << clientAddr << std::endl;
 
+        bool assigned = false;
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
             if (_socketDescriptors[i].fd == -1) {
                 _socketDescriptors[i].fd = client_sock;
                 LOG_DEBUG("Assigned slot %d to socket %d", i, _socketDescriptors[i].fd);
+                assigned = true;
                 break;
             }
+        }
+        if (!assigned) {
+            // Every slot is taken, previously the accepted socket was dropped but
+            // now we refuse it properly
+            LOG_WARN("No free client slot (%d in use); refusing connection", THINGSET_SERVER_MAX_CLIENTS);
+            close(client_sock);
         }
     }
 
@@ -208,20 +245,35 @@ void _ThingSetSocketServerTransport::runHandler()
         SocketEndpoint addr;
         socklen_t len = sizeof(addr);
         for (int i = 0; i < THINGSET_SERVER_MAX_CLIENTS; i++) {
-            if (_socketDescriptors[i].revents & POLLIN) {
-                int clientSocketHandle = _socketDescriptors[i].fd;
+            short revents = _socketDescriptors[i].revents;
+            if (revents == 0) {
+                continue;
+            }
+            int clientSocketHandle = _socketDescriptors[i].fd;
 
+            if (!(revents & POLLIN)) {
+                // Error or hang-up with nothing left to read (i.e., due to
+                // dropped keepalive probes) so free it and return it
+                LOG_DEBUG("Socket %d in slot %d signalled 0x%x; closing", clientSocketHandle, i, revents);
+                releaseSlot(i);
+                continue;
+            }
+
+            {
                 int rxLen = recv(clientSocketHandle, _rxBuf, sizeof(_rxBuf), 0);
 
                 if (rxLen < 0) {
-                    LOG_ERROR("Receive error: %d", errno);
+                    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                        continue;
+                    }
+                    LOG_ERROR("Receive error on socket %d: %d; closing", clientSocketHandle, errno);
+                    releaseSlot(i);
                 }
                 else if (rxLen == 0) {
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
                     //std::cout << "Closing connection from " << addr << std::endl;
 
-                    close(clientSocketHandle);
-                    _socketDescriptors[i].fd = -1;
+                    releaseSlot(i);
                 }
                 else {
                     getpeername(clientSocketHandle, (sockaddr *)&addr, &len);
@@ -245,6 +297,13 @@ void _ThingSetSocketServerTransport::runHandler()
     }
 
     LOG_INFO("Shut down handler thread");
+}
+
+void _ThingSetSocketServerTransport::releaseSlot(size_t slot)
+{
+    close(_socketDescriptors[slot].fd);
+    _socketDescriptors[slot].fd = -1;
+    _socketDescriptors[slot].revents = 0;
 }
 
 #ifdef __ZEPHYR__
@@ -313,8 +372,13 @@ ThingSetSocketServerTransport::~ThingSetSocketServerTransport()
 {
     _runHandler = false;
     _runAcceptor = false;
-    _handlerThread.join();
-    _acceptorThread.join();
+
+    if (_handlerThread.joinable()) {
+        _handlerThread.join();
+    }
+    if (_acceptorThread.joinable()) {
+        _acceptorThread.join();
+    }
 }
 
 void ThingSetSocketServerTransport::startThreads()

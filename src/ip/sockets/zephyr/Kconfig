@@ -8,3 +8,31 @@ config THINGSET_PLUS_PLUS_SOCKET_SERVER_TX_BUFFER_SIZE
 config THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE
 	int "Receive buffer size in bytes for socket server"
 	default 1024
+
+config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
+	bool "Probe idle client connections with TCP keep-alive"
+	depends on NET_TCP
+	select NET_TCP_KEEPALIVE
+	default y
+	help
+	  The socket server has a fixed number of client slots and frees one
+	  only when the client closes its end. A client that disappears
+	  would hold its slot forever, and once every slot is held new
+	  connections are refused. With keepalive the stack probes an idle
+	  connection and drops it after a number of probes and frees the slot
+
+if THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
+
+config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_IDLE
+	int "Idle seconds before the first keep-alive probe"
+	default 60
+
+config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_INTERVAL
+	int "Seconds between keep-alive probes"
+	default 10
+
+config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_COUNT
+	int "Unanswered probes before the connection is dropped"
+	default 3
+
+endif # THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
