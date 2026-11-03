@@ -37,7 +37,12 @@ jobs:
   zephyr-build-and-test:
     permissions:
       checks: write
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to Ubuntu 26.04 in October 2026 and the
+    # native_sim tests do not build there. Its glibc 2.43 names a struct
+    # member __unused (bits/struct_mutex.h), which Zephyr's toolchain/gcc.h
+    # defines as a macro, so every C++ translation unit fails to compile.
+    # glibc is expected to rename it in 2.44. Revisit on a newer image.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -51,6 +56,11 @@ jobs:
           toolchains: x86_64-zephyr-elf
 
       - name: Run Zephyr Tests
+        # Zephyr 4.1's FindZephyr-sdk.cmake fails to parse under CMake >= 4
+        # (now on ubuntu-latest) when ZEPHYR_TOOLCHAIN_VARIANT is unset
+        # See zephyrproject-rtos/zephyr#113746
+        env:
+          ZEPHYR_TOOLCHAIN_VARIANT: zephyr
         run: |
           west build -p -b native_sim/native/64 thingsetplusplus/tests/zephyr/can -T thingset++.ZephyrClientServer
           zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/can -p native_sim/native/64 -v -v
