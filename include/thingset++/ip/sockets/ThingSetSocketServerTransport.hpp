@@ -7,6 +7,7 @@
 
 #include "thingset++/ip/ThingSetIpServerTransport.hpp"
 #include "thingset++/ip/sockets/SocketEndpoint.hpp"
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #ifdef __ZEPHYR__
@@ -70,7 +71,16 @@ private:
         PollDescriptor();
     };
 
+    /// Client slots, polled and modified by the handler thread only - poll() on Zephyr walks
+    /// this array twice, so a slot changed mid-poll by another thread misreports readiness
     std::array<PollDescriptor, THINGSET_SERVER_MAX_CLIENTS> _socketDescriptors;
+
+    /// Accepted sockets waiting for the handler (acceptor -> handler ring, one spare entry)
+    std::array<int, THINGSET_SERVER_MAX_CLIENTS + 1> _pendingSockets;
+    std::atomic<size_t> _pendingHead;
+    std::atomic<size_t> _pendingTail;
+    /// Clients holding or waiting for a slot - acceptor increments, handler decrements
+    std::atomic<int> _clientCount;
 
     sockaddr_in _publishAddress;
     sockaddr_in _listenAddress;
@@ -94,6 +104,10 @@ public:
     bool publish(uint8_t *buffer, size_t len) override;
 
 private:
+    /// Acceptor side - queue a freshly accepted socket for the handler
+    bool enqueuePendingSocket(int sock);
+    /// Handler side - move queued sockets into free slots
+    void adoptPendingSockets();
     void releaseSlot(size_t slot);
 
 protected:
