@@ -69,12 +69,12 @@ bool ThingSetTextEncoder::encode(const double *value)
 
 bool ThingSetTextEncoder::encode(const bool &value)
 {
-    return appendFormat(value, "%i");
+    return appendFormat(value ? "true" : "false", "%s");
 }
 
 bool ThingSetTextEncoder::encode(const bool *value)
 {
-    return appendFormat(*value, "%i");
+    return encode(*value);
 }
 
 bool ThingSetTextEncoder::encode(const uint8_t &value)

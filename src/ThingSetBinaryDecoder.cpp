@@ -47,7 +47,7 @@ bool ThingSetBinaryDecoder::decode(std::string *value)
 bool ThingSetBinaryDecoder::decode(char *value, size_t size)
 {
     zcbor_string zstring;
-    if (zcbor_tstr_decode(this->getState(), &zstring) && zstring.len <= size) {
+    if (zcbor_tstr_decode(this->getState(), &zstring) && zstring.len < size) {
         strncpy(value, (char *)zstring.value, zstring.len);
         value[zstring.len] = '\0';
         return true;
@@ -73,7 +73,7 @@ bool ThingSetBinaryDecoder::decode(bool *value)
 bool ThingSetBinaryDecoder::decode(uint8_t *value)
 {
     uint32_t i;
-    if (zcbor_uint32_decode(this->getState(), &i) && i < UINT8_MAX) {
+    if (zcbor_uint32_decode(this->getState(), &i) && i <= UINT8_MAX) {
         *value = i;
         return true;
     }
@@ -84,7 +84,7 @@ bool ThingSetBinaryDecoder::decode(uint8_t *value)
 bool ThingSetBinaryDecoder::decode(uint16_t *value)
 {
     uint32_t i;
-    if (zcbor_uint32_decode(this->getState(), &i) && i < UINT16_MAX) {
+    if (zcbor_uint32_decode(this->getState(), &i) && i <= UINT16_MAX) {
         *value = i;
         return true;
     }
@@ -105,7 +105,7 @@ bool ThingSetBinaryDecoder::decode(uint64_t *value)
 bool ThingSetBinaryDecoder::decode(int8_t *value)
 {
     int32_t i;
-    if (zcbor_int32_decode(this->getState(), &i) && i < INT8_MAX) {
+    if (zcbor_int32_decode(this->getState(), &i) && i >= INT8_MIN && i <= INT8_MAX) {
         *value = i;
         return true;
     }
@@ -116,7 +116,7 @@ bool ThingSetBinaryDecoder::decode(int8_t *value)
 bool ThingSetBinaryDecoder::decode(int16_t *value)
 {
     int32_t i;
-    if (zcbor_int32_decode(this->getState(), &i) && i < INT16_MAX) {
+    if (zcbor_int32_decode(this->getState(), &i) && i >= INT16_MIN && i <= INT16_MAX) {
         *value = i;
         return true;
     }

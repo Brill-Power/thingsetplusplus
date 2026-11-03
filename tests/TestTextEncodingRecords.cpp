@@ -98,7 +98,8 @@ TEST(TextRecords,
         "\"soh\":0.000000},{\"soc\":0.000000,\"soh\":0.000000},{\"soc\":0.950000,\"soh\":0.000000}]}]";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 
-    FixedSizeThingSetTextDecoder<128> decoder(buffer, size);
+    // only the encoded part: the rest of the buffer is uninitialised and would be parsed as JSON too
+    FixedSizeThingSetTextDecoder<128> decoder(buffer, encoder.getEncodedLength());
     std::array<ModuleRecord, 2> newModuleRecords;
     ASSERT_TRUE(decoder.decode(&newModuleRecords));
     ASSERT_EQ(moduleRecords[0].voltage.getValue(), newModuleRecords[0].voltage.getValue());
