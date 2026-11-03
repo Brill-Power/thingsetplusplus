@@ -37,7 +37,12 @@ jobs:
   zephyr-build-and-test:
     permissions:
       checks: write
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to Ubuntu 26.04 in October 2026 and the
+    # native_sim tests do not build there. Its glibc 2.43 names a struct
+    # member __unused (bits/struct_mutex.h), which Zephyr's toolchain/gcc.h
+    # defines as a macro, so every C++ translation unit fails to compile.
+    # glibc is expected to rename it in 2.44. Revisit on a newer image.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
