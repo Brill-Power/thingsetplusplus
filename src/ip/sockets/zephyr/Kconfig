@@ -10,7 +10,7 @@ config THINGSET_PLUS_PLUS_SOCKET_SERVER_RX_BUFFER_SIZE
 	default 1024
 
 config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
-	bool "Probe idle client connections with TCP keep-alive"
+	bool "Probe idle client connections with TCP keepalive"
 	depends on NET_TCP
 	select NET_TCP_KEEPALIVE
 	default y
@@ -24,11 +24,11 @@ config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
 if THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE
 
 config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_IDLE
-	int "Idle seconds before the first keep-alive probe"
+	int "Idle seconds before the first keepalive probe"
 	default 10
 
 config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_INTERVAL
-	int "Seconds between keep-alive probes"
+	int "Seconds between keepalive probes"
 	default 5
 
 config THINGSET_PLUS_PLUS_SOCKET_SERVER_KEEPALIVE_COUNT
