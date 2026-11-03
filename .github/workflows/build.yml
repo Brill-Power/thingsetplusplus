@@ -51,6 +51,11 @@ jobs:
           toolchains: x86_64-zephyr-elf
 
       - name: Run Zephyr Tests
+        # Zephyr 4.1's FindZephyr-sdk.cmake fails to parse under CMake >= 4
+        # (now on ubuntu-latest) when ZEPHYR_TOOLCHAIN_VARIANT is unset
+        # See zephyrproject-rtos/zephyr#113746
+        env:
+          ZEPHYR_TOOLCHAIN_VARIANT: zephyr
         run: |
           west build -p -b native_sim/native/64 thingsetplusplus/tests/zephyr/can -T thingset++.ZephyrClientServer
           zephyr/scripts/twister -T thingsetplusplus/tests/zephyr/can -p native_sim/native/64 -v -v
