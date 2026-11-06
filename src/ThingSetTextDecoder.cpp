@@ -5,6 +5,7 @@
  */
 #include "thingset++/internal/jsmn.h"
 #include "thingset++/ThingSetTextDecoder.hpp"
+#include <cctype>
 
 namespace ThingSet {
 
@@ -24,7 +25,9 @@ bool ThingSetTextDecoder::decode(std::string *value)
     if (!expectType(JSMN_STRING, &token)) {
         return false;
     }
-    *value = std::string(&_inputBuffer[_bufferElemPtr], token->end - token->start);
+    *value = std::string(&_inputBuffer[token->start], token->end - token->start);
+    // a string token excludes its quotes, so step past the closing one
+    _bufferElemPtr = token->end + 1;
     return true;
 }
 
@@ -35,8 +38,11 @@ bool ThingSetTextDecoder::decode(char *value, size_t size)
         return false;
     }
     size_t length = (size_t)token->end - (size_t)token->start;
-    if (length <= size) {
-        strncpy(value, &_inputBuffer[_bufferElemPtr], length);
+    // size is that of the buffer, which must also hold the terminator
+    if (length < size) {
+        strncpy(value, &_inputBuffer[token->start], length);
+        value[length] = '\0';
+        _bufferElemPtr = token->end + 1;
         return true;
     }
     return false;
@@ -64,76 +70,62 @@ bool ThingSetTextDecoder::decode(bool *value)
 
     if (isLiteral("true")) {
         *value = true;
-        return true;
     } else if (isLiteral("false")) {
         *value = false;
-        return true;
+    } else {
+        return false;
     }
-    return false;
+    _bufferElemPtr = token->end;
+    return true;
 }
 
 bool ThingSetTextDecoder::decode(uint8_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> uint8_t {
-        return static_cast<uint8_t>(std::strtoul(start, end, 10));
-    };
-    return decodePrimitive<uint8_t>(value, decodeFunction);
+    return decodeInteger(value);
 }
 
 bool ThingSetTextDecoder::decode(uint16_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> uint16_t {
-        return static_cast<uint16_t>(std::strtoul(start, end, 10));
-    };
-    return decodePrimitive<uint16_t>(value, decodeFunction);
+    return decodeInteger(value);
 }
 
 bool ThingSetTextDecoder::decode(uint32_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> uint32_t {
-        return static_cast<uint32_t>(std::strtoul(start, end, 10));
-    };
-    return decodePrimitive<uint32_t>(value, decodeFunction);
+    return decodeInteger(value);
 }
 
 bool ThingSetTextDecoder::decode(uint64_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> uint64_t {
-        return static_cast<uint64_t>(std::strtoull(start, end, 10));
-    };
-    return decodePrimitive<uint64_t>(value, decodeFunction);
+    return decodeInteger(value);
 }
 
 bool ThingSetTextDecoder::decode(int8_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> int8_t {
-        return static_cast<int8_t>(std::strtol(start, end, 10));
-    };
-    return decodePrimitive<int8_t>(value, decodeFunction);
+    return decodeInteger(value);
 }
 
 bool ThingSetTextDecoder::decode(int16_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> int16_t {
-        return static_cast<int16_t>(std::strtol(start, end, 10));
-    };
-    return decodePrimitive<int16_t>(value, decodeFunction);
+    return decodeInteger(value);
 }
 
 bool ThingSetTextDecoder::decode(int32_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> int32_t {
-        return static_cast<int32_t>(std::strtol(start, end, 10));
-    };
-    return decodePrimitive<int32_t>(value, decodeFunction);
+    return decodeInteger(value);
 }
 
 bool ThingSetTextDecoder::decode(int64_t *value)
 {
-    auto decodeFunction = [](const char *start, char **end) -> int64_t {
-        return static_cast<int64_t>(std::strtol(start, end, 10));
-    };
-    return decodePrimitive<int64_t>(value, decodeFunction);
+    return decodeInteger(value);
+}
+
+size_t ThingSetTextDecoder::nextNonWhitespace() const
+{
+    size_t pos = _bufferElemPtr;
+    while (pos < _bufferSize && isspace((unsigned char)_inputBuffer[pos])) {
+        pos++;
+    }
+    return pos;
 }
 
 bool ThingSetTextDecoder::isLiteral(const char* literal)
@@ -143,10 +135,12 @@ bool ThingSetTextDecoder::isLiteral(const char* literal)
 
 bool ThingSetTextDecoder::decodeNull()
 {
-    if (!expectType(JSMN_PRIMITIVE, nullptr)) {
+    jsmntok *token;
+    if (!expectType(JSMN_PRIMITIVE, &token) || !isLiteral("null")) {
         return false;
     }
-    return isLiteral("null");
+    _bufferElemPtr = token->end;
+    return true;
 }
 
 bool ThingSetTextDecoder::decodeListStart()
@@ -157,8 +151,9 @@ bool ThingSetTextDecoder::decodeListStart()
 bool ThingSetTextDecoder::decodeListEnd()
 {
     // TODO: concoct better test that does not rely on exact formatting
-    if (_inputBuffer[_bufferElemPtr] == ']') {
-        _bufferElemPtr++;
+    size_t pos = nextNonWhitespace();
+    if (pos < _bufferSize && _inputBuffer[pos] == ']') {
+        _bufferElemPtr = pos + 1;
         return true;
     }
     return false;
@@ -178,8 +173,9 @@ bool ThingSetTextDecoder::decodeMapStart()
 bool ThingSetTextDecoder::decodeMapEnd()
 {
     // TODO: concoct better test that does not rely on exact formatting
-    if (_inputBuffer[_bufferElemPtr] == '}') {
-        _bufferElemPtr++;
+    size_t pos = nextNonWhitespace();
+    if (pos < _bufferSize && _inputBuffer[pos] == '}') {
+        _bufferElemPtr = pos + 1;
         return true;
     }
     return false;
@@ -188,13 +184,15 @@ bool ThingSetTextDecoder::decodeMapEnd()
 bool ThingSetTextDecoder::isInMap() const
 {
     // TODO: concoct better test that does not rely on exact formatting
-    return (_bufferElemPtr < _bufferSize) && (_inputBuffer[_bufferElemPtr] != '}');
+    size_t pos = nextNonWhitespace();
+    return (pos < _bufferSize) && (_inputBuffer[pos] != '}');
 }
 
 bool ThingSetTextDecoder::isInList() const
 {
     // TODO: concoct better test that does not rely on exact formatting
-    return (_bufferElemPtr < _bufferSize) && (_inputBuffer[_bufferElemPtr] != ']');
+    size_t pos = nextNonWhitespace();
+    return (pos < _bufferSize) && (_inputBuffer[pos] != ']');
 }
 
 ThingSetEncodedNodeType ThingSetTextDecoder::peekType()

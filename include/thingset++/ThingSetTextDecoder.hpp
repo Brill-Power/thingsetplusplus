@@ -11,9 +11,13 @@
 #include "internal/jsmn.h"
 #include "zcbor_decode.h"
 #include <array>
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
 #include <map>
 #include <optional>
 #include <tuple>
+#include <type_traits>
 
 #define TEXT_ENCODER_BUFFER_SIZE 1024
 #define TEXT_DECODER_DEFAULT_MAX_TOKENS 64
@@ -72,6 +76,11 @@ protected:
 private:
     bool expectType(const jsmntype_t &type, jsmntok **token);
     bool isLiteral(const char* literal);
+    /// @brief Gets the position of the next character from the current one that is not whitespace.
+    size_t nextNonWhitespace() const;
+
+    // Each decode of a single value leaves _bufferElemPtr at the end of its token, so that the
+    // end of an enclosing list or map can be found from there.
 
     template <typename T> bool decodePrimitive(T *value, T (*parseFunc)(const char *, char **))
     {
@@ -81,9 +90,43 @@ private:
         }
         const char *startPtr = &_inputBuffer[token->start];
         char *endPtr;
-        *value = parseFunc(startPtr, &endPtr);
-        size_t consumed = endPtr - startPtr;
-        _bufferElemPtr += consumed;
+        T parsed = parseFunc(startPtr, &endPtr);
+        if (endPtr == startPtr) {
+            return false;
+        }
+        *value = parsed;
+        _bufferElemPtr = token->end;
+        return true;
+    }
+
+    /// @brief Decodes an integer, failing if the token is not a number or its value does not fit in T.
+    template <typename T> bool decodeInteger(T *value)
+    {
+        jsmntok *token;
+        if (!expectType(JSMN_PRIMITIVE, &token)) {
+            return false;
+        }
+        const char *startPtr = &_inputBuffer[token->start];
+        char *endPtr;
+        bool fits;
+        T parsed;
+        errno = 0;
+        if constexpr (std::is_signed_v<T>) {
+            long long wide = std::strtoll(startPtr, &endPtr, 10);
+            fits = wide >= std::numeric_limits<T>::min() && wide <= std::numeric_limits<T>::max();
+            parsed = static_cast<T>(wide);
+        }
+        else {
+            // strtoull accepts a leading minus sign and negates the result, so reject it here
+            unsigned long long wide = std::strtoull(startPtr, &endPtr, 10);
+            fits = *startPtr != '-' && wide <= std::numeric_limits<T>::max();
+            parsed = static_cast<T>(wide);
+        }
+        if (endPtr == startPtr || errno == ERANGE || !fits) {
+            return false;
+        }
+        *value = parsed;
+        _bufferElemPtr = token->end;
         return true;
     }
 };

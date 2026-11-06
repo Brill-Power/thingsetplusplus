@@ -36,6 +36,16 @@ TEST(TextDecoder, DecodeString)
     ASSERT_STREQ(value, "F");
 }
 
+TEST(TextDecoder, DecodeStringTooLongForBuffer)
+{
+    char buffer[] = "\"FF\"";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+    // a guard byte after the two bytes the decoder is given; no room for a terminator
+    char value[3] = { 'x', 'x', '#' };
+    ASSERT_FALSE(decoder.decode(value, 2));
+    ASSERT_EQ(value[2], '#');
+}
+
 TEST(TextDecoder, DecodeDouble)
 {
     char buffer[] = "12.4";
@@ -130,7 +140,7 @@ TEST(TextDecoder, DecodeInt64)
 {
     char buffer[] = "-9223372036854775808";
     DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
-    uint64_t value;
+    int64_t value;
     bool ret = decoder.decode(&value);
     ASSERT_TRUE(ret);
     ASSERT_EQ(value, INT64_MIN);
@@ -199,4 +209,75 @@ TEST(TextDecoder, DecodeStruct)
     ASSERT_NEAR(13.4f, newStructTest[0].three.getValue()[1], 1e-6);
     ASSERT_NEAR(14.5f, newStructTest[0].three.getValue()[2], 1e-6);
     ASSERT_EQ(0x10, newStructTest[0].canAddr.getValue());
+}
+
+TEST(TextDecoder, DecodeBoolLiterals)
+{
+    char buffer[] = "[true,false]";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::tuple<bool, bool> values;
+    ASSERT_TRUE(decoder.decodeList(values));
+    ASSERT_TRUE(std::get<0>(values));
+    ASSERT_FALSE(std::get<1>(values));
+}
+
+TEST(TextDecoder, DecodeListEndingInString)
+{
+    char buffer[] = "[1,\"abc\"]";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::tuple<int, std::string> values;
+    ASSERT_TRUE(decoder.decodeList(values));
+    ASSERT_EQ(std::get<1>(values), "abc");
+}
+
+TEST(TextDecoder, DecodeListEndingInNull)
+{
+    char buffer[] = "[null]";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+    ASSERT_TRUE(decoder.decodeListStart());
+    ASSERT_TRUE(decoder.decodeNull());
+    ASSERT_TRUE(decoder.decodeListEnd());
+}
+
+TEST(TextDecoder, DecodeListWithWhitespaceBeforeEnd)
+{
+    char buffer[] = "[ 1 , 2 ]";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+    std::array<int32_t, 2> values;
+    ASSERT_TRUE(decoder.decode(&values));
+    ASSERT_EQ(values[0], 1);
+    ASSERT_EQ(values[1], 2);
+}
+
+TEST(TextDecoder, DecodeIntegerOutOfRange)
+{
+    for (const char *text : { "256", "-1" }) {
+        char buffer[8];
+        strcpy(buffer, text);
+        DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+        uint8_t value = 42;
+        ASSERT_FALSE(decoder.decode(&value)) << text;
+        ASSERT_EQ(value, 42) << text;
+    }
+    for (const char *text : { "128", "-129" }) {
+        char buffer[8];
+        strcpy(buffer, text);
+        DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+        int8_t value = 42;
+        ASSERT_FALSE(decoder.decode(&value)) << text;
+        ASSERT_EQ(value, 42) << text;
+    }
+    char buffer[] = "18446744073709551616";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+    uint64_t value;
+    ASSERT_FALSE(decoder.decode(&value));
+}
+
+TEST(TextDecoder, DecodeNonNumberIntoInteger)
+{
+    char buffer[] = "true";
+    DefaultFixedSizeThingSetTextDecoder decoder(buffer, strlen(buffer));
+    int32_t value = 42;
+    ASSERT_FALSE(decoder.decode(&value));
+    ASSERT_EQ(value, 42);
 }

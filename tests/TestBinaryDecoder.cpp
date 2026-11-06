@@ -80,3 +80,22 @@ TEST(BinaryDecoder, DecodeMap)
     ASSERT_EQ(0x10, canAddr);
     ASSERT_EQ(1.23f, three[0]);
 }
+
+TEST(BinaryDecoder, DecodeString)
+{
+    uint8_t buffer[] = { 0x61, 'F' };
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
+    char value[2] = { 'x', 'x' };
+    ASSERT_TRUE(decoder.decode(value, sizeof(value)));
+    ASSERT_STREQ(value, "F");
+}
+
+TEST(BinaryDecoder, DecodeStringTooLongForBuffer)
+{
+    uint8_t buffer[] = { 0x62, 'F', 'F' };
+    FixedDepthThingSetBinaryDecoder decoder(buffer, sizeof(buffer));
+    // a guard byte after the two bytes the decoder is given; no room for a terminator
+    char value[3] = { 'x', 'x', '#' };
+    ASSERT_FALSE(decoder.decode(value, 2));
+    ASSERT_EQ(value[2], '#');
+}

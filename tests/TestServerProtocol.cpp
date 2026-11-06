@@ -377,8 +377,7 @@ TEST_F(ServerProtocol, DISABLED_BinaryUpdateIsAllOrNothing)
 }
 
 /// Values that do not fit the target type are rejected rather than wrapped.
-/// Disabled: thingset++ currently accepts -129 into an int8_t, which wraps to 127.
-TEST_F(ServerProtocol, DISABLED_BinaryUpdateOutOfRange)
+TEST_F(ServerProtocol, BinaryUpdateOutOfRange)
 {
     EXPECT_TRUE(binary("07 65 5479706573 A1 63 775538 19 0100", ThingSetStatusCode::badRequest)); /* wU8: 256 */
     EXPECT_TRUE(binary("07 65 5479706573 A1 63 774938 18 80", ThingSetStatusCode::badRequest));   /* wI8: 128 */
@@ -521,8 +520,7 @@ TEST_F(ServerProtocol, TextUpdateWhitespace)
     ASSERT_EQ(50, wI32.getValue());
 }
 
-/// Disabled: thingset++ currently wraps values that do not fit: 256 becomes 0 and -129 becomes 127.
-TEST_F(ServerProtocol, DISABLED_TextUpdateOutOfRange)
+TEST_F(ServerProtocol, TextUpdateOutOfRange)
 {
     EXPECT_TRUE(text("=Types {\"wU8\":256}", ThingSetStatusCode::badRequest));
     EXPECT_TRUE(text("=Types {\"wI8\":-129}", ThingSetStatusCode::badRequest));
@@ -569,8 +567,7 @@ TEST_F(ServerProtocol, DISABLED_TextExecVoid)
     ASSERT_TRUE(xVoidCalled);
 }
 
-/// Disabled: thingset++ currently fails when a list ends in a bool, because the decoder does not move past true/false.
-TEST_F(ServerProtocol, DISABLED_TextExecVoidWithParams)
+TEST_F(ServerProtocol, TextExecVoidWithParams)
 {
     ASSERT_TRUE(text("!Exec/xVoidParams [true]", ThingSetStatusCode::changed));
     ASSERT_TRUE(lBool);
@@ -725,8 +722,10 @@ TEST_F(ServerSerde, BinaryUpdateTextGetUnsigned)
         { "wU8", "0", "00" },
         { "wU8", "23", "17" },
         { "wU8", "24", "18 18" },
+        { "wU8", "255", "18 FF" },
         { "wU16", "255", "19 00 FF" }, // not the shortest encoding
         { "wU16", "256", "19 01 00" },
+        { "wU16", "65535", "19 FF FF" },
         { "wU32", "255", "19 00 FF" },
         { "wU32", "65535", "1A 00 00 FF FF" },
         { "wU32", "65536", "1A 00 01 00 00" },
@@ -741,10 +740,12 @@ TEST_F(ServerSerde, BinaryUpdateTextGetSigned)
 {
     binaryUpdateTextGet({
         { "wI8", "23", "17" },
+        { "wI8", "127", "18 7F" },
         { "wI8", "-24", "37" },
         { "wI8", "-25", "38 18" },
         { "wI8", "-128", "38 7F" },
         { "wI16", "255", "19 00 FF" },
+        { "wI16", "32767", "19 7F FF" },
         { "wI16", "-257", "39 01 00" },
         { "wI16", "-32768", "39 7F FF" },
         { "wI32", "65535", "1A 00 00 FF FF" },
@@ -758,18 +759,6 @@ TEST_F(ServerSerde, BinaryUpdateTextGetSigned)
     });
 }
 
-/// Disabled: thingset++ currently rejects the largest value of each 8- and 16-bit type
-/// (the decoder checks value < max rather than value <= max).
-TEST_F(ServerSerde, DISABLED_BinaryUpdateTextGetSmallTypeMaximum)
-{
-    binaryUpdateTextGet({
-        { "wU8", "255", "18 FF" },
-        { "wU16", "65535", "19 FF FF" },
-        { "wI8", "127", "18 7F" },
-        { "wI16", "32767", "19 7F FF" },
-    });
-}
-
 /// Disabled: thingset++ currently always writes six decimal places: 12.340000.
 TEST_F(ServerSerde, DISABLED_BinaryUpdateTextGetFloat)
 {
@@ -779,8 +768,7 @@ TEST_F(ServerSerde, DISABLED_BinaryUpdateTextGetFloat)
     });
 }
 
-/// Disabled: thingset++ currently writes bools as 1 and 0.
-TEST_F(ServerSerde, DISABLED_BinaryUpdateTextGetBool)
+TEST_F(ServerSerde, BinaryUpdateTextGetBool)
 {
     binaryUpdateTextGet({
         { "wBool", "true", "F5" },

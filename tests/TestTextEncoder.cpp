@@ -334,7 +334,7 @@ TEST(TextEncoder, EncodeBool)
     SETUP(TEXT_ENCODER_BUFFER_SIZE)
     bool b = true;
     encoder.encode(b);
-    const char *expected = "1";
+    const char *expected = "true";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
@@ -344,7 +344,7 @@ TEST(TextEncoder, EncodeBoolPtr)
     bool b = true;
     bool *ptr = &b;
     encoder.encode(ptr);
-    const char *expected = "1";
+    const char *expected = "true";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
@@ -353,7 +353,7 @@ TEST(TextEncoder, EncodeArrayOfBools)
     SETUP(TEXT_ENCODER_BUFFER_SIZE)
     std::array<bool, 3> i = { true, false, true };
     encoder.encode(i);
-    const char *expected = "[1,0,1]";
+    const char *expected = "[true,false,true]";
     ASSERT_BUFFER_EQ(expected, buffer, encoder.getEncodedLength());
 }
 
