@@ -24,7 +24,8 @@ public:
     {}
 
     bool subscribe(std::function<void(const Identifier &, uint16_t &)> callback) {
-        _transport.subscribe([&](const Identifier &identifier, ThingSetBinaryDecoder &decoder) {
+        // the transport calls this long after subscribe() returns, so it must own its copy of callback
+        _transport.subscribe([callback](const Identifier &identifier, ThingSetBinaryDecoder &decoder) {
             uint16_t subsetId;
             if (!decoder.decode(&subsetId)) {
                 return;
