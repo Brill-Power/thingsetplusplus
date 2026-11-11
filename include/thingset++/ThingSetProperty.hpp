@@ -51,12 +51,18 @@ public:
             return context.getHeaderLength() + context.encoder().getEncodedLength();
         }
         else if (context.isUpdate()) {
+            if (context.index == SIZE_MAX) {
+                // Only allow updates of individual array elements
+                context.setStatus(ThingSetStatusCode::badRequest);
+                return context.getHeaderLength();
+            }
+            if (!context.decoder().decode(&value[context.index])) {
+                // handle decode fail as we do for ordinary properties
+                context.setStatus(ThingSetStatusCode::badRequest);
+                return context.getHeaderLength();
+            }
             context.setStatus(ThingSetStatusCode::changed);
             context.encoder().encodePreamble();
-            if (context.index == SIZE_MAX) {
-                context.setStatus(ThingSetStatusCode::badRequest);
-            }
-            context.decoder().decode(&value[context.index]);
             return context.getHeaderLength();
         }
         return 0;
