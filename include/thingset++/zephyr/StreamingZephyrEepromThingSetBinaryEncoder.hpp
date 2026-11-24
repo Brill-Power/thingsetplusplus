@@ -38,7 +38,7 @@ public:
         uint8_t chunk[Chunk];
         int err = 0;
         for (int i = 0; i < CONFIG_THINGSET_PLUS_PLUS_EEPROM_ACCESS_ATTEMPTS; i++) {
-            int err = eeprom_write(_device, _offset, &this->_buffer[0], length);
+            err = eeprom_write(_device, _offset, &this->_buffer[0], length);
             if (err) {
                 LOG_WARN("EEPROM write error %d at offset 0x%lx", err, _offset);
                 continue;
