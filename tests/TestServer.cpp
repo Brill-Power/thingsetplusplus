@@ -3,26 +3,20 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "ServerTestUtilities.hpp"
 #include "gtest/gtest.h"
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
+#include <string>
+#include <vector>
 
 using namespace ThingSet;
 
 namespace {
 
-class TestableServer : public _ThingSetServer
+struct TestRecord
 {
-public:
-    TestableServer() : _ThingSetServer(nullptr)
-    {}
-
-    bool listen() override
-    {
-        return true;
-    }
-
-    using _ThingSetServer::handleBinaryRequest;
+    ThingSetReadWriteRecordMember<0x7F1, 0x7F0, "x", int32_t> x;
 };
 
 /// @brief Builds a binary GET request for the given node ID.
@@ -86,4 +80,90 @@ TEST(Server, GetPropertyTooBigForResponseBufferReturnsRequestTooLarge)
 
     ASSERT_EQ(1, responseLen);
     ASSERT_EQ(ThingSetStatusCode::requestTooLarge, response[0]);
+}
+
+// Updating a record array as a whole (rather than one element of it) is not
+// supported. It must be refused without touching the array: value[SIZE_MAX] is
+// out of bounds, and decoding into it corrupts whatever precedes the array.
+
+TEST(Server, UpdateRecordArrayByIdIsBadRequest)
+{
+    ThingSetReadWriteProperty<std::array<TestRecord, 2>> records { 0x7F0, 0, "serverTestRecords" };
+    records.getValue()[0].x = 1;
+    records.getValue()[1].x = 2;
+
+    TestableServer server;
+    uint8_t response[64];
+    // =0x7F0 {0x7F1: 9}
+    std::vector<uint8_t> request = fromHex("07 19 07F0 A1 19 07F1 09");
+    int responseLen = server.handleBinaryRequest(request.data(), request.size(), response, sizeof(response));
+
+    ASSERT_EQ(1, responseLen);
+    ASSERT_EQ(ThingSetStatusCode::badRequest, response[0]);
+    ASSERT_EQ(1, records.getValue()[0].x.getValue());
+    ASSERT_EQ(2, records.getValue()[1].x.getValue());
+}
+
+TEST(Server, UpdateRecordArrayByNameIsBadRequest)
+{
+    ThingSetReadWriteProperty<std::array<TestRecord, 2>> records { 0x7F0, 0, "serverTestRecords" };
+    records.getValue()[0].x = 1;
+    records.getValue()[1].x = 2;
+
+    TestableServer server;
+    std::string request = "=serverTestRecords {\"x\":9}";
+    uint8_t response[64];
+    int responseLen = server.handleTextRequest((uint8_t *)request.data(), request.size(), response, sizeof(response));
+
+    ASSERT_GE(responseLen, 3);
+    ASSERT_EQ(":A0", std::string((char *)response, 3));
+    ASSERT_EQ(1, records.getValue()[0].x.getValue());
+    ASSERT_EQ(2, records.getValue()[1].x.getValue());
+}
+
+TEST(Server, UpdateRecordArrayElementByNameIsChanged)
+{
+    ThingSetReadWriteProperty<std::array<TestRecord, 2>> records { 0x7F0, 0, "serverTestRecords" };
+    records.getValue()[0].x = 1;
+    records.getValue()[1].x = 2;
+
+    TestableServer server;
+    std::string request = "=serverTestRecords/1 {\"x\":9}";
+    uint8_t response[64];
+    int responseLen = server.handleTextRequest((uint8_t *)request.data(), request.size(), response, sizeof(response));
+
+    ASSERT_GE(responseLen, 3);
+    ASSERT_EQ(":84", std::string((char *)response, 3));
+    ASSERT_EQ(1, records.getValue()[0].x.getValue());
+    ASSERT_EQ(9, records.getValue()[1].x.getValue());
+}
+
+TEST(Server, UpdateRecordArrayElementWithBadValueIsBadRequest)
+{
+    ThingSetReadWriteProperty<std::array<TestRecord, 2>> records { 0x7F0, 0, "serverTestRecords" };
+    records.getValue()[0].x = 1;
+    records.getValue()[1].x = 2;
+
+    TestableServer server;
+    uint8_t response[64];
+    for (const char *bad : { "=serverTestRecords/1 {\"x\":\"nine\"}", /* wrong type */
+                             "=serverTestRecords/1 {\"x\":9999999999}" /* out of range */ }) {
+        std::string request = bad;
+        int responseLen =
+            server.handleTextRequest((uint8_t *)request.data(), request.size(), response, sizeof(response));
+
+        ASSERT_GE(responseLen, 3) << request;
+        ASSERT_EQ(":A0", std::string((char *)response, 3)) << request;
+        ASSERT_EQ(1, records.getValue()[0].x.getValue()) << request;
+        ASSERT_EQ(2, records.getValue()[1].x.getValue()) << request;
+    }
+
+    // a truncated map is also a bad request, but members decoded before the
+    // truncation keep their new values: updates are not transactional, as for
+    // ordinary properties (see DISABLED_BinaryUpdateIsAllOrNothing)
+    std::string truncated = "=serverTestRecords/1 {\"x\":9";
+    int responseLen =
+        server.handleTextRequest((uint8_t *)truncated.data(), truncated.size(), response, sizeof(response));
+    ASSERT_GE(responseLen, 3);
+    ASSERT_EQ(":A0", std::string((char *)response, 3));
 }
