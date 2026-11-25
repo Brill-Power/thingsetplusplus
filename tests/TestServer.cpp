@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "ServerTestUtilities.hpp"
 #include "gtest/gtest.h"
 #include <thingset++/ThingSet.hpp>
 #include <thingset++/ThingSetServer.hpp>
@@ -13,42 +14,10 @@ using namespace ThingSet;
 
 namespace {
 
-class TestableServer : public _ThingSetServer
-{
-public:
-    TestableServer() : _ThingSetServer(nullptr)
-    {}
-
-    bool listen() override
-    {
-        return true;
-    }
-
-    using _ThingSetServer::handleBinaryRequest;
-    using _ThingSetServer::handleTextRequest;
-};
-
 struct TestRecord
 {
     ThingSetReadWriteRecordMember<0x7F1, 0x7F0, "x", int32_t> x;
 };
-
-/// @brief Sends a binary request given as hex bytes and returns the response length; the
-/// response is left in `response`.
-static int sendBinary(TestableServer &server, const char *hex, uint8_t *response, size_t responseSize)
-{
-    std::vector<uint8_t> request;
-    std::string digits;
-    for (const char *c = hex; *c; c++) {
-        if (*c != ' ') {
-            digits += *c;
-        }
-    }
-    for (size_t i = 0; i + 1 < digits.size(); i += 2) {
-        request.push_back((uint8_t)std::stoul(digits.substr(i, 2), nullptr, 16));
-    }
-    return server.handleBinaryRequest(request.data(), request.size(), response, responseSize);
-}
 
 /// @brief Builds a binary GET request for the given node ID.
 static size_t buildGetRequest(uint16_t id, uint8_t *request, size_t requestSize)
@@ -126,7 +95,8 @@ TEST(Server, UpdateRecordArrayByIdIsBadRequest)
     TestableServer server;
     uint8_t response[64];
     // =0x7F0 {0x7F1: 9}
-    int responseLen = sendBinary(server, "07 19 07F0 A1 19 07F1 09", response, sizeof(response));
+    std::vector<uint8_t> request = fromHex("07 19 07F0 A1 19 07F1 09");
+    int responseLen = server.handleBinaryRequest(request.data(), request.size(), response, sizeof(response));
 
     ASSERT_EQ(1, responseLen);
     ASSERT_EQ(ThingSetStatusCode::badRequest, response[0]);
